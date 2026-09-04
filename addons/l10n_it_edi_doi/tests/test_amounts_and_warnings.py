@@ -9,6 +9,10 @@ from odoo.tests import tagged, Form
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
 class TestItEdiDoiRemaining(TestItEdiDoi):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env.user.group_ids |= cls.env.ref('sales_team.group_sale_salesman')
 
     def create_invoice(self, declaration, invoice_line_vals):
         return self.env['account.move'].create({
@@ -93,7 +97,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi):
                 'product_id': self.product_1.id,
                 'price_unit': 1000.0,  # == declaration.threshold
                 'product_uom_qty': 2,
-                'tax_id': [Command.set(declaration_tax.ids)],
+                'tax_ids': [Command.set(declaration_tax.ids)],
             }),
         ])
 
@@ -217,13 +221,13 @@ class TestItEdiDoiRemaining(TestItEdiDoi):
                 'name': 'declaration line',
                 'product_id': self.product_1.id,
                 'price_unit': 1000.0,  # == declaration.threshold
-                'tax_id': [Command.set(declaration_tax.ids)],
+                'tax_ids': [Command.set(declaration_tax.ids)],
             }),
             Command.create({
                 'name': 'not a declaration line',
                 'product_id': self.product_1.id,
                 'price_unit': 2000.0,  # > declaration.threshold; not counted
-                'tax_id': False,
+                'tax_ids': False,
             }),
         ])
 
@@ -313,13 +317,13 @@ class TestItEdiDoiRemaining(TestItEdiDoi):
                 'name': 'declaration line',
                 'product_id': self.product_1.id,
                 'price_unit': 2000.0,  # > declaration.threshold
-                'tax_id': [Command.set(declaration_tax.ids)],
+                'tax_ids': [Command.set(declaration_tax.ids)],
             }),
             Command.create({
                 'name': 'not a declaration line',
                 'product_id': self.product_1.id,
                 'price_unit': 2000.0,  # > declaration.threshold; not counted
-                'tax_id': False,
+                'tax_ids': False,
             }),
         ])
         independent_order.action_confirm()
@@ -334,13 +338,13 @@ class TestItEdiDoiRemaining(TestItEdiDoi):
                 'name': 'declaration line',
                 'product_id': self.product_1.id,
                 'price_unit': 1000.0,  # == declaration.threshold
-                'tax_id': [Command.set(declaration_tax.ids)],
+                'tax_ids': [Command.set(declaration_tax.ids)],
             }),
             Command.create({
                 'name': 'not a declaration line',
                 'product_id': self.product_1.id,
                 'price_unit': 2000.0,  # > declaration.threshold; not counted
-                'tax_id': False,
+                'tax_ids': False,
             }),
         ])
         order.action_confirm()
@@ -350,7 +354,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi):
             'remaining': -2000.0,
         }])
 
-        for i in range(2):
+        for _i in range(2):
             self.env['sale.advance.payment.inv'].with_context({
                    'active_model': 'sale.order',
                    'active_ids': [order.id],
@@ -448,7 +452,7 @@ class TestItEdiDoiRemaining(TestItEdiDoi):
                     'product_id': self.product_1.id,
                     'product_uom_qty': 2,
                     'price_unit': 2000.0,  # > declaration.threshold
-                    'tax_id': [Command.set(declaration_tax.ids)],
+                    'tax_ids': [Command.set(declaration_tax.ids)],
                 }),
             ]) for dummy in range(3)
         ])

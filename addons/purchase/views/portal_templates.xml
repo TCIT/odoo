@@ -57,7 +57,6 @@
                         <span class='d-block d-md-none'>Ref.</span>
                     </th>
                       <th class="text-end">Order Deadline</th>
-                      <th class="text-end">Total</th>
                   </tr>
               </thead>
               <t t-foreach="rfqs" t-as="rfq">
@@ -66,9 +65,6 @@
                       <td class="text-end">
                           <span t-field="rfq.date_order" t-options="{'widget': 'date'}"/>&amp;nbsp;
                           <span class='d-none d-md-inline' t-field="rfq.date_order" t-options="{'time_only': True}"/>
-                      </td>
-                      <td class="text-end">
-                          <span t-field="rfq.amount_total"/>
                       </td>
                   </tr>
               </t>
@@ -115,9 +111,6 @@
                           <span t-if="order.state == 'cancel'" class="badge rounded-pill text-bg-secondary">
                               <i class="fa fa-fw fa-remove" role="img" aria-label="Cancelled" title="Cancelled"></i><span class="d-none d-md-inline"> Cancelled</span>
                           </span>
-                          <span t-if="order.state == 'done'" class="badge rounded-pill text-bg-success">
-                              <i class="fa fa-fw fa-check" role="img" aria-label="Done" title="Done"></i><span class="d-none d-md-inline"> Done</span>
-                          </span>
                       </td>
                       <td id="order_total" class="text-end"><span t-field="order.amount_total"/></td>
                   </tr>
@@ -143,19 +136,8 @@
                       <h2 t-field="order.amount_total" data-id="total_amount" class="mb-0 text-break"/>
                   </t>
                   <t t-set="entries">
-                    <div t-if="not request.env.user._is_public() and order.state in ['sent']" class="flex-grow-1 d-flex gap-2">
-                        <div class="btn-group flex-grow-1 mb-1">
-                            <a t-if="not order.mail_reception_confirmed" t-att-href="order.get_confirm_url(confirm_type='reception')" target="_self" class="btn btn-secondary btn-block px-3" name="accept" title="Accept" style="background-color: #875A7B;">Accept</a>
-                            <a t-else="" href="#" class="btn btn-secondary btn-block px-3 disabled" style="background-color: #875A7B;" tabindex="-1" aria-disabled="true" name="accept" title="Accept">Accept</a>
-                        </div>
-                        <div class="btn-group flex-grow-1 mb-1">
-                            <a t-if="not order.mail_reception_declined" t-att-href="order.get_confirm_url(confirm_type='decline')" target="_self" class="btn btn-secondary btn-block px-3" name="decline" title="Decline">Decline</a>
-                            <a t-else="" href="#" class="btn btn-secondary btn-block px-3 disabled" tabindex="-1" aria-disabled="true" name="decline" title="Decline">Decline</a>
-                        </div>
-                    </div>
-
                       <div class="d-flex flex-column gap-4 mt-3">
-                        <a class="btn btn-secondary o_print_btn o_portal_invoice_print" t-att-href="order.get_portal_url(report_type='pdf')" id="print_invoice_report" title="View Details" role="button" target="_blank"><i class="fa fa-print me-1"/>Download / Print</a>
+                          <a class="btn btn-secondary o_print_btn o_portal_invoice_print" t-att-href="order.get_portal_url(report_type='pdf')" id="print_invoice_report" title="View Details" role="button" target="_blank"><i class="fa fa-print me-1"/>Download / Print</a>
                           <div class="navspy flex-grow-1 ps-0" t-ignore="true" role="complementary">
                               <ul class="nav flex-column bs-sidenav"></ul>
                           </div>
@@ -169,7 +151,7 @@
                                 </t>
                           </div>
 
-                          <div>
+                          <div t-if="order._get_edi_builders()">
                             <button id="portal_connect_software_modal_btn" type="button" class="btn btn-primary"
                             data-bs-toggle="modal" data-bs-target="#portal_connect_software_modal">
                                 Connect with your software!
@@ -214,24 +196,9 @@
 
               <!-- Page content -->
               <div id="quote_content" class="o_portal_content col-12 col-lg-8 col-xxl-9">
-
-                  <!-- status messages -->
-                  <div t-if="order.state == 'cancel'" class="alert alert-danger alert-dismissable d-print-none" role="alert">
-                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
-                      <strong>This purchase has been cancelled.</strong>
-                  </div>
-                  <div t-if="order.mail_reception_confirmed and order.state not in ['purchase', 'done']" class="alert alert-success alert-dismissible d-print-none" role="alert">
-                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
-                      <strong>This quotation has been accepted.</strong>
-                  </div>
-                  <div t-if="order.mail_reception_declined and order.state not in ['purchase', 'done']" class="alert alert-warning alert-dismissible d-print-none" role="alert">
-                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
-                      <strong>This quotation has been declined.</strong>
-                  </div>
-
                   <!-- main content -->
                   <div id="portal_purchase_content">
-                      <div t-call="purchase.purchase_order_portal_content"/>
+                      <div><t t-call="purchase.purchase_order_portal_content"/></div>
                   </div>
 
                   <!-- chatter -->
@@ -265,7 +232,7 @@
                     <t t-if="order.state in ['draft', 'sent']">
                       <strong>Request For Quotation Date:</strong>
                     </t>
-                    <t t-if="order.state in ['purchase', 'done', 'cancel']">
+                    <t t-if="order.state in ['purchase', 'cancel']">
                       <strong>Order Date:</strong>
                     </t>
                     <span t-field="order.date_order" t-options='{"widget": "date"}'/>
@@ -275,7 +242,9 @@
                   <div class="col-lg-6">
                     <strong class="d-block mb-1">From:</strong>
                     <address t-field="order.company_id.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
-                    <strong>Confirmation Date:</strong> <span t-field="order.date_approve" t-options='{"widget": "date"}'/><br/>
+                    <t t-if="order.date_approve">
+                      <strong>Confirmation Date:</strong> <span t-field="order.date_approve" t-options='{"widget": "date"}'/><br/>
+                    </t>
                     <div t-att-class="'d-inline' if order.date_planned else 'd-none'">
                       <strong>Receipt Date:</strong><span class="ms-1" t-field="order.date_planned" t-options='{"widget": "date"}'/>
                     </div>
@@ -311,7 +280,7 @@
 
               <div class="table-responsive">
                 <table t-att-data-order-id="order.id" t-att-data-token="order.access_token" class="table table-sm" id="purchase_order_table">
-                    <t t-set="display_price_and_taxes" t-value="not update_dates and order.state in ['sent', 'purchase', 'done']"/>
+                    <t t-set="display_price_and_taxes" t-value="not update_dates and order.state == 'purchase'"/>
                     <thead class="bg-100">
                         <tr>
                             <th class="text-start">Products</th>
@@ -322,7 +291,7 @@
                                 <span>Taxes</span>
                             </th>
                             <th t-if="display_price_and_taxes" t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">Disc.%</th>
-                            <th class="text-end" t-if="not update_dates and order.state in ['purchase', 'done']" >
+                            <th class="text-end" t-if="display_price_and_taxes" >
                                 <span>Amount</span>
                             </th>
                         </tr>
@@ -330,21 +299,23 @@
                     <tbody class="purchase_tbody">
 
                           <t t-set="current_subtotal" t-value="0"/>
+                          <t t-set="filtered_lines" t-value="order.order_line.filtered(lambda l: l.display_type or l.product_qty != 0)"/>
 
-                          <t t-foreach="order.order_line" t-as="line">
+                          <t t-foreach="filtered_lines" t-as="line">
 
                               <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal"/>
 
-                            <tr t-att-class="'fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic text-break' if line.display_type == 'line_note' else ''">
+                            <tr t-att-class="'fw-bolder o_line_section' if line.display_type == 'line_section' else 'fw-bold o_line_subsection' if line.display_type == 'line_subsection' else 'fst-italic text-break o_line_note' if line.display_type == 'line_note' else ''">
                                 <t t-if="not line.display_type">
                                     <td id="product_name" class="d-flex">
-                                        <img t-att-src="image_data_uri(resize_to_48(line.product_id.image_1024))" alt="Product" class="d-none d-lg-inline"/>
+                                        <img t-att-src="line.product_id.image_128 and image_data_uri(line.product_id.image_128) or '/web/static/img/placeholder.png'"
+                                            alt="Product" class="d-none d-lg-inline o_purchase_portal_product_image"/>
                                         <span t-field="line.name"/>
                                     </td>
                                     <td class="text-end">
                                         <div id="quote_qty">
                                             <span t-field="line.product_qty"/>
-                                            <span t-field="line.product_uom" groups="uom.group_uom"/>
+                                            <span t-field="line.product_uom_id" groups="uom.group_uom"/>
                                         </div>
                                     </td>
                                     <td t-if="update_dates" class="text-end">
@@ -369,16 +340,16 @@
                                         />
                                     </td>
                                     <td t-if="display_price_and_taxes" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                        <span t-out="', '.join(map(lambda x: (x.name), line.taxes_id))"/>
+                                        <span t-out="', '.join(map(lambda x: (x.name), line.tax_ids))"/>
                                     </td>
                                     <td t-if="display_price_and_taxes" t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
                                         <div t-field="line.discount" class="text-end"/>
                                     </td>
-                                    <td class="text-end" t-if="not update_dates and order.state in ['purchase', 'done']">
+                                    <td class="text-end" t-if="not update_dates and order.state == 'purchase'">
                                         <span class="oe_order_line_price_subtotal" t-field="line.price_subtotal"/>
                                     </td>
                                 </t>
-                                <t t-if="line.display_type == 'line_section'">
+                                <t t-if="line.display_type in ('line_section', 'line_subsection')">
                                     <td colspan="99">
                                         <span t-field="line.name"/>
                                     </td>
@@ -391,8 +362,7 @@
                                     </td>
                                 </t>
                             </tr>
-
-                            <t t-if="current_section and (line_last or order.order_line[line_index+1].display_type == 'line_section') and order.state in ['purchase', 'done']">
+                            <t t-if="current_section and (line_last or filtered_lines[line_index+1].display_type in ('line_section', 'line_subsection')) and order.state == 'purchase'">
                                 <tr class="is-subtotal text-end">
                                     <td colspan="99">
                                         <strong class="mr16">Subtotal</strong>
@@ -408,17 +378,17 @@
                 </table>
               </div>
 
-              <div id="total" t-if="order.state in ['purchase', 'done']" class="row" name="total" style="page-break-inside: avoid;">
+              <div id="total" t-if="order.state == 'purchase'" class="row" name="total" style="page-break-inside: avoid;">
                   <div t-attf-class="#{'col-4' if report_type != 'html' else 'col-sm-7 col-md-5'} ms-auto">
                       <t t-call="purchase.purchase_order_portal_content_totals_table"/>
                   </div>
               </div>
           </section>
 
-          <section id="terms" class="mt-5" t-if="order.notes">
+          <section id="terms" class="mt-5" t-if="order.note">
               <h3 class="">Terms &amp; Conditions</h3>
               <hr class="mt-0 mb-1"/>
-              <em t-field="order.notes"/>
+              <em t-field="order.note"/>
           </section>
 
           <section class="mt-5" t-if="order.payment_term_id">
@@ -442,7 +412,7 @@
     <xpath expr="////div[@id='portal_purchase_content']" position="replace">
       <div id="portal_purchase_content">
         <t t-set="update_dates" t-value="True"/>
-        <div t-call="purchase.purchase_order_portal_content"/>
+        <div><t t-call="purchase.purchase_order_portal_content"/></div>
       </div>
     </xpath>
   </template>

@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { generateHash, HootError, isOfType, normalize } from "../hoot_utils";
-import { Tag } from "./tag";
+import { applyTags } from "./tag";
 
 /**
  * @typedef {{
@@ -9,10 +9,11 @@ import { Tag } from "./tag";
  *  multi?: number;
  *  only?: boolean;
  *  skip?: boolean;
- *  tags?: string[];
  *  timeout?: number;
  *  todo?: boolean;
  * }} JobConfig
+ *
+ * @typedef {import("./tag").Tag} Tag
  */
 
 //-----------------------------------------------------------------------------
@@ -21,6 +22,7 @@ import { Tag } from "./tag";
 
 const {
     Object: { assign: $assign, entries: $entries },
+    Symbol,
 } = globalThis;
 
 //-----------------------------------------------------------------------------
@@ -30,23 +32,27 @@ const {
 /**
  * @param {JobConfig} config
  */
-const validateConfig = (config) => {
+function validateConfig(config) {
     for (const [key, value] of $entries(config)) {
         if (!isOfType(value, CONFIG_TAG_SCHEMA[key])) {
-            throw new HootError(`invalid config tag: parameter "${key}" does not exist`);
+            throw new HootError(`invalid config tag: parameter "${key}" does not exist`, {
+                level: "critical",
+            });
         }
     }
-};
+}
 
 /** @type {Record<keyof JobConfig, import("../hoot_utils").ArgumentType>} */
 const CONFIG_TAG_SCHEMA = {
     debug: "boolean",
-    multi: "integer",
+    multi: "number",
     only: "boolean",
     skip: "boolean",
     timeout: "number",
     todo: "boolean",
 };
+
+const S_MINIMIZED = Symbol("minimized");
 
 //-----------------------------------------------------------------------------
 // Exports
@@ -61,10 +67,14 @@ export class Job {
     /** @type {Tag[]} */
     tags = [];
 
+    get isMinimized() {
+        return S_MINIMIZED in this;
+    }
+
     /**
      * @param {import("./suite").Suite | null} parent
      * @param {string} name
-     * @param {JobConfig & { tags?: Iterable<Tag | string> }} config
+     * @param {JobConfig & { tags?: Iterable<Tag> }} config
      */
     constructor(parent, name, config) {
         this.parent = parent || null;
@@ -88,30 +98,38 @@ export class Job {
         this.configure(config);
     }
 
+    after() {
+        for (const tag of this.tags) {
+            tag.after?.(this);
+        }
+    }
+
+    before() {
+        for (const tag of this.tags) {
+            tag.before?.(this);
+        }
+    }
+
     /**
-     * @param {JobConfig & { tags?: Iterable<Tag | string> }} config
+     * @param {JobConfig & { tags?: Iterable<Tag> }} config
      */
     configure({ tags, ...config }) {
         // Assigns and validates job config
         $assign(this.config, config);
         validateConfig(this.config);
 
-        // Tags
-        for (const tag of Tag.getAll(tags)) {
-            if (!this.tags.includes(tag)) {
-                this.tags.push(tag);
-                tag.weight++;
-            }
-        }
+        // Add tags
+        applyTags(this, tags);
+    }
+
+    minimize() {
+        this[S_MINIMIZED] = true;
     }
 
     /**
-     * @param {Job} [child]
+     * @returns {boolean}
      */
-    willRunAgain(child) {
-        if (this.config.multi && this.runCount < this.config.multi) {
-            return true;
-        }
-        return Boolean(this.parent?.willRunAgain(this));
+    willRunAgain() {
+        return this.runCount < (this.config.multi || 0) || this.parent?.willRunAgain();
     }
 }

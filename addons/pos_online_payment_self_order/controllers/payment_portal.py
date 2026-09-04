@@ -18,16 +18,11 @@ class PaymentPortalSelfOrder(PaymentPortal):
 
         if tx_sudo.state not in ('authorized', 'done'):
             self._send_notification_payment_status(pos_order_id, 'fail')
-        else:
-            self._send_notification_payment_status(pos_order_id, 'success')
 
         return result
 
     def _send_notification_payment_status(self, pos_order_id, status):
         pos_order = request.env['pos.order'].sudo().browse(pos_order_id)
-        pos_order.config_id._notify("ONLINE_PAYMENT_STATUS", {
-            'status': status, # progress, success, fail
-            'data': {
-                'pos.order': pos_order.read(pos_order._load_pos_self_data_fields(pos_order.config_id.id), load=False)
-            }
-        })
+        pos_order._send_notification_online_payment_status(status)
+        if status == 'success':
+            pos_order._send_order()

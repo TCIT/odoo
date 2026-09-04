@@ -15,7 +15,6 @@ import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import {
     fakeTitleService,
-    fakeCompanyService,
     makeFakePwaService,
     makeFakeLocalizationService,
     makeFakeHTTPService,
@@ -31,6 +30,7 @@ import { Component, onMounted, xml } from "@odoo/owl";
 import { fieldService } from "@web/core/field_service";
 import { nameService } from "@web/core/name_service";
 import { datetimePickerService } from "@web/core/datetime/datetimepicker_service";
+import { treeProcessorService } from "@web/core/tree_editor/tree_processor";
 
 const actionRegistry = registry.category("actions");
 const serviceRegistry = registry.category("services");
@@ -62,6 +62,7 @@ export function setupWebClientRegistries() {
         dialog: () => dialogService,
         effect: () => effectService,
         field: () => fieldService,
+        tree_processor: () => treeProcessorService,
         hotkey: () => hotkeyService,
         http: () => makeFakeHTTPService(),
         pwa: () => makeFakePwaService(),
@@ -75,7 +76,6 @@ export function setupWebClientRegistries() {
         title: () => fakeTitleService,
         ui: () => uiService,
         view: () => viewService,
-        company: () => fakeCompanyService,
         datetime_picker: () => datetimePickerService,
     };
     for (const serviceName in services) {
@@ -204,7 +204,6 @@ export function getActionManagerServerData() {
             name: "Partner",
             res_id: 2,
             res_model: "partner",
-            target: "inline",
             type: "ir.actions.act_window",
             views: [[false, "form"]],
         },

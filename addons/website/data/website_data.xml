@@ -3,7 +3,6 @@
     <!-- Group multi website -->
     <record id="group_multi_website" model="res.groups">
         <field name="name">Multi-website</field>
-        <field name="category_id" ref="base.module_category_hidden"/>
     </record>
 
     <!-- Action Jump on website action -->
@@ -16,8 +15,7 @@
 
     <!-- Template for home and contactus -->
     <template id="website.homepage" name="Home">
-        <t t-call="website.layout">
-            <t t-set="pageName" t-value="'homepage'"/>
+        <t t-call="website.layout" pageName.f="homepage">
             <div id="wrap" class="oe_structure oe_empty"/>
         </t>
     </template>
@@ -175,7 +173,7 @@
             <div id="wrap" class="oe_structure">
                 <section class="pt8 pb8">
                     <div class="container">
-                        <h2 class="pt16">Cookie Policy</h2>
+                        <h1 class="pt16 h2-fs">Cookie Policy</h1>
                         <p>
                             Cookies are small bits of text sent by our servers to your computer or device when you access our services.
                             They are stored in your browser and later sent back to our servers so that we can provide contextual content.
@@ -254,7 +252,7 @@
                                             </p>
                                             <p>Note that some third-party services may install additional cookies on your browser in order to identify you.</p>
                                             <p>
-                                                You may opt-out of a third-party's use of cookies by visiting the <a href="https://optout.networkadvertising.org/?c=1" rel="nofollow">Network Advertising Initiative opt-out page</a>.
+                                                You may opt-out of a third-party's use of cookies by visiting the <a class="o_translate_inline" href="https://optout.networkadvertising.org/?c=1" rel="nofollow">Network Advertising Initiative opt-out page</a>.
                                                 The website will still work if you reject or discard those cookies.
                                             </p>
                                         </td>
@@ -270,7 +268,7 @@
                                         <td>
                                             <p>
                                                 Understand how visitors engage with our website, via Google Analytics.
-                                                Learn more about <a href="https://developers.google.com/analytics/resources/concepts/gaConceptsCookies?hl=en">Analytics cookies and privacy information.</a>
+                                                Learn more about <a class="o_translate_inline" href="https://support.google.com/analytics/answer/11397207?hl=en">Analytics cookies and privacy information.</a>
                                             </p>
                                             <p>The website will still work if you reject or discard those cookies.</p>
                                         </td>
@@ -427,7 +425,7 @@
     </record>
     <record id="feature_module_career" model="website.configurator.feature">
         <field name="name">Career</field>
-        <field name="description">Publish job offers and let people apply</field>
+        <field name="description">Publish job offers</field>
         <field name="sequence">8</field>
         <field name="module_id" ref="base.module_website_hr_recruitment"/>
         <field name="icon">fa-address-card</field>
@@ -447,7 +445,7 @@
         <field name="description">Publish on-site and online events</field>
         <field name="sequence">10</field>
         <field name="website_config_preselection">event</field>
-        <field name="module_id" ref="base.module_website_event_sale"/>
+        <field name="module_id" ref="base.module_website_event"/>
         <field name="icon">fa-ticket</field>
         <field name="menu_sequence">20</field>
         <field name="feature_url">/event</field>

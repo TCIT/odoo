@@ -12,10 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'visible': True,
             'property_account_receivable_id': 'chart_at_template_2000',
             'property_account_payable_id': 'chart_at_template_3300',
-            'property_account_income_categ_id': 'chart_at_template_4000',
-            'property_account_expense_categ_id': 'chart_at_template_5010',
-            'property_stock_account_input_categ_id': 'chart_at_template_3740',
-            'property_stock_account_output_categ_id': 'chart_at_template_5000',
             'property_stock_valuation_account_id': 'chart_at_template_1600',
             'code_digits': '4',
         }
@@ -37,6 +33,10 @@ class AccountChartTemplate(models.AbstractModel):
                 'paperformat_id': 'l10n_din5008.paperformat_euro_din',
                 'account_sale_tax_id': 'account_tax_template_sales_20_code022',
                 'account_purchase_tax_id': 'account_tax_template_purchase_20_code060',
+                'income_account_id': 'chart_at_template_4000',
+                'expense_account_id': 'chart_at_template_5010',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'chart_at_template_1600',
             },
         }
 
@@ -46,3 +46,12 @@ class AccountChartTemplate(models.AbstractModel):
             bank_tags = self.env.ref('l10n_at.account_tag_external_code_2300') | self.env.ref('l10n_at.account_tag_l10n_at_ABIV')
             company.account_journal_suspense_account_id.tag_ids = bank_tags
             company.transfer_account_id.tag_ids = self.env.ref('l10n_at.account_tag_external_code_2885') | self.env.ref('l10n_at.account_tag_l10n_at_ABIV')
+
+    @template('at', 'account.account')
+    def _get_at_account_account(self):
+        return {
+            'chart_at_template_1600': {
+                'account_stock_expense_id': 'chart_at_template_5010',
+                'account_stock_variation_id': 'chart_at_template_5880',
+            },
+        }

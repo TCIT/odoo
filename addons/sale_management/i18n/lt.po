@@ -1,54 +1,43 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_management
-# 
+# * sale_management
+#
 # Translators:
-# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2024
-# Eimantas <eimantas@focusate.eu>, 2024
-# Jonas Zinkevicius <jozi@odoo.com>, 2024
-# Mantas, 2024
-# Gailius Kazlauskas <gailius@vialaurea.lt>, 2024
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2024
-# Audrius Palenskis <audrius.palenskis@gmail.com>, 2024
-# Arunas V. <arunas@devoro.com>, 2024
-# Martin Trigaux, 2024
-# Antanas Muliuolis <an.muliuolis@gmail.com>, 2024
-# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024
-# Linas Versada <linaskrisiukenas@gmail.com>, 2024
-# 
+# Gailius Kazlauskas <gailius@vialaurea.lt>, 2022
+# Anatolij, 2022
+# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2022
+# digitouch UAB <digitouchagencyeur@gmail.com>, 2022
+# Eimantas <eimantas@focusate.eu>, 2022
+# Antanas Muliuolis <an.muliuolis@gmail.com>, 2022
+# Audrius Palenskis <audrius.palenskis@gmail.com>, 2022
+# Arunas V. <arunas@devoro.com>, 2022
+# Jonas Zinkevicius <jozi@odoo.com>, 2022
+# Martin Trigaux, 2022
+# Linas Versada <linaskrisiukenas@gmail.com>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Ulevičienė <vilma.uleviciene@mededu.lt>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Linas Versada <linaskrisiukenas@gmail.com>, 2024\n"
-"Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
+"POT-Creation-Date: 2026-01-25 18:35+0000\n"
+"PO-Revision-Date: 2026-08-06 02:25+0000\n"
+"Last-Translator: Ulevičienė <vilma.uleviciene@mededu.lt>\n"
+"Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-19/"
+"sale_management/lt/>\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lt\n"
-"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-msgid "1.5"
-msgstr ""
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "<span class=\"btn btn-secondary\">Add to order</span>"
-msgstr ""
+"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "<span invisible=\"not require_payment\">of</span>"
-msgstr ""
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-msgid "<span>Options</span>"
-msgstr ""
+msgstr "<span invisible=\"not require_payment\">iš</span>"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__active
@@ -61,7 +50,6 @@ msgid "Add a note"
 msgstr "Pridėti pastabą"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "Add a product"
 msgstr "Pridėti produktą"
@@ -72,19 +60,9 @@ msgid "Add a section"
 msgstr "Pridėti sekciją"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_optional_product_quantity
 msgid "Add one"
 msgstr "Pridėti vieną"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "Add to cart"
-msgstr "Pridėti į krepšelį"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-msgid "Add to order lines"
-msgstr "Pridėti prie užsakymo eilučių"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_digest_digest__kpi_all_sale_total
@@ -92,17 +70,15 @@ msgid "All Sales"
 msgstr "Visi pardavimai"
 
 #. module: sale_management
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__allowed_uom_ids
+msgid "Allowed Uom"
+msgstr ""
+
+#. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_search
 msgid "Archived"
 msgstr "Archyvuotas"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__product_uom_category_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__product_uom_category_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__product_uom_category_id
-msgid "Category"
-msgstr "Kategorija"
 
 #. module: sale_management
 #: model:ir.model,name:sale_management.model_res_company
@@ -112,7 +88,6 @@ msgstr "Įmonės"
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__company_id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__company_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__company_id
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_search
 msgid "Company"
 msgstr "Įmonė"
@@ -128,17 +103,6 @@ msgid "Confirmation Mail"
 msgstr "Patvirtinimo laiškas"
 
 #. module: sale_management
-#: model:ir.model.fields,help:sale_management.field_sale_order_option__product_uom_category_id
-#: model:ir.model.fields,help:sale_management.field_sale_order_template_line__product_uom_category_id
-#: model:ir.model.fields,help:sale_management.field_sale_order_template_option__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Konvertavimas galimas tik tarp tai pačiai grupei priklausančių matavimo "
-"vienetų. Konvertuojant kiekiai bus paskaičiuoti pagal santykį."
-
-#. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
 msgid "Create standardized offers with default products"
 msgstr "Kurti standartizuotus pasiūlymus su numatytaisiais produktais"
@@ -149,25 +113,21 @@ msgid "Create your quotation template"
 msgstr "Sukurti savo komercinio pasiūlymo šabloną"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__create_uid
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__create_uid
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__create_uid
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__create_uid
 msgid "Created by"
 msgstr "Sukūrė"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__create_date
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__create_date
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__create_date
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__create_date
 msgid "Created on"
 msgstr "Sukurta"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_res_company__sale_order_template_id
 msgid "Default Sale Template"
-msgstr ""
+msgstr "Numatytasis pardavimo šablonas"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_res_config_settings__company_so_template_id
@@ -175,10 +135,7 @@ msgid "Default Template"
 msgstr "Numatytasis šablonas"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__name
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__name
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__name
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "Description"
 msgstr "Aprašymas"
@@ -189,22 +146,13 @@ msgid "Digest"
 msgstr "Santrauka"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "Disc.%"
-msgstr "Nuol. %"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__discount
-msgid "Discount (%)"
-msgstr "Nuolaida (%)"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__display_name
+#: model:ir.model.fields,field_description:sale_management.field_digest_digest__display_name
+#: model:ir.model.fields,field_description:sale_management.field_res_company__display_name
+#: model:ir.model.fields,field_description:sale_management.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:sale_management.field_sale_order__display_name
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_line__display_name
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__display_name
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__display_name
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__display_name
 msgid "Display Name"
 msgstr "Rodomas pavadinimas"
 
@@ -218,23 +166,14 @@ msgstr "Ekrano tipas"
 #: code:addons/sale_management/models/digest.py:0
 msgid "Do not have access, skip this data for user's digest email"
 msgstr ""
-"Neturite prieigos, praleiskite šiuos duomenis vartotojo santraukos el. "
-"paštui"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-msgid "Extra Chips"
-msgstr ""
+"Neturite prieigos, praleiskite šiuos duomenis vartotojo santraukos el. paštui"
 
 #. module: sale_management
 #: model:ir.model.constraint,message:sale_management.constraint_sale_order_template_line_non_accountable_fields_null
 msgid "Forbidden product, quantity and UoM on non-accountable sale quote line"
 msgstr ""
-
-#. module: sale_management
-#: model:ir.model.fields,help:sale_management.field_sale_order_option__sequence
-msgid "Gives the sequence order when displaying a list of optional products."
-msgstr "Suteikia eilės tvarką, kai rodomas papildomų produktų sąrašas."
+"Neapskaitomoje komercinio pasiūlymo eilutėje negalima nurodyti prekės, "
+"kiekio ir matavimo vieneto"
 
 #. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template_line__sequence
@@ -242,15 +181,13 @@ msgid "Gives the sequence order when displaying a list of sale quote lines."
 msgstr "Priskiria eilės tvarką, kai rodomas pardavimų užklausų sąrašas."
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_search
-msgid "Group By"
-msgstr "Grupuoti pagal"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__id
+#: model:ir.model.fields,field_description:sale_management.field_digest_digest__id
+#: model:ir.model.fields,field_description:sale_management.field_res_company__id
+#: model:ir.model.fields,field_description:sale_management.field_res_config_settings__id
+#: model:ir.model.fields,field_description:sale_management.field_sale_order__id
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_line__id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__id
 msgid "ID"
 msgstr "ID"
 
@@ -260,6 +197,9 @@ msgid ""
 "If set, SO with this template will invoice in this journal; otherwise the "
 "sales journal with the lowest sequence is used."
 msgstr ""
+"Jei pasirinkta, pardavimo užsakymai, kuriems naudojamas šis šablonas, bus "
+"registruojami šiame sąskaitų faktūrų žurnale. Jei nepasirinkta, bus "
+"naudojamas pardavimo žurnalas, turintis mažiausią eilės numerį."
 
 #. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template__active
@@ -280,25 +220,16 @@ msgid "Kpi All Sale Total Value"
 msgstr "Visų pardavimų KPI bendra vertė"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__write_uid
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__write_uid
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__write_uid
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__write_uid
 msgid "Last Updated by"
 msgstr "Paskutinį kartą atnaujino"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__write_date
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__write_date
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__write_date
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__write_date
 msgid "Last Updated on"
 msgstr "Paskutinį kartą atnaujinta"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__line_id
-msgid "Line"
-msgstr "Eilutė"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__sale_order_template_line_ids
@@ -335,22 +266,21 @@ msgid "Online Signature"
 msgstr "Internetinis pasirašymas"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template__sale_order_template_option_ids
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
-msgid "Optional Products"
-msgstr "Papildomi produktai"
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_line__is_optional
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__is_optional
+msgid "Optional Line"
+msgstr "Pasirenkama eilutė"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order__sale_order_option_ids
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_line__sale_order_option_ids
-msgid "Optional Products Lines"
-msgstr "Papildomų produktų eilutės"
+#. odoo-python
+#: code:addons/sale_management/models/sale_order_template.py:0
+msgid "Optional Products Section"
+msgstr "Pasirenkamų prekių skiltis"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "Options"
-msgstr "Pasirinkimai"
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__parent_id
+msgid "Parent Section Line"
+msgstr "Pagrindinės skilties eilutė"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__prepayment_percent
@@ -364,29 +294,14 @@ msgid "Prepayment percentage must be a valid percentage."
 msgstr "Avanso procentas turi būti įvestas"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__is_present
-msgid "Present on Quotation"
-msgstr ""
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__product_id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__product_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__product_id
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
 msgid "Product"
 msgstr "Produktas"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__quantity
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__product_uom_qty
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__quantity
 msgid "Quantity"
 msgstr "Kiekis"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-msgid "Quantity:"
-msgstr "Kiekis:"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__number_of_days
@@ -413,13 +328,7 @@ msgid "Quotation Template Lines"
 msgstr "Komercinio pasiūlymo šablono eilutės"
 
 #. module: sale_management
-#: model:ir.model,name:sale_management.model_sale_order_template_option
-msgid "Quotation Template Option"
-msgstr "Pasiūlymo šablono pasirinkimas"
-
-#. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__sale_order_template_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__sale_order_template_id
 msgid "Quotation Template Reference"
 msgstr "Komercinio pasiūlymo šablono numeris"
 
@@ -438,12 +347,7 @@ msgid "Quotation Validity"
 msgstr "Komercinio pasiūlymo galiojimas"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "Remove"
-msgstr "Pašalinti"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_optional_product_quantity
 msgid "Remove one"
 msgstr "Pašalinti vieną"
 
@@ -466,11 +370,6 @@ msgstr ""
 "apmokėjimo."
 
 #. module: sale_management
-#: model:ir.model,name:sale_management.model_sale_order_option
-msgid "Sale Options"
-msgstr "Pardavimo pasirinkimai"
-
-#. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.digest_digest_view_form
 msgid "Sales"
 msgstr "Pardavimai"
@@ -484,16 +383,6 @@ msgstr "Pardavimo užsakymas"
 #: model:ir.model,name:sale_management.model_sale_order_line
 msgid "Sales Order Line"
 msgstr "Pardavimo užsakymo eilutė"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__order_id
-msgid "Sales Order Reference"
-msgstr "Pardavimų užsakymo numeris"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-msgid "Sales Quotation Template Lines"
-msgstr "Pardavimų pasiūlymo šablono eilutės"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_search
@@ -513,13 +402,22 @@ msgid ""
 "and populate your orders with multiple quantities of each variant. This "
 "feature also exists in the Purchase application."
 msgstr ""
+"Parduodate tą pačią prekę skirtingų dydžių ar spalvų? Naudodamiesi prekių "
+"lentele, į užsakymą galite lengvai įtraukti skirtingus kiekvieno varianto "
+"kiekius. Ši funkcija taip pat veikia Pirkimų programoje."
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__sequence
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__sequence
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__sequence
 msgid "Sequence"
 msgstr "Seka"
+
+#. module: sale_management
+#. odoo-javascript
+#: code:addons/sale_management/static/src/fields/sale_order_line_field/sale_order_line_field.xml:0
+#: code:addons/sale_management/static/src/fields/sale_order_template_line_field/sale_order_template_line_field.xml:0
+msgid "Set Optional"
+msgstr "Nustatyti kaip pasirenkamą"
 
 #. module: sale_management
 #: model_terms:digest.tip,tip_description:sale_management.digest_tip_sale1_management_0
@@ -528,6 +426,15 @@ msgid ""
 "to help sales configure a product with different options: colors, size, "
 "capacity, etc. Make sale orders encoding easier and error-proof."
 msgstr ""
+"Sudėtinga dirbti su dideliu prekių katalogu? Išbandykite prekių "
+"konfigūratorių, kuris padės pardavėjams sukonfigūruoti prekę pasirenkant "
+"spalvą, dydį, talpą ir kitas savybes. Pardavimo užsakymus pildysite lengviau "
+"ir išvengsite klaidų."
+
+#. module: sale_management
+#: model:ir.model.fields.selection,name:sale_management.selection__sale_order_template_line__display_type__line_subsection
+msgid "Subsection"
+msgstr "Poskiltis"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
@@ -545,14 +452,16 @@ msgid ""
 "The Administrator can set default Terms & Conditions in Sales Settings. "
 "Terms set here will show up instead if you select this quotation template."
 msgstr ""
-"Administratorius gali nustatyti numatytąsias sąlygas pardavimų nustatymuose."
-" Jei pasirinksite šį komercinio pasiūlymo šabloną, bus rodomos sąlygos, "
+"Administratorius gali nustatyti numatytąsias sąlygas pardavimų nustatymuose. "
+"Jei pasirinksite šį komercinio pasiūlymo šabloną, bus rodomos sąlygos, "
 "kurios nustatytos čia."
 
 #. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template__prepayment_percent
 msgid "The percentage of the amount needed to be paid to confirm quotations."
 msgstr ""
+"Procentinė pasiūlymo sumos dalis, kurią reikia sumokėti norint jį "
+"patvirtinti."
 
 #. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template__mail_template_id
@@ -564,53 +473,37 @@ msgstr ""
 "nieko, palikite tuščią."
 
 #. module: sale_management
-#: model:ir.model.fields,help:sale_management.field_sale_order_option__is_present
-msgid ""
-"This field will be checked if the option line's product is already present "
-"in the quotation."
-msgstr ""
-
-#. module: sale_management
 #: model:digest.tip,name:sale_management.digest_tip_sale1_management_0
 #: model_terms:digest.tip,tip_description:sale_management.digest_tip_sale1_management_0
 msgid "Tip: Odoo supports configurable products"
-msgstr ""
+msgstr "Patarimas: „Odoo“ palaiko konfigūruojamas prekes"
 
 #. module: sale_management
 #: model:digest.tip,name:sale_management.digest_tip_sale_management_1
 #: model_terms:digest.tip,tip_description:sale_management.digest_tip_sale_management_1
 msgid "Tip: Sell or buy products in bulk with matrixes"
 msgstr ""
+"Patarimas: parduokite arba pirkite prekes dideliais kiekiais naudodamiesi "
+"variantų lentele"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__price_unit
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
-msgid "Unit Price"
-msgstr "Vieneto kaina"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-msgid "Unit Price:"
-msgstr "Vieneto kaina:"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option__uom_id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__product_uom_id
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__uom_id
-msgid "Unit of Measure"
-msgstr "Mato vienetas"
+msgid "Unit"
+msgstr "Vienetas"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
-msgid "UoM"
-msgstr "Mat. vnt."
+#. odoo-javascript
+#: code:addons/sale_management/static/src/fields/sale_order_line_field/sale_order_line_field.xml:0
+#: code:addons/sale_management/static/src/fields/sale_order_template_line_field/sale_order_template_line_field.xml:0
+msgid "Unset Optional"
+msgstr "Atšaukti pasirenkamumą"
 
 #. module: sale_management
 #: model_terms:ir.actions.act_window,help:sale_management.sale_order_template_action
 msgid ""
 "Use templates to create polished, professional quotes in minutes.\n"
-"                Send these quotes by email and let your customers sign online.\n"
+"                Send these quotes by email and let your customers sign "
+"online.\n"
 "                Use cross-selling and discounts to push and boost your sales."
 msgstr ""
 "Naudokite šablonus, kad per kelias minutes sukurtumėte\n"
@@ -620,10 +513,9 @@ msgstr ""
 "savo pardavimus."
 
 #. module: sale_management
-#. odoo-python
-#: code:addons/sale_management/models/sale_order_option.py:0
-msgid "You cannot add options to a confirmed order."
-msgstr "Negalite pridėti pasirinkimų prie jau patvirtinto užsakymo."
+#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
+msgid "Visible to all"
+msgstr "Matoma visiems"
 
 #. module: sale_management
 #. odoo-python
@@ -632,30 +524,52 @@ msgid ""
 "You cannot change the type of a sale quote line. Instead you should delete "
 "the current line and create a new line of the proper type."
 msgstr ""
-
-#. module: sale_management
-#. odoo-python
-#: code:addons/sale_management/models/sale_order.py:0
-msgid ""
-"Your quotation contains products from company %(product_company)s whereas your quotation belongs to company %(quote_company)s. \n"
-" Please change the company of your quotation or remove the products from other companies (%(bad_products)s)."
-msgstr ""
-"Jūsų komerciniame pasiūlyme yra produktų iš įmonės %(product_company)s, o jūsų pasiūlymas priklauso %(quote_company)s įmonei . \n"
-"Prašome pakeisti įmonę savo komerciniame pasiūlyme arba pašalinkite kitų įmonių produktus (%(bad_products)s)."
-
-#. module: sale_management
-#. odoo-python
-#: code:addons/sale_management/models/sale_order_template.py:0
-msgid "Your template cannot contain products from multiple companies."
-msgstr ""
+"Negalite pakeisti komercinio pasiūlymo eilutės tipo. Ištrinkite esamą eilutę "
+"ir sukurkite naują reikiamo tipo eilutę."
 
 #. module: sale_management
 #. odoo-python
 #: code:addons/sale_management/models/sale_order_template.py:0
 msgid ""
-"Your template contains products from company %(product_company)s whereas your template belongs to company %(template_company)s. \n"
-" Please change the company of your template or remove the products from other companies."
+"Your template belongs to company %(template_company)s but contains products "
+"from company (%(product_company)s) that are not accessible to %"
+"(template_company)s.\n"
+"Please change the company of your template or remove the products from other "
+"companies."
 msgstr ""
+"Jūsų šablonas priklauso įmonei %(template_company)s, tačiau jame yra įmonės %"
+"(product_company)s prekių, kurių įmonė %(template_company)s negali "
+"pasiekti.\n"
+"Pakeiskite šablono įmonę arba pašalinkite kitoms įmonėms priklausančias "
+"prekes."
+
+#. module: sale_management
+#. odoo-python
+#: code:addons/sale_management/models/sale_order_template.py:0
+msgid ""
+"Your template belongs to company %(template_company)s but contains products "
+"from other companies (%(product_company)s) that are not accessible to %"
+"(template_company)s.\n"
+"Please change the company of your template or remove the products from other "
+"companies."
+msgstr ""
+"Jūsų šablonas priklauso įmonei %(template_company)s, tačiau jame yra kitoms "
+"įmonėms (%(product_company)s) priklausančių prekių, kurių įmonė %"
+"(template_company)s negali pasiekti.\n"
+"Pakeiskite šablono įmonę arba pašalinkite kitoms įmonėms priklausančias "
+"prekes."
+
+#. module: sale_management
+#. odoo-python
+#: code:addons/sale_management/models/sale_order_template.py:0
+msgid ""
+"Your template cannot contain products from specific companies if it's shared "
+"between companies. Please restrict the template access, or remove those "
+"products."
+msgstr ""
+"Jei šablonas bendrinamas kelioms įmonėms, jame negali būti konkrečioms "
+"įmonėms priklausančių prekių. Apribokite prieigą prie šablono arba "
+"pašalinkite šias prekes."
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
@@ -666,3 +580,100 @@ msgstr "dienos"
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "e.g. Standard Consultancy Package"
 msgstr "pvz: Standartinis konsultacijų paketas"
+
+#~ msgid "4 Person Desk"
+#~ msgstr "4 žmonių stalas"
+
+#~ msgid "Add to cart"
+#~ msgstr "Pridėti į krepšelį"
+
+#~ msgid "Add to order lines"
+#~ msgstr "Pridėti prie užsakymo eilučių"
+
+#~ msgid "Category"
+#~ msgstr "Kategorija"
+
+#~ msgid ""
+#~ "Conversion between Units of Measure can only occur if they belong to the "
+#~ "same category. The conversion will be made based on the ratios."
+#~ msgstr ""
+#~ "Konvertavimas galimas tik tarp tai pačiai grupei priklausančių matavimo "
+#~ "vienetų. Konvertuojant kiekiai bus paskaičiuoti pagal santykį."
+
+#~ msgid "Disc.%"
+#~ msgstr "Nuol. %"
+
+#~ msgid "Discount (%)"
+#~ msgstr "Nuolaida (%)"
+
+#~ msgid ""
+#~ "Gives the sequence order when displaying a list of optional products."
+#~ msgstr "Suteikia eilės tvarką, kai rodomas papildomų produktų sąrašas."
+
+#~ msgid "Group By"
+#~ msgstr "Grupuoti pagal"
+
+#~ msgid "Line"
+#~ msgstr "Eilutė"
+
+#~ msgid "Office Chair"
+#~ msgstr "Biuro kėdė"
+
+#~ msgid "Optional Products"
+#~ msgstr "Papildomi produktai"
+
+#~ msgid "Optional Products Lines"
+#~ msgstr "Papildomų produktų eilutės"
+
+#~ msgid "Options"
+#~ msgstr "Pasirinkimai"
+
+#~ msgid "Quantity:"
+#~ msgstr "Kiekis:"
+
+#~ msgid "Quotation Builder"
+#~ msgstr "Pasiūlymų kūrimas"
+
+#~ msgid "Quotation Template Option"
+#~ msgstr "Pasiūlymo šablono pasirinkimas"
+
+#~ msgid "Quotation expires after"
+#~ msgstr "Pasiūlymas nebegalios po"
+
+#~ msgid "Remove"
+#~ msgstr "Pašalinti"
+
+#~ msgid "Sale Options"
+#~ msgstr "Pardavimo pasirinkimai"
+
+#~ msgid "Sales Order Reference"
+#~ msgstr "Pardavimų užsakymo numeris"
+
+#~ msgid "Sales Quotation Template Lines"
+#~ msgstr "Pardavimų pasiūlymo šablono eilutės"
+
+#~ msgid "Unit Price"
+#~ msgstr "Vieneto kaina"
+
+#~ msgid "Unit Price:"
+#~ msgstr "Vieneto kaina:"
+
+#~ msgid "Unit of Measure"
+#~ msgstr "Mato vienetas"
+
+#~ msgid "UoM"
+#~ msgstr "Mat. vnt."
+
+#~ msgid "You cannot add options to a confirmed order."
+#~ msgstr "Negalite pridėti pasirinkimų prie jau patvirtinto užsakymo."
+
+#~ msgid ""
+#~ "Your quotation contains products from company %(product_company)s whereas "
+#~ "your quotation belongs to company %(quote_company)s. \n"
+#~ " Please change the company of your quotation or remove the products from "
+#~ "other companies (%(bad_products)s)."
+#~ msgstr ""
+#~ "Jūsų komerciniame pasiūlyme yra produktų iš įmonės %(product_company)s, o "
+#~ "jūsų pasiūlymas priklauso %(quote_company)s įmonei . \n"
+#~ "Prašome pakeisti įmonę savo komerciniame pasiūlyme arba pašalinkite kitų "
+#~ "įmonių produktus (%(bad_products)s)."

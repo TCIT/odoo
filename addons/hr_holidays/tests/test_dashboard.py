@@ -5,9 +5,9 @@ from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon
 
 class TestDashboard(TestHrHolidaysCommon):
     def test_dashboard_special_days(self):
-        self.env.user = self.user_hrmanager
+        self.uid = self.user_hrmanager.id
         employee = self.env.user.employee_id
-        other_calendar = self.env['resource.calendar'].create({
+        other_calendar = self.env['resource.calendar'].sudo().create({
             'name': 'Other calendar',
         })
 
@@ -56,7 +56,7 @@ class TestDashboard(TestHrHolidaysCommon):
         ]
         self.env['resource.calendar.leaves'].create(public_holiday_vals)
 
-        dashboard_data = self.env['hr.employee'].get_special_days_data("2021/06/01", "2021/07/01")
+        dashboard_data = self.env['hr.employee'].get_special_days_data("2021-06-01", "2021-07-01")
 
         self.assertEqual({d["title"] for d in dashboard_data["mandatoryDays"]}, {'Super Event (employee schedule)', 'Super Event (no schedule)'})
         self.assertEqual({d["title"] for d in dashboard_data["bankHolidays"]}, {'Public holiday (employee schedule)', 'Public holiday (no schedule)'})

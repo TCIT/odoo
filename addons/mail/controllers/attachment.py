@@ -1,23 +1,24 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import base64
 import io
 import logging
 import zipfile
 
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, UnsupportedMediaType
 
 from odoo import _, http
-from odoo.exceptions import AccessError
+from odoo.addons.mail.controllers.thread import ThreadController
+from odoo.exceptions import AccessError, UserError
 from odoo.http import request, content_disposition
-
-from odoo.tools import consteq
-from ..models.discuss.mail_guest import add_guest_to_context
-from odoo.addons.mail.tools.discuss import Store
+from odoo.addons.mail.tools.discuss import add_guest_to_context, Store
+from odoo.tools.misc import file_open
+from odoo.tools.pdf import DependencyError, PdfReadError, extract_page
 
 logger = logging.getLogger(__name__)
 
 
-class AttachmentController(http.Controller):
+class AttachmentController(ThreadController):
     def _make_zip(self, name, attachments):
         streams = (request.env['ir.binary']._get_stream_from(record, 'raw') for record in attachments)
         # TODO: zip on-the-fly while streaming instead of loading the
@@ -48,19 +49,25 @@ class AttachmentController(http.Controller):
     @http.route("/mail/attachment/upload", methods=["POST"], type="http", auth="public")
     @add_guest_to_context
     def mail_attachment_upload(self, ufile, thread_id, thread_model, is_pending=False, **kwargs):
-        thread = request.env[thread_model]._get_thread_with_access(
-            int(thread_id), mode=request.env[thread_model]._mail_post_access, **kwargs
-        )
+        thread = self._get_thread_with_access_for_post(thread_model, thread_id, **kwargs)
         if not thread:
             raise NotFound()
-        if thread_model == "discuss.channel" and not thread.allow_public_upload and not request.env.user._is_internal():
-            raise AccessError(_("You are not allowed to upload attachments on this channel."))
         vals = {
             "name": ufile.filename,
             "raw": ufile.read(),
             "res_id": int(thread_id),
             "res_model": thread_model,
         }
+        if company_id := thread._mail_get_companies()[thread.id]:
+            vals["company_id"] = company_id.id
+        elif cids := request.cookies.get("cids", False):
+            active_company_ids = [int(cid) for cid in cids.split("-")]
+            company_id = (
+                request.env.user.company_id.id
+                if request.env.user.company_id.id in active_company_ids
+                else active_company_ids[0]
+            )
+            vals["company_id"] = company_id
         if is_pending and is_pending != "false":
             # Add this point, the message related to the uploaded file does
             # not exist yet, so we use those placeholder values instead.
@@ -70,54 +77,35 @@ class AttachmentController(http.Controller):
                     "res_model": "mail.compose.message",
                 }
             )
-        if request.env.user.share:
-            # Only generate the access token if absolutely necessary (= not for internal user).
-            vals["access_token"] = request.env["ir.attachment"]._generate_access_token()
         try:
             # sudo: ir.attachment - posting a new attachment on an accessible thread
             attachment = request.env["ir.attachment"].sudo().create(vals)
             attachment._post_add_create(**kwargs)
-            res = {"data": Store(attachment, extra_fields=["access_token"]).get_result()}
+            res = {
+                "data": {
+
+                    "store_data": Store().add(
+                        attachment,
+                        extra_fields=request.env["ir.attachment"]._get_store_ownership_fields(),
+                    ).get_result(),
+                    "attachment_id": attachment.id,
+                }
+            }
         except AccessError:
             res = {"error": _("You are not allowed to upload an attachment here.")}
         return request.make_json_response(res)
 
-    @http.route("/mail/attachment/delete", methods=["POST"], type="json", auth="public")
+    @http.route("/mail/attachment/delete", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
-    def mail_attachment_delete(self, attachment_id, access_token=None, **kwargs):
+    def mail_attachment_delete(self, attachment_id, access_token=None):
         attachment = request.env["ir.attachment"].browse(int(attachment_id)).exists()
-        if not attachment:
+        if not attachment or not attachment._has_attachments_ownership([access_token]):
             request.env.user._bus_send("ir.attachment/delete", {"id": attachment_id})
-            return
-        attachment_message = request.env["mail.message"].sudo().search(
+            raise NotFound()
+        message = request.env["mail.message"].sudo().search(
             [("attachment_ids", "in", attachment.ids)], limit=1)
-        message = request.env["mail.message"].sudo(False)._get_with_access(attachment_message.id,
-                                                                           "create", **kwargs)
-        if not request.env.user.share:
-            # Check through standard access rights/rules for internal users.
-            attachment._delete_and_notify(message)
-            return
-        # For non-internal users 2 cases are supported:
-        #   - Either the attachment is linked to a message: verify the request is made by the author of the message (portal user or guest).
-        #   - Either a valid access token is given: also verify the message is pending (because unfortunately in portal a token is also provided to guest for viewing others' attachments).
-        # sudo: ir.attachment: access is validated below with membership of message or access token
-        attachment_sudo = attachment.sudo()
-        if message:
-            if not self._is_allowed_to_delete(message, **kwargs):
-                raise NotFound()
-        else:
-            if (
-                not access_token
-                or not attachment_sudo.access_token
-                or not consteq(access_token, attachment_sudo.access_token)
-            ):
-                raise NotFound()
-            if attachment_sudo.res_model != "mail.compose.message" or attachment_sudo.res_id != 0:
-                raise NotFound()
-        attachment_sudo._delete_and_notify(message)
-
-    def _is_allowed_to_delete(self, message, **kwargs):
-        return message.is_current_user_or_guest_author
+        # sudo: ir.attachment: access is validated with _has_attachments_ownership
+        attachment.sudo()._delete_and_notify(message)
 
     @http.route(['/mail/attachment/zip'], methods=["POST"], type="http", auth="public")
     def mail_attachment_get_zip(self, file_ids, zip_name, **kw):
@@ -128,3 +116,64 @@ class AttachmentController(http.Controller):
         ids_list = list(map(int, file_ids.split(',')))
         attachments = request.env['ir.attachment'].browse(ids_list)
         return self._make_zip(zip_name, attachments)
+
+    @http.route(
+        "/mail/attachment/pdf_first_page/<int:attachment_id>",
+        auth="public",
+        methods=["GET"],
+        readonly=True,
+        type="http",
+    )
+    @add_guest_to_context
+    def mail_attachment_pdf_first_page(self, attachment_id, access_token=None):
+        """Returns the first page of a pdf."""
+        attachment = request.env["ir.attachment"].browse(int(attachment_id)).exists()
+        if not attachment or (
+            not attachment.has_access("read")
+            and not attachment._has_attachments_ownership([access_token])
+        ):
+            raise request.not_found()
+        # sudo: ir.attachment: access check is done above, sudo necessary for guests
+        return self._get_pdf_first_page_response(attachment.sudo())
+
+    @http.route(
+        "/mail/attachment/update_thumbnail",
+        auth="public",
+        methods=["POST"],
+        type="jsonrpc",
+    )
+    @add_guest_to_context
+    def mail_attachement_update_thumbnail(self, attachment_id, thumbnail=None, access_token=None):
+        """Updates the thumbnail of an attachment."""
+        attachment = request.env["ir.attachment"].browse(int(attachment_id)).exists()
+        if not attachment or (
+            not attachment.has_access("write")
+            and not attachment._has_attachments_ownership([access_token])
+        ):
+            raise request.not_found()
+        # sudo: ir.attachment: access check is done above, sudo necessary for guests
+        attachment_sudo = attachment.sudo()
+        if attachment_sudo.mimetype != "application/pdf":
+            raise UserError(request.env._("Only PDF files can have thumbnail."))
+        if not thumbnail:
+            with file_open("web/static/img/mimetypes/unknown.svg") as unknown_svg:
+                thumbnail = base64.b64encode(unknown_svg.read().encode())
+        attachment_sudo.thumbnail = thumbnail
+        Store(bus_channel=attachment_sudo).add(attachment_sudo, ["has_thumbnail"]).bus_send()
+
+    def _get_pdf_first_page_response(self, attachment):
+        try:
+            page_stream = extract_page(attachment, 0)
+        except (PdfReadError, DependencyError, UnicodeDecodeError) as e:
+            raise UnsupportedMediaType() from e
+        if not page_stream:
+            raise UnsupportedMediaType()
+        content = page_stream.getvalue()
+        headers = [
+            ("Content-Type", "attachment/pdf"),
+            ("X-Content-Type-Options", "nosniff"),
+            ("Content-Length", len(content)),
+        ]
+        if attachment.name:
+            headers.append(("Content-Disposition", content_disposition(attachment.name)))
+        return request.make_response(content, headers)

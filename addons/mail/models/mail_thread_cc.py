@@ -4,9 +4,9 @@
 from odoo import _, api, fields, models, tools
 
 
-class MailCCMixin(models.AbstractModel):
+class MailThreadCc(models.AbstractModel):
     _name = 'mail.thread.cc'
-    _inherit = 'mail.thread'
+    _inherit = ['mail.thread']
     _description = 'Email CC management'
 
     email_cc = fields.Char('Email cc')
@@ -28,10 +28,10 @@ class MailCCMixin(models.AbstractModel):
             'email_cc': ", ".join(self._mail_cc_sanitized_raw_dict(msg_dict.get('cc')).values()),
         }
         cc_values.update(custom_values)
-        return super(MailCCMixin, self).message_new(msg_dict, cc_values)
+        return super().message_new(msg_dict, cc_values)
 
     def message_update(self, msg_dict, update_vals=None):
-        '''Adds cc email to self.email_cc while trying to keep email as raw as possible but unique'''
+        # Adds cc email to self.email_cc while trying to keep email as raw as possible but unique
         if update_vals is None:
             update_vals = {}
         cc_values = {}
@@ -41,11 +41,10 @@ class MailCCMixin(models.AbstractModel):
             new_cc.update(old_cc)
             cc_values['email_cc'] = ", ".join(new_cc.values())
         cc_values.update(update_vals)
-        return super(MailCCMixin, self).message_update(msg_dict, cc_values)
+        return super().message_update(msg_dict, cc_values)
 
-    def _message_get_suggested_recipients(self):
-        recipients = super()._message_get_suggested_recipients()
-        if self.email_cc:
-            for email in tools.mail.email_split_and_format(self.email_cc):
-                self._message_add_suggested_recipient(recipients, email=email, reason=_('CC Email'))
-        return recipients
+    def _message_add_suggested_recipients(self, force_primary_email=False):
+        suggested = super()._message_add_suggested_recipients(force_primary_email=force_primary_email)
+        for record in self.filtered('email_cc'):
+            suggested[record.id]['email_to_lst'] += tools.mail.email_split_and_format_normalize(record.email_cc)
+        return suggested

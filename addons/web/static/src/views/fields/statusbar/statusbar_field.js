@@ -1,5 +1,4 @@
 import { Component, onWillRender, useEffect, useExternalListener, useRef } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { useCommand } from "@web/core/commands/command_hook";
 import { Domain } from "@web/core/domain";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -7,7 +6,6 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { groupBy } from "@web/core/utils/arrays";
-import { escape } from "@web/core/utils/strings";
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { getFieldDomain } from "@web/model/relational_model/utils";
 import { useSpecialData } from "@web/views/fields/relational_utils";
@@ -57,6 +55,7 @@ export class StatusBarField extends Component {
         isDisabled: { type: Boolean, optional: true },
         visibleSelection: { type: Array, element: String, optional: true },
         withCommand: { type: Boolean, optional: true },
+        context: { type: Object, optional: true },
     };
 
     setup() {
@@ -73,46 +72,53 @@ export class StatusBarField extends Component {
             status = "adjusting";
             this.adjustVisibleItems();
             this.render();
-            browser.requestAnimationFrame(() => (status = "idle"));
         };
 
-        useEffect(
-            () => status === "shouldAdjust" && adjust(),
-            () => [status]
-        );
+        useEffect(() => {
+            if (status === "shouldAdjust") {
+                adjust();
+            }
+        });
 
+        let forceRecomputeItems = false;
         onWillRender(() => {
-            if (status !== "adjusting") {
+            if (status !== "adjusting" || forceRecomputeItems) {
                 Object.assign(this.items, this.getSortedItems());
                 status = "shouldAdjust";
+            } else {
+                status = "idle";
             }
+            forceRecomputeItems = false;
         });
 
         useExternalListener(window, "resize", throttleForAnimation(adjust));
 
         // Special data
         if (this.field.type === "many2one") {
-            this.specialData = useSpecialData((orm, props) => {
-                const { foldField, name: fieldName, record } = props;
+            this.specialData = useSpecialData(async (orm, props) => {
+                const { foldField, name: fieldName, record, context } = props;
                 const { relation } = record.fields[fieldName];
-                const fieldNames = ["display_name"];
+                const fieldNames = this.getFieldNames(props);
                 if (foldField) {
                     fieldNames.push(foldField);
                 }
                 const value = record.data[fieldName];
                 let domain = getFieldDomain(record, fieldName, props.domain);
+                domain = Domain.and([this.getDomain(props), domain]).toList();
                 if (domain.length && value) {
-                    domain = Domain.or([[["id", "=", value[0]]], domain]).toList(
+                    domain = Domain.or([[["id", "=", value.id]], domain]).toList(
                         record.evalContext
                     );
                 }
-                return orm.searchRead(relation, domain, fieldNames);
+                const res = orm.searchRead(relation, domain, fieldNames, { context });
+                forceRecomputeItems = true;
+                return res;
             });
         }
 
         // Command palette
         if (this.props.withCommand) {
-            const moveToCommandName = _t("Move to %s...", escape(this.field.string));
+            const moveToCommandName = _t("Move to %s...", this.field.string);
             useCommand(
                 moveToCommandName,
                 () => ({
@@ -143,8 +149,13 @@ export class StatusBarField extends Component {
                 {
                     category: "smart_action",
                     hotkey: "alt+x",
-                    isAvailable: () =>
-                        !this.props.isDisabled && !this.getAllItems().at(-1).isSelected,
+                    isAvailable: () => {
+                        if (this.props.isDisabled) {
+                            return false;
+                        }
+                        const items = this.getAllItems();
+                        return items.length && !items.at(-1).isSelected;
+                    },
                 }
             );
         }
@@ -155,6 +166,20 @@ export class StatusBarField extends Component {
      */
     get field() {
         return this.props.record.fields[this.props.name];
+    }
+
+    /**
+     * Override this to force a dynamic domain on the records
+     */
+    getDomain(props) {
+        return [];
+    }
+
+    /**
+     * Override this to change the fields to fetch
+     */
+    getFieldNames(props) {
+        return ["display_name"];
     }
 
     /**
@@ -200,6 +225,13 @@ export class StatusBarField extends Component {
         this.items.after = [...this.items.folded];
         const itemsToAssign = this.getAllItems().filter((item) => !item.isFolded);
 
+        if (this.env.isSmall && this.items.inline.length) {
+            // Small screen case: only a single dropdown
+            show(this.dropdownRef.el);
+            hide(this.beforeRef.el, this.afterRef.el, ...itemEls);
+            return;
+        }
+
         while (this.areItemsWrapping()) {
             if (itemsBefore.length) {
                 // Case 1: elements before can be hidden
@@ -243,7 +275,7 @@ export class StatusBarField extends Component {
                 value: option.id,
                 label: option.display_name,
                 isFolded: option[foldField],
-                isSelected: Boolean(currentValue && option.id === currentValue[0]),
+                isSelected: Boolean(currentValue && option.id === currentValue.id),
             }));
         } else {
             // Selection
@@ -281,20 +313,6 @@ export class StatusBarField extends Component {
         return classNames.join(" ");
     }
 
-    /**
-     * @param {StatusBarItem} item
-     * TODO: unused, remove in master
-     */
-    getItemTooltip(item) {
-        if (item.isSelected) {
-            return _t("Current state");
-        }
-        if (this.props.isDisabled) {
-            return _t("Not active state");
-        }
-        return _t("Not active state, click to change it");
-    }
-
     getSortedItems() {
         const before = [];
         const after = [];
@@ -312,7 +330,10 @@ export class StatusBarField extends Component {
      */
     async selectItem(item) {
         const { name, record } = this.props;
-        const value = this.field.type === "many2one" ? [item.value, item.label] : item.value;
+        const value =
+            this.field.type === "many2one"
+                ? { id: item.value, display_name: item.label }
+                : item.value;
         await record.update({ [name]: value });
         await record.save();
     }
@@ -353,6 +374,7 @@ export const statusBarField = {
         withCommand: viewType === "form",
         foldField: options.fold_field,
         domain: dynamicInfo.domain,
+        context: dynamicInfo.context,
     }),
 };
 

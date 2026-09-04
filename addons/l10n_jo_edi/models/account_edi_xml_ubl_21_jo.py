@@ -1,32 +1,20 @@
-from functools import wraps
+import functools
+import re
 from types import SimpleNamespace
 
 from odoo import models
-from odoo.tools import float_repr
-from odoo.tools.float_utils import float_round
-
-
-# There is a need for this dummy currency because:
-# 1. In `ubl_20_templates.xml`, the currency name is read from currency like `vals['currency'].name`
-# 2. In Jordanian EDI XML documentation, certain locations expect the currency name to be `JO` not `JOD`.
-JO_CURRENCY = SimpleNamespace(name='JO')
+from odoo.tools import float_compare, float_round, float_is_zero
+from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
 
 JO_MAX_DP = 9
 
-PAYMENT_CODES_MAP = {
-    'income': {
-        'cash': '011',
-        'receivable': '021',
-    },
-    'sales': {
-        'cash': '012',
-        'receivable': '022',
-    },
-    'special': {
-        'cash': '013',
-        'receivable': '023',
-    }
-}
+
+class HashableNamespace(SimpleNamespace):
+    """ We need to use a hashable namespace to be able to use it as a key in a dictionary.
+    This is because the `SimpleNamespace` class is not hashable by default.
+    """
+    def __hash__(self):
+        return hash(self.name)
 
 
 class AccountEdiXmlUBL21JO(models.AbstractModel):
@@ -34,395 +22,467 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
     _inherit = 'account.edi.xml.ubl_21'
     _description = 'UBL 2.1 (JoFotara)'
 
-    ####################################################
-    # helper functions
-    ####################################################
+    # -------------------------------------------------------------------------
+    # EXPORT
+    # -------------------------------------------------------------------------
 
-    def _round_max_dp(self, value):
-        return float_round(value, JO_MAX_DP)
+    def _add_invoice_config_vals(self, vals):
+        super()._add_invoice_config_vals(vals)
+        vals['document_type'] = 'invoice'  # Only use Invoice in JO, even for credit and debit notes
+        vals['fixed_taxes_as_allowance_charges'] = False  # In JO, fixed taxes should be reported as taxes, not as AllowanceCharges
 
-    def _sum_max_dp(self, iterable):
-        return sum(self._round_max_dp(element) for element in iterable)
-
-    def approximate(func):
-        """Decorator that rounds the return value of a method."""
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            result = func(self, *args, **kwargs)
-            return self._round_max_dp(result)
-        return wrapper
-
-    @approximate
-    def _get_line_amount_before_discount_jod(self, base_line):
-        line = base_line['record']
-        amount_after_discount = base_line['tax_details']['raw_total_excluded']
-        return amount_after_discount / (1 - line.discount / 100) \
-            if line.discount < 100 else line.currency_id._convert(
-            from_amount=line.price_unit * line.quantity,
-            to_currency=self.env.ref('base.JOD'),
-            company=line.company_id,
-            date=line.date,
+        # We cannot use a new `res.currency` record to round to 9 decimals, because the
+        # `res.currency.rounding` field definition prevents rounding to more than 6 decimal places.
+        vals['currency_id'] = HashableNamespace(
+            name='JO',  # Every amount will be reported with currencyID="JO"
+            round=functools.partial(float_round, precision_digits=JO_MAX_DP),
+            is_zero=functools.partial(float_is_zero, precision_digits=JO_MAX_DP),
+            rounding=10**-JO_MAX_DP,
+            decimal_places=JO_MAX_DP,
         )
 
-    @approximate
-    def _get_line_discount_jod(self, base_line):
-        line = base_line['record']
-        return self._get_line_amount_before_discount_jod(base_line) * line.discount / 100
+    def _add_base_lines_edi_ids(self, vals):
+        vals['base_lines_edi_ids'] = {}
+        invoice = vals['invoice']
+        if invoice.reversed_entry_id:
+            DecimalPrecision = self.env['decimal.precision']
+            invoice_vals = {
+                **vals,
+                'invoice': invoice.reversed_entry_id,
+            }
+            self._add_invoice_base_lines_vals(invoice_vals)
+            invoice_edi_id_x_base_line = dict(enumerate(invoice_vals['base_lines'], 1))
+            overflow_edi_id = len(invoice_edi_id_x_base_line) + 1
 
-    @approximate
-    def _get_line_unit_price_jod(self, base_line):
-        line = base_line['record']
-        return self._get_line_amount_before_discount_jod(base_line) / line.quantity
+            refund_base_lines = filter(lambda l: not self._is_document_allowance_charge(l), vals['base_lines'])
+            for line_idx, refund_base_line in enumerate(refund_base_lines, 1):
+                matching_edi_ids = [
+                    line_id for line_id, base_line in invoice_edi_id_x_base_line.items()
+                    if base_line['product_id'] == refund_base_line['product_id']
+                    and float_compare(base_line['price_unit'], refund_base_line['price_unit'], precision_digits=DecimalPrecision.precision_get('Product Price')) == 0
+                    and float_compare(base_line['discount'], refund_base_line['discount'], precision_digits=DecimalPrecision.precision_get('Discount')) == 0
+                    and float_compare(base_line['quantity'], refund_base_line['quantity'], precision_digits=DecimalPrecision.precision_get('Product Unit')) >= 0
+                ]
 
-    @approximate
-    def _get_line_taxable_amount(self, base_line):
-        line = base_line['record']
-        return self._get_line_unit_price_jod(base_line) * line.quantity - self._get_line_discount_jod(base_line)
+                if matching_edi_ids:
+                    edi_id = min(matching_edi_ids, key=lambda line_id: invoice_edi_id_x_base_line[line_id]['quantity'])
+                    vals['base_lines_edi_ids'][line_idx] = edi_id
+                    invoice_edi_id_x_base_line.pop(edi_id)
+                else:
+                    vals['base_lines_edi_ids'][line_idx] = overflow_edi_id
+                    overflow_edi_id += 1
 
-    @approximate
-    def _get_line_tax_amount(self, base_line, tax_type):
-        """
-        tax_type possible values:
-        'percent' -> general tax
-        'fixed'   -> special tax
-        """
-        tax_data = next(filter(lambda tax_data: tax_data['tax'].amount_type == tax_type, base_line['tax_details']['taxes_data']), None)
-        if not tax_data:
-            return 0
-        if tax_type == 'fixed':
-            return tax_data['raw_tax_amount']
-        else:
-            # general tax amount = (taxable amount + special (fixed) tax mount) * tax percent
-            return (self._get_line_taxable_amount(base_line) + self._get_line_tax_amount(base_line, 'fixed')) * tax_data['tax'].amount / 100
+    def _add_invoice_base_lines_vals(self, vals):
+        # OVERRIDE account_edi_xml_ubl_20.py
+        currency_9_dp = vals['currency_id']
+        invoice = vals['invoice']
 
-    def _extract_base_lines(self, taxes_vals):
-        if 'base_lines' in taxes_vals:  # whole invoice
-            return taxes_vals['base_lines']
-        elif 'base_line_x_taxes_data' in taxes_vals:  # some lines grouped by tax
-            return [x[0] for x in taxes_vals['base_line_x_taxes_data']]
-        elif 'base_line' in taxes_vals:  # single invoice line
-            return [taxes_vals['base_line']]
+        # Compute values for invoice lines. In Jordan, because the web-service has absolutely no tolerance,
+        # what we do is: use round per line with 9 decimals (yes!)
+        base_amls = invoice.line_ids.filtered(lambda line: line.display_type == 'product')
+        base_lines = [invoice._prepare_product_base_line_for_taxes_computation(line) for line in base_amls]
+        epd_amls = invoice.line_ids.filtered(lambda line: line.display_type == 'epd')
+        base_lines += [invoice._prepare_epd_base_line_for_taxes_computation(line) for line in epd_amls]
+        cash_rounding_amls = invoice.line_ids.filtered(lambda line: line.display_type == 'rounding' and not line.tax_repartition_line_id)
+        base_lines += [invoice._prepare_cash_rounding_base_line_for_taxes_computation(line) for line in cash_rounding_amls]
 
-    def _get_payment_method_code(self, invoice):
-        return PAYMENT_CODES_MAP[invoice.company_id.l10n_jo_edi_taxpayer_type]['receivable']
+        AccountTax = self.env['account.tax']
+        for base_line in base_lines:
+            base_line['currency_id'] = currency_9_dp
+            AccountTax._add_tax_details_in_base_line(base_line, base_line['record'].company_id, 'round_per_line')
 
-    ########################################################
-    # overriding vals methods of account_edi_xml_ubl_20 file
-    ########################################################
+        # Round to 9 decimals
+        AccountTax._round_base_lines_tax_details(base_lines, company=invoice.company_id)
 
-    def _get_country_vals(self, country):
-        return {
-            'identification_code': country.code,
+        # raw_total_* values need to calculated with `round_globally` because these values should not be rounded per line
+        # However, taxes need to be calculated with `round_per_line` so that _round_base_lines_tax_details does not
+        # end up generating lines taxes using unrounded base amounts
+        new_base_lines = [base_line.copy() for base_line in base_lines]
+        for base_line, new_base_line in zip(base_lines, new_base_lines):
+            AccountTax._add_tax_details_in_base_line(new_base_line, new_base_line['record'].company_id, 'round_globally')
+            for key in [
+                'raw_total_excluded_currency',
+                'raw_total_excluded',
+                'raw_total_included_currency',
+                'raw_total_included',
+            ]:
+                base_line['tax_details'][key] = new_base_line['tax_details'][key]
+
+        vals['base_lines'] = base_lines
+        self._add_base_lines_edi_ids(vals)
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Helpers
+    # -------------------------------------------------------------------------
+
+    def format_float(self, amount, precision_digits=3):
+        # Force all floats to be formatted with at least 3 decimals and at most 9 decimals
+        return FloatFmt(amount, 3, max_dp=JO_MAX_DP)
+
+    def _get_tax_category_code(self, customer, supplier, tax):
+        if tax and tax._l10n_jo_is_exempt_tax():
+            return "Z"
+        if tax and tax.amount:
+            return "S"
+        return "O"
+
+    def _sanitize_phone(self, raw):
+        return re.sub(r'[^0-9]', '', raw or '')[:15]
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates for document header nodes
+    # -------------------------------------------------------------------------
+
+    def _add_invoice_header_nodes(self, document_node, vals):
+        super()._add_invoice_header_nodes(document_node, vals)
+
+        invoice = vals['invoice']
+
+        invoice._compute_l10n_jo_edi_uuid()
+        document_node.update({
+            'cbc:UBLVersionID': None,
+            'cbc:ProfileID': {'_text': 'reporting:1.0'},
+            'cbc:ID': {'_text': invoice.name.replace('/', '_')},
+            'cbc:UUID': {'_text': invoice.l10n_jo_edi_uuid},
+            'cbc:DueDate': None,
+            'cbc:InvoiceTypeCode': {
+                '_text': "381" if invoice.move_type == 'out_refund' else "388",
+                'name': invoice._get_invoice_scope_code() + invoice._get_invoice_payment_method_code() + invoice._get_invoice_tax_payer_type_code(),
+            },
+            'cbc:DocumentCurrencyCode': {'_text': invoice.currency_id.name},
+            'cbc:TaxCurrencyCode': {'_text': invoice.currency_id.name},
+            'cbc:BuyerReference': None,
+            'cac:OrderReference': None,
+        })
+
+        if invoice.reversed_entry_id:
+            document_node['cac:BillingReference'] = {
+                'cac:InvoiceDocumentReference': {
+                    'cbc:ID': {'_text': (invoice.reversed_entry_id.name or '').replace('/', '_')},
+                    'cbc:UUID': {'_text': invoice.reversed_entry_id.l10n_jo_edi_uuid},
+                    'cbc:DocumentDescription': {
+                        '_text': self.format_float(
+                            abs(invoice.reversed_entry_id.amount_total),
+                            vals['currency_dp'],
+                        )
+                    },
+                }
+            }
+
+        document_node['cac:AdditionalDocumentReference'] = {
+            'cbc:ID': {'_text': 'ICV'},
+            'cbc:UUID': {'_text': invoice.id},
         }
 
-    def _get_partner_party_identification_vals_list(self, partner):
-        return [{
-            'id_attrs': {'schemeID': 'TN'},
-            'id': partner.vat,
-        }]
-
-    def _get_partner_address_vals(self, partner):
-        return {
-            'postal_zone': partner.zip,
-            'country_subentity_code': partner.state_id.code,
-            'country_vals': self._get_country_vals(partner.country_id),
+    def _add_invoice_accounting_customer_party_nodes(self, document_node, vals):
+        super()._add_invoice_accounting_customer_party_nodes(document_node, vals)
+        invoice = vals['invoice']
+        document_node['cac:AccountingCustomerParty']['cac:AccountingContact'] = {
+            'cbc:Telephone': {
+                '_text': self._sanitize_phone(invoice.partner_id.phone)
+            }
         }
 
-    def _get_partner_party_tax_scheme_vals_list(self, partner, role):
-        return [{
-            'company_id': partner.vat,
-            'tax_scheme_vals': {'id': 'VAT'},
-        }]
-
-    def _get_partner_party_legal_entity_vals_list(self, partner):
-        return [{
-            'registration_name': partner.name,
-        }]
-
-    def _get_partner_contact_vals(self, partner):
-        return {}
-
-    def _get_empty_party_vals(self):
-        return {
-            'postal_address_vals': {'country_vals': {'identification_code': 'JO'}},
-            'party_tax_scheme_vals': [{'tax_scheme_vals': {'id': 'VAT'}}],
+    def _add_invoice_seller_supplier_party_nodes(self, document_node, vals):
+        # Add SellerSupplierParty
+        invoice = vals['invoice']
+        document_node['cac:SellerSupplierParty'] = {
+            'cac:Party': {
+                'cac:PartyIdentification': {
+                    'cbc:ID': {
+                        '_text': invoice.company_id.l10n_jo_edi_sequence_income_source
+                    }
+                }
+            }
         }
 
-    def _get_partner_party_vals(self, partner, role):
-        vals = super()._get_partner_party_vals(partner, role)
-        vals['party_name_vals'] = []
-        if role == 'supplier':
-            vals['party_identification_vals'] = []
-        return vals
+    def _add_invoice_delivery_nodes(self, document_node, vals):
+        pass
 
-    def _get_delivery_vals_list(self, invoice):
-        return []
-
-    def _get_invoice_payment_means_vals_list(self, invoice):
+    def _add_invoice_payment_means_nodes(self, document_node, vals):
+        invoice = vals['invoice']
         if invoice.move_type == 'out_refund':
-            return [{
-                'payment_means_code': 10,
-                'payment_means_code_attrs': {'listID': "UN/ECE 4461"},
-                'instruction_note': invoice.ref.replace('/', '_'),
-            }]
-        else:
-            return []
+            document_node['cac:PaymentMeans'] = {
+                'cbc:PaymentMeansCode': {
+                    '_text': 10,
+                    'listID': "UN/ECE 4461",
+                },
+                'cbc:InstructionNote': {
+                    '_text': (invoice.ref or '').replace('/', '_')
+                },
+            }
 
-    def _get_invoice_payment_terms_vals_list(self, invoice):
-        return []
+    def _get_party_node(self, vals):
+        partner = vals['partner']
+        role = vals['role']
 
-    def _get_invoice_tax_totals_vals_helper(self, taxes_vals, is_single_line):
-        tax_totals_vals = {
-            'currency': JO_CURRENCY,
-            'currency_dp': self._get_currency_decimal_places(),
-            'tax_amount': 0,
-            'tax_subtotal_vals': [],
-        }
-        for grouping_key, vals in taxes_vals['tax_details'].items():
-            if grouping_key['tax_amount_type'] != 'fixed':
-                # taxable amount (on which general tax is calculated) = line taxable amount + special (fixed) tax amount
-                taxable_amount = self._sum_max_dp(self._get_line_taxable_amount(base_line) + self._get_line_tax_amount(base_line, 'fixed')
-                                     for base_line in self._extract_base_lines(taxes_vals if is_single_line else vals))
-                subtotal = {
-                    'currency': JO_CURRENCY,
-                    'currency_dp': self._get_currency_decimal_places(),
-                    'taxable_amount': taxable_amount,
-                    'tax_amount': self._round_max_dp(taxable_amount * vals['tax_category_percent'] / 100),
-                    'tax_category_vals': vals['_tax_category_vals_'],
+        party_node = {
+            'cac:PartyIdentification': {
+                'cbc:ID': {
+                    '_text': partner.vat if partner.vat and partner.vat != '/' else '',
+                    'schemeID': 'TN' if partner.country_code == 'JO' else 'PN',
                 }
-                tax_totals_vals['tax_subtotal_vals'].append(subtotal)
-                tax_totals_vals['tax_amount'] += subtotal['tax_amount']
-
-        return tax_totals_vals
-
-    def _get_invoice_tax_totals_vals_list(self, invoice, taxes_vals):
-        # Tax unregistered companies should have no tax values
-        if invoice.company_id.l10n_jo_edi_taxpayer_type == 'income':
-            return []
-
-        vals = self._get_invoice_tax_totals_vals_helper(taxes_vals, is_single_line=False)
-        if not invoice._is_sales_refund():
-            vals['tax_subtotal_vals'] = []
-        return [vals]
-
-    def _get_invoice_line_item_vals(self, line, taxes_vals):
-        product = line.product_id
-        description = line.name and line.name.replace('\n', ', ')
-        return {
-            'name': product.name or description,
-        }
-
-    def _get_document_allowance_charge_vals_list(self, invoice, taxes_vals):
-        """ For JO UBL the document allowance charge vals needs to be the sum of the line discounts. """
-        discount_amount = 0
-        for base_line in self._extract_base_lines(taxes_vals):
-            discount_amount += self._get_line_discount_jod(base_line)
-        return [{
-            'charge_indicator': 'false',
-            'allowance_charge_reason': 'discount',
-            'currency_name': JO_CURRENCY.name,
-            'currency_dp': self._get_currency_decimal_places(),
-            'amount': discount_amount,
-        }]
-
-    def _get_invoice_line_allowance_vals_list(self, line, taxes_vals):
-        return [{
-            'charge_indicator': 'false',
-            'allowance_charge_reason': 'DISCOUNT',
-            'currency_name': JO_CURRENCY.name,
-            'currency_dp': self._get_currency_decimal_places(),
-            'amount': self._get_line_discount_jod(self._extract_base_lines(taxes_vals)[0]),
-        }]
-
-    def _get_invoice_line_price_vals(self, line, taxes_vals):
-        return {
-            'currency': JO_CURRENCY,
-            'currency_dp': self._get_currency_decimal_places(),
-            'price_amount': self._get_line_unit_price_jod(self._extract_base_lines(taxes_vals)[0]),
-            'product_price_dp': self._get_currency_decimal_places(),
-            'allowance_charge_vals': self._get_invoice_line_allowance_vals_list(line, taxes_vals),
-            'base_quantity': None,
-            'base_quantity_attrs': {'unitCode': self._get_uom_unece_code()},
-        }
-
-    def _get_invoice_line_tax_totals_vals_list(self, line, taxes_vals):
-        # Tax unregistered companies should have no tax values
-        if line.move_id.company_id.l10n_jo_edi_taxpayer_type == 'income':
-            return []
-
-        vals = self._get_invoice_tax_totals_vals_helper(taxes_vals, is_single_line=True)
-        taxable_amount = self._get_line_taxable_amount(self._extract_base_lines(taxes_vals)[0])
-        vals['rounding_amount'] = taxable_amount + vals['tax_amount']
-        for grouping_key, tax_details_vals in taxes_vals['tax_details'].items():
-            if grouping_key['tax_amount_type'] == 'fixed':
-                special_tax_subtotal = {
-                    'currency': JO_CURRENCY,
-                    'currency_dp': self._get_currency_decimal_places(),
-                    'taxable_amount': taxable_amount,
-                    'tax_amount': tax_details_vals['raw_tax_amount'],
-                    'tax_category_vals': tax_details_vals['_tax_category_vals_'],
+            } if role != 'supplier' else None,
+            'cac:PostalAddress': self._get_address_node(vals),
+            'cac:PartyTaxScheme': {
+                'cbc:CompanyID': {'_text': partner.vat},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'VAT'}
                 }
-                vals['rounding_amount'] += self._round_max_dp(tax_details_vals['raw_tax_amount'])
-                vals['tax_subtotal_vals'].insert(0, special_tax_subtotal)
-                # Because we want the following:
-                # 1. The special tax amount should be accounted for in the taxable amount used to calculate general tax amount.
-                # 2. The special tax amount should not be included in the reported taxable amount of either subtotals (general or special).
-                # We do the following in the general tax subtotal:
-                # 1. Taxable amount is first calculated as (line taxable amount + line special tax amount)
-                # 2. This taxable amount is used to calculate general tax amount, and is reported in the general tax subtotal itself
-                # 3. If special tax was found on the line, the reported taxable amount in the general tax subtotal is overridden here
-                #       to remove special tax amount from it
-                vals['tax_subtotal_vals'][1]['taxable_amount'] = taxable_amount
-        return [vals]
+            },
+            'cac:PartyLegalEntity': {
+                'cbc:RegistrationName': {'_text': partner.name}
+            },
+        }
+        return party_node
 
-    def _get_invoice_line_vals(self, line, line_id, taxes_vals):
+    def _get_address_node(self, vals):
+        partner = vals['partner']
+
         return {
-            'currency': JO_CURRENCY,
-            'currency_dp': self._get_currency_decimal_places(),
-            'id': line_id + 1,
-            'line_quantity': line.quantity,
-            'line_quantity_attrs': {'unitCode': self._get_uom_unece_code()},
-            'line_extension_amount': self._get_line_taxable_amount(self._extract_base_lines(taxes_vals)[0]),
-            'tax_total_vals': self._get_invoice_line_tax_totals_vals_list(line, taxes_vals),
-            'item_vals': self._get_invoice_line_item_vals(line, taxes_vals),
-            'price_vals': self._get_invoice_line_price_vals(line, taxes_vals),
+            'cbc:PostalZone': {'_text': partner.zip},
+            'cbc:CountrySubentityCode': {'_text': partner.state_id.code},
+            'cac:Country': {
+                'cbc:IdentificationCode': {'_text': partner.country_id.code}
+            }
         }
 
-    def _get_invoice_monetary_total_vals(self, invoice, taxes_vals, line_extension_amount, allowance_total_amount, charge_total_amount):
-        base_lines = self._extract_base_lines(taxes_vals)
-        tax_inclusive_amount = self._sum_max_dp(self._get_line_taxable_amount(base_line) +
-                                                self._get_line_tax_amount(base_line, 'percent') +
-                                                self._get_line_tax_amount(base_line, 'fixed')
-                                                for base_line in base_lines)
-        tax_exclusive_amount = self._sum_max_dp(self._get_line_unit_price_jod(base_line) * base_line['record'].quantity for base_line in base_lines)
-        return {
-            'currency': JO_CURRENCY,
-            'currency_dp': self._get_currency_decimal_places(),
-            'allowance_total_amount': allowance_total_amount,
-            'prepaid_amount': 0 if invoice._is_sales_refund() else None,
-            'tax_inclusive_amount': tax_inclusive_amount,
-            'payable_amount': tax_inclusive_amount,
-            'tax_exclusive_amount': tax_exclusive_amount,
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates for document amount nodes
+    # -------------------------------------------------------------------------
+
+    def _add_document_tax_total_nodes(self, document_node, vals):
+        # Tax unregistered companies should have no tax values
+        if vals['invoice'].company_id.l10n_jo_edi_taxpayer_type == 'income':
+            return
+
+        # In the document-level tax total, we only report general (not special) taxes
+        def tax_grouping_function(base_line, tax_data):
+            if tax_data and tax_data['tax'].amount_type == 'fixed':
+                return None
+            return vals['tax_grouping_function'](base_line, tax_data)
+
+        super()._add_document_tax_total_nodes(document_node, {**vals, 'tax_grouping_function': tax_grouping_function})
+
+        # Only credit notes should have tax subtotals
+        if not vals['invoice']._is_sales_refund():
+            document_node['cac:TaxTotal']['cac:TaxSubtotal'] = None
+
+    def _add_invoice_monetary_total_nodes(self, document_node, vals):
+        # OVERRIDE account_edi_xml_ubl_20.py
+        invoice = vals['invoice']
+        allowance_total_amount = 0.0
+        tax_exclusive_amount = 0.0
+        for base_line in vals['base_lines']:
+            # Compute the gross subtotal and discount for the line
+            vals['base_line'] = base_line
+            self._add_document_line_gross_subtotal_and_discount_vals(vals)
+
+            # The document-level AllowanceTotalAmount is an aggregation of the lines' discounts.
+            allowance_total_amount += vals['discount_amount_currency']
+
+            # The tax exclusive amount is the sum of the lines' gross amounts (before discount)
+            tax_exclusive_amount += vals['gross_subtotal_currency']
+
+        tax_inclusive_amount = tax_exclusive_amount - allowance_total_amount
+
+        base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(vals['base_lines'], vals['total_grouping_function'])
+        aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
+        for grouping_key, tax_details in aggregated_tax_details.items():
+            if grouping_key:
+                tax_inclusive_amount += tax_details['tax_amount_currency']
+
+        monetary_total_tag = 'cac:LegalMonetaryTotal' if vals['document_type'] in {'invoice', 'credit_note'} else 'cac:RequestedMonetaryTotal'
+        document_node[monetary_total_tag] = {
+            'cbc:TaxExclusiveAmount': {
+                '_text': self.format_float(tax_exclusive_amount, vals['currency_dp']),
+                'currencyID': vals['currency_name'],
+            },
+            'cbc:TaxInclusiveAmount': {
+                '_text': self.format_float(tax_inclusive_amount, vals['currency_dp']),
+                'currencyID': vals['currency_name'],
+            },
+            'cbc:AllowanceTotalAmount': {
+                '_text': self.format_float(allowance_total_amount, vals['currency_dp']),
+                'currencyID': vals['currency_name'],
+            },
+            'cbc:PrepaidAmount': {
+                '_text': self.format_float(0.0, vals['currency_dp']),
+                'currencyID': vals['currency_name'],
+            } if invoice._is_sales_refund() else None,
+            'cbc:PayableAmount': {
+                '_text': self.format_float(tax_inclusive_amount, vals['currency_dp']),
+                'currencyID': vals['currency_name'],
+            },
         }
 
-    ####################################################
-    # overriding vals methods of account_edi_common file
-    ####################################################
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates for document allowance charge nodes
+    # -------------------------------------------------------------------------
 
-    def format_float(self, amount, precision_digits):
-        if amount is None:
-            return None
+    def _add_document_allowance_charge_nodes(self, document_node, vals):
+        # In JoFotara, there is only one document-level AllowanceCharge, which is a *recap* of the line discounts.
+        document_node['cac:AllowanceCharge'] = self._get_document_allowance_charge_node(vals)
 
-        def get_decimal_places(number):
-            return len(f'{float(number)}'.split('.')[1])
+    def _get_document_allowance_charge_node(self, vals):
+        """ For JO UBL the document allowance charge needs to be the sum of the line discounts. """
+        base_lines = vals['base_lines']
+        discount_amount = 0.0
+        for base_line in base_lines:
+            vals['base_line'] = base_line
+            self._add_document_line_gross_subtotal_and_discount_vals(vals)
+            discount_amount += vals['discount_amount_currency']
 
-        rounded_amount = float_repr(self._round_max_dp(amount), JO_MAX_DP).rstrip('0').rstrip('.')
-        decimal_places = get_decimal_places(rounded_amount)
-        if decimal_places < precision_digits:
-            rounded_amount = float_repr(float(rounded_amount), precision_digits)
-        return rounded_amount
+        return {
+            'cbc:ChargeIndicator': {'_text': 'false'},
+            'cbc:AllowanceChargeReason': {'_text': 'discount'},
+            'cbc:Amount': {
+                '_text': self.format_float(discount_amount, vals['currency_dp']),
+                'currencyID': vals['currency_name'],
+            },
+        }
 
-    def _get_currency_decimal_places(self, currency_id=None):
-        # Invoices are always reported in JOD
-        return self.env.ref('base.JOD').decimal_places
+    def _get_tax_subtotal_node(self, vals):
+        tax_subtotal_node = super()._get_tax_subtotal_node(vals)
+        tax_subtotal_node['cbc:Percent'] = None
+        return tax_subtotal_node
 
-    def _get_uom_unece_code(self, line=None):
-        return "PCE"
-
-    def _get_tax_category_list(self, customer, supplier, tax):
-        def get_tax_jo_ubl_code(tax):
-            if tax._l10n_jo_is_exempt_tax():
-                return "Z"
-            if tax.amount:
-                return "S"
-            return "O"
-
-        def get_jo_tax_type(tax):
-            if tax.amount_type == 'percent':
-                return 'general'
-            elif tax.amount_type == 'fixed':
-                return 'special'
-
-        tax_type = get_jo_tax_type(tax)
-        tax_code = get_tax_jo_ubl_code(tax)
-        return [{
-            'id': tax_code,
-            'id_attrs': {'schemeAgencyID': '6', 'schemeID': 'UN/ECE 5305'},
-            'percent': tax.amount if tax_type == 'general' else '',
-            'tax_scheme_vals': {
-                'id': 'VAT' if tax_type == 'general' else 'OTH',
-                'id_attrs': {
-                    'schemeAgencyID': '6',
+    def _get_tax_category_node(self, vals):
+        grouping_key = vals['grouping_key']
+        return {
+            'cbc:ID': {
+                '_text': grouping_key['tax_category_code'],
+                'schemeID': 'UN/ECE 5305',
+                'schemeAgencyID': '6',
+            },
+            'cbc:Percent': {'_text': grouping_key['amount']} if grouping_key['amount_type'] == 'percent' else None,
+            'cac:TaxScheme': {
+                'cbc:ID': {
+                    '_text': 'VAT' if grouping_key['amount_type'] == 'percent' else 'OTH',
                     'schemeID': 'UN/ECE 5153',
-                },
-            },
-        }]
-
-    ####################################################
-    # vals methods of account.edi.xml.ubl_21.jo
-    ####################################################
-
-    def _get_billing_reference_vals(self, invoice):
-        if not invoice.reversed_entry_id:
-            return {}
-
-        return {
-            'id': invoice.reversed_entry_id.name.replace('/', '_'),
-            'uuid': invoice.reversed_entry_id.l10n_jo_edi_uuid,
-            'document_description': self.format_float(abs(invoice.reversed_entry_id.amount_total_signed), self._get_currency_decimal_places()),
+                    'schemeAgencyID': '6',
+                }
+            }
         }
 
-    def _get_additional_document_reference_list(self, invoice):
-        return [{
-            'id': 'ICV',
-            'uuid': invoice.id,
-        }]
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates for document line nodes
+    # -------------------------------------------------------------------------
 
-    def _get_seller_supplier_party_vals(self, invoice):
-        return {
-            'party_identification_vals': [{'id': invoice.company_id.l10n_jo_edi_sequence_income_source}],
+    def _add_invoice_line_id_nodes(self, line_node, vals):
+        line_node['cbc:ID'] = {
+            '_text': vals['base_lines_edi_ids'].get(vals['line_idx'], vals['line_idx']),
         }
 
-    ####################################################
-    # export methods
-    ####################################################
+    def _get_line_edi_id(self, line, default_id):
+        # only kept for stable policy, would be removed in FWs
+        return default_id
 
-    def _export_invoice_vals(self, invoice):
-        vals = super()._export_invoice_vals(invoice)
+    def _add_document_line_gross_subtotal_and_discount_vals(self, vals):
+        """ In JO, because of the precision requirements, we first compute an exact
+        gross unit price, rounded to 9 decimals, and then use it to compute the discount amounts.
+        """
+        base_line = vals['base_line']
+        currency_9_dp = vals['currency_id']
 
-        vals.update({
-            'main_template': 'l10n_jo_edi.ubl_jo_Invoice',
-            'InvoiceType_template': 'l10n_jo_edi.ubl_jo_InvoiceType',
-            'PaymentMeansType_template': 'l10n_jo_edi.ubl_jo_PaymentMeansType',
-            'InvoiceLineType_template': 'l10n_jo_edi.ubl_jo_InvoiceLineType',
-            'TaxTotalType_template': 'l10n_jo_edi.ubl_jo_TaxTotalType',
-        })
+        # OVERRIDE account_edi_xml_ubl_20.py
+        discount_factor = 1 - (base_line['discount'] / 100.0)
+        if discount_factor != 0.0:
+            gross_subtotal_currency = base_line['tax_details']['raw_total_excluded_currency'] / discount_factor
+        else:
+            gross_subtotal_currency = base_line['currency_id'].round(base_line['price_unit'] * base_line['quantity'])
 
-        customer = invoice.partner_id
-        is_refund = invoice.move_type == 'out_refund'
+        # Start by getting a gross unit price rounded to 9 decimals
+        vals['gross_price_unit_currency'] = currency_9_dp.round(gross_subtotal_currency / base_line['quantity']) if base_line['quantity'] else 0.0
 
-        vals['vals'].update({
-            'ubl_version_id': '',
-            'order_reference': '',
-            'sales_order_id': '',
-            'profile_id': 'reporting:1.0',
-            'id': invoice.name.replace('/', '_'),
-            'uuid': invoice.l10n_jo_edi_uuid,
-            'document_currency_code': 'JOD',
-            'tax_currency_code': 'JOD',
-            'document_type_code_attrs': {'name': self._get_payment_method_code(invoice)},
-            'document_type_code': "381" if is_refund else "388",
-            'accounting_customer_party_vals': {
-                'party_vals': self._get_empty_party_vals() if is_refund else self._get_partner_party_vals(customer, role='customer'),
-                'accounting_contact': {
-                    'telephone': '' if is_refund else invoice.partner_id.phone or invoice.partner_id.mobile,
-                },
+        # Then compute the gross subtotal from the rounded unit price
+        vals['gross_subtotal_currency'] = currency_9_dp.round(vals['gross_price_unit_currency'] * base_line['quantity'])
+
+        # Then compute the discount from the gross subtotal
+        vals['discount_amount_currency'] = vals['gross_subtotal_currency'] - base_line['tax_details']['total_excluded_currency']
+
+    def _add_invoice_line_amount_nodes(self, line_node, vals):
+        super()._add_invoice_line_amount_nodes(line_node, vals)
+        quantity_tag = self._get_tags_for_document_type(vals)['line_quantity']
+        line_node[quantity_tag]['unitCode'] = 'PCE'
+
+    def _add_invoice_line_allowance_charge_nodes(self, line_node, vals):
+        # The line-level AllowanceCharge should be added to the Price node
+        pass
+
+    def _add_document_line_tax_total_nodes(self, line_node, vals):
+        base_line = vals['base_line']
+
+        # Tax unregistered companies should have no tax values
+        if base_line['record'].move_id.company_id.l10n_jo_edi_taxpayer_type == 'income':
+            return
+
+        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+
+        total_tax_amount_percent = sum(
+            values['tax_amount_currency']
+            for grouping_key, values in aggregated_tax_details.items()
+            if grouping_key and grouping_key['amount_type'] == 'percent'
+        )
+
+        line_node['cac:TaxTotal'] = {
+            # This contains the total amount of general (percent) taxes
+            'cbc:TaxAmount': {
+                '_text': self.format_float(total_tax_amount_percent, vals['currency_dp']),
+                'currencyID': vals['currency_name']
             },
-            'seller_supplier_party_vals': {
-                'party_vals': self._get_seller_supplier_party_vals(invoice),
+            'cbc:RoundingAmount': {
+                '_text': self.format_float(base_line['tax_details']['total_included_currency'], vals['currency_dp']),
+                'currencyID': vals['currency_name'],
             },
-            'billing_reference_vals': self._get_billing_reference_vals(invoice),
-            'additional_document_reference_list': self._get_additional_document_reference_list(invoice),
-        })
+            'cac:TaxSubtotal': [
+                {
+                    'cbc:TaxableAmount': {
+                        # Always report the line's tax-excluded total as base amount, even if it isn't the base of the tax
+                        # (e.g. if there is first a fixed tax and then a percent tax). This is required by the JoFotara spec.
+                        '_text': self.format_float(base_line['tax_details']['total_excluded_currency'], vals['currency_dp']),
+                        'currencyID': vals['currency_name']
+                    },
+                    'cbc:TaxAmount': {
+                        '_text': self.format_float(values['tax_amount_currency'], vals['currency_dp']),
+                        'currencyID': vals['currency_name']
+                    },
+                    'cac:TaxCategory': self._get_tax_category_node({**vals, 'grouping_key': grouping_key})
+                }
+                for grouping_key, values in aggregated_tax_details.items()
+                if grouping_key
+            ],
+        }
 
-        return vals
+    def _add_invoice_line_item_nodes(self, line_node, vals):
+        super()._add_invoice_line_item_nodes(line_node, vals)
+        line_node['cac:Item']['cbc:Description'] = None
+
+    def _add_document_line_tax_category_nodes(self, line_node, vals):
+        # No InvoiceLine/Item/ClassifiedTaxCategory in Jordan
+        pass
+
+    def _add_invoice_line_price_nodes(self, line_node, vals):
+        # OVERRIDE account_edi_xml_ubl_20.py
+        line_node['cac:Price'] = {
+            'cbc:PriceAmount': {
+                '_text': self.format_float(vals['gross_price_unit_currency'], vals['currency_dp']),
+                'currencyID': vals['currency_name'],
+            },
+            # Add the line-level AllowanceCharge to the Price node
+            'cac:AllowanceCharge': self._get_line_discount_allowance_charge_node(vals),
+        }
+
+    def _get_line_discount_allowance_charge_node(self, vals):
+        # OVERRIDE account_edi_xml_ubl_20.py
+        return {
+            'cbc:ChargeIndicator': {'_text': 'false'},
+            'cbc:AllowanceChargeReason': {'_text': 'DISCOUNT'},
+            'cbc:Amount': {
+                '_text': self.format_float(
+                    abs(vals['discount_amount_currency']),
+                    vals['currency_dp'],
+                ),
+                'currencyID': vals['currency_name'],
+            }
+        }

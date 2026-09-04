@@ -5,8 +5,8 @@ from odoo import api, fields, models, _
 from odoo.exceptions import AccessError
 
 
-class Tags(models.Model):
-    _name = "forum.tag"
+class ForumTag(models.Model):
+    _name = 'forum.tag'
     _description = "Forum Tag"
     _inherit = [
         'mail.thread',
@@ -22,9 +22,10 @@ class Tags(models.Model):
         string='Posts', domain=[('state', '=', 'active')])
     posts_count = fields.Integer('Number of Posts', compute='_compute_posts_count', store=True)
     website_url = fields.Char("Link to questions with the tag", compute='_compute_website_url')
-    _sql_constraints = [
-        ('name_uniq', 'unique (name, forum_id)', "Tag name already exists!"),
-    ]
+    _name_uniq = models.Constraint(
+        'unique (name, forum_id)',
+        'Tag name already exists!',
+    )
 
     @api.depends("post_ids", "post_ids.tag_ids", "post_ids.state", "post_ids.active")
     def _compute_posts_count(self):
@@ -42,7 +43,7 @@ class Tags(models.Model):
             forum = self.env['forum.forum'].browse(vals.get('forum_id'))
             if self.env.user.karma < forum.karma_tag_create and not self.env.is_admin():
                 raise AccessError(_('%d karma required to create a new Tag.', forum.karma_tag_create))
-        return super(Tags, self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True)).create(vals_list)
+        return super(ForumTag, self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True)).create(vals_list)
 
     # ----------------------------------------------------------------------
     # WEBSITE

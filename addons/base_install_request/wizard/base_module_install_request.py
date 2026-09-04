@@ -6,7 +6,7 @@ from odoo.exceptions import UserError
 
 
 class BaseModuleInstallRequest(models.TransientModel):
-    _name = "base.module.install.request"
+    _name = 'base.module.install.request'
     _description = "Module Activation Request"
     _rec_name = "module_id"
 
@@ -21,7 +21,7 @@ class BaseModuleInstallRequest(models.TransientModel):
 
     @api.depends('module_id')
     def _compute_user_ids(self):
-        users = self.env.ref('base.group_system').users
+        users = self.env.ref('base.group_system').all_user_ids
         self.user_ids = [(6, 0, users.ids)]
 
     def action_send_request(self):
@@ -45,7 +45,7 @@ class BaseModuleInstallRequest(models.TransientModel):
 
 
 class BaseModuleInstallReview(models.TransientModel):
-    _name = "base.module.install.review"
+    _name = 'base.module.install.review'
     _description = "Module Activation Review"
     _rec_name = "module_id"
 

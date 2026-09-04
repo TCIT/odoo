@@ -3,7 +3,6 @@
 
 import base64
 import urllib.parse
-import werkzeug
 
 from datetime import timedelta
 from markupsafe import Markup, escape
@@ -117,47 +116,17 @@ class MassMailController(http.Controller):
         except NotFound as e:  # avoid leaking ID existence
             raise Unauthorized() from e
 
-        unsubscribed_str = _('Are you sure you want to unsubscribe from our mailing list?')
+        unsubscribed_lists = ''
         # Display list name if list is public
         if mailing.mailing_model_real == 'mailing.contact':
             unsubscribed_lists = ', '.join(mailing_list.name for mailing_list in mailing.contact_list_ids if mailing_list.is_public)
-            if unsubscribed_lists:
-                unsubscribed_str = _(
-                    'Are you sure you want to unsubscribe from the mailing list "%(unsubscribed_lists)s"?',
-                    unsubscribed_lists=unsubscribed_lists
-                )
 
-        template = etree.fromstring("""
-            <t t-call="mass_mailing.layout">
-                <div class="container o_unsubscribe_form">
-                    <div class="row">
-                        <div class="col-lg-6 offset-lg-3 mt-4">
-                            <div id="info_state"  class="alert alert-success">
-                                <div class="text-center">
-                                    <form action="/mailing/confirm_unsubscribe" method="POST">
-                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                        <input type="hidden" name="mailing_id" t-att-value="mailing_id"/>
-                                        <input type="hidden" name="document_id" t-att-value="document_id"/>
-                                        <input type="hidden" name="email" t-att-value="email"/>
-                                        <input type="hidden" name="hash_token" t-att-value="hash_token"/>
-                                        <p t-out="unsubscribed_str"/>
-                                        <button type="submit" class="btn btn-primary" t-out="unsubscribe_btn"/>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </t>
-        """)
-        return request.env['ir.qweb']._render(template, {
-            'main_object': mailing,
+        return request.render('mass_mailing.page_mailing_confirm_unsubscribe', {
             'mailing_id': mailing_id,
             'document_id': document_id,
             'email': email,
             'hash_token': hash_token,
-            'unsubscribed_str': unsubscribed_str,
-            'unsubscribe_btn': _("Unsubscribe"),
+            'unsubscribed_lists': unsubscribed_lists,
         })
 
     # POST method
@@ -184,28 +153,8 @@ class MassMailController(http.Controller):
             'document_id': document_id,
             'hash_token': hash_token,
         })
-        settings_url = f'/mailing/{int(mailing_id)}/unsubscribe?{url_params}'
-        template = etree.fromstring("""
-            <t t-call="mass_mailing.layout">
-                <div class="container o_unsubscribe_form">
-                    <div class="row">
-                        <div class="col-lg-6 offset-lg-3 mt-4">
-                            <div id="info_state"  class="alert alert-success">
-                                <div class="text-center">
-                                    <p t-out="success_str"/>
-                                    <a t-att-href="settings_url" class="btn btn-primary" t-out="manage_btn"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </t>
-        """)
-        return request.env['ir.qweb']._render(template, {
-            'main_object': request.env['mailing.mailing'].browse(int(mailing_id)),
-            'settings_url': settings_url,
-            'success_str': _('Successfully unsubscribed!'),
-            'manage_btn': _('Manage Subscriptions'),
+        return request.render('mass_mailing.page_mailing_has_unsubscribed', {
+            'settings_url': f'/mailing/{int(mailing_id)}/unsubscribe?{url_params}',
         })
 
     # todo: merge this route with /mail/mailing/confirm_unsubscribe on next minor version
@@ -330,7 +279,7 @@ class MassMailController(http.Controller):
             'lists_public': lists_public,
         }
 
-    @http.route('/mailing/list/update', type='json', auth='public', csrf=True)
+    @http.route('/mailing/list/update', type='jsonrpc', auth='public', csrf=True)
     def mailing_update_list_subscription(self, mailing_id=None, document_id=None,
                                          email=None, hash_token=None,
                                          lists_optin_ids=None, **post):
@@ -361,7 +310,7 @@ class MassMailController(http.Controller):
 
         return len(lists_to_optout)
 
-    @http.route('/mailing/feedback', type='json', auth='public', csrf=True)
+    @http.route('/mailing/feedback', type='jsonrpc', auth='public', csrf=True)
     def mailing_send_feedback(self, mailing_id=None, document_id=None,
                               email=None, hash_token=None,
                               last_action=None,
@@ -514,14 +463,20 @@ class MassMailController(http.Controller):
         )[document_id]
         # Update generic URLs (without parameters) to final ones
         if document_id:
+            # Keep the unsubscribe link on the recipient's website, as is done when
+            # the mail is sent (see mail.mail._prepare_outgoing_list). Sudo as the
+            # route is public and the record is only used to resolve the base URL.
+            recipient = request.env[mailing_sudo.mailing_model_real].sudo().browse(document_id)
             html_markupsafe = html_markupsafe.replace(
                 '/unsubscribe_from_list',
-                mailing_sudo._get_unsubscribe_url(email, document_id)
+                mailing_sudo.with_context(
+                    mailing_recipient_record=recipient
+                )._get_unsubscribe_url(email, document_id)
             )
         else:  # when manually trying a /view on a mailing, not through email link
             html_markupsafe = html_markupsafe.replace(
                 '/unsubscribe_from_list',
-                werkzeug.urls.url_join(
+                tools.urls.urljoin(
                     mailing_sudo.get_base_url(),
                     f'/mailing/{mailing_sudo.id}/unsubscribe',
                 )
@@ -538,7 +493,7 @@ class MassMailController(http.Controller):
     # BLACKLIST
     # ------------------------------------------------------------
 
-    @http.route('/mailing/blocklist/add', type='json', auth='public')
+    @http.route('/mailing/blocklist/add', type='jsonrpc', auth='public')
     def mail_blocklist_add(self, mailing_id=None, document_id=None,
                            email=None, hash_token=None):
         email_found, hash_token_found = self._fetch_user_information(email, hash_token)
@@ -565,7 +520,7 @@ class MassMailController(http.Controller):
         _blocklist_rec = request.env['mail.blacklist'].sudo()._add(email_found, message=message)
         return True
 
-    @http.route('/mailing/blocklist/remove', type='json', auth='public')
+    @http.route('/mailing/blocklist/remove', type='jsonrpc', auth='public')
     def mail_blocklist_remove(self, mailing_id=None, document_id=None,
                               email=None, hash_token=None):
         email_found, hash_token_found = self._fetch_user_information(email, hash_token)

@@ -15,10 +15,7 @@ class ProductTemplate(models.Model):
             ('delivered_manual', _('Based on Delivered Quantity (Manual)')),
         ]
 
-        user = self.env['res.users'].sudo().browse(SUPERUSER_ID)
-        if (self.env.user.has_group('project.group_project_milestone') or
-                (self.env.user.has_group('base.group_public') and user.has_group('project.group_project_milestone'))
-        ):
+        if self.env['res.groups']._is_feature_enabled('project.group_project_milestone'):
             service_policies.insert(1, ('delivered_milestones', _('Based on Milestones')))
         return service_policies
 
@@ -34,10 +31,15 @@ class ProductTemplate(models.Model):
         },
     )
     project_id = fields.Many2one(
-        'project.project', 'Project', company_dependent=True, copy=True,
+        'project.project', 'Project', company_dependent=True, copy=True, domain='[("is_template", "=", False)]'
     )
     project_template_id = fields.Many2one(
         'project.project', 'Project Template', company_dependent=True, copy=True,
+        domain='[("is_template", "=", True)]',
+    )
+    task_template_id = fields.Many2one('project.task', 'Task Template',
+        domain="[('is_template', '=', True), ('project_id', '=', project_id)]",
+        company_dependent=True, copy=True, compute='_compute_task_template', store=True, readonly=False
     )
     service_policy = fields.Selection('_selection_service_policy', string="Service Invoicing Policy", compute_sudo=True, compute='_compute_service_policy', inverse='_inverse_service_policy', tracking=True)
     service_type = fields.Selection(selection_add=[
@@ -50,6 +52,12 @@ class ProductTemplate(models.Model):
             product.service_policy = self._get_general_to_service(product.invoice_policy, product.service_type)
             if not product.service_policy and product.type == 'service':
                 product.service_policy = 'ordered_prepaid'
+
+    @api.depends('project_id')
+    def _compute_task_template(self):
+        for product in self:
+            if product.task_template_id and product.task_template_id.project_id != product.project_id:
+                product.task_template_id = False
 
     @api.depends('service_policy')
     def _compute_product_tooltip(self):

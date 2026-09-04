@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
@@ -57,10 +55,8 @@ export class StockForecasted extends Component {
         this.docs = {
             ...reportValues.docs,
             ...reportValues.precision,
-            lead_days_date: this.context.lead_days_date,
+            lead_horizon_date: this.context.lead_horizon_date,
             qty_to_order: this.context.qty_to_order,
-            visibility_days_date: this.context.visibility_days_date,
-            qty_to_order_with_visibility_days: this.context.qty_to_order_with_visibility_days
         };
     }
 
@@ -109,16 +105,9 @@ export class StockForecasted extends Component {
     }
 
     get graphDomain() {
-        let warehouseId = null;
-        if (Array.isArray(this.context.warehouse_id)) {
-            const validWarehouseIds = this.context.warehouse_id.filter(Number.isInteger);
-            warehouseId = validWarehouseIds.length ? validWarehouseIds[0] : null;
-        } else if (Number.isInteger(this.context.warehouse_id)) {
-            warehouseId = this.context.warehouse_id;
-        }
         const domain = [
             ["state", "=", "forecast"],
-            ["warehouse_id", "=", warehouseId],
+            ["warehouse_id", "=", this.context.warehouse_id],
         ];
         if (this.resModel === "product.template") {
             domain.push(["product_tmpl_id", "=", this.productId]);
@@ -132,13 +121,18 @@ export class StockForecasted extends Component {
         return { noContentHelp: _t("Try to add some incoming or outgoing transfers.") };
     }
 
-    async openView(resModel, view, resId) {
+    async openView(resModel, view, resId=false, domain = false) {
+        const views = [[false, view]];
+        if (view !== "form") {
+            views.push([false, "form"]);
+        }
         const action = {
             type: "ir.actions.act_window",
             res_model: resModel,
-            views: [[false, view]],
+            views,
             view_mode: view,
-            res_id: resId,
+            res_id:  resId,
+            domain: domain,
         };
         return this.action.doAction(action);
     }

@@ -2,6 +2,7 @@
 
 from odoo import api, fields, models
 
+
 class ResUsersSettings(models.Model):
     _inherit = "res.users.settings"
 

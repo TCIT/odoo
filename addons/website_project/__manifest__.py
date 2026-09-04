@@ -18,7 +18,7 @@ Generate tasks in Project app from a form published on your website. This module
     'installable': True,
     'auto_install': True,
     'assets': {
-        'website.assets_wysiwyg': [
+        'website.website_builder_assets': [
             'website_project/static/src/js/website_project_editor.js',
         ],
         'project.webclient': [
@@ -32,5 +32,6 @@ Generate tasks in Project app from a form published on your website. This module
             'website/static/src/components/autocomplete_with_pages/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

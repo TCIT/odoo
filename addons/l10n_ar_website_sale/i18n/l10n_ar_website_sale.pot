@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~17.4\n"
+"Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-28 09:54+0000\n"
-"PO-Revision-Date: 2024-11-28 09:54+0000\n"
+"POT-Creation-Date: 2025-12-30 19:04+0000\n"
+"PO-Revision-Date: 2025-12-30 19:04+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,66 +16,43 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: l10n_ar_website_sale
-#: model:website,contact_us_button_url:l10n_ar_website_sale.default_website_ri
-msgid "/contactus"
+#: model:ir.model,name:l10n_ar_website_sale.model_res_config_settings
+msgid "Config Settings"
 msgstr ""
 
 #. module: l10n_ar_website_sale
-#: model_terms:ir.ui.view,arch_db:l10n_ar_website_sale.partner_info
-msgid "<option value=\"\">AFIP Responsibility...</option>"
+#: model:ir.model.fields,field_description:l10n_ar_website_sale.field_product_template__display_name
+#: model:ir.model.fields,field_description:l10n_ar_website_sale.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:l10n_ar_website_sale.field_website__display_name
+msgid "Display Name"
 msgstr ""
 
 #. module: l10n_ar_website_sale
-#: model_terms:ir.ui.view,arch_db:l10n_ar_website_sale.partner_info
-msgid "<option value=\"\">Identification Type...</option>"
+#: model:ir.model.fields,field_description:l10n_ar_website_sale.field_res_config_settings__l10n_ar_website_sale_show_both_prices
+#: model:ir.model.fields,field_description:l10n_ar_website_sale.field_website__l10n_ar_website_sale_show_both_prices
+msgid "Display Price without National Taxes"
 msgstr ""
 
 #. module: l10n_ar_website_sale
-#: model_terms:ir.ui.view,arch_db:l10n_ar_website_sale.partner_info
-msgid "AFIP Responsibility"
+#: model:ir.model.fields,field_description:l10n_ar_website_sale.field_product_template__id
+#: model:ir.model.fields,field_description:l10n_ar_website_sale.field_res_config_settings__id
+#: model:ir.model.fields,field_description:l10n_ar_website_sale.field_website__id
+msgid "ID"
 msgstr ""
 
 #. module: l10n_ar_website_sale
-#: model_terms:ir.ui.view,arch_db:l10n_ar_website_sale.partner_info
-msgid ""
-"Changing AFIP Responsibility type is not allowed once document(s) have been "
-"issued for your account. Please contact us directly for this operation."
+#: model_terms:ir.ui.view,arch_db:l10n_ar_website_sale.l10n_ar_website_sale_products_item_inherit
+msgid "Precio s/Imp. Nac."
 msgstr ""
 
 #. module: l10n_ar_website_sale
-#: model_terms:ir.ui.view,arch_db:l10n_ar_website_sale.partner_info
-msgid ""
-"Changing Identification type is not allowed once document(s) have been "
-"issued for your account. Please contact us directly for this operation."
+#: model_terms:ir.ui.view,arch_db:l10n_ar_website_sale.l10n_ar_website_sale_product_price_inherit
+msgid "Precio s/Imp. Nac.:"
 msgstr ""
 
 #. module: l10n_ar_website_sale
-#. odoo-python
-#: code:addons/l10n_ar_website_sale/controllers/main.py:0
-msgid ""
-"For the selected AFIP Responsibility you will need to set CUIT "
-"Identification Type"
-msgstr ""
-
-#. module: l10n_ar_website_sale
-#: model_terms:ir.ui.view,arch_db:l10n_ar_website_sale.portal_my_details_fields
-msgid "Identification Number"
-msgstr ""
-
-#. module: l10n_ar_website_sale
-#: model_terms:ir.ui.view,arch_db:l10n_ar_website_sale.partner_info
-msgid "Identification Type"
-msgstr ""
-
-#. module: l10n_ar_website_sale
-#: model:website,prevent_zero_price_sale_text:l10n_ar_website_sale.default_website_ri
-msgid "Not Available For Sale"
-msgstr ""
-
-#. module: l10n_ar_website_sale
-#. odoo-python
-#: code:addons/l10n_ar_website_sale/controllers/main.py:0
-msgid "Number"
+#: model:ir.model,name:l10n_ar_website_sale.model_product_template
+msgid "Product"
 msgstr ""
 
 #. module: l10n_ar_website_sale

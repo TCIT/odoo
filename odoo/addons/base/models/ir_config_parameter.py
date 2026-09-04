@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 """
 Store database-specific configuration parameters
@@ -7,7 +6,7 @@ Store database-specific configuration parameters
 import uuid
 import logging
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools import config, ormcache, mute_logger
 
@@ -26,7 +25,7 @@ _default_parameters = {
 }
 
 
-class IrConfigParameter(models.Model):
+class IrConfig_Parameter(models.Model):
     """Per-database storage of configuration key-value pairs."""
     _name = 'ir.config_parameter'
     _description = 'System Parameter'
@@ -37,9 +36,10 @@ class IrConfigParameter(models.Model):
     key = fields.Char(required=True)
     value = fields.Text(required=True)
 
-    _sql_constraints = [
-        ('key_uniq', 'unique (key)', 'Key must be unique.')
-    ]
+    _key_uniq = models.Constraint(
+        'unique (key)',
+        "Key must be unique.",
+    )
 
     @mute_logger('odoo.addons.base.models.ir_config_parameter')
     def init(self, force=False):
@@ -69,7 +69,7 @@ class IrConfigParameter(models.Model):
         return self._get_param(key) or default
 
     @api.model
-    @ormcache('key')
+    @ormcache('key', cache='stable')
     def _get_param(self, key):
         # we bypass the ORM because get_param() is used in some field's depends,
         # and must therefore work even when the ORM is not ready to work
@@ -104,22 +104,22 @@ class IrConfigParameter(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        self.env.registry.clear_cache()
-        return super(IrConfigParameter, self).create(vals_list)
+        self.env.registry.clear_cache('stable')
+        return super().create(vals_list)
 
     def write(self, vals):
         if 'key' in vals:
             illegal = _default_parameters.keys() & self.mapped('key')
             if illegal:
-                raise ValidationError(_("You cannot rename config parameters with keys %s", ', '.join(illegal)))
-        self.env.registry.clear_cache()
-        return super(IrConfigParameter, self).write(vals)
+                raise ValidationError(self.env._("You cannot rename config parameters with keys %s", ', '.join(illegal)))
+        self.env.registry.clear_cache('stable')
+        return super().write(vals)
 
     def unlink(self):
-        self.env.registry.clear_cache()
-        return super(IrConfigParameter, self).unlink()
+        self.env.registry.clear_cache('stable')
+        return super().unlink()
 
     @api.ondelete(at_uninstall=False)
     def unlink_default_parameters(self):
         for record in self.filtered(lambda p: p.key in _default_parameters.keys()):
-            raise ValidationError(_("You cannot delete the %s record.", record.key))
+            raise ValidationError(self.env._("You cannot delete the %s record.", record.key))

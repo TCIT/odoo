@@ -3,7 +3,7 @@
 {
     'name': "Spreadsheet dashboard for accounting",
     'version': '1.0',
-    'category': 'Hidden',
+    'category': 'Productivity/Dashboard',
     'summary': 'Spreadsheet',
     'description': 'Spreadsheet',
     'depends': ['spreadsheet_dashboard', 'account'],
@@ -12,5 +12,6 @@
     ],
     'installable': True,
     'auto_install': ['account'],
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

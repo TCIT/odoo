@@ -1,13 +1,7 @@
-import {
-    animationFrame,
-    queryAll,
-    queryAllAttributes,
-    queryAllTexts,
-    queryOne,
-} from "@odoo/hoot-dom";
+import { animationFrame, queryAll, queryAllAttributes, queryAllTexts, queryOne } from "@odoo/hoot";
+import { getDropdownMenu } from "./component_test_helpers";
 import { contains } from "./dom_test_helpers";
 import { buildSelector } from "./view_test_helpers";
-import { getDropdownMenu } from "./component_test_helpers";
 
 /**
  * @param {number} [columnIndex=0]
@@ -111,7 +105,7 @@ export function getKanbanRecordTexts(columnIndex) {
 }
 
 export function quickCreateKanbanColumn() {
-    return contains(".o_column_quick_create > .o_quick_create_folded").click();
+    return contains(".o_column_quick_create.o_quick_create_folded div").click();
 }
 
 /**
@@ -127,7 +121,7 @@ export async function quickCreateKanbanRecord(columnIndex = 0) {
  */
 export async function toggleKanbanColumnActions(columnIndex = 0) {
     const column = getKanbanColumn(columnIndex);
-    await contains(".o_kanban_config .dropdown-toggle", { root: column, visible: false }).click();
+    await contains(".o_group_config .dropdown-toggle", { root: column, visible: false }).click();
     return (buttonText) => {
         const menu = getDropdownMenu(column);
         return contains(`.dropdown-item:contains(/\\b${buttonText}\\b/i)`, { root: menu }).click();

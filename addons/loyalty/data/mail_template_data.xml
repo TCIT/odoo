@@ -4,8 +4,8 @@
         <field name="name">Gift Card: Gift Card Information</field>
         <field name="model_id" ref="model_loyalty_card"/>
         <field name="subject">Your Gift Card at {{ object.company_id.name }}</field>
-        <field name="partner_to">{{ object._get_mail_partner().id }}</field>
-        <field name="lang">{{ object._get_mail_partner().lang }}</field>
+        <field name="partner_to" eval="False"/>
+        <field name="use_default_to" eval="True"/>
         <field name="description">Sent to customer who purchased a gift card</field>
         <field name="body_html" type="html">
             <div style="background: #ffffff">
@@ -30,7 +30,7 @@
                 </div>
                 <div style="padding:20px; margin:0px; text-align:center;">
                     <span style="background-color:#999999; display:inline-block; width:auto; border-radius:5px;">
-                        <a t-attf-href="{{ object.get_base_url() }}/shop" target="_blank" style="text-decoration:none; font-family:arial, 'helvetica neue', helvetica, sans-serif; font-size:22px; color:#FFFFFF; border-style:solid; border-color:#999999; border-width:20px 30px; display:inline-block; background-color:#999999; border-radius:5px; font-weight:bold; font-style:normal; line-height:26px; width:auto; text-align:center">Use it right now!</a>
+                        <a t-attf-href="{{ object.get_base_url() }}/shop" target="_blank" t-attf-style="text-decoration:none; font-family:arial, 'helvetica neue', helvetica, sans-serif; font-size:22px; color: {{object.company_id.email_primary_color or '#FFFFFF'}}; border-style:solid; border-width:20px 30px; display:inline-block; background-color: {{object.company_id.email_secondary_color or '#875A7B'}}; border-radius:5px; font-weight:bold; font-style:normal; line-height:26px; width:auto; text-align:center">Use it right now!</a>
                     </span>
                 </div>
             </div>
@@ -44,22 +44,22 @@
         <field name="model_id" ref="loyalty.model_loyalty_card"/>
         <field name="subject">Your reward coupon from {{ object.program_id.company_id.name }} </field>
         <field name="email_from">{{ object.program_id.company_id.email }}</field>
-        <field name="partner_to">{{ object._get_mail_partner().id }}</field>
-        <field name="lang">{{ object._get_mail_partner().lang }}</field>
+        <field name="partner_to" eval="False"/>
+        <field name="use_default_to" eval="True"/>
         <field name="description">Sent to customer with coupon information</field>
         <field name="body_html" type="html">
 <table border="0" cellpadding="0" cellspacing="0" style="width:100%; margin:0px auto; background:#ffffff; color:#333333;"><tbody>
 <tr>
     <td valign="top" style="text-align: center; font-size: 14px;">
-        <t t-if="object._get_mail_partner().name">
-            Congratulations <t t-out="object._get_mail_partner().name or ''">Brandon Freeman</t>,<br />
+        <t t-if="object._mail_get_customer().name">
+            Congratulations <t t-out="object._mail_get_customer().name or ''">Brandon Freeman</t>,<br />
         </t>
 
         Here is your reward from <t t-out="object.program_id.company_id.name or ''">YourCompany</t>.<br />
 
         <t t-foreach="object.program_id.reward_ids" t-as="reward">
             <t t-if="reward.required_points &lt;= object.points">
-                <span style="font-size: 50px; color: #875A7B; font-weight: bold;" t-esc="reward.description">Reward Description</span>
+                <span t-attf-style="font-size: 50px; color: {{object.program_id.company_id.email_secondary_color or '#875A7B'}}; font-weight: bold;" t-esc="reward.description">Reward Description</span>
                 <br/>
             </t>
         </t>
@@ -69,7 +69,7 @@
     <td valign="top" style="text-align: center; font-size: 14px;">
         Use this promo code
         <t t-if="object.expiration_date">
-            before <t t-out="object.expiration_date or ''">2021-06-16</t>
+            before <t t-out="format_date(object.expiration_date) or ''">2021-06-16</t>
         </t>
         <p style="margin-top: 16px;">
             <strong style="padding: 16px 8px 16px 8px; border-radius: 3px; background-color: #F1F1F1;" t-out="object.code or ''">15637502648479132902</strong>
@@ -90,7 +90,7 @@
         Thank you,
         <t t-if="object._get_signature()">
             <br />
-            <t t-out="object._get_signature() or ''">--<br/>Mitchell Admin</t>
+            <div>--<br/><t t-out="object._get_signature() or ''">Mitchell Admin</t></div>
         </t>
     </td>
 </tr>

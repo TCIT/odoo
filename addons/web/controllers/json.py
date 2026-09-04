@@ -2,6 +2,7 @@
 
 import ast
 import logging
+import re
 from collections import defaultdict
 from datetime import date
 from http import HTTPStatus
@@ -14,9 +15,9 @@ from werkzeug.exceptions import BadRequest, NotFound
 
 from odoo import http
 from odoo.exceptions import AccessError
+from odoo.fields import Domain
 from odoo.http import request
-from odoo.models import regex_object_name
-from odoo.osv import expression
+from odoo.models import check_object_name
 from odoo.tools.safe_eval import safe_eval
 
 from .utils import get_action_triples
@@ -112,8 +113,8 @@ class WebJsonController(http.Controller):
             domains.append(user_domain)
         else:
             default_domain = get_default_domain(model, action, context, eval_context)
-            if default_domain and default_domain != expression.TRUE_DOMAIN:
-                kwargs['domain'] = repr(default_domain)
+            if default_domain and not Domain(default_domain).is_true():
+                kwargs['domain'] = repr(list(default_domain))
             domains.append(default_domain)
         try:
             limit = int(kwargs.get('limit', 0)) or action.limit
@@ -150,11 +151,19 @@ class WebJsonController(http.Controller):
             domains.append([('activity_ids', '!=', False)])
             # add activity fields
             for field_name, field in model._fields.items():
-                if field_name.startswith('activity_') and field_name not in spec and field.is_accessible(env):
+                if field_name.startswith('activity_') and field_name not in spec and model._has_field_access(field, 'read'):
                     spec[field_name] = {}
 
         # Group by
         groupby, fields = get_groupby(view_tree, kwargs.get('groupby'), kwargs.get('fields'))
+        if fields:
+            aggregates = [
+                f"{fname}:{model._fields[fname].aggregator}" if ':' not in fname else fname
+                for fname in fields
+            ]
+        else:
+            aggregates = ['__count']
+
         if groupby is not None and not kwargs.get('groupby'):
             # add arguments to kwargs
             kwargs['groupby'] = ','.join(groupby)
@@ -168,19 +177,18 @@ class WebJsonController(http.Controller):
         # Last checks before the query
         if redirect := check_redirect():
             return redirect
-        domain = expression.AND(domains)
+        domain = Domain.AND(domains)
         # Reading a group or a list
         if groupby:
             res = model.web_read_group(
                 domain,
-                fields=fields or ['__count'],
+                aggregates=aggregates,
                 groupby=groupby,
                 limit=limit,
-                lazy=False,
             )
             # pop '__domain' key
             for value in res['groups']:
-                del value['__domain']
+                del value['__extra_domain']
         else:
             res = model.web_search_read(
                 domain,
@@ -232,6 +240,7 @@ class WebJsonController(http.Controller):
             action._get_eval_context(action),
             active_id=active_id,
             context=context,
+            allowed_company_ids=request.env.user.company_ids.ids,
         )
         # update the context and return
         context.update(safe_eval(action.context, eval_context))
@@ -244,16 +253,16 @@ def get_view_id_and_type(action, view_type: str | None) -> tuple[int | None, str
     view_modes = action.view_mode.split(',')
     if not view_type:
         view_type = view_modes[0]
-    for view_id, action_view_type in action.views:
-        if view_type == action_view_type:
-            break
-    else:
+
+    try:
+        view_id = next(view_id for view_id, action_view_type in action.views if view_type == action_view_type)
+    except StopIteration:
         if view_type not in view_modes:
             raise BadRequest(request.env._(
                 "Invalid view type '%(view_type)s' for action id=%(action)s",
                 view_type=view_type,
                 action=action.id,
-            ))
+            )) from None
         view_id = False
     return view_id, view_type
 
@@ -262,7 +271,9 @@ def get_default_domain(model, action, context, eval_context):
     for ir_filter in model.env['ir.filters'].get_filters(model._name, action._origin.id):
         if ir_filter['is_default']:
             # user filters, static parsing only
-            default_domain = ast.literal_eval(ir_filter['domain'])
+            domain_str = ir_filter['domain']
+            domain_str = re.sub(r'\buid\b', str(model.env.uid), domain_str)
+            default_domain = ast.literal_eval(domain_str)
             break
     else:
         def filters_from_context():
@@ -270,7 +281,7 @@ def get_default_domain(model, action, context, eval_context):
             for key, value in context.items():
                 if key.startswith('search_default_') and value:
                     filter_name = key[15:]
-                    if not regex_object_name.match(filter_name):
+                    if not check_object_name(filter_name):
                         raise ValueError(model.env._("Invalid default search filter name for %s", key))
                     if view_tree is None:
                         view = model.get_view(action.search_view_id.id, 'search')
@@ -281,7 +292,7 @@ def get_default_domain(model, action, context, eval_context):
                             yield domain
                         # not parsing context['group_by']
 
-        default_domain = expression.AND(
+        default_domain = Domain.AND(
             safe_eval(domain, eval_context)
             for domain in filters_from_context()
         )

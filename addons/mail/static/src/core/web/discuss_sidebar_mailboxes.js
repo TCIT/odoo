@@ -2,7 +2,7 @@ import { ThreadIcon } from "@mail/core/common/thread_icon";
 import { discussSidebarItemsRegistry } from "@mail/core/public_web/discuss_sidebar";
 import { useHover } from "@mail/utils/common/hooks";
 
-import { Component, useRef, useState } from "@odoo/owl";
+import { Component, useRef } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 
@@ -16,10 +16,18 @@ export class Mailbox extends Component {
 
     setup() {
         super.setup();
-        this.store = useState(useService("mail.store"));
-        this.hover = useHover(["root", "floating*"], {
-            onHover: () => (this.floating.isOpen = true),
-            onAway: () => (this.floating.isOpen = false),
+        this.store = useService("mail.store");
+        this.hover = useHover(["root", "floating"], {
+            onHover: () => {
+                if (this.store.discuss.isSidebarCompact) {
+                    this.floating.isOpen = true;
+                }
+            },
+            onAway: () => {
+                if (this.store.discuss.isSidebarCompact) {
+                    this.floating.isOpen = false;
+                }
+            },
         });
         this.floating = useDropdownState();
         this.rootRef = useRef("root");
@@ -48,7 +56,7 @@ export class DiscussSidebarMailboxes extends Component {
 
     setup() {
         super.setup();
-        this.store = useState(useService("mail.store"));
+        this.store = useService("mail.store");
     }
 }
 

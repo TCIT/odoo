@@ -5,6 +5,7 @@ from odoo.exceptions import AccessError, ValidationError
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
 from odoo import Command
+import contextlib
 
 
 class TestRules(TransactionCase):
@@ -80,8 +81,11 @@ class TestRules(TransactionCase):
         container_user.invalidate_model(['some_ids'])
         self.assertItemsEqual(container_user.some_ids.ids, [self.allowed.id])
 
-        # this should not fail
-        container_user.write({'some_ids': [Command.set(ids)]})
+        # this should fail
+        with self.assertRaises(AccessError):
+            container_user.write({'some_ids': [Command.set(ids)]})
+
+        container_admin.write({'some_ids': [Command.set(ids)]})
         container_user.invalidate_model(['some_ids'])
         self.assertItemsEqual(container_user.some_ids.ids, [self.allowed.id])
         container_admin.invalidate_model(['some_ids'])
@@ -126,7 +130,7 @@ class TestRules(TransactionCase):
     def test_check_access_rule_with_inherits(self):
         """
         For models in `_inherits`, verify that both methods `check_access`
-        and `_apply_ir_rules` check the rules from parent models.
+        and `_search` check the rules from parent models.
         """
         ChildModel = self.env['test_access_right.inherits']
         allowed_child, __ = children = ChildModel.create([
@@ -140,10 +144,10 @@ class TestRules(TransactionCase):
         self.assertEqual(search_result, allowed_child)
         self.assertEqual(filter_result, allowed_child)
 
-    def test_flush_search_with_inherits(self):
+    def test_flush_with_inherits(self):
         """
-        For models with `_inherits`, verify that method `_flush_search` takes in
-        account the rules from inherited models, as method `_search` does.
+        For models with `_inherits`, verify that fields of the rules from inherited models
+        are flushed correctly.
         """
         ChildModel = self.env['test_access_right.inherits']
         child = ChildModel.create([{'some_id': self.allowed.id}])
@@ -193,3 +197,29 @@ class TestRules(TransactionCase):
         for domain in valid_domains:
             # no error is raised
             rule.domain_force = domain
+
+    @mute_logger('odoo.addons.base.models.ir_rule')
+    def test_ir_rule_cache_after_error(self):
+        NB_RECORD = 14  # At least twice 6, 6 is used by _make_access_error
+        # copy the forbidden record 15 times
+        SomeObj = self.env['test_access_right.some_obj']
+        forbiddens = SomeObj.create([{'val': -1, 'categ_id': self.categ.id}] * NB_RECORD)
+        forbiddens.invalidate_model()
+
+        env = self.env(user=self.env.ref('base.public_user'))
+        forbiddens = forbiddens.with_env(env)
+        forbiddens.browse().check_access('read')
+
+        # Don't use assertRaise since it invalidates the cache
+        # and it is what we want to test.
+        with contextlib.suppress(AccessError):
+            forbiddens.check_access('read')
+            self.fail('Previous line should raise AccessError')
+
+        with contextlib.suppress(AccessError):
+            forbiddens[0].val
+            self.fail('Previous line should raise AccessError')
+
+        with contextlib.suppress(AccessError):
+            forbiddens[NB_RECORD - 1].val
+            self.fail('Previous line should raise AccessError')

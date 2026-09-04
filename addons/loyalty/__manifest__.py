@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 {
-    'name': 'Coupons & Loyalty',
+    'name': "Coupons & Loyalty",
     'summary': "Use discounts, gift card, eWallets and loyalty programs in different sales channels",
     'category': 'Sales',
     'version': '1.0',
@@ -34,11 +34,18 @@
             'loyalty/static/src/xml/*.xml',
 
             ('remove', 'loyalty/static/src/js/portal/**/*'),
+            # Don't include dark mode files in light mode
+            ('remove', 'loyalty/static/src/scss/*.dark.scss'),
+        ],
+        "web.assets_web_dark": [
+            'loyalty/static/src/scss/*.dark.scss',
         ],
         'web.assets_frontend': [
             'loyalty/static/src/js/portal/**/*',
+            'loyalty/static/src/interactions/*',
         ],
     },
     'installable': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

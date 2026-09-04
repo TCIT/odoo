@@ -2,21 +2,19 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, models, _, fields
-from odoo.tools import float_compare
 
 
-class ReportBomStructure(models.AbstractModel):
+class ReportMrpReport_Bom_Structure(models.AbstractModel):
     _inherit = 'report.mrp.report_bom_structure'
 
     def _get_subcontracting_line(self, bom, seller, level, bom_quantity):
-        ratio_uom_seller = seller.product_uom.ratio / bom.product_uom_id.ratio
+        ratio_uom_seller = seller.product_uom_id.factor / bom.product_uom_id.factor
         price = seller.currency_id._convert(seller.price, self.env.company.currency_id, (bom.company_id or self.env.company), fields.Date.today())
         return {
             'name': seller.partner_id.display_name,
             'partner_id': seller.partner_id.id,
             'quantity': bom_quantity,
             'uom': bom.product_uom_id.name,
-            'prod_cost': price / ratio_uom_seller * bom_quantity,
             'bom_cost': price / ratio_uom_seller * bom_quantity,
             'level': level or 0
         }
@@ -34,7 +32,7 @@ class ReportBomStructure(models.AbstractModel):
                     res['bom_cost'] += res['subcontracting']['bom_cost']
         return res
 
-    def _get_bom_array_lines(self, data, level, unfolded_ids, unfolded, parent_unfolded):
+    def _get_bom_array_lines(self, data, level, unfolded_ids, unfolded, parent_unfolded=True):
         lines = super()._get_bom_array_lines(data, level, unfolded_ids, unfolded, parent_unfolded)
 
         if data.get('subcontracting'):
@@ -45,7 +43,6 @@ class ReportBomStructure(models.AbstractModel):
                 'uom': False,
                 'quantity': subcontract_info['quantity'],
                 'bom_cost': subcontract_info['bom_cost'],
-                'prod_cost': subcontract_info['prod_cost'],
                 'level': subcontract_info['level'],
                 'visible': level == 1 or unfolded or parent_unfolded
             })
@@ -86,14 +83,14 @@ class ReportBomStructure(models.AbstractModel):
             # for subcontracting, we can't decide the lead time without component's resupply availability
             # we only return necessary info and calculate the lead time late when we have component's data
             if supplier:
-                qty_supplier_uom = product.uom_id._compute_quantity(quantity, supplier.product_uom)
+                qty_supplier_uom = product.uom_id._compute_quantity(quantity, supplier.product_uom_id)
                 return {
                     'route_type': 'subcontract',
                     'route_name': subcontract_rules[0].route_id.display_name,
-                    'route_detail': supplier.display_name,
+                    'route_detail': supplier.with_context(use_simplified_supplier_name=True).display_name,
                     'lead_time': rules_delay,
                     'supplier': supplier,
-                    'route_alert': float_compare(qty_supplier_uom, supplier.min_qty, precision_rounding=product.uom_id.rounding) < 0,
+                    'route_alert': product.uom_id.compare(qty_supplier_uom, supplier.min_qty) < 0,
                     'qty_checked': quantity,
                     'bom': bom,
                 }

@@ -1,14 +1,14 @@
 import { contains, mockService } from "@web/../tests/web_test_helpers";
 import { defineSpreadsheetModels } from "@spreadsheet/../tests/helpers/data";
-import { describe, expect, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 
 import { mountPublicSpreadsheet } from "@spreadsheet/../tests/helpers/ui";
 import { THIS_YEAR_GLOBAL_FILTER } from "@spreadsheet/../tests/helpers/global_filter";
 import { addGlobalFilter } from "@spreadsheet/../tests/helpers/commands";
 import { freezeOdooData } from "@spreadsheet/helpers/model";
 import { createModelWithDataSource } from "@spreadsheet/../tests/helpers/model";
+import { setCellContent } from "../helpers/commands";
 
-describe.current.tags("headless");
 defineSpreadsheetModels();
 
 let data;
@@ -21,7 +21,7 @@ mockService("http", {
 });
 
 test("show spreadsheet in readonly mode", async function () {
-    const model = await createModelWithDataSource();
+    const { model } = await createModelWithDataSource();
     await addGlobalFilter(model, THIS_YEAR_GLOBAL_FILTER);
     data = await freezeOdooData(model);
     const fixture = await mountPublicSpreadsheet("dashboardDataUrl", "spreadsheet");
@@ -30,7 +30,7 @@ test("show spreadsheet in readonly mode", async function () {
 });
 
 test("show dashboard in dashboard mode when there are global filters", async function () {
-    const model = await createModelWithDataSource();
+    const { model } = await createModelWithDataSource();
     await addGlobalFilter(model, THIS_YEAR_GLOBAL_FILTER);
     data = await freezeOdooData(model);
     const fixture = await mountPublicSpreadsheet("dashboardDataUrl", "dashboard");
@@ -39,7 +39,7 @@ test("show dashboard in dashboard mode when there are global filters", async fun
 });
 
 test("show dashboard in dashboard mode when there are no global filters", async function () {
-    const model = await createModelWithDataSource();
+    const { model } = await createModelWithDataSource();
     data = await freezeOdooData(model);
     const fixture = await mountPublicSpreadsheet("dashboardDataUrl", "dashboard");
     const filterButton = fixture.querySelector(".o-public-spreadsheet-filter-button");
@@ -47,7 +47,7 @@ test("show dashboard in dashboard mode when there are no global filters", async 
 });
 
 test("click filter button can show all filters", async function () {
-    const model = await createModelWithDataSource();
+    const { model } = await createModelWithDataSource();
     await addGlobalFilter(model, THIS_YEAR_GLOBAL_FILTER);
     data = await freezeOdooData(model);
     const fixture = await mountPublicSpreadsheet("dashboardDataUrl", "dashboard");
@@ -57,7 +57,7 @@ test("click filter button can show all filters", async function () {
 });
 
 test("click close button in filter panel will close the panel", async function () {
-    const model = await createModelWithDataSource();
+    const { model } = await createModelWithDataSource();
     await addGlobalFilter(model, THIS_YEAR_GLOBAL_FILTER);
     data = await freezeOdooData(model);
     const fixture = await mountPublicSpreadsheet("dashboardDataUrl", "dashboard");
@@ -65,4 +65,31 @@ test("click close button in filter panel will close the panel", async function (
     await contains(".o-public-spreadsheet-filters-close-button").click();
     expect(fixture.querySelector(".o-public-spreadsheet-filter-button")).toBeVisible();
     expect(fixture.querySelector(".o-public-spreadsheet-filters")).toBe(null);
+});
+
+test("Internal links converted to neutralized are not clickable", async function (assert) {
+    const { model } = await createModelWithDataSource();
+    setCellContent(model, "A1", "[label](odoo://ir_menu_xml_id/test_menu)");
+    data = await freezeOdooData(model);
+    const fixture = await mountPublicSpreadsheet("dashboardDataUrl", "dashboard");
+    expect(fixture.querySelector(".o-dashboard-clickable-cell")).toBe(null);
+});
+
+test.tags("desktop");
+test("Hides the download button when the downloadExcelUrl is not provided", async function () {
+    const { model } = await createModelWithDataSource();
+    data = await freezeOdooData(model);
+    const fixture = await mountPublicSpreadsheet("dashboardDataUrl", "spreadsheet", false);
+    await contains(".o-topbar-menu[data-id='file']").click();
+    expect(fixture.querySelector(".o-menu-item[data-name='download_public_excel']")).toBe(null);
+});
+
+test.tags("desktop");
+test("Disable copy button in public spreadsheets", async function () {
+    const { model } = await createModelWithDataSource();
+    await addGlobalFilter(model, THIS_YEAR_GLOBAL_FILTER);
+    data = await freezeOdooData(model);
+    const fixture = await mountPublicSpreadsheet("dashboardDataUrl", "spreadsheet");
+    await contains(".o-topbar-menu[data-id='edit']").click();
+    expect(fixture.querySelector(".o-menu-item[data-name='copy']")).toHaveClass("disabled");
 });

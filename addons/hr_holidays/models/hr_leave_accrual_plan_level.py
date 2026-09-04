@@ -1,49 +1,47 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+from calendar import monthrange
 from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError, UserError
 
-
-DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
-MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-# Used for displaying the days and reversing selection -> integer
-DAY_SELECT_VALUES = [str(i) for i in range(1, 29)] + ['last']
-DAY_SELECT_SELECTION_NO_LAST = tuple(zip(DAY_SELECT_VALUES, (str(i) for i in range(1, 29))))
 
 def _get_selection_days(self):
-    return DAY_SELECT_SELECTION_NO_LAST + (("last", _("last day")),)
+    return [(str(i), str(i)) for i in range(1, 32)]
 
 
-class AccrualPlanLevel(models.Model):
-    _name = "hr.leave.accrual.level"
+class HrLeaveAccrualLevel(models.Model):
+    _name = 'hr.leave.accrual.level'
     _description = "Accrual Plan Level"
     _order = 'sequence asc'
 
     sequence = fields.Integer(
         string='sequence', compute='_compute_sequence', store=True,
         help='Sequence is generated automatically by start time delta.')
-    accrual_plan_id = fields.Many2one('hr.leave.accrual.plan', "Accrual Plan", required=True, ondelete="cascade")
-    accrued_gain_time = fields.Selection(related='accrual_plan_id.accrued_gain_time')
-    start_count = fields.Integer(
-        "Start after",
-        help="The accrual starts after a defined period from the allocation start date. This field defines the number of days, months or years after which accrual is used.", default="1")
+    accrual_plan_id = fields.Many2one('hr.leave.accrual.plan', "Accrual Plan", required=True, index=True, ondelete="cascade", default=lambda self: self.env.context.get("active_id", None))
+    accrued_gain_time = fields.Selection(related='accrual_plan_id.accrued_gain_time', export_string_translation=False)
+    start_count = fields.Integer(export_string_translation=False,
+        help="The accrual starts after a defined period from the allocation start date. This field defines the number of days, months or years after which accrual is used.")
     start_type = fields.Selection(
         [('day', 'Days'),
          ('month', 'Months'),
          ('year', 'Years')],
-        default='day', string=" ", required=True,
+        default='day', required=True, export_string_translation=False,
         help="This field defines the unit of time after which the accrual starts.")
-
+    milestone_date = fields.Selection(
+        [('creation', 'At allocation creation'),
+         ('after', 'After')],
+        compute='_compute_milestone_date', inverse='_inverse_milestone_date', readonly=False,
+        store=True, export_string_translation=False,
+        default='creation', required=True
+    )
     # Accrue of
-    added_value = fields.Float(
-        "Rate", digits=(16, 5), required=True, default=1,
-        help="The number of hours/days that will be incremented in the specified Time Off Type for every period")
+    added_value = fields.Float(digits=(16, 5), required=True, default=1, export_string_translation=False)
     added_value_type = fields.Selection([
-        ('day', 'Days'),
-        ('hour', 'Hours')
-    ], compute="_compute_added_value_type", store=True, required=True, readonly=False, default="day")
+        ('day', 'Day(s)'),
+        ('hour', 'Hour(s)')
+    ], compute="_compute_added_value_type", inverse="_inverse_added_value_type", precompute=True, store=True, required=True,
+        readonly=False, export_string_translation=False)
     frequency = fields.Selection([
         ('hourly', 'Hourly'),
         ('daily', 'Daily'),
@@ -54,112 +52,136 @@ class AccrualPlanLevel(models.Model):
         ('yearly', 'Yearly'),
     ], default='daily', required=True, string="Frequency")
     week_day = fields.Selection([
-        ('mon', 'Monday'),
-        ('tue', 'Tuesday'),
-        ('wed', 'Wednesday'),
-        ('thu', 'Thursday'),
-        ('fri', 'Friday'),
-        ('sat', 'Saturday'),
-        ('sun', 'Sunday'),
-    ], default='mon', required=True, string="Allocation on")
-    first_day = fields.Integer(default=1)
-    first_day_display = fields.Selection(
-        _get_selection_days, compute='_compute_days_display', inverse='_inverse_first_day_display')
-    second_day = fields.Integer(default=15)
-    second_day_display = fields.Selection(
-        _get_selection_days, compute='_compute_days_display', inverse='_inverse_second_day_display')
-    first_month_day = fields.Integer(default=1)
-    first_month_day_display = fields.Selection(
-        _get_selection_days, compute='_compute_days_display', inverse='_inverse_first_month_day_display')
+        ('0', 'Monday'),
+        ('1', 'Tuesday'),
+        ('2', 'Wednesday'),
+        ('3', 'Thursday'),
+        ('4', 'Friday'),
+        ('5', 'Saturday'),
+        ('6', 'Sunday'),
+    ], default='0', required=True, string="Allocation on")
+    first_day = fields.Selection(_get_selection_days, default='1', export_string_translation=False)
+    second_day = fields.Selection(_get_selection_days, default='15', export_string_translation=False)
+    first_month_day = fields.Selection(
+        _get_selection_days, compute='_compute_first_month_day', store=True, readonly=False, default='1',
+        export_string_translation=False)
     first_month = fields.Selection([
-        ('jan', 'January'),
-        ('feb', 'February'),
-        ('mar', 'March'),
-        ('apr', 'April'),
-        ('may', 'May'),
-        ('jun', 'June'),
-    ], default="jan")
-    second_month_day = fields.Integer(default=1)
-    second_month_day_display = fields.Selection(
-        _get_selection_days, compute='_compute_days_display', inverse='_inverse_second_month_day_display')
+        ('1', 'January'),
+        ('2', 'February'),
+        ('3', 'March'),
+        ('4', 'April'),
+        ('5', 'May'),
+        ('6', 'June'),
+    ], default="1", export_string_translation=False)
+    second_month_day = fields.Selection(
+        _get_selection_days, compute='_compute_second_month_day', store=True, readonly=False, default='1',
+        export_string_translation=False)
     second_month = fields.Selection([
-        ('jul', 'July'),
-        ('aug', 'August'),
-        ('sep', 'September'),
-        ('oct', 'October'),
-        ('nov', 'November'),
-        ('dec', 'December')
-    ], default="jul")
+        ('7', 'July'),
+        ('8', 'August'),
+        ('9', 'September'),
+        ('10', 'October'),
+        ('11', 'November'),
+        ('12', 'December')
+    ], default="7", export_string_translation=False)
     yearly_month = fields.Selection([
-        ('jan', 'January'),
-        ('feb', 'February'),
-        ('mar', 'March'),
-        ('apr', 'April'),
-        ('may', 'May'),
-        ('jun', 'June'),
-        ('jul', 'July'),
-        ('aug', 'August'),
-        ('sep', 'September'),
-        ('oct', 'October'),
-        ('nov', 'November'),
-        ('dec', 'December')
-    ], default="jan")
-    yearly_day = fields.Integer(default=1)
-    yearly_day_display = fields.Selection(
-        _get_selection_days, compute='_compute_days_display', inverse='_inverse_yearly_day_display')
-    cap_accrued_time = fields.Boolean("Cap accrued time", default=True,
+        ('1', 'January'),
+        ('2', 'February'),
+        ('3', 'March'),
+        ('4', 'April'),
+        ('5', 'May'),
+        ('6', 'June'),
+        ('7', 'July'),
+        ('8', 'August'),
+        ('9', 'September'),
+        ('10', 'October'),
+        ('11', 'November'),
+        ('12', 'December')
+    ], default="1", export_string_translation=False)
+    yearly_day = fields.Selection(
+        _get_selection_days, compute='_compute_yearly_day', store=True, readonly=False, default='1',
+        export_string_translation=False)
+    cap_accrued_time = fields.Boolean(export_string_translation=False,
         help="When the field is checked the balance of an allocation using this accrual plan will never exceed the specified amount.")
     maximum_leave = fields.Float(
-        'Limit to', digits=(16, 2), compute="_compute_maximum_leave", readonly=False, store=True,
-        help="Choose a cap for this accrual.")
-    cap_accrued_time_yearly = fields.Boolean(string="Milestone cap",
+        digits=(16, 2), compute="_compute_maximum_leave", default=0, readonly=False, store=True,
+        help="Choose a cap for this accrual.", export_string_translation=False)
+    cap_accrued_time_yearly = fields.Boolean(export_string_translation=False,
+        store=True, readonly=False,
         help="When the field is checked the total amount accrued each year will be capped at the specified amount")
-    maximum_leave_yearly = fields.Float(string="Yearly limit to", digits=(16, 2))
+    maximum_leave_yearly = fields.Float(digits=(16, 2), export_string_translation=False)
+    can_be_carryover = fields.Boolean(related='accrual_plan_id.can_be_carryover', readonly=True,
+        export_string_translation=False)
     action_with_unused_accruals = fields.Selection(
-        [('lost', 'None. Accrued time reset to 0'),
-         ('all', 'All accrued time carried over'),
-         ('maximum', 'Carry over with a maximum')],
-        string="Carry over",
-        default='all', required=True,
+        [('lost', 'Lost'),
+         ('all', 'Carried over')],
+        compute="_compute_action_with_unused_accruals",
+        store=True,
+        export_string_translation=False,
+        default='lost', required=True,
         help="When the Carry-Over Time is reached, according to Plan's setting, select what you want "
-        "to happen with the unused time off: None (time will be reset to zero), All accrued time carried over to "
-        "the next period; or Carryover with a maximum).")
-    postpone_max_days = fields.Integer("Maximum amount of accruals to transfer",
+        "to happen with the unused time off: Lost (time will be reset to zero), Carried over (accrued time carried over to "
+        "the next period.)")
+    carryover_options = fields.Selection(
+        [('unlimited', 'Unlimited'),
+         ('limited', 'Up to')],
+        store=True, readonly=False,
+        export_string_translation=False,
+        compute="_compute_carryover_options",
+        default='unlimited', required=True,
+        help="You can limit the accrued time carried over for the next period."
+    )
+    postpone_max_days = fields.Integer(export_string_translation=False,
         help="Set a maximum of accruals an allocation keeps at the end of the year.")
-    can_modify_value_type = fields.Boolean(compute="_compute_can_modify_value_type")
-    accrual_validity = fields.Boolean(string="Accrual Validity")
+    can_modify_value_type = fields.Boolean(compute="_compute_can_modify_value_type", default=False,
+        export_string_translation=False)
+    accrual_validity = fields.Boolean(export_string_translation=False, compute="_compute_accrual_validity", store=True, readonly=False)
     accrual_validity_count = fields.Integer(
-        "Accrual Validity Count",
+        export_string_translation=False,
         help="You can define a period of time where the days carried over will be available", default="1")
     accrual_validity_type = fields.Selection(
         [('day', 'Days'),
          ('month', 'Months')],
-        default='day', string="Accrual Validity Type", required=True,
+        default='day', export_string_translation=False, required=True,
         help="This field defines the unit of time after which the accrual ends.")
 
-    _sql_constraints = [
-        ('check_dates',
-         "CHECK( (frequency IN ('daily', 'hourly')) or"
-         "(week_day IS NOT NULL AND frequency = 'weekly') or "
-         "(first_day > 0 AND second_day > first_day AND first_day <= 31 AND second_day <= 31 AND frequency = 'bimonthly') or "
-         "(first_day > 0 AND first_day <= 31 AND frequency = 'monthly')or "
-         "(first_month_day > 0 AND first_month_day <= 31 AND second_month_day > 0 AND second_month_day <= 31 AND frequency = 'biyearly') or "
-         "(yearly_day > 0 AND yearly_day <= 31 AND frequency = 'yearly'))",
-         "The dates you've set up aren't correct. Please check them."),
-        ('start_count_check', "CHECK( start_count >= 0 )", "You can not start an accrual in the past."),
-        ('added_value_greater_than_zero', 'CHECK(added_value > 0)', "You must give a rate greater than 0 in accrual plan levels."),
-        (
-            'valid_yearly_cap_value',
-            'CHECK(cap_accrued_time_yearly IS NOT TRUE OR COALESCE(maximum_leave_yearly, 0) > 0)',
-            "You cannot have a cap on yearly accrued time without setting a maximum amount."
-        ),
-    ]
+    _start_count_check = models.Constraint(
+        "CHECK((start_count > 0 AND milestone_date = 'after') OR (start_count = 0 AND milestone_date = 'creation'))",
+        'You can not start an accrual in the past.',
+    )
+    _added_value_greater_than_zero = models.Constraint(
+        'CHECK(added_value > 0)',
+        'You must give a rate greater than 0 in accrual plan levels.',
+    )
+    _valid_postpone_max_days_value = models.Constraint(
+        "CHECK(action_with_unused_accruals <> 'all' OR carryover_options <> 'limited' OR COALESCE(postpone_max_days, 0) > 0)",
+        'You cannot have a maximum quantity to carryover set to 0.',
+    )
+    _valid_accrual_validity_value = models.Constraint(
+        'CHECK(accrual_validity IS NOT TRUE OR COALESCE(accrual_validity_count, 0) > 0)',
+        'You cannot have an accrual validity time set to 0.',
+    )
+    _valid_yearly_cap_value = models.Constraint(
+        'CHECK(cap_accrued_time_yearly IS NOT TRUE OR COALESCE(maximum_leave_yearly, 0) > 0)',
+        'You cannot have a cap on yearly accrued time without setting a maximum amount.',
+    )
+
+    @api.constrains('first_day', 'second_day', 'week_day', 'frequency')
+    def _check_dates(self):
+        error_message = ''
+        for level in self:
+            if level.frequency == 'weekly' and not level.week_day:
+                error_message = _("Weekday must be selected to use the frequency weekly")
+            elif level.frequency == 'bimonthly' and int(level.first_day) >= int(level.second_day):
+                error_message = _("The first day must be lower than the second day.")
+        if error_message:
+            raise ValidationError(error_message)
 
     @api.constrains('cap_accrued_time', 'maximum_leave')
-    def _check_maximum_leave(self):
+    def _check_maximum_leaves(self):
         for level in self:
-            if level.cap_accrued_time and level.maximum_leave < 1:
-                raise UserError(_("You cannot have a cap on accrued time without setting a maximum amount."))
+            if level.cap_accrued_time and level.maximum_leave <= 0:
+                raise UserError(self.env._("You cannot have a balance cap on accrued time set to 0."))
 
     @api.depends('start_count', 'start_type')
     def _compute_sequence(self):
@@ -177,110 +199,119 @@ class AccrualPlanLevel(models.Model):
         for level in self:
             level.can_modify_value_type = not level.accrual_plan_id.time_off_type_id and level.accrual_plan_id.level_ids and level.accrual_plan_id.level_ids[0] == level
 
-    @api.depends('accrual_plan_id', 'accrual_plan_id.level_ids', 'accrual_plan_id.time_off_type_id')
+    def _inverse_added_value_type(self):
+        for level in self:
+            if level.accrual_plan_id.level_ids[0] == level:
+                level.accrual_plan_id.added_value_type = level.added_value_type
+
+    @api.depends('accrual_plan_id', 'accrual_plan_id.level_ids', 'accrual_plan_id.added_value_type', 'accrual_plan_id.time_off_type_id')
     def _compute_added_value_type(self):
         for level in self:
             if level.accrual_plan_id.time_off_type_id:
                 level.added_value_type = "day" if level.accrual_plan_id.time_off_type_id.request_unit in ["day", "half_day"] else "hour"
             elif level.accrual_plan_id.level_ids and level.accrual_plan_id.level_ids[0] != level:
                 level.added_value_type = level.accrual_plan_id.level_ids[0].added_value_type
+            elif not level.added_value_type:
+                level.added_value_type = "day"  # default value
 
-    @api.depends('first_day', 'second_day', 'first_month_day', 'second_month_day', 'yearly_day')
-    def _compute_days_display(self):
-        days_select = _get_selection_days(self)
+    def _set_day(self, day_field, month_field):
         for level in self:
-            level.first_day_display = days_select[min(level.first_day - 1, 28)][0]
-            level.second_day_display = days_select[min(level.second_day - 1, 28)][0]
-            level.first_month_day_display = days_select[min(level.first_month_day - 1, 28)][0]
-            level.second_month_day_display = days_select[min(level.second_month_day - 1, 28)][0]
-            level.yearly_day_display = days_select[min(level.yearly_day - 1, 28)][0]
+            # 2020 is a leap year, so monthrange(2020, february) will return [2, 29]
+            level[day_field] = str(min(monthrange(2020, int(level[month_field]))[1], int(level[day_field])))
+
+    @api.depends("first_month")
+    def _compute_first_month_day(self):
+        self._set_day("first_month_day", "first_month")
+
+    @api.depends("second_month")
+    def _compute_second_month_day(self):
+        self._set_day("second_month_day", "second_month")
+
+    @api.depends("yearly_month")
+    def _compute_yearly_day(self):
+        self._set_day("yearly_day", "yearly_month")
 
     @api.depends('cap_accrued_time')
     def _compute_maximum_leave(self):
         for level in self:
-            level.maximum_leave = 100 if level.cap_accrued_time else 0
+            if not level.cap_accrued_time:
+                level.maximum_leave = 0
 
-    def _inverse_first_day_display(self):
+    @api.depends('can_be_carryover')
+    def _compute_action_with_unused_accruals(self):
         for level in self:
-            if level.first_day_display == 'last':
-                level.first_day = 31
-            else:
-                level.first_day = DAY_SELECT_VALUES.index(level.first_day_display) + 1
+            if not level.can_be_carryover:
+                level.action_with_unused_accruals = 'lost'
 
-    def _inverse_second_day_display(self):
+    @api.depends('action_with_unused_accruals')
+    def _compute_carryover_options(self):
         for level in self:
-            if level.second_day_display == 'last':
-                level.second_day = 31
-            else:
-                level.second_day = DAY_SELECT_VALUES.index(level.second_day_display) + 1
+            if level.action_with_unused_accruals == 'lost':
+                level.carryover_options = 'unlimited'
 
-    def _inverse_first_month_day_display(self):
+    @api.depends('action_with_unused_accruals')
+    def _compute_accrual_validity(self):
         for level in self:
-            if level.first_month_day_display == 'last':
-                level.first_month_day = 31
-            else:
-                level.first_month_day = DAY_SELECT_VALUES.index(level.first_month_day_display) + 1
+            if level.action_with_unused_accruals == 'lost':
+                level.accrual_validity = False
 
-    def _inverse_second_month_day_display(self):
+    @api.depends('start_count', 'milestone_date')
+    def _compute_milestone_date(self):
         for level in self:
-            if level.second_month_day_display == 'last':
-                level.second_month_day = 31
-            else:
-                level.second_month_day = DAY_SELECT_VALUES.index(level.second_month_day_display) + 1
+            if level.start_count == 0:
+                level.milestone_date = 'creation'
 
-    def _inverse_yearly_day_display(self):
+    def _inverse_milestone_date(self):
         for level in self:
-            if level.yearly_day_display == 'last':
-                level.yearly_day = 31
-            else:
-                level.yearly_day = DAY_SELECT_VALUES.index(level.yearly_day_display) + 1
+            if level.milestone_date == 'creation':
+                level.start_count = 0
+
+    def _get_hourly_frequencies(self):
+        return ['hourly']
 
     def _get_next_date(self, last_call):
         """
         Returns the next date with the given last call
         """
         self.ensure_one()
-        if self.frequency in ['hourly', 'daily']:
+        if self.frequency in self._get_hourly_frequencies() + ['daily']:
             return last_call + relativedelta(days=1)
-        elif self.frequency == 'weekly':
-            daynames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
-            weekday = daynames.index(self.week_day)
-            return last_call + relativedelta(days=1, weekday=weekday)
-        elif self.frequency == 'bimonthly':
-            first_date = last_call + relativedelta(day=self.first_day)
-            second_date = last_call + relativedelta(day=self.second_day)
+
+        if self.frequency == 'weekly':
+            return last_call + relativedelta(days=1, weekday=int(self.week_day))
+
+        if self.frequency == 'bimonthly':
+            first_date = last_call + relativedelta(day=int(self.first_day))
+            second_date = last_call + relativedelta(day=int(self.second_day))
             if last_call < first_date:
                 return first_date
-            elif last_call < second_date:
+            if last_call < second_date:
                 return second_date
-            else:
-                return last_call + relativedelta(months=1, day=self.first_day)
-        elif self.frequency == 'monthly':
-            date = last_call + relativedelta(day=self.first_day)
+            return last_call + relativedelta(day=int(self.first_day), months=1)
+
+        if self.frequency == 'monthly':
+            date = last_call + relativedelta(day=int(self.first_day))
             if last_call < date:
                 return date
-            else:
-                return last_call + relativedelta(months=1, day=self.first_day)
-        elif self.frequency == 'biyearly':
-            first_month = MONTHS.index(self.first_month) + 1
-            second_month = MONTHS.index(self.second_month) + 1
-            first_date = last_call + relativedelta(month=first_month, day=self.first_month_day)
-            second_date = last_call + relativedelta(month=second_month, day=self.second_month_day)
+            return last_call + relativedelta(day=int(self.first_day), months=1)
+
+        if self.frequency == 'biyearly':
+            first_date = last_call + relativedelta(month=int(self.first_month), day=int(self.first_month_day))
+            second_date = last_call + relativedelta(month=int(self.second_month), day=int(self.second_month_day))
             if last_call < first_date:
                 return first_date
-            elif last_call < second_date:
+            if last_call < second_date:
                 return second_date
-            else:
-                return last_call + relativedelta(years=1, month=first_month, day=self.first_month_day)
-        elif self.frequency == 'yearly':
-            month = MONTHS.index(self.yearly_month) + 1
-            date = last_call + relativedelta(month=month, day=self.yearly_day)
+            return last_call + relativedelta(month=int(self.first_month), day=int(self.first_month_day), years=1)
+
+        if self.frequency == 'yearly':
+            date = last_call + relativedelta(month=int(self.yearly_month), day=int(self.yearly_day))
             if last_call < date:
                 return date
-            else:
-                return last_call + relativedelta(years=1, month=month, day=self.yearly_day)
-        else:
-            return False
+            return last_call + relativedelta(month=int(self.yearly_month), day=int(self.yearly_day), years=1)
+
+        raise ValidationError(_("Your frequency selection is not correct: please choose a frequency between theses options:"
+            "Hourly, Daily, Weekly, Twice a month, Monthly, Twice a year and Yearly."))
 
     def _get_previous_date(self, last_call):
         """
@@ -289,47 +320,44 @@ class AccrualPlanLevel(models.Model):
         Contrary to `_get_next_date` this function will return the 01/02 if that date is given
         """
         self.ensure_one()
-        if self.frequency in ['hourly', 'daily']:
+        if self.frequency in self._get_hourly_frequencies() + ['daily']:
             return last_call
-        elif self.frequency == 'weekly':
-            daynames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
-            weekday = daynames.index(self.week_day)
-            return last_call + relativedelta(days=-6, weekday=weekday)
-        elif self.frequency == 'bimonthly':
-            second_date = last_call + relativedelta(day=self.second_day)
-            first_date = last_call + relativedelta(day=self.first_day)
+
+        if self.frequency == 'weekly':
+            return last_call + relativedelta(days=-6, weekday=int(self.week_day))
+
+        if self.frequency == 'bimonthly':
+            first_date = last_call + relativedelta(day=int(self.first_day))
+            second_date = last_call + relativedelta(day=int(self.second_day))
             if last_call >= second_date:
                 return second_date
-            elif last_call >= first_date:
+            if last_call >= first_date:
                 return first_date
-            else:
-                return last_call + relativedelta(months=-1, day=self.second_day)
-        elif self.frequency == 'monthly':
-            date = last_call + relativedelta(day=self.first_day)
+            return last_call + relativedelta(day=int(self.second_day), months=-1)
+
+        if self.frequency == 'monthly':
+            date = last_call + relativedelta(day=int(self.first_day))
             if last_call >= date:
                 return date
-            else:
-                return last_call + relativedelta(months=-1, day=self.first_day)
-        elif self.frequency == 'biyearly':
-            first_month = MONTHS.index(self.first_month) + 1
-            second_month = MONTHS.index(self.second_month) + 1
-            first_date = last_call + relativedelta(month=first_month, day=self.first_month_day)
-            second_date = last_call + relativedelta(month=second_month, day=self.second_month_day)
+            return last_call + relativedelta(day=int(self.first_day), months=-1, days=1)
+
+        if self.frequency == 'biyearly':
+            first_date = last_call + relativedelta(month=int(self.first_month), day=int(self.first_month_day))
+            second_date = last_call + relativedelta(month=int(self.second_month), day=int(self.second_month_day))
             if last_call >= second_date:
                 return second_date
-            elif last_call >= first_date:
+            if last_call >= first_date:
                 return first_date
-            else:
-                return last_call + relativedelta(years=-1, month=second_month, day=self.second_month_day)
-        elif self.frequency == 'yearly':
-            month = MONTHS.index(self.yearly_month) + 1
-            year_date = last_call + relativedelta(month=month, day=self.yearly_day)
+            return last_call + relativedelta(month=int(self.second_month), day=int(self.second_month_day), years=-1)
+
+        if self.frequency == 'yearly':
+            year_date = last_call + relativedelta(month=int(self.yearly_month), day=int(self.yearly_day))
             if last_call >= year_date:
                 return year_date
-            else:
-                return last_call + relativedelta(years=-1, month=month, day=self.yearly_day)
-        else:
-            return False
+            return last_call + relativedelta(month=int(self.yearly_month), day=int(self.yearly_day), years=-1)
+
+        raise ValidationError(_("Your frequency selection is not correct: please choose a frequency between theses options:"
+            "Hourly, Daily, Weekly, Twice a month, Monthly, Twice a year and Yearly."))
 
     def _get_level_transition_date(self, allocation_start):
         if self.start_type == 'day':
@@ -338,3 +366,6 @@ class AccrualPlanLevel(models.Model):
             return allocation_start + relativedelta(months=self.start_count)
         if self.start_type == 'year':
             return allocation_start + relativedelta(years=self.start_count)
+
+    def action_save_new(self):
+        return self.accrual_plan_id.action_create_accrual_plan_level()

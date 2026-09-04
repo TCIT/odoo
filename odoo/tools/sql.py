@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 # pylint: disable=sql-injection
 from __future__ import annotations
@@ -7,6 +6,7 @@ import enum
 import json
 import logging
 import re
+import warnings
 from binascii import crc32
 from collections import defaultdict
 from typing import TYPE_CHECKING
@@ -16,14 +16,12 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
 import psycopg2
-import psycopg2.sql as pgsql
 
 from .misc import named_to_positional_printf
 
 __all__ = [
     "SQL",
     "create_index",
-    "create_unique_index",
     "drop_view_if_exists",
     "escape_psql",
     "index_exists",
@@ -52,9 +50,10 @@ class SQL:
         cr.execute(sql)
 
     The code is given as a ``%``-format string, and supports either positional
-    arguments (with `%s`) or named arguments (with `%(name)s`). Escaped
-    characters (like ``"%%"``) are not supported, though. The arguments are
-    meant to be merged into the code using the `%` formatting operator.
+    arguments (with `%s`) or named arguments (with `%(name)s`). The arguments
+    are meant to be merged into the code using the `%` formatting operator.
+    Note that the character ``%`` must always be escaped (as ``%%``), even if
+    the code does not have parameters, like in ``SQL("foo LIKE 'a%%'")``.
 
     The SQL wrapper is designed to be composable: the arguments can be either
     actual parameters, or SQL objects themselves::
@@ -84,16 +83,20 @@ class SQL:
 
     __code: str
     __params: tuple
-    __to_flush: tuple
+    __to_flush: tuple[Field, ...]
 
     # pylint: disable=keyword-arg-before-vararg
-    def __init__(self, code: (str | SQL) = "", /, *args, to_flush: (Field | None) = None, **kwargs):
-        if isinstance(code, SQL):
-            if args or kwargs or to_flush:
+    def __init__(self, code: (str | SQL) = "", /, *args, to_flush: (Field | Iterable[Field] | None) = None, **kwargs):
+        if isinstance(code, SQL) or (code == "%s" and len(args) == 1 and isinstance(args[0], SQL)):
+            if code == "%s":
+                code, args = args[0], ()
+            if args or kwargs:
                 raise TypeError("SQL() unexpected arguments when code has type SQL")
             self.__code = code.__code
             self.__params = code.__params
-            self.__to_flush = code.__to_flush
+            self.__to_flush = (code.__to_flush if to_flush is None
+                        else tuple(to_flush) if getattr(to_flush.__class__, '__iter__', None) is not None
+                        else (to_flush,))
             return
 
         # validate the format of code and parameters
@@ -106,7 +109,12 @@ class SQL:
             code % ()  # check that code does not contain %s
             self.__code = code
             self.__params = ()
-            self.__to_flush = () if to_flush is None else (to_flush,)
+            if to_flush is None:
+                self.__to_flush = ()
+            elif getattr(to_flush.__class__, '__iter__', None) is not None:
+                self.__to_flush = tuple(to_flush)
+            else:
+                self.__to_flush = (to_flush,)
             return
 
         code_list = []
@@ -121,9 +129,12 @@ class SQL:
                 code_list.append("%s")
                 params_list.append(arg)
         if to_flush is not None:
-            to_flush_list.append(to_flush)
+            if getattr(to_flush.__class__, '__iter__', None) is not None:
+                to_flush_list.extend(to_flush)
+            else:
+                to_flush_list.append(to_flush)
 
-        self.__code = code % tuple(code_list)
+        self.__code = code.replace('%%', '%%%%') % tuple(code_list)
         self.__params = tuple(params_list)
         self.__to_flush = tuple(to_flush_list)
 
@@ -153,6 +164,9 @@ class SQL:
     def __eq__(self, other):
         return isinstance(other, SQL) and self.__code == other.__code and self.__params == other.__params
 
+    def __hash__(self):
+        return hash((self.__code, self.__params))
+
     def __iter__(self):
         """ Yields ``self.code`` and ``self.params``. This was introduced for
         backward compatibility, as it enables to access the SQL and parameters
@@ -161,6 +175,7 @@ class SQL:
             sql = SQL(...)
             code, params = sql
         """
+        warnings.warn("Deprecated since 19.0, use code and params properties directly", DeprecationWarning)
         yield self.code
         yield self.params
 
@@ -195,10 +210,9 @@ def existing_tables(cr, tablenames):
     cr.execute(SQL("""
         SELECT c.relname
           FROM pg_class c
-          JOIN pg_namespace n ON (n.oid = c.relnamespace)
          WHERE c.relname IN %s
            AND c.relkind IN ('r', 'v', 'm')
-           AND n.nspname = current_schema
+           AND c.relnamespace = current_schema::regnamespace
     """, tuple(tablenames)))
     return [row[0] for row in cr.fetchall()]
 
@@ -225,9 +239,8 @@ def table_kind(cr, tablename: str) -> TableKind | None:
     cr.execute(SQL("""
         SELECT c.relkind, c.relpersistence
           FROM pg_class c
-          JOIN pg_namespace n ON (n.oid = c.relnamespace)
          WHERE c.relname = %s
-           AND n.nspname = current_schema
+           AND c.relnamespace = current_schema::regnamespace
     """, tablename))
     if not cr.rowcount:
         return None
@@ -294,21 +307,52 @@ def table_columns(cr, tablename):
     # Do not select the field `character_octet_length` from `information_schema.columns`
     # because specific access right restriction in the context of shared hosting (Heroku, OVH, ...)
     # might prevent a postgres user to read this field.
-    cr.execute(SQL(
-        ''' SELECT column_name, udt_name, character_maximum_length, is_nullable
-            FROM information_schema.columns WHERE table_name=%s ''',
-        tablename,
-    ))
+    query = """
+        SELECT a.attname AS column_name,
+               coalesce(bt.typname, t.typname) AS udt_name,
+               information_schema._pg_char_max_length(information_schema._pg_truetypid(a.*, t.*), information_schema._pg_truetypmod(a.*, t.*)) AS character_maximum_length,
+               CASE WHEN a.attnotnull OR t.typtype = 'd' AND t.typnotnull THEN 'NO'
+                    ELSE 'YES'
+               END AS is_nullable
+          FROM pg_attribute a
+          JOIN pg_class c
+            ON a.attrelid = c.oid
+          JOIN pg_namespace nc
+            ON c.relnamespace = nc.oid
+          JOIN pg_type t
+            ON a.atttypid = t.oid
+     LEFT JOIN (pg_type bt JOIN pg_namespace nbt ON bt.typnamespace = nbt.oid)
+            ON t.typtype = 'd'::"char"
+           AND t.typbasetype = bt.oid
+         WHERE nc.nspname = current_schema
+           AND a.attnum > 0
+           AND NOT a.attisdropped
+           AND c.relkind IN ('r', 'v', 'f', 'p')
+           AND (pg_has_role(c.relowner, 'USAGE'::text) OR has_column_privilege(c.oid, a.attnum, 'SELECT, INSERT, UPDATE, REFERENCES'))
+           AND c.relname=%s
+    """
+    cr.execute(SQL(query, tablename))
     return {row['column_name']: row for row in cr.dictfetchall()}
 
 
 def column_exists(cr, tablename, columnname):
     """ Return whether the given column exists. """
-    cr.execute(SQL(
-        """ SELECT 1 FROM information_schema.columns
-            WHERE table_name=%s AND column_name=%s """,
-        tablename, columnname,
-    ))
+    query = """
+        SELECT 1
+          FROM pg_attribute a
+          JOIN pg_class c
+            ON a.attrelid = c.oid
+          JOIN pg_namespace nc
+            ON c.relnamespace = nc.oid
+         WHERE nc.nspname = current_schema
+           AND a.attnum > 0
+           AND NOT a.attisdropped
+           AND c.relkind IN ('r', 'v', 'f', 'p')
+           AND (pg_has_role(c.relowner, 'USAGE'::text) OR has_column_privilege(c.oid, a.attnum, 'SELECT, INSERT, UPDATE, REFERENCES'))
+           AND c.relname=%s
+           AND a.attname=%s
+    """
+    cr.execute(SQL(query, tablename, columnname))
     return cr.rowcount
 
 
@@ -397,6 +441,7 @@ def get_depending_views(cr, table, column):
         JOIN pg_attribute ON pg_depend.refobjid = pg_attribute.attrelid
             AND pg_depend.refobjsubid = pg_attribute.attnum
         WHERE dependent.relname = %s
+        AND dependent.relnamespace = current_schema::regnamespace
         AND pg_attribute.attnum > 0
         AND pg_attribute.attname = %s
         AND dependee.relkind in ('v', 'm')
@@ -410,12 +455,8 @@ def set_not_null(cr, tablename, columnname):
         "ALTER TABLE %s ALTER COLUMN %s SET NOT NULL",
         SQL.identifier(tablename), SQL.identifier(columnname),
     )
-    try:
-        with cr.savepoint(flush=False):
-            cr.execute(query, log_exceptions=False)
-            _schema.debug("Table %r: column %r: added constraint NOT NULL", tablename, columnname)
-    except Exception:
-        raise Exception("Table %r: unable to set NOT NULL on column %r", tablename, columnname)
+    cr.execute(query, log_exceptions=False)
+    _schema.debug("Table %r: column %r: added constraint NOT NULL", tablename, columnname)
 
 
 def drop_not_null(cr, tablename, columnname):
@@ -435,42 +476,33 @@ def constraint_definition(cr, tablename, constraintname):
         JOIN pg_class t ON t.oid = c.conrelid
         LEFT JOIN pg_description d ON c.oid = d.objoid
         WHERE t.relname = %s AND conname = %s
+        AND t.relnamespace = current_schema::regnamespace
     """, tablename, constraintname))
     return cr.fetchone()[0] if cr.rowcount else None
 
 
 def add_constraint(cr, tablename, constraintname, definition):
     """ Add a constraint on the given table. """
-    # There is a fundamental issue with SQL implementation that messes up with queries
-    # using %, for details check the PR discussion of this patch #188716. To be fixed
-    # in master. Here we use instead psycopg.sql
-    query1 = pgsql.SQL("ALTER TABLE {} ADD CONSTRAINT {} {}").format(
-        pgsql.Identifier(tablename), pgsql.Identifier(constraintname), pgsql.SQL(definition),
+    query1 = SQL(
+        "ALTER TABLE %s ADD CONSTRAINT %s %s",
+        SQL.identifier(tablename), SQL.identifier(constraintname), SQL(definition.replace('%', '%%')),
     )
     query2 = SQL(
         "COMMENT ON CONSTRAINT %s ON %s IS %s",
         SQL.identifier(constraintname), SQL.identifier(tablename), definition,
     )
-    try:
-        with cr.savepoint(flush=False):
-            cr.execute(query1, log_exceptions=False)
-            cr.execute(query2, log_exceptions=False)
-            _schema.debug("Table %r: added constraint %r as %s", tablename, constraintname, definition)
-    except Exception:
-        raise Exception("Table %r: unable to add constraint %r as %s", tablename, constraintname, definition)
+    cr.execute(query1, log_exceptions=False)
+    cr.execute(query2, log_exceptions=False)
+    _schema.debug("Table %r: added constraint %r as %s", tablename, constraintname, definition)
 
 
 def drop_constraint(cr, tablename, constraintname):
-    """ drop the given constraint. """
-    try:
-        with cr.savepoint(flush=False):
-            cr.execute(SQL(
-                "ALTER TABLE %s DROP CONSTRAINT %s",
-                SQL.identifier(tablename), SQL.identifier(constraintname),
-            ))
-            _schema.debug("Table %r: dropped constraint %r", tablename, constraintname)
-    except Exception:
-        _schema.warning("Table %r: unable to drop constraint %r!", tablename, constraintname)
+    """ Drop the given constraint. """
+    cr.execute(SQL(
+        "ALTER TABLE %s DROP CONSTRAINT %s",
+        SQL.identifier(tablename), SQL.identifier(constraintname),
+    ))
+    _schema.debug("Table %r: dropped constraint %r", tablename, constraintname)
 
 
 def add_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondelete):
@@ -483,7 +515,6 @@ def add_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondele
     ))
     _schema.debug("Table %r: added foreign key %r references %r(%r) ON DELETE %s",
                   tablename1, columnname1, tablename2, columnname2, ondelete)
-    return True
 
 
 def get_foreign_keys(cr, tablename1, columnname1, tablename2, columnname2, ondelete):
@@ -501,6 +532,7 @@ def get_foreign_keys(cr, tablename1, columnname1, tablename2, columnname2, ondel
             AND a1.attname = %s
             AND c2.relname = %s
             AND a2.attname = %s
+            AND c1.relnamespace = current_schema::regnamespace
             AND fk.confdeltype = %s
         """,
         tablename1, columnname1, tablename2, columnname2, deltype,
@@ -522,7 +554,8 @@ def fix_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondele
                AND array_lower(con.conkey, 1)=1 AND con.conkey[1]=a1.attnum
                AND array_lower(con.confkey, 1)=1 AND con.confkey[1]=a2.attnum
                AND a1.attrelid=c1.oid AND a2.attrelid=c2.oid
-               AND c1.relname=%s AND a1.attname=%s """,
+               AND c1.relname=%s AND a1.attname=%s
+               AND c1.relnamespace = current_schema::regnamespace """,
         tablename1, columnname1,
     ))
     found = False
@@ -531,13 +564,16 @@ def fix_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondele
             found = True
         else:
             drop_constraint(cr, tablename1, fk[0])
-    if not found:
-        return add_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondelete)
+    if found:
+        return False
+    add_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondelete)
+    return True
 
 
 def index_exists(cr, indexname):
     """ Return whether the given index exists. """
-    cr.execute(SQL("SELECT 1 FROM pg_indexes WHERE indexname=%s", indexname))
+    cr.execute(SQL("SELECT 1 FROM pg_indexes WHERE indexname=%s"
+                   " AND schemaname = current_schema", indexname))
     return cr.rowcount
 
 
@@ -545,32 +581,79 @@ def check_index_exist(cr, indexname):
     assert index_exists(cr, indexname), f"{indexname} does not exist"
 
 
-def create_index(cr, indexname, tablename, expressions, method='btree', where=''):
-    """ Create the given index unless it exists. """
+def index_definition(cr, indexname):
+    """ Read the index definition from the database """
+    cr.execute(SQL("""
+        SELECT idx.indexdef, d.description
+        FROM pg_class c
+        JOIN pg_indexes idx ON c.relname = idx.indexname
+        LEFT JOIN pg_description d ON c.oid = d.objoid
+        WHERE c.relname = %s AND c.relkind = 'i'
+          AND c.relnamespace = current_schema::regnamespace
+    """, indexname))
+    return cr.fetchone() if cr.rowcount else (None, None)
+
+
+def create_index(
+    cr,
+    indexname,
+    tablename,
+    expressions,
+    method='btree',
+    where='',
+    *,
+    comment=None,
+    unique=False
+):
+    """ Create the given index unless it exists.
+
+    :param cr: The cursor
+    :param indexname: The name of the index
+    :param tablename: The name of the table
+    :param method: The type of the index (default: btree)
+    :param where: WHERE clause for the index (default: '')
+    :param comment: The comment to set on the index
+    :param unique: Whether the index is unique or not (default: False)
+    """
+    assert expressions, "Missing expressions"
     if index_exists(cr, indexname):
         return
-    cr.execute(SQL(
-        "CREATE INDEX %s ON %s USING %s (%s)%s",
-        SQL.identifier(indexname),
-        SQL.identifier(tablename),
+    definition = SQL(
+        "USING %s (%s)%s",
         SQL(method),
         SQL(", ").join(SQL(expression) for expression in expressions),
         SQL(" WHERE %s", SQL(where)) if where else SQL(),
-    ))
-    _schema.debug("Table %r: created index %r (%s)", tablename, indexname, ", ".join(expressions))
+    )
+    add_index(cr, indexname, tablename, definition, unique=unique, comment=comment)
+
+
+def add_index(cr, indexname, tablename, definition, *, unique: bool, comment=''):
+    """ Create an index. """
+    if isinstance(definition, str):
+        definition = SQL(definition.replace('%', '%%'))
+    else:
+        definition = SQL(definition)
+    query = SQL(
+        "CREATE %sINDEX %s ON %s %s",
+        SQL("UNIQUE ") if unique else SQL(),
+        SQL.identifier(indexname),
+        SQL.identifier(tablename),
+        definition,
+    )
+    query_comment = SQL(
+        "COMMENT ON INDEX %s IS %s",
+        SQL.identifier(indexname), comment,
+    ) if comment else None
+    cr.execute(query, log_exceptions=False)
+    if query_comment:
+        cr.execute(query_comment, log_exceptions=False)
+    _schema.debug("Table %r: created index %r (%s)", tablename, indexname, definition.code)
 
 
 def create_unique_index(cr, indexname, tablename, expressions):
     """ Create the given index unless it exists. """
-    if index_exists(cr, indexname):
-        return
-    cr.execute(SQL(
-        "CREATE UNIQUE INDEX %s ON %s (%s)",
-        SQL.identifier(indexname),
-        SQL.identifier(tablename),
-        SQL(", ").join(SQL(expression) for expression in expressions),
-    ))
-    _schema.debug("Table %r: created index %r (%s)", tablename, indexname, ", ".join(expressions))
+    warnings.warn("Since 19.0, use create_index(unique=True)", DeprecationWarning)
+    return create_index(cr, indexname, tablename, expressions, unique=True)
 
 
 def drop_index(cr, indexname, tablename):
@@ -636,7 +719,7 @@ def increment_fields_skiplock(records, *fields):
     for field in fields:
         assert records._fields[field].type == 'integer'
 
-    cr = records._cr
+    cr = records.env.cr
     tablename = records._table
     cr.execute(SQL(
         """

@@ -1,5 +1,6 @@
 from typing import Literal
 
+import base64
 import markupsafe
 import requests
 
@@ -7,6 +8,7 @@ from odoo import api, fields, models, _
 from odoo.addons.l10n_ro_edi_stock.models.l10n_ro_edi_stock_document import DOCUMENT_STATES
 from odoo.addons.l10n_ro_edi_stock.models.etransport_api import ETransportAPI
 from odoo.exceptions import UserError
+from odoo.tools.float_utils import float_round
 
 OPERATION_TYPES = [
     ('10', "Intra-community purchase"),
@@ -239,6 +241,10 @@ STATE_CODES = {
     'GR': '52',
 }
 
+_eu_country_vat = {
+    'GR': 'EL'
+}
+
 
 class Picking(models.Model):
     _inherit = 'stock.picking'
@@ -363,7 +369,7 @@ class Picking(models.Model):
     @api.depends('company_id.account_fiscal_country_id.code')
     def _compute_l10n_ro_edi_stock_enable(self):
         for picking in self:
-            picking.l10n_ro_edi_stock_enable = picking.company_id.account_fiscal_country_id.code == 'RO'
+            picking.l10n_ro_edi_stock_enable = picking.picking_type_code != 'internal' and picking.company_id.account_fiscal_country_id.code == 'RO'
 
     @api.depends('l10n_ro_edi_stock_enable', 'state', 'l10n_ro_edi_stock_state')
     def _compute_l10n_ro_edi_stock_enable_send(self):
@@ -404,7 +410,11 @@ class Picking(models.Model):
         # EXTENDS 'stock'
 
         # Validate the carrier first because it cannot be changed after the super call
-        self._l10n_ro_edi_stock_validate_carrier()
+        # validation should not be blocking demo data or unit tests of other modules
+        # an example is l10n_ro_saft_stock that creates pickings in demo data which cannot
+        # have a carrier_id because the module does not depends on stock_delivery
+        if not self.env.context.get('demo_mode', False):
+            self._l10n_ro_edi_stock_validate_carrier()
 
         return super().button_validate()
 
@@ -434,9 +444,6 @@ class Picking(models.Model):
         # carrier partner fields
         partner = data['transport_partner_id']
         missing_carrier_partner_fields = []
-
-        if partner.country_id.code != 'RO':
-            errors.append(_("The delivery carrier partner has to be located in Romania."))
 
         if not partner.vat:
             missing_carrier_partner_fields.append(_("VAT"))
@@ -498,6 +505,7 @@ class Picking(models.Model):
             return errors  # return prematurely because all the end location fields depend on this field
 
         # Location fields
+        country_ro = self.env.ref('base.ro')
         for location in ('start', 'end'):
             loc_value = data[f'l10n_ro_edi_stock_{location}_loc_type']
             loc_group = _("'Start Location'") if location == 'start' else _("'End Location'")
@@ -515,6 +523,9 @@ class Picking(models.Model):
                     case _other:
                         errors.append(_("Invalid picking type %(type_code)s", type_code=_other))
                         continue
+
+                if partner.country_id != country_ro:
+                    errors.append(_("Warehouse of %(location_group)s should be in Romania", location_group=loc_group))
 
                 missing_field_names = []
                 if not partner.state_id:
@@ -597,35 +608,15 @@ class Picking(models.Model):
 
         return documents_in_state and documents_in_state[0]
 
-    @api.model
-    def _l10n_ro_edi_stock_create_attachment(self, values: dict):
-        data = {
-            'name': f"etransport_{values['name'].replace('/', '_')}.xml",
-            'res_model': 'l10n_ro_edi.document',
-            'res_id': values['res_id'],
-            'raw': values['raw'],
-            'type': 'binary',
-            'mimetype': 'application/xml',
-        }
-
-        return self.env['ir.attachment'].sudo().create(data)
-
     def _l10n_ro_edi_stock_create_document_stock_sent(self, values: dict[str, object]):
         self.ensure_one()
-        document = self.env['l10n_ro_edi.document'].create({
+        return self.env['l10n_ro_edi.document'].create({
             'picking_id': self.id,
             'state': 'stock_sent',
             'l10n_ro_edi_stock_load_id': values['l10n_ro_edi_stock_load_id'],
             'l10n_ro_edi_stock_uit': values['l10n_ro_edi_stock_uit'],
+            'attachment': base64.b64encode(values['raw_xml'].encode('utf-8')),
         })
-
-        document.attachment_id = self._l10n_ro_edi_stock_create_attachment({
-            'name': self.name,
-            'res_id': document.id,
-            'raw': values['raw_xml'],
-        })
-
-        return document
 
     def _l10n_ro_edi_stock_create_document_stock_sending_failed(self, values: dict[str, object]):
         self.ensure_one()
@@ -639,30 +630,19 @@ class Picking(models.Model):
 
         if 'raw_xml' in values:
             # when an error is thrown during data validation there will be no 'raw_xml'
-            document.attachment_id = self._l10n_ro_edi_stock_create_attachment({
-                'name': self.name,
-                'res_id': document.id,
-                'raw': values['raw_xml'],
-            })
+            document.attachment = base64.b64encode(values['raw_xml'].encode('utf-8'))
 
         return document
 
     def _l10n_ro_edi_stock_create_document_stock_validated(self, values: dict[str, object]):
         self.ensure_one()
-        document = self.env['l10n_ro_edi.document'].create({
+        return self.env['l10n_ro_edi.document'].create({
             'picking_id': self.id,
             'state': 'stock_validated',
             'l10n_ro_edi_stock_load_id': values['l10n_ro_edi_stock_load_id'],
             'l10n_ro_edi_stock_uit': values['l10n_ro_edi_stock_uit'],
+            'attachment': base64.b64encode(values['raw_xml'].encode('utf-8')),
         })
-
-        document.attachment_id = self._l10n_ro_edi_stock_create_attachment({
-            'name': self.name,
-            'res_id': document.id,
-            'raw': values['raw_xml'],
-        })
-
-        return document
 
     ################################################################################
     # Send Logic
@@ -707,7 +687,7 @@ class Picking(models.Model):
                 document_values |= {
                     'l10n_ro_edi_stock_load_id': last_sent_document.l10n_ro_edi_stock_load_id,
                     'l10n_ro_edi_stock_uit': last_sent_document.l10n_ro_edi_stock_uit,
-                    'raw_xml': last_sent_document.attachment_id.raw,
+                    'raw_xml': base64.b64decode(last_sent_document.attachment).decode(),
                 }
 
             self._l10n_ro_edi_stock_create_document_stock_sending_failed(document_values)
@@ -742,11 +722,23 @@ class Picking(models.Model):
                 last_validated = self._l10n_ro_edi_stock_get_last_document('stock_validated')
                 uit = last_validated.l10n_ro_edi_stock_uit
 
-            self._l10n_ro_edi_stock_create_document_stock_sent({
+            edi_document = self._l10n_ro_edi_stock_create_document_stock_sent({
                 'l10n_ro_edi_stock_load_id': content['index_incarcare'],
                 'l10n_ro_edi_stock_uit': uit,
                 'raw_xml': raw_xml,
             })
+            attachment = self.env['ir.attachment'].create({
+                'name': f"etransport_{self.name.replace('/', '_')}.xml",
+                'type': 'binary',
+                'datas': edi_document.attachment,
+            })
+            self._message_log(
+                body=_(
+                    "Generated eTransport XML (UIT: %(uit)s) was sent to the authority.",
+                    uit=uit,
+                ),
+                attachment_ids=attachment.ids
+            )
 
     def _l10n_ro_edi_stock_fetch_document_status(self):
         session = requests.Session()
@@ -761,7 +753,7 @@ class Picking(models.Model):
                     'message': '\n'.join(errors),
                     'l10n_ro_edi_stock_load_id': current_sending_document.l10n_ro_edi_stock_load_id,
                     'l10n_ro_edi_stock_uit': current_sending_document.l10n_ro_edi_stock_uit,
-                    'raw_xml': current_sending_document.attachment_id.raw,
+                    'raw_xml': base64.b64decode(current_sending_document.attachment).decode(),
                 })
                 continue
 
@@ -776,14 +768,14 @@ class Picking(models.Model):
                     'message': result['error'],
                     'l10n_ro_edi_stock_load_id': current_sending_document.l10n_ro_edi_stock_load_id,
                     'l10n_ro_edi_stock_uit': current_sending_document.l10n_ro_edi_stock_uit,
-                    'raw_xml': current_sending_document.attachment_id.raw,
+                    'raw_xml': base64.b64decode(current_sending_document.attachment).decode(),
                 })
             else:
                 documents_to_delete |= picking._l10n_ro_edi_stock_get_all_documents(('stock_sent', 'stock_sending_failed'))
                 new_document_data = {
                     'l10n_ro_edi_stock_load_id': current_sending_document.l10n_ro_edi_stock_load_id,
                     'l10n_ro_edi_stock_uit': current_sending_document.l10n_ro_edi_stock_uit,
-                    'raw_xml': current_sending_document.attachment_id.raw,
+                    'raw_xml': base64.b64decode(current_sending_document.attachment).decode(),
                 }
                 match state := result['content']['stare']:
                     case 'ok':
@@ -831,16 +823,16 @@ class Picking(models.Model):
                         'codScopOperatiune': data['l10n_ro_edi_stock_operation_scope'],
                         'codTarifar': (product.intrastat_code_id.code if 'intrastat_code_id' in product._fields else None) or '00000000',
                         'denumireMarfa': product.name,
-                        'cantitate': move.product_qty,
+                        'cantitate': float_round(move.product_qty, precision_digits=2),
                         'codUnitateMasura': move.product_uom._get_unece_code(),
-                        'greutateNeta': move.weight,
-                        'greutateBruta': self._l10n_ro_edi_stock_get_gross_weight(move),
-                        'valoareLeiFaraTva': product.list_price,
+                        'greutateNeta': float_round(move.weight, precision_digits=2),
+                        'greutateBruta': float_round(self._l10n_ro_edi_stock_get_gross_weight(move), precision_digits=2),
+                        'valoareLeiFaraTva': float_round(product.standard_price, precision_digits=2),
                     }
                     for move in data['stock_move_ids'] for product in move.product_id
                 ],
                 'partenerComercial': {
-                    'codTara': commercial_partner.country_code,
+                    'codTara': _eu_country_vat.get(commercial_partner.country_code, commercial_partner.country_code),
                     'denumire': commercial_partner.name,
                     'cod': commercial_partner_code,
                 },
@@ -848,7 +840,7 @@ class Picking(models.Model):
                     'nrVehicul': data['l10n_ro_edi_stock_vehicle_number'].upper(),
                     'nrRemorca1': data['l10n_ro_edi_stock_trailer_1_number'].upper() if data['l10n_ro_edi_stock_trailer_1_number'] else None,
                     'nrRemorca2': data['l10n_ro_edi_stock_trailer_2_number'].upper() if data['l10n_ro_edi_stock_trailer_2_number'] else None,
-                    'codTaraOrgTransport': transport_partner.country_code,
+                    'codTaraOrgTransport': _eu_country_vat.get(transport_partner.country_code, transport_partner.country_code),
                     'codOrgTransport': self._l10n_ro_edi_stock_get_cod(transport_partner),
                     'denumireOrgTransport': transport_partner.name,
                     'dataTransport': scheduled_date,

@@ -1,23 +1,22 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* spreadsheet_dashboard_stock_account
-# 
-# Translators:
-# Wil Odoo, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Hindi (https://app.transifex.com/odoo/teams/41243/hi/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-03 22:17+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-19/"
+"spreadsheet_dashboard_stock_account/hi/>\n"
+"Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet_dashboard_stock_account
 #. odoo-javascript
@@ -45,6 +44,13 @@ msgstr ""
 
 #. module: spreadsheet_dashboard_stock_account
 #. odoo-javascript
+#: code:addons/spreadsheet_dashboard_stock_account/data/files/warehouse_metrics_dashboard.json:0
+msgid "Ageing stock qty by product and creation date"
+msgstr ""
+
+#. module: spreadsheet_dashboard_stock_account
+#. odoo-javascript
+#: code:addons/spreadsheet_dashboard_stock_account/data/files/warehouse_metrics_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/warehouse_metrics_sample_dashboard.json:0
 msgid "Ageing stock value by product and creation date"
 msgstr ""
@@ -105,6 +111,12 @@ msgstr ""
 
 #. module: spreadsheet_dashboard_stock_account
 #. odoo-javascript
+#: code:addons/spreadsheet_dashboard_stock_account/data/files/warehouse_metrics_dashboard.json:0
+msgid "Creation Date"
+msgstr ""
+
+#. module: spreadsheet_dashboard_stock_account
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/warehouse_metrics_sample_dashboard.json:0
 msgid "Electric standing desk"
 msgstr ""
@@ -157,13 +169,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/warehouse_metrics_dashboard.json:0
 msgid "Product"
-msgstr "उत्पाद"
+msgstr ""
 
 #. module: spreadsheet_dashboard_stock_account
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/warehouse_metrics_dashboard.json:0
 msgid "Product Category"
-msgstr "उत्पाद श्रेणी"
+msgstr ""
 
 #. module: spreadsheet_dashboard_stock_account
 #. odoo-javascript
@@ -230,6 +242,17 @@ msgstr ""
 #. module: spreadsheet_dashboard_stock_account
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/warehouse_metrics_dashboard.json:0
+msgid "Stock Quantity"
+msgstr ""
+
+#. module: spreadsheet_dashboard_stock_account
+#. odoo-javascript
+#: code:addons/spreadsheet_dashboard_stock_account/data/files/warehouse_metrics_dashboard.json:0
+msgid "Stock Value"
+msgstr ""
+
+#. module: spreadsheet_dashboard_stock_account
+#. odoo-javascript
 #: code:addons/spreadsheet_dashboard_stock_account/data/files/warehouse_metrics_sample_dashboard.json:0
 msgid "Top 10 products with negative stock"
 msgstr ""

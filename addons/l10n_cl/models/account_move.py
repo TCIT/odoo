@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import re
+
 from odoo.exceptions import ValidationError
 from odoo import models, fields, api, _
 from odoo.tools.misc import formatLang
@@ -15,10 +17,23 @@ class AccountMove(models.Model):
     l10n_latam_internal_type = fields.Selection(
         related='l10n_latam_document_type_id.internal_type', string='L10n Latam Internal Type')
 
+    @api.constrains("l10n_latam_document_number")
+    def _check_l10n_latam_document_number_is_numeric(self):
+        for move in self:
+            if (
+                move.company_id.country_id.code == "CL"
+                and move.l10n_latam_use_documents
+                and move.l10n_latam_document_number
+                and not re.fullmatch(r"[0-9]+", move.l10n_latam_document_number)
+            ):
+                raise ValidationError(self.env._(
+                    "The DTE document number (folio) must contain only digits."
+                ))
+
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
         if self.journal_id.company_id.account_fiscal_country_id != self.env.ref('base.cl') or not \
-                self.journal_id.l10n_latam_use_documents:
+                self.l10n_latam_use_documents:
             return super()._get_l10n_latam_documents_domain()
         if self.journal_id.type == 'sale':
             domain = [('country_id.code', '=', 'CL')]
@@ -67,13 +82,13 @@ class AccountMove(models.Model):
                                                   and latam_document_type_code not in ['35', '38', '39', '41']):
                 raise ValidationError(_('Tax payer type and vat number are mandatory for this type of '
                                         'document. Please set the current tax payer type of this customer'))
-            if rec.journal_id.type == 'sale' and rec.journal_id.l10n_latam_use_documents:
+            if rec.journal_id.type == 'sale' and rec.l10n_latam_use_documents:
                 if country_id.code != "CL":
                     if not ((tax_payer_type == '4' and latam_document_type_code in ['110', '111', '112']) or (
                             tax_payer_type == '3' and latam_document_type_code in ['39', '41', '61', '56'])):
                         raise ValidationError(_(
                             'Document types for foreign customers must be export type (codes 110, 111 or 112) or you should define the customer as an end consumer and use receipts (codes 39 or 41)'))
-            if rec.journal_id.type == 'purchase' and rec.journal_id.l10n_latam_use_documents:
+            if rec.journal_id.type == 'purchase' and rec.l10n_latam_use_documents:
                 if vat != SII_VAT and latam_document_type_code == '914':
                     raise ValidationError(_('The DIN document is intended to be used only with RUT 60805000-0'
                                             ' (Tesorería General de La República)'))
@@ -111,7 +126,7 @@ class AccountMove(models.Model):
     def _get_starting_sequence(self):
         """ If use documents then will create a new starting sequence using the document type code prefix and the
         journal document number with a 6 padding number """
-        if self.journal_id.l10n_latam_use_documents and self.company_id.account_fiscal_country_id.code == "CL":
+        if self.l10n_latam_use_documents and self.company_id.account_fiscal_country_id.code == "CL":
             if self.l10n_latam_document_type_id:
                 return self._l10n_cl_get_formatted_sequence()
         return super()._get_starting_sequence()
@@ -131,7 +146,13 @@ class AccountMove(models.Model):
 
     def _get_name_invoice_report(self):
         self.ensure_one()
-        if self.l10n_latam_use_documents and self.company_id.account_fiscal_country_id.code == 'CL':
+        if (
+            self.l10n_latam_use_documents and self.company_id.account_fiscal_country_id.code == "CL"
+            and (
+                self.move_type in {"out_invoice", "out_refund"}
+                or self.l10n_latam_document_type_id.code == "46"
+            )
+        ):
             return 'l10n_cl.report_invoice_document'
         return super()._get_name_invoice_report()
 
@@ -160,7 +181,7 @@ class AccountMove(models.Model):
         return self.l10n_latam_document_type_id.code in ['39', '41', '110', '111', '112', '34']
 
     def _is_manual_document_number(self):
-        if self.journal_id.company_id.country_id.code == 'CL':
+        if self.journal_id.country_code == 'CL':
             return self.journal_id.type == 'purchase' and not self.l10n_latam_document_type_id._is_doc_type_vendor()
         return super()._is_manual_document_number()
 
@@ -200,7 +221,7 @@ class AccountMove(models.Model):
                     if export else currency_round_other_currency.round(self.amount_total),
                 'round_currency': currency_round_other_currency.decimal_places,
                 'name': self._l10n_cl_normalize_currency_name(currency_round_other_currency.name),
-                'rate': round(abs(self.amount_total_signed) / self.amount_total, 4),
+                'rate': round(abs(self.amount_total_signed) / self.amount_total, 4) if self.amount_total else 1,
             }
         for line in self.line_ids:
             if line.tax_line_id and line.tax_line_id.l10n_cl_sii_code == 14:

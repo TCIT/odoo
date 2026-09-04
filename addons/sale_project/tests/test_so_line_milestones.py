@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import Command
+from odoo.tests import Form
 from odoo.addons.sale.tests.common import TestSaleCommon
 from odoo.exceptions import ValidationError
 from odoo.tests.common import tagged
@@ -13,8 +15,9 @@ class TestSoLineMilestones(TestSaleCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.env.user.group_ids += cls.quick_ref('project.group_project_manager')
 
-        cls.env['res.config.settings'].create({'group_project_milestone': True}).execute()
+        cls.env.user.group_ids += cls.env.ref('project.group_project_milestone')
         uom_hour = cls.env.ref('uom.product_uom_hour')
 
         cls.product_delivery_milestones1 = cls.env['product.product'].create({
@@ -24,7 +27,6 @@ class TestSoLineMilestones(TestSaleCommon):
             'type': 'service',
             'invoice_policy': 'delivery',
             'uom_id': uom_hour.id,
-            'uom_po_id': uom_hour.id,
             'default_code': 'MILE-DELI4',
             'service_type': 'milestones',
             'service_tracking': 'project_only',
@@ -36,7 +38,6 @@ class TestSoLineMilestones(TestSaleCommon):
             'type': 'service',
             'invoice_policy': 'delivery',
             'uom_id': uom_hour.id,
-            'uom_po_id': uom_hour.id,
             'default_code': 'MILE-DELI4',
             'service_type': 'milestones',
             'service_tracking': 'project_only',
@@ -48,7 +49,6 @@ class TestSoLineMilestones(TestSaleCommon):
             'type': 'service',
             'invoice_policy': 'delivery',
             'uom_id': uom_hour.id,
-            'uom_po_id': uom_hour.id,
             'default_code': 'MILE-DELI4',
             'service_type': 'milestones',
             'service_tracking': 'task_in_project',
@@ -216,6 +216,7 @@ class TestSoLineMilestones(TestSaleCommon):
         """
         project_template = self.env['project.project'].create({
             'name': 'Project Template',
+            'allow_milestones': True,
         })
         self.env['project.milestone'].create([{
             'project_id': project_template.id,
@@ -236,6 +237,7 @@ class TestSoLineMilestones(TestSaleCommon):
         project = sale_order.project_ids
         self.assertEqual(len(project.milestone_ids), 4, "The generated project should have 4 milestones.")
         self.assertEqual({m.quantity_percentage for m in project.milestone_ids}, {0.25}, "All milestones of the generated project should have a quantity percentage of 25%.")
+        self.assertTrue(project.allow_milestones, "The project should allow milestones as it was created from a product configured to create milestones.")
 
     def test_project_template_with_milestones_multiple_products(self):
         """
@@ -244,6 +246,7 @@ class TestSoLineMilestones(TestSaleCommon):
         """
         project_template = self.env['project.project'].create({
             'name': 'Project Template',
+            'allow_milestones': True,
         })
         self.env['project.milestone'].create([{
             'project_id': project_template.id,
@@ -266,3 +269,52 @@ class TestSoLineMilestones(TestSaleCommon):
 
         project = sale_order.project_ids
         self.assertEqual(len(project.milestone_ids), 5, "The project should have 5 milestones")
+        self.assertTrue(project.allow_milestones, "The project should allow milestones as it was created from a product configured to create milestones.")
+
+    def test_subtask_milestone_sol(self):
+        """ A task should keep its sale line according to its milestone is changed. """
+        # Create a sale order with two milestone lines
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.product_delivery_milestones3.id,
+                    'product_uom_qty': 1,
+                    'name': name,
+                }) for name in ["m1", "m2"]
+            ]
+        })
+        sale_order.action_confirm()
+
+        # Case 1: parent task is present set SOL according parent's SOL
+        parent_task = self.env['project.task'].create({
+            'name': 'Test Task',
+            'partner_id': self.partner.id,
+            'project_id': sale_order.project_id.id,
+            'sale_line_id': self.sol1.id
+        })
+        tasks = sale_order.project_id.task_ids
+        tasks[0].parent_id = parent_task.id
+        with Form(tasks[0]) as task_form:
+            task_form.sale_line_id = self.env['sale.order.line']
+            task_form.milestone_id = tasks[1].milestone_id
+        self.assertEqual(tasks[0].sale_line_id,
+                         parent_task.sale_line_id,
+                         "Task should have the correct sale line based on parent task.")
+
+        # Case 2: parent task not present set SOL according Milestone's SOL
+        tasks[0].parent_id = False
+        with Form(tasks[0]) as task_form:
+            task_form.sale_line_id = self.env['sale.order.line']
+            task_form.milestone_id = tasks[0].milestone_id
+        self.assertEqual(tasks[0].sale_line_id,
+                         tasks[0].milestone_id.sale_line_id,
+                         "Task should have the correct sale line based on milestone.")
+
+        # Case 3: parent task and milestone not present set SOL according project's SOL
+        with Form(tasks[0]) as task_form:
+            task_form.sale_line_id = self.env['sale.order.line']
+            task_form.milestone_id = self.env['project.milestone']
+        self.assertEqual(tasks[0].sale_line_id,
+                         tasks[0].project_id.sale_line_id,
+                         "Task should have the correct sale line based on project.")

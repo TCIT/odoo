@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from collections import defaultdict
 
 from odoo import api, fields, models, _
-from odoo.tools import float_compare
+
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -50,15 +50,18 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    def _compute_qty_delivered(self):
+    def _prepare_qty_delivered(self):
+        repair_delivered_qties = defaultdict(float)
         remaining_so_lines = self
         for so_line in self:
             move = so_line.move_ids.sudo().filtered(lambda m: m.repair_id and m.state == 'done')
             if len(move) != 1:
                 continue
             remaining_so_lines -= so_line
-            so_line.qty_delivered = move.quantity
-        return super(SaleOrderLine, remaining_so_lines)._compute_qty_delivered()
+            repair_delivered_qties[so_line] = move.quantity
+        delivered_qties = super(SaleOrderLine, remaining_so_lines)._prepare_qty_delivered()
+        delivered_qties.update(repair_delivered_qties)
+        return delivered_qties
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -72,9 +75,9 @@ class SaleOrderLine(models.Model):
             res = super().write(vals)
             for line in self:
                 if line.state in ('sale', 'done') and line.product_id:
-                    if float_compare(old_product_uom_qty[line.id], 0, precision_rounding=line.product_uom.rounding) <= 0 and float_compare(line.product_uom_qty, 0, precision_rounding=line.product_uom.rounding) > 0:
+                    if line.product_uom_id.compare(old_product_uom_qty[line.id], 0) <= 0 and line.product_uom_id.compare(line.product_uom_qty, 0) > 0:
                         self._create_repair_order()
-                    if float_compare(old_product_uom_qty[line.id], 0, precision_rounding=line.product_uom.rounding) > 0 and float_compare(line.product_uom_qty, 0, precision_rounding=line.product_uom.rounding) <= 0:
+                    if line.product_uom_id.compare(old_product_uom_qty[line.id], 0) > 0 and line.product_uom_id.compare(line.product_uom_qty, 0) <= 0:
                         self._cancel_repair_order()
             return res
         return super().write(vals)
@@ -88,39 +91,22 @@ class SaleOrderLine(models.Model):
         new_repair_vals = []
         for line in self:
             # One RO for each line with at least a quantity of 1, quantities > 1 don't create multiple ROs
-            if any(line.id == ro.sale_order_line_id.id for ro in line.order_id.sudo().repair_order_ids) and float_compare(line.product_uom_qty, 0, precision_rounding=line.product_uom.rounding) > 0:
+            if any(line.id == ro.sale_order_line_id.id for ro in line.order_id.sudo().repair_order_ids) and line.product_uom_id.compare(line.product_uom_qty, 0) > 0:
                 binded_ro_ids = line.order_id.sudo().repair_order_ids.filtered(lambda ro: ro.sale_order_line_id.id == line.id and ro.state == 'cancel')
                 binded_ro_ids.action_repair_cancel_draft()
                 binded_ro_ids._action_repair_confirm()
                 continue
-            if not line.product_template_id.sudo().create_repair or line.move_ids.sudo().repair_id or float_compare(line.product_uom_qty, 0, precision_rounding=line.product_uom.rounding) <= 0:
+            if line.product_template_id.sudo().service_tracking != 'repair' or line.move_ids.sudo().repair_id or line.product_uom_id.compare(line.product_uom_qty, 0) <= 0:
                 continue
 
             order = line.order_id
-            default_repair_vals = {
+            new_repair_vals.append({
                 'state': 'confirmed',
                 'partner_id': order.partner_id.id,
                 'sale_order_id': order.id,
                 'sale_order_line_id': line.id,
                 'picking_type_id': order.warehouse_id.repair_type_id.id,
-            }
-            if line.product_id.tracking == 'serial':
-                vals = {
-                    **default_repair_vals,
-                    'product_id': line.product_id.id,
-                    'product_qty': 1,
-                    'product_uom': line.product_uom.id,
-                }
-                new_repair_vals.extend([vals] * int(line.product_uom_qty))
-            elif line.product_id.type == 'consu':
-                new_repair_vals.append({
-                    **default_repair_vals,
-                    'product_id': line.product_id.id,
-                    'product_qty': line.product_uom_qty,
-                    'product_uom': line.product_uom.id,
-                })
-            else:
-                new_repair_vals.append(default_repair_vals.copy())
+            })
 
         if new_repair_vals:
             self.env['repair.order'].sudo().create(new_repair_vals)

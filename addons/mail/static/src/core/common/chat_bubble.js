@@ -1,53 +1,74 @@
 import { ImStatus } from "@mail/core/common/im_status";
 
-import { Component, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, useEffect, useRef, useState, useSubEnv } from "@odoo/owl";
 
-import { useService } from "@web/core/utils/hooks";
-import { useHover, useMovable } from "@mail/utils/common/hooks";
-import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
-import { Dropdown } from "@web/core/dropdown/dropdown";
+import { useChildRef, useService } from "@web/core/utils/hooks";
+import { useHover } from "@mail/utils/common/hooks";
+import { usePopover } from "@web/core/popover/popover_hook";
 import { CountryFlag } from "@mail/core/common/country_flag";
+import { isMobileOS } from "@web/core/browser/feature_detection";
+
+class ChatBubblePreview extends Component {
+    static props = ["chatWindow", "close"];
+    static template = "mail.ChatBubblePreview";
+
+    /** @returns {import("models").Thread} */
+    get thread() {
+        return this.props.chatWindow.thread;
+    }
+
+    get previewText() {
+        const lastMessage = this.thread?.newestPersistentOfAllMessage;
+        if (!lastMessage) {
+            return false;
+        }
+        return lastMessage.previewText;
+    }
+}
 
 /**
  * @typedef {Object} Props
  * @extends {Component<Props, Env>}
  */
 export class ChatBubble extends Component {
-    static components = { CountryFlag, ImStatus, Dropdown };
+    static components = { CountryFlag, ImStatus };
     static props = ["chatWindow"];
     static template = "mail.ChatBubble";
 
     setup() {
         super.setup();
-        this.store = useState(useService("mail.store"));
-        this.wasHover = false;
-        this.hover = useHover(["root", "preview*"], {
-            onHover: () => (this.preview.isOpen = true),
-            onHovering: [100, () => (this.state.showClose = true)],
-            onAway: () => {
-                this.state.showClose = false;
-                this.preview.isOpen = false;
-            },
+        this.store = useService("mail.store");
+        const popoverRef = useChildRef();
+        this.isMobileOS = isMobileOS();
+        this.popover = usePopover(ChatBubblePreview, {
+            animation: false,
+            position: "left-middle",
+            popoverClass:
+                "dropdown-menu bg-view border-0 p-0 overflow-visible o-rounded-bubble mx-1",
+            ref: popoverRef,
         });
-        this.preview = useDropdownState();
-        this.rootRef = useRef("root");
-        this.state = useState({ bouncing: false, showClose: true });
-        useEffect(
-            () => {
-                this.state.bouncing = this.thread.importantCounter ? true : this.state.bouncing;
+        this.env.bus.addEventListener("ChatBubble:preview-will-open", ({ detail }) => {
+            if (detail === this) {
+                return;
+            }
+            this.popover.close();
+        });
+        this.hover = useHover(["root", popoverRef], {
+            onHover: () => {
+                this.env.bus.trigger("ChatBubble:preview-will-open", this);
+                this.popover.open(this.rootRef.el, { chatWindow: this.props.chatWindow });
             },
-            () => [this.thread.importantCounter]
+            onAway: () => this.popover.close(),
+        });
+        this.rootRef = useRef("root");
+        this.state = useState({ bouncing: false });
+        useEffect(
+            (importantCounter) => {
+                this.state.bouncing = Boolean(importantCounter);
+            },
+            () => [this.thread?.importantCounter]
         );
-        if (this.env.embedLivechat) {
-            this.position = useState({ left: "auto", top: "auto" });
-            useMovable({
-                cursor: "grabbing",
-                ref: this.rootRef,
-                elements: ".o-mail-ChatBubble",
-                onDrop: ({ top, left }) =>
-                    Object.assign(this.position, { left: `${left}px`, top: `${top}px` }),
-            });
-        }
+        useSubEnv({ inChatBubble: true });
     }
 
     /** @returns {import("models").Thread} */
@@ -55,11 +76,10 @@ export class ChatBubble extends Component {
         return this.props.chatWindow.thread;
     }
 
-    get previewContent() {
-        const lastMessage = this.thread?.newestPersistentNotEmptyOfAllMessage;
-        if (!lastMessage) {
-            return false;
-        }
-        return lastMessage.inlineBody;
+    get showImStatus() {
+        return (
+            this.thread?.correspondent?.im_status &&
+            this.thread.correspondent.im_status !== "offline"
+        );
     }
 }

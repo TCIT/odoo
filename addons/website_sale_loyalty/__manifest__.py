@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 {
     'name': "Coupons, Promotions, Gift Card and Loyalty for eCommerce",
     'summary': """Use coupon, promotion, gift cards and loyalty programs in your eCommerce store""",
@@ -15,7 +16,6 @@ Coupon & promotion programs can be edited in the Catalog menu of the Website app
 
         'views/loyalty_card_views.xml',
         'views/loyalty_program_views.xml',
-        'views/snippets.xml',
         'views/website_sale_templates.xml',
         'views/website_sale_loyalty_menus.xml',
 
@@ -28,11 +28,16 @@ Coupon & promotion programs can be edited in the Catalog menu of the Website app
     'auto_install': ['website_sale', 'sale_loyalty'],
     'assets': {
         'web.assets_frontend': [
-            'website_sale_loyalty/static/src/**/*',
+            'website_sale_loyalty/static/src/js/**/*',
+            'website_sale_loyalty/static/src/interactions/**/*',
         ],
         'web.assets_tests': [
             'website_sale_loyalty/static/tests/**/*',
         ],
+        'website.website_builder_assets': [
+            'website_sale_loyalty/static/src/website_builder/**/*',
+        ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

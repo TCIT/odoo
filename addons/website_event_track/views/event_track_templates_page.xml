@@ -3,9 +3,12 @@
 
 <template id="event_track_main" name="Event Exhibitor">
     <t t-call="website_event.layout">
-        <t t-set="navbar__back_url" t-value="'/event/%s/track' % (slug(event))"/>
-        <t t-set="navbar__back_title">Back to All Talks</t>
-        <t t-set="navbar__back_text">All Talks</t>
+        <t t-set="navbar_back_url" t-value="'/event/%s/track' % (slug(event))"/>
+        <t t-set="navbar_back_title">Back to All Talks</t>
+        <t t-set="navbar_back_text">All Talks</t>
+        <!-- Set aside block only if there are filtered tracks -->
+        <t t-set="has_ongoing_or_upcoming" t-value="any(track.is_track_live or track.track_start_remaining for track in tracks_other)"/>
+        <t t-set="filtered_tracks_other" t-value="tracks_other.filtered(lambda track: not (has_ongoing_or_upcoming and track.is_track_done))"/>
 
         <div class="o_wevent_online o_wesession_index">
             <!-- Options -->
@@ -15,15 +18,16 @@
             <div id="oe_structure_wesession_track_index_1" class="oe_structure"/>
             <!-- Content -->
             <div t-att-class="'o_wevent_online_page_container py-3 %s' % ('container' if not option_widescreen else 'container-fluid')">
-                <div t-att-class="'row mb-5 mx-0 %s' % ('justify-content-center' if not tracks_other else '')">
-                    <t t-if="tracks_other">
-                        <t t-call="website_event_track.event_track_aside"/>
-                    </t>
+                <div t-att-class="'row mb-5 mx-0 %s' % ('justify-content-center' if not filtered_tracks_other else '')">
+                        <t t-call="website_event_track.event_track_aside">
+                            <t t-set="tracks_other" t-value="filtered_tracks_other"/>
+                        </t>
+                    <!-- Main content -->
                     <t t-call="website_event_track.event_track_content"/>
                 </div>
+                <!-- Drag/Drop Area -->
+                <div id="oe_structure_wesession_track_index_2" class="oe_structure"/>
             </div>
-            <!-- Drag/Drop Area -->
-            <div id="oe_structure_wesession_track_index_2" class="oe_structure"/>
         </div>
     </t>
 </template>
@@ -102,7 +106,7 @@
                             -
                             <span t-field="track.date_end"
                                 t-options='{"hide_seconds":"True", "format": "short", "tz_name": event.date_tz}'/>
-                            <t t-if="event.date_tz">
+                            <t t-if="event.date_tz and website_visitor_timezone != event.date_tz">
                                 (<span t-out="event.date_tz"/>)
                             </t>
                         </t>
@@ -113,10 +117,10 @@
                     </div>
                     <div class="o_we_track_action_buttons d-flex justify-content-md-end align-items-center flex-wrap">
                         <div class="o_we_track_reminder_button my-1">
-                            <div t-if="option_track_wishlist and not track.is_track_done"
-                                t-call="website_event_track.track_widget_reminder">
-                                <t t-set="reminder_small" t-value="False"/>
-                                <t t-set="reminder_light" t-value="False"/>
+                            <div t-if="option_track_wishlist and (track.is_track_upcoming or track.is_reminder_on or (not track.date and not track.event_id.is_finished))">
+                                <t t-call="website_event_track.track_widget_reminder"
+                                    reminder_small="False"
+                                    reminder_light="False"/>
                             </div>
                         </div>
                     </div>
@@ -204,7 +208,7 @@
                 <div class="tab-pane fade show active" id="track_list" role="tabpanel">
                     <ul class="list-group list-group-flush">
                         <li t-foreach="tracks_other" t-as="track_other" class="list-group-item list-group-item-action">
-                            <a t-if="is_event_user or track_other.is_published"
+                            <a t-if="not (is_html_empty(track_other.description) and is_html_empty(track_other.partner_biography)) and (is_event_user or track_other.is_published)"
                                 t-att-data-publish="track_other.website_published and 'on' or 'off'"
                                 class="d-flex flex-column flex-wrap flex-md-nowrap text-decoration-none text-reset"
                                 t-att-href="track_other.website_url">

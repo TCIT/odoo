@@ -11,8 +11,11 @@ from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal
 from odoo.addons.website_google_map.controllers.main import GoogleMap
 from odoo.addons.website_partner.controllers.main import WebsitePartnerPage
+from odoo.fields import Domain
 
-from odoo.tools.translate import _
+from odoo.tools.translate import _, LazyTranslate
+
+_lt = LazyTranslate(__name__)
 
 
 class WebsiteAccount(CustomerPortal):
@@ -106,8 +109,8 @@ class WebsiteAccount(CustomerPortal):
             'overdue': {'label': _('Late Activities'), 'domain': [('activity_date_deadline', '<', today)]},
             'today': {'label': _('Today Activities'), 'domain': [('activity_date_deadline', '=', today)]},
             'future': {'label': _('Future Activities'), 'domain': [('activity_date_deadline', '>', today)]},
-            'won': {'label': _('Won'), 'domain': [('stage_id.is_won', '=', True)]},
-            'lost': {'label': _('Lost'), 'domain': [('active', '=', False), ('probability', '=', 0)]},
+            'won': {'label': _('Won'), 'domain': [('won_status', '=', 'won')]},
+            'lost': {'label': _('Lost'), 'domain': [('won_status', '=', 'lost')]},
         }
         searchbar_sortings = {
             'date': {'label': _('Newest'), 'order': 'create_date desc'},
@@ -174,7 +177,7 @@ class WebsiteAccount(CustomerPortal):
                 'opportunity': opp,
                 'user_activity': opp.sudo().activity_ids.filtered(lambda activity: activity.user_id == request.env.user)[:1],
                 'stages': request.env['crm.stage'].search([
-                    ('is_won', '!=', True), '|', ('team_id', '=', False), ('team_id', '=', opp.team_id.id)
+                    ('is_won', '!=', True), '|', ('team_ids', '=', False), ('team_ids', 'in', opp.team_id.id)
                 ], order='sequence desc, name desc, id desc'),
                 'activity_types': request.env['mail.activity.type'].sudo().search(['|', ('res_model', '=', opp._name), ('res_model', '=', False)]),
                 'states': request.env['res.country.state'].sudo().search([]),
@@ -227,30 +230,25 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
             if not qs or qs.lower() in loc:
                 yield {'loc': loc}
 
-    @http.route([
-        '/partners',
-        '/partners/page/<int:page>',
-
-        '/partners/grade/<model("res.partner.grade"):grade>',
-        '/partners/grade/<model("res.partner.grade"):grade>/page/<int:page>',
-
-        '/partners/country/<model("res.country"):country>',
-        '/partners/country/<model("res.country"):country>/page/<int:page>',
-
-        '/partners/grade/<model("res.partner.grade"):grade>/country/<model("res.country"):country>',
-        '/partners/grade/<model("res.partner.grade"):grade>/country/<model("res.country"):country>/page/<int:page>',
-    ], type='http', auth="public", website=True, sitemap=sitemap_partners, readonly=True)
-    def partners(self, country=None, grade=None, page=0, **post):
+    def _get_partners_values(self, country=None, grade=None, page=0, references_per_page=20, **post):
         country_all = post.pop('country_all', False)
         partner_obj = request.env['res.partner']
         country_obj = request.env['res.country']
+
+        industries = request.env['res.partner.industry'].sudo().search([])
+        industry_param = request.env['ir.http']._unslug(post.pop('industry', ''))[1]
+        current_industry = industry_param in industries.ids and industries.browse(int(industry_param))
+
         search = post.get('search', '')
 
         base_partner_domain = [('is_company', '=', True), ('grade_id', '!=', False), ('website_published', '=', True), ('grade_id.active', '=', True)]
         if not request.env.user.has_group('website.group_website_restricted_editor'):
             base_partner_domain += [('grade_id.website_published', '=', True)]
         if search:
-            base_partner_domain += ['|', ('name', 'ilike', search), ('website_description', 'ilike', search)]
+            base_partner_domain += Domain.OR(
+                Domain(field, 'ilike', search)
+                for field in ('name', 'website_description', 'street', 'street2', 'city', 'zip', 'state_id', 'country_id')
+            )
 
         # Infer Country
         if not country and not country_all:
@@ -261,15 +259,14 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
         country_domain = list(base_partner_domain)
         if grade:
             country_domain += [('grade_id', '=', grade.id)]
-        countries = partner_obj.sudo().read_group(
+
+        country_groups = partner_obj.sudo()._read_group(
             country_domain + [('country_id', '!=', False)],
-            ["id", "country_id"],
-            groupby="country_id", orderby="country_id")
+            ["country_id"], ["__count"], order="country_id")
 
         # Fallback on all countries if no partners found for the country and
         # there are matching partners for other countries.
-        country_ids = [c['country_id'][0] for c in countries]
-        fallback_all_countries = country and country.id not in country_ids
+        fallback_all_countries = country and country.id not in (c.id for c, __ in country_groups)
         if fallback_all_countries:
             country = None
 
@@ -277,34 +274,39 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
         grade_domain = list(base_partner_domain)
         if country:
             grade_domain += [('country_id', '=', country.id)]
-        grades = partner_obj.sudo().read_group(
-            grade_domain, ["id", "grade_id"],
-            groupby="grade_id")
-        grades_partners = partner_obj.sudo().search_count(grade_domain)
-        # flag active grade
-        for grade_dict in grades:
-            grade_dict['active'] = grade and grade_dict['grade_id'][0] == grade.id
-        grades.insert(0, {
-            'grade_id_count': grades_partners,
-            'grade_id': (0, _("All Categories")),
-            'active': bool(grade is None),
-        })
+        grade_groups = partner_obj.sudo()._read_group(
+            grade_domain, ["grade_id"], ["__count"], order="grade_id")
+        grades = [{
+            'grade_id_count': sum(count for __, count in grade_groups),
+            'grade_id': (0, ""),
+            'active': grade is None,
+        }]
+        for g_grade, count in grade_groups:
+            grades.append({
+                'grade_id_count': count,
+                'grade_id': (g_grade.id, g_grade.display_name),
+                'active': grade and grade.id == g_grade.id,
+            })
 
-        countries_partners = partner_obj.sudo().search_count(country_domain)
-        # flag active country
-        for country_dict in countries:
-            country_dict['active'] = country and country_dict['country_id'] and country_dict['country_id'][0] == country.id
-        countries.insert(0, {
-            'country_id_count': countries_partners,
+        countries = [{
+            'country_id_count': sum(count for __, count in country_groups),
             'country_id': (0, _("All Countries")),
-            'active': bool(country is None),
-        })
+            'active': country is None,
+        }]
+        for g_country, count in country_groups:
+            countries.append({
+                'country_id_count': count,
+                'country_id': (g_country.id, g_country.display_name),
+                'active': country and g_country.id == country.id,
+            })
 
         # current search
         if grade:
             base_partner_domain += [('grade_id', '=', grade.id)]
         if country:
             base_partner_domain += [('country_id', '=', country.id)]
+        if current_industry:
+            base_partner_domain += [('implemented_partner_ids.industry_id', 'in', current_industry.id)]
 
         # format pager
         slug = request.env['ir.http']._slug
@@ -321,21 +323,25 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
             url_args['search'] = search
         if country_all:
             url_args['country_all'] = True
+        if current_industry:
+            url_args['industry'] = slug(current_industry)
 
         partner_count = partner_obj.sudo().search_count(base_partner_domain)
         pager = request.website.pager(
-            url=url, total=partner_count, page=page, step=self._references_per_page, scope=7,
+            url=url, total=partner_count, page=page, step=references_per_page, scope=7,
             url_args=url_args)
 
         # search partners matching current search parameters
         partner_ids = partner_obj.sudo().search(
             base_partner_domain, order="grade_sequence ASC, implemented_partner_count DESC, complete_name ASC, id ASC",
-            offset=pager['offset'], limit=self._references_per_page)
+            offset=pager['offset'], limit=references_per_page)
         partners = partner_ids.sudo()
 
         google_maps_api_key = request.website.google_maps_api_key
 
         values = {
+            'industries': industries,
+            'current_industry': current_industry,
             'countries': countries,
             'country_all': country_all,
             'current_country': country,
@@ -345,11 +351,34 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
             'pager': pager,
             'searches': post,
             'search_path': "%s" % werkzeug.urls.url_encode(post),
+            'search': search,
             'google_maps_api_key': google_maps_api_key,
             'fallback_all_countries': fallback_all_countries,
         }
-        return request.render("website_crm_partner_assign.index", values, status=partners and 200 or 404)
+        return values
 
+    @http.route([
+        '/partners',
+        '/partners/page/<int:page>',
+
+        '/partners/grade/<model("res.partner.grade"):grade>',
+        '/partners/grade/<model("res.partner.grade"):grade>/page/<int:page>',
+
+        '/partners/country/<model("res.country"):country>',
+        '/partners/country/<model("res.country"):country>/page/<int:page>',
+
+        '/partners/grade/<model("res.partner.grade"):grade>/country/<model("res.country"):country>',
+        '/partners/grade/<model("res.partner.grade"):grade>/country/<model("res.country"):country>/page/<int:page>',
+    ], type='http', auth="public", website=True, sitemap=sitemap_partners, readonly=True, list_as_website_content=_lt("Partners"))
+    def partners(self, country=None, grade=None, page=0, **post):
+        values = self._get_partners_values(
+            country=country,
+            grade=grade,
+            page=page,
+            references_per_page=self._references_per_page,
+            **post
+        )
+        return request.render("website_crm_partner_assign.index", values, status=values.get('partners') and 200 or 404)
 
     # Do not use semantic controller due to sudo()
     @http.route()

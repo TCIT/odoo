@@ -2,9 +2,18 @@
 from odoo.tests import common
 from odoo.exceptions import ValidationError
 from odoo import Command
+from unittest.mock import patch
 
 
 class test_inherits(common.TransactionCase):
+
+    def test_ir_model_inherit(self):
+        imi = self.env['ir.model.inherit'].search(
+            [('model_id.model', '=', 'test.box')]
+        )
+        self.assertEqual(len(imi), 1)
+        self.assertEqual(imi.parent_id.model, 'test.unit')
+        self.assertEqual(imi.parent_field_id.name, 'unit_id')
 
     def test_create_3_levels_inherits(self):
         """ Check that we can create an inherits on 3 levels """
@@ -149,3 +158,29 @@ class test_inherits(common.TransactionCase):
         boxes.unit_id = unit_bar
 
         self.assertEqual(boxes.mapped('unit_id.name'), ['bar'])
+
+    def test_write_cache_x2m_unstored_inherits(self):
+        # test_unstored_inherits_shared_line_ids field is inherited through inheritS
+        # writing on that field invokes its inverse method, and should not write the value twice on the field
+        parent = self.env['test.unstored.inherits.parent'].create({'name': 'foo'})
+
+        field = parent._fields['test_unstored_inherits_shared_line_ids']
+        with patch.object(field, '_cache_missing_ids', side_effect=lambda recs: iter(recs.ids)):
+            parent.write({'test_unstored_inherits_shared_line_ids': [(0, 0, {'name': 'Coucou'})]})
+            self.assertTrue(parent.child_id)
+            self.assertEqual(len(parent.child_id.test_unstored_inherits_shared_line_ids), 1)
+
+    def test_default_on_inaccessible_inherited_field(self):
+        model = self.env['test.another_box'].with_user(self.ref('base.user_admin'))
+        parent_model = model.another_unit_id
+
+        # the field is inaccessible in both models
+        self.assertFalse(parent_model._has_field_access(parent_model._fields['ro_with_default'], 'write'))
+        self.assertFalse(model._has_field_access(model._fields['ro_with_default'], 'write'))
+
+        # its default value is only accessible in the parent model
+        self.assertIn('ro_with_default', parent_model.default_get(['ro_with_default']))
+        self.assertNotIn('ro_with_default', model.default_get(['ro_with_default']))
+
+        record = model.create({f'val{i}': 2 for i in (1, 2)})
+        self.assertEqual(record.sudo().ro_with_default, 'roro')

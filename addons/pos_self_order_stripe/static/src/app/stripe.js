@@ -47,7 +47,7 @@ export class Stripe {
     async startPayment(order) {
         try {
             const result = await rpc(`/kiosk/payment/${this.pos_config.id}/kiosk`, {
-                order: order.serialize({ orm: true }),
+                order: order.serializeForORM(),
                 access_token: this.access_token,
                 payment_method_id: this.stripePaymentMethod.id,
             });
@@ -126,7 +126,11 @@ export class Stripe {
     }
 
     async collectPaymentMethod(clientSecret) {
-        const result = await this.terminal.collectPaymentMethod(clientSecret);
+        const result = await this.terminal.collectPaymentMethod(clientSecret, {
+            config_override: {
+                enable_customer_cancellation: true,
+            },
+        });
 
         if (result.error) {
             throw new StripeError(result.error.code);

@@ -1,6 +1,6 @@
-import { Record } from "@mail/core/common/record";
+import { fields } from "@mail/core/common/record";
 import { Store } from "@mail/core/common/store_service";
-import { RtcSession } from "@mail/discuss/call/common/rtc_session_model";
+import { router } from "@web/core/browser/router";
 
 import { patch } from "@web/core/utils/patch";
 
@@ -8,27 +8,44 @@ import { patch } from "@web/core/utils/patch";
 const StorePatch = {
     setup() {
         super.setup(...arguments);
-        /** @type {typeof import("@mail/discuss/call/common/rtc_session_model").RtcSession} */
-        this.RtcSession = RtcSession;
-        this.rtc = Record.one("Rtc", {
+        this.rtc = fields.One("Rtc", {
             compute() {
                 return {};
             },
         });
-        this.ringingThreads = Record.many("Thread", {
+        this.ringingThreads = fields.Many("Thread", {
             /** @this {import("models").Store} */
             onUpdate() {
                 if (this.ringingThreads.length > 0) {
-                    this.env.services["mail.sound_effects"].play("incoming-call", {
+                    this.env.services["mail.sound_effects"].play("call-invitation", {
                         loop: true,
                     });
                 } else {
-                    this.env.services["mail.sound_effects"].stop("incoming-call");
+                    this.env.services["mail.sound_effects"].stop("call-invitation");
                 }
             },
         });
-        this.allActiveRtcSessions = Record.many("RtcSession");
+        this.allActiveRtcSessions = fields.Many("discuss.channel.rtc.session");
         this.nextTalkingTime = 1;
+        this.fullscreenChannel = fields.One("Thread");
+        this._hasFullscreenUrl = fields.Attr(false, {
+            compute() {
+                return this.discuss?.thread?.eq(this.fullscreenChannel);
+            },
+            onUpdate() {
+                if (!this.discuss?.hasRestoredThread) {
+                    return;
+                }
+                this._hasFullscreenUrlOnUpdate();
+            },
+            eager: true,
+        });
+        this.meetingViewOpened = false;
+    },
+    _hasFullscreenUrlOnUpdate() {
+        router.pushState({
+            fullscreen: this._hasFullscreenUrl ? true : undefined,
+        });
     },
     onStarted() {
         super.onStarted(...arguments);

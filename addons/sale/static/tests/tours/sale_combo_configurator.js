@@ -1,5 +1,5 @@
 import { registry } from '@web/core/registry';
-import { stepUtils } from '@web_tour/tour_service/tour_utils';
+import { stepUtils } from '@web_tour/tour_utils';
 import comboConfiguratorTourUtils from '@sale/js/tours/combo_configurator_tour_utils';
 import productConfiguratorTourUtils from '@sale/js/tours/product_configurator_tour_utils';
 import tourUtils from '@sale/js/tours/tour_utils';
@@ -101,6 +101,35 @@ registry
                 content: "Verify the order's total price",
                 trigger: 'div.oe_subtotal_footer:contains(50.00)',
             },
+            // Don't end the tour with a form in edition mode.
+            ...stepUtils.saveForm(),
+        ],
+    });
+
+    registry
+    .category('web_tour.tours')
+    .add('sale_combo_configurator_with_optional_products', {
+        url: '/odoo',
+        steps: () => [
+            ...stepUtils.goToAppSteps('sale.sale_menu_root', "Open the sales app"),
+            ...tourUtils.createNewSalesOrder(),
+            ...tourUtils.selectCustomer("Test Partner"),
+            ...tourUtils.addProduct("Combo product"),
+            comboConfiguratorTourUtils.selectComboItem("Product B2"),
+            ...comboConfiguratorTourUtils.saveConfigurator(),
+            productConfiguratorTourUtils.addOptionalProduct("Optional product"),
+            {
+                content: "verify that we cannot reduce main product quantity",
+                trigger: ':not(button[name="sale_quantity_button_minus"])',
+            },
+            {
+                content: "verify that we cannot increase main product quantity",
+                trigger: ':not(button[name="sale_quantity_button_plus"])',
+            },
+            ...productConfiguratorTourUtils.saveConfigurator(),
+            tourUtils.checkSOLDescriptionContains("Combo product"),
+            tourUtils.checkSOLDescriptionContains("Product B2"),
+            tourUtils.checkSOLDescriptionContains("Optional product"),
             // Don't end the tour with a form in edition mode.
             ...stepUtils.saveForm(),
         ],

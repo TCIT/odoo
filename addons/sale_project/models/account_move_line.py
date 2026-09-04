@@ -1,7 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
+
 from odoo import models
-from odoo.osv.expression import AND, OR
+from odoo.fields import Domain
 
 
 class AccountMoveLine(models.Model):
@@ -12,22 +14,23 @@ class AccountMoveLine(models.Model):
         # analytic account from being overridden by analytic default rules and lack thereof
         project_amls = self.filtered(lambda aml: aml.analytic_distribution and any(aml.sale_line_ids.project_id))
         super(AccountMoveLine, self - project_amls)._compute_analytic_distribution()
-        project_id = self._context.get('project_id', False)
+        project_id = self.env.context.get('project_id', False)
         if project_id:
             project = self.env['project.project'].browse(project_id)
-            self.analytic_distribution = project._get_analytic_distribution()
+            # Payement lines could receive this context if the payment was created after opening the bill from a project
+            lines = self.filtered(lambda line: line.account_type not in ['asset_receivable', 'liability_payable']
+                                  and not line.move_id.payment_ids)
+            lines.analytic_distribution = project._get_analytic_distribution()
 
     def _get_so_mapping_domain(self):
-        return OR([
-            OR([
-                AND([
-                    [(self.env['account.analytic.account'].browse(int(account_id)).root_plan_id._column_name(), "=", int(account_id))]
-                    for account_id in key.split(",")
-                ])
-                for key in line.analytic_distribution
-            ])
+        return Domain.OR(
+            Domain.AND(
+                Domain(self.env['account.analytic.account'].browse(int(account_id)).root_plan_id._column_name(), "=", int(account_id))
+                for account_id in key.split(",")
+            )
             for line in self
-        ])
+            for key in line.analytic_distribution or []
+        )
 
     def _get_so_mapping_from_project(self):
         """ Get the mapping of move.line with the sale.order record on which its analytic entries should be reinvoiced.
@@ -42,22 +45,26 @@ class AccountMoveLine(models.Model):
             groupby=['project_id'],
             aggregates=['id:recordset']
         ))
-        project_per_accounts = {
-            next(iter(project._get_analytic_distribution())): project
-            for project in projects
-        }
+        projects_per_accounts = defaultdict(lambda: self.env['project.project'])
+        for project in projects:
+            distribution = project._get_analytic_distribution()
+            if not distribution:
+                continue
+            key = next(iter(distribution))
+            projects_per_accounts[key] |= project
 
         for move_line in self:
             analytic_distribution = move_line.analytic_distribution
             if not analytic_distribution:
                 continue
 
+            matching_projects = self.env['project.project']
             for accounts in analytic_distribution:
-                project = project_per_accounts.get(accounts)
-            if not project:
-                continue
+                matching_projects |= projects_per_accounts.get(accounts, self.env['project.project'])
 
-            orders = orders_per_project.get(project)
+            orders = self.env['sale.order']
+            for project in matching_projects:
+                orders |= orders_per_project.get(project, self.env['sale.order'])
             if not orders:
                 continue
             orders = orders.sorted('create_date')

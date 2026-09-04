@@ -1,6 +1,6 @@
 import contextlib
 import json
-import re
+from unittest.mock import patch
 
 from odoo import fields
 from odoo.addons.base.tests.common import SavepointCaseWithUserDemo
@@ -471,13 +471,21 @@ class test_required_string_field(ImporterCase):
     @mute_logger('odoo.sql_db', 'odoo.models')
     def test_empty(self):
         result = self.import_(['value'], [[]])
-        self.assertEqual(result['messages'], [message("Missing required value for the field 'Value' (value)")])
+        self.assertEqual(len(result['messages']), 1)
+        result_message = result['messages'][0]
+        expected_message = message("Missing required value for the field 'Value' (value)")
+        self.assertIn(expected_message.pop('message'), result_message.pop('message'))
+        self.assertEqual(result_message, expected_message)
         self.assertIs(result['ids'], False)
 
     @mute_logger('odoo.sql_db', 'odoo.models')
     def test_not_provided(self):
         result = self.import_(['const'], [['12']])
-        self.assertEqual(result['messages'], [message("Missing required value for the field 'Value' (value)")])
+        self.assertEqual(len(result['messages']), 1)
+        result_message = result['messages'][0]
+        expected_message = message("Missing required value for the field 'Value' (value)")
+        self.assertIn(expected_message.pop('message'), result_message.pop('message'))
+        self.assertEqual(result_message, expected_message)
         self.assertIs(result['ids'], False)
 
     @mute_logger('odoo.sql_db', 'odoo.models')
@@ -487,7 +495,7 @@ class test_required_string_field(ImporterCase):
         self.assertEqual(len(result['messages']), 11)
         for m in result['messages'][:-1]:
             self.assertEqual(m['type'], 'error')
-            self.assertEqual(m['message'], "Missing required value for the field 'Value' (value)")
+            self.assertIn("Missing required value for the field 'Value' (value)", m['message'])
         last = result['messages'][-1]
         self.assertEqual(last['type'], 'warning')
         self.assertEqual(
@@ -1355,7 +1363,7 @@ class test_realworld(SavepointCaseWithUserDemo):
 
     def test_bigfile(self):
         data = json.loads(file_open('test_import_export/data/contacts_big.json', 'rt').read())
-        result = self.env['res.partner'].load(['name', 'mobile', 'email', 'image_1920'], data)
+        result = self.env['res.partner'].load(['name', 'phone', 'email', 'image_1920'], data)
         self.assertFalse(result['messages'])
         self.assertEqual(len(result['ids']), len(data))
 
@@ -1415,6 +1423,18 @@ class test_realworld(SavepointCaseWithUserDemo):
                 )
             ],
         )
+        self.assertIs(result['ids'], False)
+
+    def test_no_install_mode(self):
+        """Test that the data is imported without the `install_mode` context key"""
+        self.env.registry.clear_cache()
+        Model = self.env['export.with.non.demo.constraint']
+        result = Model.with_context(import_file=True).load(
+            ['name'],
+            [['test']],
+        )
+        self.assertEqual(len(result['messages']), 1)
+        self.assertEqual(result['messages'][0]['message'], "Name must start with an uppercase letter")
         self.assertIs(result['ids'], False)
 
 
@@ -1512,13 +1532,20 @@ class test_unique(ImporterCase):
             ],
         )
         self.assertFalse(result['ids'])
-        self.assertEqual(
-            result['messages'],
-            [
-                dict(message="The value for the field 'value' already exists (this is probably 'Value' in the current model).", type='error', rows={'from': 1, 'to': 1}, record=1, field='value'),
-                dict(message="The value for the field 'value' already exists (this is probably 'Value' in the current model).", type='error', rows={'from': 4, 'to': 4}, record=4, field='value'),
-            ],
-        )
+        messages = result['messages']
+        messages_messages = [m.pop('message') for m in messages]
+        expected = [
+            dict(message="The value for 'value' (Value) already exists.",
+                 type='error', rows={'from': 1, 'to': 1},
+                 record=1, field='value'),
+            dict(message="The value for 'value' (Value) already exists.",
+                 type='error', rows={'from': 4, 'to': 4},
+                 record=4, field='value'),
+        ]
+        expected_messages = [m.pop('message') for m in expected]
+        for actual, expect in zip(messages_messages, expected_messages):
+            self.assertIn(expect, actual)
+        self.assertEqual(messages, expected)
 
     @mute_logger('odoo.sql_db')
     def test_unique_pair(self):
@@ -1537,19 +1564,24 @@ class test_unique(ImporterCase):
         self.assertEqual(message['type'], 'error')
         self.assertEqual(message['record'], 3)
         self.assertEqual(message['rows'], {'from': 3, 'to': 3})
-        m = re.match(
-            r"The values for the fields '([^']+)' already exist \(they are probably '([^']+)' in the current model\)\.",
-            message['message'],
+        self.assertIn("The value for 'value2, value3' (Value2 and Value3) already exists.", message['message'])
+
+    @mute_logger('odoo.sql_db')
+    def test_unique_update_record(self):
+        existing_records = self.env[self.model_name].create([{'value': 1}, {'value': 2}])
+        result = self.import_(
+            ['.id', 'value'],
+            [
+                [str(existing_records[1].id), '1'],
+            ],
         )
-        self.assertIsNotNone(m)
-        self.assertItemsEqual(
-            m.group(1).split(' and '),
-            ['value2', 'value3'],
-        )
-        self.assertItemsEqual(
-            m.group(2).split(' and '),
-            ['Value2', 'Value3'],
-        )
+        self.assertFalse(result['ids'])
+        self.assertEqual(len(result['messages']), 1)
+        message = result['messages'][0]
+        self.assertEqual(message['type'], 'error')
+        self.assertEqual(message['record'], 0)
+        self.assertEqual(message['rows'], {'from': 0, 'to': 0})
+        self.assertIn("The value for 'value' (Value) already exists.", message['message'])
 
 
 class test_inherits(ImporterCase):
@@ -1742,3 +1774,20 @@ class test_inherits(ImporterCase):
             parent._get_external_ids()[parent.id],
             ['xxx.parent'],
         )
+
+
+class CheckSavepoint(ImporterCase):
+    model_name = 'export.unique'
+
+    @mute_logger("odoo.sql_db")
+    def test_max_savepoint(self):
+        from odoo.sql_db import Cursor  # noqa: PLC0415
+        with (
+            patch.object(Cursor, 'savepoint', autospec=True, side_effect=Cursor.savepoint) as sp_mock,
+            patch.object(Cursor, 'flush', autospec=True, side_effect=Cursor.flush) as sp_flush,
+        ):
+            data = [[str(i)] for i in range(100)] + [[str(i)] for i in range(20)]
+            self.import_(['value'], data)
+            self.assertLess(sp_mock.call_count, 100, "Too many savepoints in the same transaction, load method should not create a savepoint for each record")
+            self.assertEqual(sp_mock.call_count, 2, "Too many savepoints in the same transaction")
+            self.assertGreater(sp_flush.call_count, 120, "We should flush after each record to bind errors to the record")

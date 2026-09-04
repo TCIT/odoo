@@ -1,3 +1,5 @@
+import base64
+
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 from odoo.tools import misc
@@ -111,7 +113,7 @@ class TestETransportFlows(TestL10nRoEdiStockCommon):
                 tag.attrib['codTarifar'] = self.default_intrastat_code.code
 
         self.assertXmlTreeEqual(
-            self.get_xml_tree_from_string(document.attachment_id.raw),
+            self.get_xml_tree_from_string(base64.b64decode(document.attachment)),
             expected_tree,
         )
 
@@ -180,8 +182,7 @@ class TestETransportFlows(TestL10nRoEdiStockCommon):
 
         # Send amended changes to ANAF
         make_request.return_value = self.successful_upload_response
-        with patch.object(self.env, 'context', dict(self.env.context) | {'l10n_ro_edi_stock_send_type': 'amend'}):
-            self.delivery_picking.action_l10n_ro_edi_stock_send_etransport()
+        self.delivery_picking.with_context(test_send_and_amend_etransport='amend').action_l10n_ro_edi_stock_send_etransport()
 
         self._assert_picking_state(self.delivery_picking, 'stock_sent', 2, ('enable', 'enable_fetch', 'fields_readonly'))
         self._assert_etransport_document(self.delivery_picking._l10n_ro_edi_stock_get_last_document('stock_sent'), 'test_send_and_amend_etransport_2')

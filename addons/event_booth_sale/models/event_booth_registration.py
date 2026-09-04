@@ -12,16 +12,18 @@ class EventBoothRegistration(models.Model):
     _name = 'event.booth.registration'
     _description = 'Event Booth Registration'
 
-    sale_order_line_id = fields.Many2one('sale.order.line', string='Sale Order Line', required=True, ondelete='cascade')
-    event_booth_id = fields.Many2one('event.booth', string='Booth', required=True)
+    sale_order_line_id = fields.Many2one('sale.order.line', string='Sale Order Line', required=True, index=True, ondelete='cascade')
+    event_booth_id = fields.Many2one('event.booth', string='Booth', required=True, index=True)
     partner_id = fields.Many2one(
         'res.partner', related='sale_order_line_id.order_partner_id', store=True)
     contact_name = fields.Char(string='Contact Name', compute='_compute_contact_name', readonly=False, store=True)
     contact_email = fields.Char(string='Contact Email', compute='_compute_contact_email', readonly=False, store=True)
     contact_phone = fields.Char(string='Contact Phone', compute='_compute_contact_phone', readonly=False, store=True)
 
-    _sql_constraints = [('unique_registration', 'unique(sale_order_line_id, event_booth_id)',
-                         'There can be only one registration for a booth by sale order line')]
+    _unique_registration = models.Constraint(
+        'unique(sale_order_line_id, event_booth_id)',
+        'There can be only one registration for a booth by sale order line',
+    )
 
     @api.depends('partner_id')
     def _compute_contact_name(self):
@@ -39,7 +41,7 @@ class EventBoothRegistration(models.Model):
     def _compute_contact_phone(self):
         for registration in self:
             if not registration.contact_phone:
-                registration.contact_phone = registration.partner_id.phone or registration.partner_id.mobile or False
+                registration.contact_phone = registration.partner_id.phone or False
 
     @api.model
     def _get_fields_for_booth_confirmation(self):

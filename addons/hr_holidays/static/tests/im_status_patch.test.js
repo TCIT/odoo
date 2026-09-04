@@ -8,7 +8,8 @@ defineHrHolidaysModels();
 
 test("on leave & online", async () => {
     const pyEnv = await startServer();
-    const partnerId = pyEnv["res.partner"].create({ name: "Demo", im_status: "leave_online" });
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo", im_status: "online" });
+    pyEnv["res.users"].create({ partner_id: partnerId, leave_date_to: "2023-01-01" });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
             Command.create({ partner_id: serverState.partnerId }),
@@ -18,12 +19,15 @@ test("on leave & online", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-ImStatus i.fa-plane[title='Online']");
+    await contains(
+        ".o-mail-DiscussContent-header .o-mail-ImStatus i.fa-plane[title='On Leave (Online)']"
+    );
 });
 
 test("on leave & away", async () => {
     const pyEnv = await startServer();
-    const partnerId = pyEnv["res.partner"].create({ name: "Demo", im_status: "leave_away" });
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo", im_status: "away" });
+    pyEnv["res.users"].create({ partner_id: partnerId, leave_date_to: "2023-01-01" });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
             Command.create({ partner_id: serverState.partnerId }),
@@ -33,12 +37,15 @@ test("on leave & away", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-ImStatus i.fa-plane[title='Idle']");
+    await contains(
+        ".o-mail-DiscussContent-header .o-mail-ImStatus i.fa-plane[title='On Leave (Idle)']"
+    );
 });
 
 test("on leave & offline", async () => {
     const pyEnv = await startServer();
-    const partnerId = pyEnv["res.partner"].create({ name: "Demo", im_status: "leave_offline" });
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo", im_status: "offline" });
+    pyEnv["res.users"].create({ partner_id: partnerId, leave_date_to: "2023-01-01" });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
             Command.create({ partner_id: serverState.partnerId }),
@@ -48,5 +55,5 @@ test("on leave & offline", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-ImStatus i.fa-plane[title='Out of office']");
+    await contains(".o-mail-DiscussContent-header .o-mail-ImStatus i.fa-plane[title='On Leave']");
 });

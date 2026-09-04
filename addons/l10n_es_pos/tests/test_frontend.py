@@ -13,6 +13,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         cls.company_data["company"].country_id = cls.env.ref("base.es").id
         cls.company_data["company"].currency_id = cls.env.ref("base.EUR").id
         cls.company_data["company"].vat = "ESA12345674"
+        cls.company_data["company"].state_id = cls.env.ref("base.state_es_ba").id
         return cls.company_data["company"]
 
     def test_spanish_pos(self):
@@ -39,7 +40,59 @@ class TestUi(TestPointOfSaleHttpCommon):
         num_of_simp_invoices = self.env['account.move'].search_count([('journal_id', '=', simp.id), ('l10n_es_is_simplified', '=', True)])
         num_of_regular_invoices = get_number_of_regular_invoices() - initial_number_of_regular_invoices
         self.assertEqual(num_of_simp_invoices, 3)
-        self.assertEqual(num_of_regular_invoices, 1)
+        self.assertEqual(num_of_regular_invoices, 2)
+
+    def test_l10n_es_pos_reconcile(self):
+        if not self.env["ir.module.module"].search([("name", "=", "pos_settle_due"), ("state", "=", "installed")]):
+            self.skipTest("pos_settle_due module is required for this test")
+
+        # create customer account payment method
+        self.customer_account_payment_method = self.env['pos.payment.method'].create({
+            'name': 'Customer Account',
+            'split_transactions': True,
+        })
+        # add customer account payment method to pos config
+        self.main_pos_config.write({
+            'payment_method_ids': [Command.link(self.customer_account_payment_method.id)],
+        })
+
+        self.assertEqual(self.partner_test_1.total_due, 0)
+
+        self.main_pos_config.with_user(self.pos_admin).open_ui()
+        current_session = self.main_pos_config.current_session_id
+
+        order = self.env['pos.order'].create({
+            'company_id': self.env.company.id,
+            'session_id': current_session.id,
+            'partner_id': self.partner_test_1.id,
+            'lines': [Command.create({
+                'product_id': self.product_a.id,
+                'price_unit': 10,
+                'discount': 0,
+                'qty': 1,
+                'price_subtotal': 10,
+                'price_subtotal_incl': 10,
+            })],
+            'amount_paid': 10.0,
+            'amount_total': 10.0,
+            'amount_tax': 0.0,
+            'amount_return': 0.0,
+            'to_invoice': True,
+            'last_order_preparation_change': '{}'
+        })
+
+        payment_context = {"active_ids": order.ids, "active_id": order.id}
+        order_payment = self.env['pos.make.payment'].with_context(**payment_context).create({
+            'amount': 10.0,
+            'payment_method_id': self.customer_account_payment_method.id
+        })
+        order_payment.with_context(**payment_context).check()
+
+        self.assertEqual(self.partner_test_1.total_due, 10)
+        current_session.action_pos_session_closing_control()
+
+        self.main_pos_config.with_user(self.pos_admin).open_ui()
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'l10n_es_pos_settle_account_due', login="accountman")
 
     def test_spanish_pos_invoice_no_certificate(self):
         """This test make sure that the invoice generated in spanish PoS are not proforma invoices when no certificate exists"""
@@ -52,7 +105,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'email': "email@gmail.com",
         })
         self._get_main_company().partner_id.write({
-            'bank_ids': [Command.create({'acc_number': 'FOO42'})]
+            'bank_ids': [Command.create({'acc_number': 'FOO42', 'allow_out_payment': True})]
         })
         self.main_pos_config.open_ui()
         self.pos_order_pos0 = self.env['pos.order'].create({
@@ -90,3 +143,16 @@ class TestUi(TestPointOfSaleHttpCommon):
         invoice_str = str(self.pos_order_pos0.account_move._get_invoice_legal_documents('pdf', allow_fallback=True).get('content'))
         self.assertTrue("invoice" in invoice_str)
         self.assertTrue("proforma" not in invoice_str)
+
+    def test_simplified_invoice_not_override_set_pricelist(self):
+        """Checks that when the simplified invoice parter is automatically set
+        on the order it does not override the pricelist that was manually selected
+        during the order"""
+        self.assertTrue(len(self.main_pos_config.available_pricelist_ids.ids) > 1)
+        self.main_pos_config.l10n_es_simplified_invoice_journal_id = self.main_pos_config.journal_id
+        self.main_pos_config.default_fiscal_position_id = self.fiscal_pos_a.id
+        self.main_pos_config.open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_simplified_invoice_not_override_set_pricelist', login="pos_user")
+        order = self.env['pos.order'].search([('partner_id', '=', self.main_pos_config.simplified_partner_id.id)])
+        self.assertNotEqual(order.pricelist_id, self.main_pos_config.simplified_partner_id.property_product_pricelist)
+        self.assertNotEqual(order.fiscal_position_id, self.fiscal_pos_a)

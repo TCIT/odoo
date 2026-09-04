@@ -1,23 +1,35 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* product_margin
-# 
+# * product_margin
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Vida Potočnik <vida.potocnik@mentis.si>, 2022
+# matjaz k <matjaz@mentis.si>, 2022
+# laznikd <laznik@mentis.si>, 2022
+# jl2035 <jaka.luthar@gmail.com>, 2022
+# Jasmina Macur <jasmina@hbs.si>, 2022
+# Martin Trigaux, 2022
+# Matjaz Mozetic <m.mozetic@matmoz.si>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Žiga Trček <ziga.trcek@implex.si>, 2026.
+# Jan Zorko <jan.zorko@implex.si>, 2026.
+# NEDŽAD BEUS <nedzad.beus@implex.si>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-08 07:11+0000\n"
+"Last-Translator: NEDŽAD BEUS <nedzad.beus@implex.si>\n"
+"Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-19/"
+"product_margin/sl/>\n"
+"Language: sl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sl\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
+"n%100==4 ? 2 : 3;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_product__purchase_num_invoiced
@@ -31,8 +43,9 @@ msgstr "# Zaračunano v prodaji"
 
 #. module: product_margin
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_tree
+#, fuzzy
 msgid "# Purchased"
-msgstr ""
+msgstr "# Kupljeno"
 
 #. module: product_margin
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_form
@@ -46,18 +59,21 @@ msgstr "Pov. cena na računih kupca"
 
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__purchase_avg_price
+#, fuzzy
 msgid "Avg. Price in Vendor Bills"
-msgstr ""
+msgstr "Povp. cena na računih dobaviteljev"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_product__purchase_avg_price
+#, fuzzy
 msgid "Avg. Purchase Unit Price"
-msgstr ""
+msgstr "Povp. nabavna cena na enoto"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_product__sale_avg_price
+#, fuzzy
 msgid "Avg. Sale Unit Price"
-msgstr ""
+msgstr "Povp. prodajna cena na enoto"
 
 #. module: product_margin
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_form
@@ -86,6 +102,7 @@ msgstr "Ustvarjeno"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_margin__display_name
+#: model:ir.model.fields,field_description:product_margin.field_product_product__display_name
 msgid "Display Name"
 msgstr "Prikazani naziv"
 
@@ -137,6 +154,7 @@ msgstr "Splošni podatki"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_margin__id
+#: model:ir.model.fields,field_description:product_margin.field_product_product__id
 msgid "ID"
 msgstr "ID"
 
@@ -207,7 +225,6 @@ msgstr "Marža"
 #. odoo-python
 #: code:addons/product_margin/wizard/product_margin.py:0
 #: model:ir.actions.act_window,name:product_margin.product_margin_act_window
-#: model:ir.ui.menu,name:product_margin.menu_action_product_margin
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_form
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_graph
 #: model_terms:ir.ui.view,arch_db:product_margin.view_product_margin_tree
@@ -215,9 +232,15 @@ msgid "Product Margins"
 msgstr "Marže na izdelkih"
 
 #. module: product_margin
+#: model:ir.ui.menu,name:product_margin.menu_action_product_margin
+#, fuzzy
+msgid "Product Margins…"
+msgstr "Marže na izdelkih…"
+
+#. module: product_margin
 #: model:ir.model,name:product_margin.model_product_product
 msgid "Product Variant"
-msgstr "Različica izdelka"
+msgstr "Različica proizvoda"
 
 #. module: product_margin
 #: model_terms:ir.ui.view,arch_db:product_margin.product_margin_form_view
@@ -252,8 +275,9 @@ msgstr "Standardna cena"
 
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__normal_cost
+#, fuzzy
 msgid "Sum of Multiplication of Cost price and quantity of Vendor Bills"
-msgstr ""
+msgstr "Vsota nabavne cene in količin na računih dobaviteljev"
 
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__turnover
@@ -264,13 +288,12 @@ msgstr "Vsota prodajne cene in količin na računih kupcev"
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__total_cost
 msgid "Sum of Multiplication of Invoice price and quantity of Vendor Bills "
-msgstr "Vsota prodajne cene in količin na računih dobaviteljev"
+msgstr "Vsota prodajne cene in količin na računih dobaviteljev "
 
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__sale_expected
 msgid ""
-"Sum of Multiplication of Sale Catalog price and quantity of Customer "
-"Invoices"
+"Sum of Multiplication of Sale Catalog price and quantity of Customer Invoices"
 msgstr "Vsota kataloške cene in količin na računih kupcev"
 
 #. module: product_margin
@@ -280,8 +303,9 @@ msgstr "Vsota količin na računih kupcev"
 
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__purchase_num_invoiced
+#, fuzzy
 msgid "Sum of Quantity in Vendor Bills"
-msgstr ""
+msgstr "Vsota količine na računih dobaviteljev"
 
 #. module: product_margin
 #: model:ir.model.fields,field_description:product_margin.field_product_margin__to_date
@@ -318,5 +342,12 @@ msgstr "Prihodek"
 
 #. module: product_margin
 #: model:ir.model.fields,help:product_margin.field_product_product__total_margin
+#, fuzzy
 msgid "Turnover - Total cost"
-msgstr ""
+msgstr "Promet – skupni stroški"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Zadnjič spremenjeno"
+
+#~ msgid "Turnover - Standard price"
+#~ msgstr "Promet - standardna cena"

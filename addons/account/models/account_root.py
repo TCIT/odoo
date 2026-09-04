@@ -15,13 +15,14 @@ class AccountRoot(models.Model):
     name = fields.Char(compute='_compute_root')
     parent_id = fields.Many2one('account.root', compute='_compute_root')
 
+    @api.private
     def browse(self, ids=()):
         if isinstance(ids, str):
             ids = (ids,)
         return super().browse(ids)
 
-    def _search(self, domain, offset=0, limit=None, order=None) -> Query:
-        match domain:
+    def _search(self, domain, offset=0, limit=None, order=None, **kw) -> Query:
+        match list(domain):
             case [('id', 'in', ids)]:
                 return self.browse(sorted(ids))._as_query()
             case [('id', 'parent_of', ids)]:

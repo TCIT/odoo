@@ -4,20 +4,22 @@ import json
 import logging
 import psycopg2
 
+import odoo.api
 import odoo.exceptions
 import odoo.modules.registry
 from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.service import security
-from odoo.tools.translate import _
+from odoo.tools.misc import hmac
+from odoo.tools.translate import _, LazyTranslate
 from .utils import (
     ensure_db,
     _get_login_redirect_url,
     is_user_internal,
 )
 
-
+_lt = LazyTranslate(__name__)
 _logger = logging.getLogger(__name__)
 
 
@@ -37,7 +39,7 @@ class Home(http.Controller):
             return request.redirect_query('/web/login_successful', query=request.params)
         return request.redirect_query('/odoo', query=request.params)
 
-    def _web_client_readonly(self):
+    def _web_client_readonly(self, rule, args):
         return False
 
     # ideally, this route should be `auth="user"` but that don't work in non-monodb mode.
@@ -64,17 +66,26 @@ class Home(http.Controller):
             if request.env.user:
                 request.env.user._on_webclient_bootstrap()
             context = request.env['ir.http'].webclient_rendering_context()
+
+            # Add the browser_cache_secret here and not in session_info() to ensure that it is only in
+            # the webclient page, which is cache-control: "no-store" (see below)
+            # Reuse session security related fields, to change the key when a security event
+            # occurs for the user, like a password or 2FA change.
+            hmac_payload = request.env.user._session_token_get_values()  # already ordered
+            session_info = context.get("session_info")
+            session_info['browser_cache_secret'] = hmac(request.env(su=True), "browser_cache_key", hmac_payload)
+
             response = request.render('web.webclient_bootstrap', qcontext=context)
             response.headers['X-Frame-Options'] = 'DENY'
+            response.headers['Cache-Control'] = 'no-store'
             return response
         except AccessError:
             return request.redirect('/web/login?error=access')
 
-    @http.route('/web/webclient/load_menus/<string:unique>', type='http', auth='user', methods=['GET'], readonly=True)
-    def web_load_menus(self, unique, lang=None):
+    @http.route('/web/webclient/load_menus', type='http', auth='user', methods=['GET'], readonly=True)
+    def web_load_menus(self, lang=None):
         """
         Loads the menus for the webclient
-        :param unique: this parameters is not used, but mandatory: it is used by the HTTP stack to make a unique request
         :param lang: language in which the menus should be loaded (only works if language is installed)
         :return: the menus (including the images in Base64)
         """
@@ -82,19 +93,14 @@ class Home(http.Controller):
             request.update_context(lang=lang)
 
         menus = request.env["ir.ui.menu"].load_web_menus(request.session.debug)
-        body = json.dumps(menus)
-        response = request.make_response(body, [
-            # this method must specify a content-type application/json instead of using the default text/html set because
-            # the type of the route is set to HTTP, but the rpc is made with a get and expects JSON
-            ('Content-Type', 'application/json'),
-            ('Cache-Control', 'public, max-age=' + str(http.STATIC_CACHE_LONG)),
+        return request.make_json_response(menus, [
+            ('Cache-Control', 'no-store'),
         ])
-        return response
 
     def _login_redirect(self, uid, redirect=None):
         return _get_login_redirect_url(uid, redirect)
 
-    @http.route('/web/login', type='http', auth='none', readonly=False)
+    @http.route('/web/login', type='http', auth='none', readonly=False, list_as_website_content=_lt("Login"))
     def web_login(self, redirect=None, **kw):
         ensure_db()
         request.params['login_success'] = False
@@ -121,7 +127,9 @@ class Home(http.Controller):
             try:
                 credential = {key: value for key, value in request.params.items() if key in CREDENTIAL_PARAMS and value}
                 credential.setdefault('type', 'password')
-                auth_info = request.session.authenticate(request.db, credential)
+                if request.env['res.users']._should_captcha_login(credential):
+                    request.env['ir.http']._verify_request_recaptcha_token('login')
+                auth_info = request.session.authenticate(request.env, credential)
                 request.params['login_success'] = True
                 return request.redirect(self._login_redirect(auth_info['uid'], redirect=redirect))
             except odoo.exceptions.AccessDenied as e:
@@ -181,4 +189,16 @@ class Home(http.Controller):
 
     @http.route(['/robots.txt'], type='http', auth="none")
     def robots(self, **kwargs):
-        return "User-agent: *\nDisallow: /\n"
+        allowed_routes = self._get_allowed_robots_routes()
+        robots_content = ["User-agent: *", "Disallow: /"]
+        robots_content.extend(f"Allow: {route}" for route in allowed_routes)
+
+        return request.make_response("\n".join(robots_content), [('Content-Type', 'text/plain')])
+
+    def _get_allowed_robots_routes(self):
+        """Override this method to return a list of allowed routes.
+
+        :return: A list of URL paths that should be allowed by robots.txt
+              Examples: ['/social_instagram/', '/sitemap.xml', '/web/']
+        """
+        return []

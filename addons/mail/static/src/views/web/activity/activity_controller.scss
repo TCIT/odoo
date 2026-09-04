@@ -67,6 +67,16 @@
         display: flex;
         flex: 1 1 auto;
         align-items: center;
+        height: 100%;
+
+        span.o_m2o_avatar {
+            width: 32px;
+            justify-content: center;
+
+            i.fa-pencil {
+                font-size: x-large;
+            }
+        }
 
         .o_m2o_avatar > img, > img {
             object-fit: cover;
@@ -115,7 +125,7 @@
     }
     .o_activity_type_cell {
         min-width:100px;
-        .fa-ellipsis-v {
+        .oi-ellipsis-v {
             cursor: pointer;
         }
 
@@ -136,6 +146,9 @@
                 }
             }
         }
+    }
+    .o_activity_view_table_footer {
+        background-color: map-get($grays, '100' );
     }
 }
 

@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-from contextlib import closing
-from collections import OrderedDict
-from lxml import etree
-from subprocess import Popen, PIPE
+import functools
 import hashlib
 import io
 import logging
@@ -10,22 +6,19 @@ import os
 import re
 import textwrap
 import uuid
+from collections import OrderedDict
+from contextlib import closing
+from subprocess import Popen, PIPE
 
-try:
-    import sass as libsass
-except ImportError:
-    # If the `sass` python library isn't found, we fallback on the
-    # `sassc` executable in the path.
-    libsass = None
-
+from lxml import etree
 from rjsmin import jsmin as rjsmin
 
-from odoo import release, SUPERUSER_ID, _
+from odoo import release
+from odoo.api import SUPERUSER_ID
 from odoo.http import request
-from odoo.tools import (func, misc, transpile_javascript,
-    is_odoo_module, SourceMapGenerator, profiler, OrderedSet)
-from odoo.tools.json import scriptsafe as json
+from odoo.tools import OrderedSet, misc, profiler
 from odoo.tools.constants import SCRIPT_EXTENSIONS, STYLE_EXTENSIONS
+from odoo.tools.json import scriptsafe as json
 from odoo.tools.misc import file_open, file_path
 
 _logger = logging.getLogger(__name__)
@@ -52,7 +45,7 @@ class AssetsBundle(object):
 
     TRACKED_BUNDLES = ['web.assets_web']
 
-    def __init__(self, name, files, external_assets=(), env=None, css=True, js=True, debug_assets=False, rtl=False, assets_params=None):
+    def __init__(self, name, files, external_assets=(), env=None, css=True, js=True, debug_assets=False, rtl=False, assets_params=None, autoprefix=False):
         """
         :param name: bundle name
         :param files: files to be added to the bundle
@@ -68,6 +61,7 @@ class AssetsBundle(object):
         self.files = files
         self.rtl = rtl
         self.assets_params = assets_params or {}
+        self.autoprefix = autoprefix
         self.has_css = css
         self.has_js = js
         self._checksum_cache = {}
@@ -90,6 +84,7 @@ class AssetsBundle(object):
             if css:
                 css_params = {
                     'rtl': self.rtl,
+                    'autoprefix': self.autoprefix,
                 }
                 if extension == 'sass':
                     self.stylesheets.append(SassStylesheetAsset(self, **params, **css_params))
@@ -147,7 +142,8 @@ class AssetsBundle(object):
 
     def get_asset_url(self, unique=ANY_UNIQUE, extension='%', ignore_params=False):
         direction = '.rtl' if self.is_css(extension) and self.rtl else ''
-        bundle_name = f"{self.name}{direction}.{extension}"
+        autoprefixed = '.autoprefixed' if self.is_css(extension) and self.autoprefix else ''
+        bundle_name = f"{self.name}{direction}{autoprefixed}.{extension}"
         return self.env['ir.asset']._get_asset_bundle_url(bundle_name, unique, self.assets_params, ignore_params)
 
     def _unlink_attachments(self, attachments):
@@ -351,6 +347,7 @@ class AssetsBundle(object):
 
         :return ir.attachment representing the un-minified content of the bundleJS
         """
+        from odoo.tools.sourcemap_generator import SourceMapGenerator  # noqa: PLC0415
         sourcemap_attachment = self.get_attachments('js.map') \
                         or self.save_attachment('js.map', '')
         generator = SourceMapGenerator(
@@ -463,7 +460,7 @@ class AssetsBundle(object):
                     inherit_mode = template_tree.get('t-inherit-mode', 'primary')
                     if inherit_mode not in ['primary', 'extension']:
                         addon = asset.url.split('/')[1]
-                        return asset.generate_error(_(
+                        return asset.generate_error(self.env._(
                             'Invalid inherit mode. Module "%(module)s" and template name "%(template_name)s"',
                             module=addon,
                             template_name=template_name,
@@ -480,7 +477,7 @@ class AssetsBundle(object):
                         blocks.append(block)
                     block["templates"].append((template_tree, asset.url, inherit_from))
                 else:
-                    return asset.generate_error(_("Template name is missing."))
+                    return asset.generate_error(self.env._("Template name is missing."))
         return blocks
 
 
@@ -537,6 +534,7 @@ css_error_message {
         :param content_import_rules: string containing all the @import rules to put at the beginning of the bundle
         :return ir.attachment representing the un-minified content of the bundleCSS
         """
+        from odoo.tools.sourcemap_generator import SourceMapGenerator  # noqa: PLC0415
         sourcemap_attachment = self.get_attachments('css.map') \
                                 or self.save_attachment('css.map', '')
         debug_asset_url = self.get_asset_url(unique='debug')
@@ -583,6 +581,9 @@ css_error_message {
                 if assets:
                     source = '\n'.join([asset.get_source() for asset in assets])
                     compiled += self.compile_css(assets[0].compile, source)
+
+            if self.autoprefix:
+                compiled = self.autoprefix_css(compiled)
 
             # We want to run rtlcss on normal css, so merge it in compiled
             if self.rtl:
@@ -631,18 +632,21 @@ css_error_message {
         except CompileError as e:
             return handle_compile_error(e, source=source)
 
-        compiled = compiled.strip()
+        return compiled.strip()
+
+    def autoprefix_css(self, source):
+        compiled = source.strip()
 
         # Post process the produced css to add required vendor prefixes here
-        compiled = re.sub(r'(appearance: (\w+);)', r'-webkit-appearance: \2; -moz-appearance: \2; \1', compiled)
+        compiled = re.sub(r'[ \t]\b(appearance: (\w+);)', r'-webkit-appearance: \2; -moz-appearance: \2; \1', compiled)
 
         # Most of those are only useful for wkhtmltopdf (some for old PhantomJS)
-        compiled = re.sub(r'(display: ((?:inline-)?)flex((?: ?!important)?);)', r'display: -webkit-\2box\3; display: -webkit-\2flex\3; \1', compiled)
-        compiled = re.sub(r'(justify-content: flex-(\w+)((?: ?!important)?);)', r'-webkit-box-pack: \2\3; \1', compiled)
-        compiled = re.sub(r'(flex-flow: (\w+ \w+);)', r'-webkit-flex-flow: \2; \1', compiled)
-        compiled = re.sub(r'(flex-direction: (column);)', r'-webkit-box-orient: vertical; -webkit-box-direction: normal; -webkit-flex-direction: \2; \1', compiled)
-        compiled = re.sub(r'(flex-wrap: (\w+);)', r'-webkit-flex-wrap: \2; \1', compiled)
-        compiled = re.sub(r'(flex: ((\d)+ \d+ (?:\d+|auto));)', r'-webkit-box-flex: \3; -webkit-flex: \2; \1', compiled)
+        compiled = re.sub(r'[ \t]\b(display: ((?:inline-)?)flex((?: ?!important)?);)', r'display: -webkit-\2box\3; display: -webkit-\2flex\3; \1', compiled)
+        compiled = re.sub(r'[ \t]\b(justify-content: flex-(\w+)((?: ?!important)?);)', r'-webkit-box-pack: \2\3; \1', compiled)
+        compiled = re.sub(r'[ \t]\b(flex-flow: (\w+ \w+);)', r'-webkit-flex-flow: \2; \1', compiled)
+        compiled = re.sub(r'[ \t]\b(flex-direction: (column);)', r'-webkit-box-orient: vertical; -webkit-box-direction: normal; -webkit-flex-direction: \2; \1', compiled)
+        compiled = re.sub(r'[ \t]\b(flex-wrap: (\w+);)', r'-webkit-flex-wrap: \2; \1', compiled)
+        compiled = re.sub(r'[ \t]\b(flex: ((\d)+ \d+ (?:\d+|auto));)', r'-webkit-box-flex: \3; -webkit-flex: \2; \1', compiled)
 
         return compiled
 
@@ -724,16 +728,16 @@ class WebAsset(object):
         _logger.error(msg)  # log it in the python console in all cases.
         return msg
 
-    @func.lazy_property
+    @functools.cached_property
     def id(self):
         if self._id is None: self._id = str(uuid.uuid4())
         return self._id
 
-    @func.lazy_property
+    @functools.cached_property
     def unique_descriptor(self):
         return f'{self.url or self.inline},{self.last_modified}'
 
-    @func.lazy_property
+    @functools.cached_property
     def name(self):
         return '<inline asset>' if self.inline else self.url
 
@@ -810,6 +814,7 @@ class JavascriptAsset(WebAsset):
     @property
     def is_transpiled(self):
         if self._is_transpiled is None:
+            from odoo.tools.js_transpiler import is_odoo_module  # noqa: PLC0415
             self._is_transpiled = bool(is_odoo_module(self.url, super().content))
         return self._is_transpiled
 
@@ -818,6 +823,7 @@ class JavascriptAsset(WebAsset):
         content = super().content
         if self.is_transpiled:
             if not self._converted_content:
+                from odoo.tools.js_transpiler import transpile_javascript  # noqa: PLC0415
                 self._converted_content = transpile_javascript(self.url, content)
             return self._converted_content
         return content
@@ -911,18 +917,20 @@ class StylesheetAsset(WebAsset):
     rx_sourceMap = re.compile(r'(/\*# sourceMappingURL=.*)', re.U)
     rx_charset = re.compile(r'(@charset "[^"]+";)', re.U)
 
-    def __init__(self, *args, rtl=False, **kw):
+    def __init__(self, *args, rtl=False, autoprefix=False, **kw):
         self.rtl = rtl
+        self.autoprefix = autoprefix
         super().__init__(*args, **kw)
 
     @property
     def bundle_version(self):
         return self.bundle.get_version('css')
 
-    @func.lazy_property
+    @functools.cached_property
     def unique_descriptor(self):
         direction = (self.rtl and 'rtl') or 'ltr'
-        return f'{self.url or self.inline},{self.last_modified},{direction}'
+        autoprefixed = (self.autoprefix and 'autoprefixed') or ''
+        return f'{self.url or self.inline},{self.last_modified},{direction},{autoprefixed}'
 
     def _fetch_content(self):
         try:
@@ -1032,8 +1040,18 @@ class ScssStylesheetAsset(PreprocessedCSS):
     output_style = 'expanded'
 
     def compile(self, source):
-        if libsass is None:
+        try:
+            import sass as libsass  # noqa: PLC0415
+        except ModuleNotFoundError:
             return super().compile(source)
+
+        def scss_importer(path, *args):
+            *parent_path, file = os.path.split(path)
+            try:
+                parent_path = file_path(os.path.join(*parent_path))
+            except FileNotFoundError:
+                parent_path = file_path(os.path.join(self.bootstrap_path, *parent_path))
+            return [(os.path.join(parent_path, file),)]
 
         try:
             profiler.force_hook()
@@ -1042,6 +1060,7 @@ class ScssStylesheetAsset(PreprocessedCSS):
                 include_paths=[
                     self.bootstrap_path,
                 ],
+                importers=[(0, scss_importer)],
                 output_style=self.output_style,
                 precision=self.precision,
             )

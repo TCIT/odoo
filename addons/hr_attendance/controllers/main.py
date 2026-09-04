@@ -3,11 +3,13 @@
 from odoo.service.common import exp_version
 from odoo import http, _
 from odoo.http import request
-from odoo.osv import expression
+from odoo.exceptions import UserError
+from odoo.fields import Domain
 from odoo.tools import float_round, py_to_js_locale, SQL
 from odoo.tools.image import image_data_uri
 
 import datetime
+from requests.exceptions import RequestException
 
 class HrAttendance(http.Controller):
     @staticmethod
@@ -27,6 +29,7 @@ class HrAttendance(http.Controller):
                 'last_check_in': employee.last_check_in,
                 'attendance_state': employee.attendance_state,
                 'display_systray': employee.company_id.attendance_from_systray,
+                'device_tracking_enabled': employee.company_id.attendance_device_tracking,
             }
         return response
 
@@ -42,29 +45,46 @@ class HrAttendance(http.Controller):
                 'kiosk_delay': employee.company_id.attendance_kiosk_delay * 1000,
                 'attendance': {'check_in': employee.last_attendance_id.check_in,
                                'check_out': employee.last_attendance_id.check_out},
-                'overtime_today': request.env['hr.attendance.overtime'].sudo().search([
-                    ('employee_id', '=', employee.id), ('date', '=', datetime.date.today()),
-                    ('adjustment', '=', False)]).duration or 0,
+                'overtime_today': sum(request.env['hr.attendance.overtime.line'].sudo().search([
+                    ('employee_id', '=', employee.id), ('date', '=', datetime.date.today())]).mapped('duration')) or 0,
                 'use_pin': employee.company_id.attendance_kiosk_use_pin,
-                'display_overtime': employee.company_id.hr_attendance_display_overtime
+                'display_overtime': employee.company_id.hr_attendance_display_overtime,
+                'device_tracking_enabled': employee.company_id.attendance_device_tracking,
             }
         return response
 
     @staticmethod
-    def _get_geoip_response(mode, latitude=False, longitude=False):
-        return {
-            'city': request.geoip.city.name or _('Unknown'),
-            'country_name': request.geoip.country.name or request.geoip.continent.name or _('Unknown'),
+    def _get_geoip_response(mode, latitude=False, longitude=False, device_tracking_enabled=True):
+        response = {'mode': mode}
+
+        if not device_tracking_enabled:
+            return response
+        try:
+            location = request.env['base.geocoder']._get_localisation(latitude, longitude)
+        except (UserError, RequestException):
+            location = _("Unknown")
+
+        response.update({
+            'location': location,
             'latitude': latitude or request.geoip.location.latitude or False,
             'longitude': longitude or request.geoip.location.longitude or False,
             'ip_address': request.geoip.ip,
             'browser': request.httprequest.user_agent.browser,
-            'mode': mode
-        }
+        })
+
+        return response
+
+    @staticmethod
+    def _get_active_company(request):
+        cids = request.httprequest.cookies.get('cids')
+        if cids:
+            return int(cids.split("-")[0])
+
+        return request.env.company
 
     @http.route('/hr_attendance/kiosk_mode_menu/<int:company_id>', auth='user', type='http')
     def kiosk_menu_item_action(self, company_id):
-        if request.env.user.has_group("hr_attendance.group_hr_attendance_manager"):
+        if request.env.user.has_group("hr_attendance.group_hr_attendance_user"):
             # Auto log out will prevent users from forgetting to log out of their session
             # before leaving the kiosk mode open to the public. This is a prevention security
             # measure.
@@ -74,7 +94,44 @@ class HrAttendance(http.Controller):
         else:
             return request.not_found()
 
-    @http.route('/hr_attendance/kiosk_keepalive', auth='user', type='json')
+    @http.route('/hr_attendance/get_employees_without_badge', type='jsonrpc', auth='public')
+    def get_employees_without_badge(self, token, name=None, limit=20):
+        """Fetch only employees without a badge (barcode)."""
+        company = self._get_company(token)
+        if company:
+            domain = Domain([('barcode', '=', False), ('company_id', '=', company.id)])
+            if name:
+                domain = Domain.AND([domain, [('name', 'ilike', name)]])
+            employee_list = request.env['hr.employee'].search_read(
+                domain,
+                ['id', 'name'],
+                limit=limit,
+            )
+            return {'status': 'success', 'employees': employee_list}
+        return {}
+
+    @http.route('/hr_attendance/set_badge', type='jsonrpc', auth='public')
+    def set_badge(self, employee_id, badge, token):
+        company = self._get_company(token)
+        if company:
+            employee = request.env['hr.employee'].browse(employee_id)
+            if employee:
+                employee.write({'barcode': badge})
+                return {'status': 'success'}
+        return {}
+
+    @http.route('/hr_attendance/create_employee', type='jsonrpc', auth='public')
+    def create_employee(self, name, token):
+        company = self._get_company(token)
+        if company:
+            request.env["hr.employee"].create({
+                "name": name,
+                "company_id": company.id,
+            })
+            return True
+        return False
+
+    @http.route('/hr_attendance/kiosk_keepalive', auth='user', type='jsonrpc')
     def kiosk_keepalive(self):
         request.session.touch()
         return {}
@@ -85,17 +142,20 @@ class HrAttendance(http.Controller):
         if not company:
             return request.not_found()
         else:
-            department_list = [{'id': dep["id"],
-                                 'name': dep["name"],
-                                 'count': dep["total_employee"]
-                                 } for dep in request.env['hr.department'].sudo().search_read(domain=[('company_id', '=', company.id)],
-                                                                                              fields=["id",
-                                                                                                      "name",
-                                                                                                      "total_employee"])]
+            department_list = [
+                {"id": dep["id"], "name": dep["name"], "count": dep["total_employee"]}
+                for dep in request.env["hr.department"]
+                .with_context(allowed_company_ids=[company.id])
+                .sudo()
+                .search_read(
+                    domain=[("company_id", "=", company.id)],
+                    fields=["id", "name", "total_employee"],
+                )
+            ]
             has_password = self.has_password()
             if not from_trial_mode and has_password:
                 request.session.logout(keep_db=True)
-            if (from_trial_mode or not has_password):
+            if (from_trial_mode or (not has_password and not request.env.user.is_public)):
                 kiosk_mode = "settings"
             else:
                 kiosk_mode = company.attendance_kiosk_mode
@@ -111,13 +171,14 @@ class HrAttendance(http.Controller):
                         'kiosk_mode': kiosk_mode,
                         'from_trial_mode': from_trial_mode,
                         'barcode_source': company.attendance_barcode_source,
-                        'lang': py_to_js_locale(company.partner_id.lang),
+                        'device_tracking_enabled': company.attendance_device_tracking,
+                        'lang': py_to_js_locale(company.partner_id.lang or company.env.lang),
                         'server_version_info': version_info.get('server_version_info'),
                     },
                 }
             )
 
-    @http.route('/hr_attendance/attendance_employee_data', type="json", auth="public")
+    @http.route('/hr_attendance/attendance_employee_data', type="jsonrpc", auth="public")
     def employee_attendance_data(self, token, employee_id):
         company = self._get_company(token)
         if company:
@@ -126,57 +187,70 @@ class HrAttendance(http.Controller):
                 return self._get_employee_info_response(employee)
         return {}
 
-    @http.route('/hr_attendance/attendance_barcode_scanned', type="json", auth="public")
     def scan_barcode(self, token, barcode):
+        return self.scan_barcode_with_geolocation(token, barcode)
+
+    @http.route('/hr_attendance/attendance_barcode_scanned', type="jsonrpc", auth="public")
+    def scan_barcode_with_geolocation(self, token, barcode, latitude=False, longitude=False):
         company = self._get_company(token)
         if company:
             employee = request.env['hr.employee'].sudo().search([('barcode', '=', barcode), ('company_id', '=', company.id)], limit=1)
             if employee:
-                employee._attendance_action_change(self._get_geoip_response('kiosk'))
+                employee._attendance_action_change(self._get_geoip_response('kiosk', latitude=latitude, longitude=longitude, device_tracking_enabled=company.attendance_device_tracking))
                 return self._get_employee_info_response(employee)
         return {}
 
-    def manual_selection(self, token, employee_id, pin_code):
-        return self.manual_selection_with_geolocation(token, employee_id, pin_code)
-
-    @http.route('/hr_attendance/manual_selection', type="json", auth="public")
-    def manual_selection_with_geolocation(self, token, employee_id, pin_code, latitude=False, longitude=False):
+    @http.route('/hr_attendance/manual_selection', type="jsonrpc", auth="public")
+    def manual_selection(self, token, employee_id, pin_code, latitude=False, longitude=False):
         company = self._get_company(token)
         if company:
             employee = request.env['hr.employee'].sudo().browse(employee_id)
             if employee.company_id == company and ((not company.attendance_kiosk_use_pin) or (employee.pin == pin_code)):
-                employee.sudo()._attendance_action_change(self._get_geoip_response('kiosk', latitude=latitude, longitude=longitude))
+                employee.sudo()._attendance_action_change(self._get_geoip_response('kiosk', latitude=latitude, longitude=longitude, device_tracking_enabled=company.attendance_device_tracking))
                 return self._get_employee_info_response(employee)
         return {}
 
-    @http.route('/hr_attendance/employees_infos', type="json", auth="public")
+    @http.route('/hr_attendance/employees_infos', type="jsonrpc", auth="public")
     def employees_infos(self, token, limit, offset, domain):
+        for condition in domain:
+            if not isinstance(condition, (list, tuple)) or len(condition) != 3:
+                continue
+            field_name, operator, _value = condition  # Force '&' implicit syntax
+            if field_name not in ('name', 'department_id') or operator not in ('=', 'ilike'):
+                raise UserError(_(
+                    "Invalid domain, use 'name' and/or 'department_id' fields "
+                    "with '=' and/or 'ilike' operators.",
+                ))
+
         company = self._get_company(token)
         if company:
-            domain = expression.AND([domain, [('company_id', '=', company.id)]])
+            domain = Domain(domain) & Domain('company_id', '=', company.id)
             employees = request.env['hr.employee'].sudo().search_fetch(domain, ['id', 'display_name', 'job_id'],
                 limit=limit, offset=offset, order="name, id")
             employees_data = [{
                 'id': employee.id,
                 'display_name': employee.display_name,
                 'job_id': employee.job_id.name,
-                'avatar': image_data_uri(employee.avatar_128)
+                'avatar': image_data_uri(employee.avatar_128),
+                'status': employee.attendance_state,
+                'mode': employee.last_attendance_id.in_mode
             } for employee in employees]
             return {'records': employees_data, 'length': request.env['hr.employee'].sudo().search_count(domain)}
         return []
 
-    @http.route('/hr_attendance/systray_check_in_out', type="json", auth="user")
+    @http.route('/hr_attendance/systray_check_in_out', type="jsonrpc", auth="user")
     def systray_attendance(self, latitude=False, longitude=False):
-        employee = request.env.user.employee_id
+        employee = request.env.user.with_company(self._get_active_company(request)).employee_id
         geo_ip_response = self._get_geoip_response(mode='systray',
                                                   latitude=latitude,
-                                                  longitude=longitude)
+                                                  longitude=longitude,
+                                                  device_tracking_enabled=employee.company_id.attendance_device_tracking)
         employee._attendance_action_change(geo_ip_response)
         return self._get_employee_info_response(employee)
 
-    @http.route('/hr_attendance/attendance_user_data', type="json", auth="user", readonly=True)
+    @http.route('/hr_attendance/attendance_user_data', type="jsonrpc", auth="user", readonly=True)
     def user_attendance_data(self):
-        employee = request.env.user.employee_id
+        employee = request.env.user.with_company(self._get_active_company(request)).employee_id
         return self._get_user_attendance_data(employee)
 
     def has_password(self):
@@ -192,23 +266,7 @@ class HrAttendance(http.Controller):
                 ''', user_id=request.env.user.id))
         return bool(request.env.cr.fetchone()[0])
 
-    @http.route('/hr_attendance/is_fresh_db', type="json", auth="public")
-    def is_fresh_db(self, token):
-        company = self._get_company(token)
-        if company:
-            users = request.env['res.users'].sudo().search([])
-            return len(users) == 1 and not users[0].employee_id.barcode
-        return False
-
-    @http.route('/hr_attendance/set_user_barcode', type="json", auth="public")
-    def set_user_barcode(self, token, barcode):
-        company = self._get_company(token)
-        if company and self.is_fresh_db(token):
-            request.env.user.employee_id.barcode = barcode
-            return True
-        return False
-
-    @http.route('/hr_attendance/set_settings', type="json", auth="public")
+    @http.route('/hr_attendance/set_settings', type="jsonrpc", auth="public")
     def set_attendance_settings(self, token, mode):
         company = self._get_company(token)
         if company:

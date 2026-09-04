@@ -344,7 +344,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
 
     def test_constraints(self):
         def assertStatementLineConstraint(statement_line_vals):
-            with self.assertRaises(Exception), self.cr.savepoint():
+            with self.assertRaises(Exception):
                 self.env['account.bank.statement.line'].create(statement_line_vals)
 
         statement_line_vals = {
@@ -390,12 +390,12 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
                 'move_id': st_line.move_id.id,
             },
         ]
-        with self.assertRaises(UserError), self.cr.savepoint():
+        with self.assertRaises(UserError):
             st_line.move_id.write({
                 'line_ids': [(0, 0, vals) for vals in addition_lines_to_create]
             })
 
-        with self.assertRaises(UserError), self.cr.savepoint():
+        with self.assertRaises(UserError):
             st_line.line_ids.create(addition_lines_to_create)
 
     def test_statement_line_move_onchange_1(self):
@@ -690,6 +690,18 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             {'is_valid': True, 'balance_start': False, 'balance_end_real': 100, 'date': False},
             {'is_valid': True, 'balance_start': -5, 'balance_end_real': -15,
              'date': fields.Date.from_string('2020-01-13')},
+        ])
+
+        # computing validity of non-consecutive statement shouldn't affect validity
+        line5 = self.create_bank_transaction(-10, '2020-01-13')
+        statement4 = self.env['account.bank.statement'].create({
+            'line_ids': [Command.set(line5.ids)],
+            'balance_start': -15,
+        })
+        (statement1 + statement4).invalidate_recordset(['is_valid'])
+        self.assertRecordValues(statement1 + statement4, [
+            {'is_valid': True},
+            {'is_valid': True},
         ])
 
         # adding a statement to the first line should make statement1 invalid
@@ -1450,3 +1462,13 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
         reversed_move = self.env['account.move'].browse(reversal['res_id'])
 
         self.assertEqual(reversed_move.partner_id, partner)
+
+    def test_bank_transaction_creation_with_default_journal_entry_date(self):
+        invoice_date_field = self.env['ir.model.fields'].search([('model', '=', 'account.move'), ('name', '=', 'invoice_date')], limit=1)
+        self.env['ir.default'].create({
+            'field_id': invoice_date_field.id,
+            'json_value': '"2023-10-16"',
+        })
+
+        transaction = self.create_bank_transaction(1, '2020-01-10', journal=self.bank_journal_1)
+        assert transaction.date == transaction.move_id.date == fields.Date.from_string('2020-01-10')

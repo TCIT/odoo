@@ -1,15 +1,35 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import Command
-from odoo.addons.sale_loyalty.tests.common import TestSaleCouponCommon
 from odoo.exceptions import ValidationError
+from odoo.fields import Command
+
+from odoo.addons.sale_loyalty.tests.common import TestSaleCouponCommon
 
 
 class TestProgramWithCodeOperations(TestSaleCouponCommon):
     # Test the basic operation (apply_coupon) on an coupon program on which we should
     # apply the reward when the code is correct or remove the reward automatically when the reward is
     # not valid anymore.
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.discount_with_multi_rewards = cls.env['loyalty.program'].create({
+            'name': 'Loyalty program with multiple discount rewards',
+            'program_type': 'coupons',
+            'reward_ids': [
+                Command.create({
+                    'reward_type': 'discount',
+                    'discount_mode': 'percent',
+                    'discount': 20,
+                }),
+                Command.create({
+                    'reward_type': 'discount',
+                    'discount_mode': 'percent',
+                    'discount': 5,
+                }),
+            ],
+        })
 
     def test_program_usability(self):
         # After clicking "Generate coupons", there is no domain so it shows "Match all records".
@@ -51,7 +71,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_A.id,
                 'name': '1 Product A',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -88,7 +107,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_A.id,
                 'name': '1 Product A',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -101,7 +119,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_A.id,
                 'name': '1 Product A',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -142,7 +159,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_C.id,
                 'name': '1 Product C',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -199,7 +215,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.third_product.id,
                 'name': '1 Third Product',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -213,7 +228,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_A.id,
                 'name': '1 Product A',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -229,7 +243,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_B.id,
                 'name': '1 Product B',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -258,7 +271,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_A.id,
                 'name': '1 Product A',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -269,7 +281,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_B.id,
                 'name': '1 Product B',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -309,7 +320,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             Command.create({
                 'product_id': self.product_A.id,
                 'name': '1 Product A',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -363,6 +373,49 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             "The coupon's partner_id should be updated if it was created for a Public User",
         )
 
+    def test_change_reward_on_confirmed_order(self):
+        """Check that changing rewards on a confirmed order restores points on the coupon.
+        Tested flow:
+            - have a coupon program with 2 discount rewards;
+            - have confirmed order;
+            - apply a 10% discount reward, costing 1 point;
+            - change to a 50% discount reward, costing 5 points;
+            - check that there are still 5 points left on the coupon.
+        """
+        program = self.code_promotion_program_with_discount
+        program.update({
+            'rule_ids': [Command.clear()],
+            'reward_ids': [Command.create({
+                'discount': 50,
+                'discount_mode': 'percent',
+                'discount_applicability': 'order',
+                'required_points': 5,
+            })],
+        })
+        discount10, discount50 = program.reward_ids
+
+        self.env['loyalty.generate.wizard'].with_context(active_id=program.id).create({
+            'coupon_qty': 1,
+            'points_granted': 10,
+        }).generate_coupons()
+        coupon = program.coupon_ids
+
+        order = self.empty_order
+        order.order_line = [Command.create({'product_id': self.product_C.id})]
+        order.action_confirm()
+
+        order.order_line.product_updatable = True  # in case `sale_project` is installed
+        order._apply_program_reward(discount10, coupon)
+        reward_line = order.order_line.filtered('is_reward_line')
+        self.assertEqual(order.amount_total, 90, "10% discount should be applied")
+        self.assertEqual(coupon.points, 9, "10% discount reward should use 1 point")
+
+        order.order_line.product_updatable = True  # in case `sale_project` is installed
+        order._apply_program_reward(discount50, coupon)
+        self.assertIn(reward_line, order.order_line, "Reward line should be re-used")
+        self.assertEqual(order.amount_total, 50, "50% discount should be applied")
+        self.assertEqual(coupon.points, 5, "50% discount reward should use 5 points")
+
     def test_edit_and_reapply_promotion_program(self):
         # The flow:
         # 1. Create a program auto applied, giving a fixed amount discount
@@ -390,7 +443,6 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_A.id,
                 'name': '1 Product A',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -411,3 +463,173 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
         self._apply_promo_code(order, 'test')
         # But the above line should not add any reward
         self.assertEqual(len(order.order_line), 2, "You should get a discount line") # product + discount
+
+    def test_reapply_multiple_global_rewards_when_new_discount_greater(self):
+        """ Test applying the maximum reward discount from multiple rewards when the applied
+            coupon discount is lower.
+
+        1. Create a two loyalty program of type `coupons`.
+        2. Add multiple rewards to the second program.
+        3. Generate a coupon for each program.
+        2. Create a sale order and add a product to it.
+        3. Apply the Coupon to the sale order.
+        4. Try to apply the second coupon with multiple rewards.
+        5. Reward with best discount will be shown.
+        """
+        self.code_promotion_program_with_discount.rule_ids.unlink()
+        coupon_1 = self._generate_coupons(self.code_promotion_program_with_discount)
+        coupon_2 = self._generate_coupons(self.discount_with_multi_rewards)
+
+        order = self.empty_order
+        self.assertEqual(order.amount_total, 0.0)
+        order.write({'order_line': [
+            Command.create({
+                'product_id': self.product_A.id,
+                'name': '1 Product A',
+                'product_uom_qty': 1.0,
+            }),
+            Command.create({
+                'product_id': self.product_B.id,
+                'name': '1 Product B',
+                'product_uom_qty': 1.0,
+            }),
+        ]})
+
+        # The order line should be created with the correct price unit
+        self.assertEqual(len(order.order_line.ids), 2)
+        self.assertEqual(order.order_line[0].price_unit, 100.0)
+        self.assertEqual(order.order_line[1].price_unit, 5.0)
+        expected_total = order.amount_total * 0.80
+
+        # Apply the first coupon
+        self._apply_promo_code(order, coupon_1.code)
+        self.assertEqual(len(order.order_line.ids), 3)
+        msg = "The discount line should be the 10% discount on the sale order total."
+        self.assertEqual(order.order_line[2].price_unit, -10.5, msg=msg)
+
+        # Apply the second coupon with multiple rewards
+        self._apply_promo_code(order, coupon_2.code)
+        self.assertEqual(len(order.order_line.ids), 3)
+        msg = "The discount line should be the 20% discount on the sale order total."
+        self.assertEqual(order.order_line[2].price_unit, -21.0, msg=msg)
+        msg = "Order total should reflect the 20% discount"
+        self.assertAlmostEqual(order.amount_total, expected_total, msg=msg)
+
+    def test_reapply_multiple_higher_global_rewards_lets_choose_best(self):
+        """ Test applying the maximum reward discount from multiple rewards when the applied
+            coupon discount is lower.
+
+        1. Create a two loyalty program of type `coupons`.
+        2. Add multiple rewards of higher discount than the applied discount.
+        3. Generate a coupon for each program.
+        2. Create a sale order and add a product to it.
+        3. Apply the Coupon to the sale order.
+        4. Try to apply the second coupon with multiple rewards.
+        5. Reward with max discount will be shown.
+        """
+        self.code_promotion_program_with_discount.rule_ids.unlink()
+        coupon_1 = self._generate_coupons(self.code_promotion_program_with_discount)
+        self.discount_with_multi_rewards.reward_ids[1].discount = 15
+        coupon_2 = self._generate_coupons(self.discount_with_multi_rewards)
+
+        order = self.empty_order
+        self.assertEqual(order.amount_total, 0.0)
+        order.write({'order_line': [
+            Command.create({
+                'product_id': self.product_A.id,
+                'name': '1 Product A',
+                'product_uom_qty': 1.0,
+            })
+        ]})
+
+        # The order line should be created with the correct price unit
+        self.assertEqual(len(order.order_line.ids), 1)
+        self.assertEqual(order.order_line[0].price_unit, 100.0)
+        expected_total = order.amount_total * 0.80
+
+        # Apply the first coupon
+        self._apply_promo_code(order, coupon_1.code)
+        self.assertEqual(len(order.order_line.ids), 2)
+        msg = "The discount line should be the 10% discount on the sale order total."
+        self.assertEqual(order.order_line[1].price_unit, -10.0, msg=msg)
+
+        # Apply the second coupon with multiple rewards of higher discount
+        rewards = self._apply_promo_code(order, coupon_2.code)
+        self.assertEqual(len(rewards), 2)
+
+        # Choose the reward with the maximum discount
+        chosen_reward = rewards.filtered(lambda r: r.discount == 20)
+        order._apply_program_reward(chosen_reward, coupon_2)
+        self.assertEqual(len(order.order_line), 2)
+        msg = "The discount line should be the 20% discount on the sale order total."
+        self.assertEqual(order.order_line[1].price_unit, -20.0, msg=msg)
+        msg = "Order total should reflect the 20% discount"
+        self.assertAlmostEqual(order.amount_total, expected_total, msg=msg)
+
+    def test_reapplying_new_multiple_lower_global_rewards_discount_raise_validation(self):
+        """ Test raising validation when the new coupon discount from multiple rewards
+            is less than the applied coupon discount.
+
+        1. Create a two loyalty program of type `coupons`.
+        2. Add multiple rewards to the second program.
+        3. Generate a coupon for each program.
+        2. Create a sale order and add a product to it.
+        3. Apply the Coupon to the sale order.
+        4. Try to apply the second coupon with multiple rewards.
+        5. Verify that it raises a validation error.
+        """
+        self.code_promotion_program_with_discount.rule_ids.unlink()
+        coupon_1 = self._generate_coupons(self.code_promotion_program_with_discount)
+        self.discount_with_multi_rewards.reward_ids[0].discount = 7
+        coupon_2 = self._generate_coupons(self.discount_with_multi_rewards)
+
+        order = self.empty_order
+        self.assertEqual(order.amount_total, 0.0)
+        order.write({'order_line': [
+            Command.create({
+                'product_id': self.product_A.id,
+                'name': '1 Product A',
+                'product_uom_qty': 1.0,
+            })
+        ]})
+
+        # The order line should be created with the correct price unit
+        self.assertEqual(len(order.order_line.ids), 1)
+        self.assertEqual(order.order_line[0].price_unit, 100.0)
+
+        # Apply the first coupon
+        self._apply_promo_code(order, coupon_1.code)
+        msg = "The discount line should be the 10% discount on the sale order total."
+        self.assertEqual(order.order_line[1].price_unit, -10.0, msg=msg)
+        self.assertEqual(len(order.order_line.ids), 2)
+
+        # raise validation error when applying the second coupon with multiple rewards
+        # with a discount lower than the applied coupon discount
+        msg = "The new coupon discount should be greater than the applied coupon discount"
+        with self.assertRaises(ValidationError, msg=msg):
+            self._apply_promo_code(order, coupon_2.code)
+
+    def test_re_apply_not_claimed_coupon_code(self):
+        promo_code_program = self.env["loyalty.program"].create({
+            "name": "promo code program",
+            "program_type": "promo_code",
+            "applies_on": "current",
+            "trigger": "with_code",
+            "rule_ids": [Command.create({"mode": "with_code", "code": "10%_discount"})],
+            "reward_ids": [Command.create({"reward_type": "discount", "discount": 10})],
+        })
+        order = self.empty_order
+        order.write({"order_line": [Command.create({"product_id": self.product_A.id})]})
+        coupon_wizard = self.env["sale.loyalty.coupon.wizard"].create({
+            "order_id": order.id,
+            "coupon_code": "10%_discount",
+        })
+        reward_wizard_action = coupon_wizard.action_apply()
+        self.assertIn(
+            promo_code_program.reward_ids.id, reward_wizard_action["context"]["default_reward_ids"]
+        )
+        # retry the same code, should work since the reward is not claimed but discarded
+        reward_wizard_action = coupon_wizard.action_apply()
+        self.assertIn(
+            promo_code_program.reward_ids.id, reward_wizard_action["context"]["default_reward_ids"]
+        )

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add('website_sale_fiscal_position_portal_tour', {
@@ -23,6 +21,7 @@ registry.category("web_tour.tours").add('website_sale_fiscal_position_public_tou
             content: "Change Pricelist",
             trigger: ".dropdown-item:contains('EUROPE EUR')",
             run: 'click',
+            expectUnloadPage: true,
         },
         {
             content: "Check price",

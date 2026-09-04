@@ -44,21 +44,11 @@ export const viewService = {
     dependencies: ["orm"],
     async: ["loadViews"],
     start(env, { orm }) {
-        let cache = {};
-
-        function clearCache() {
-            cache = {};
-            const processedArchs = registry.category("__processed_archs__");
-            processedArchs.content = {};
-            processedArchs.trigger("UPDATE");
-        }
-
-        env.bus.addEventListener("CLEAR-CACHES", clearCache);
         rpcBus.addEventListener("RPC:RESPONSE", (ev) => {
             const { model, method } = ev.detail.data.params;
             if (["ir.ui.view", "ir.filters"].includes(model)) {
                 if (UPDATE_METHODS.includes(method)) {
-                    clearCache();
+                    rpcBus.trigger("CLEAR-CACHES", "get_views");
                 }
             }
         });
@@ -96,46 +86,37 @@ export const viewService = {
             if (env.isSmall) {
                 loadViewsOptions.mobile = true;
             }
+            if (env.debug) {
+                loadViewsOptions.debug = true;
+            }
             const filteredContext = Object.fromEntries(
                 Object.entries(context || {}).filter(
                     ([k, v]) => k == "lang" || k.endsWith("_view_ref")
                 )
             );
 
-            const key = JSON.stringify([resModel, views, filteredContext, loadViewsOptions]);
-            if (!cache[key]) {
-                cache[key] = orm
-                    .call(resModel, "get_views", [], {
-                        context: filteredContext,
-                        views,
-                        options: loadViewsOptions,
-                    })
-                    .then((result) => {
-                        const { models, views } = result;
-                        const viewDescriptions = {
-                            fields: models[resModel].fields,
-                            relatedModels: models,
-                            views: {},
-                        };
-                        for (const viewType in views) {
-                            const { arch, toolbar, id, filters, custom_view_id } = views[viewType];
-                            const viewDescription = { arch, id, custom_view_id };
-                            if (toolbar) {
-                                viewDescription.actionMenus = toolbar;
-                            }
-                            if (filters) {
-                                viewDescription.irFilters = filters;
-                            }
-                            viewDescriptions.views[viewType] = viewDescription;
-                        }
-                        return viewDescriptions;
-                    })
-                    .catch((error) => {
-                        delete cache[key];
-                        return Promise.reject(error);
-                    });
+            const result = await orm.cache({ type: "disk" }).call(resModel, "get_views", [], {
+                context: filteredContext,
+                views,
+                options: loadViewsOptions,
+            });
+            const viewDescriptions = {
+                fields: result.models[resModel].fields,
+                relatedModels: result.models,
+                views: {},
+            };
+            for (const viewType in result.views) {
+                const { arch, toolbar, id, filters, custom_view_id } = result.views[viewType];
+                const viewDescription = { arch, id, custom_view_id };
+                if (toolbar) {
+                    viewDescription.actionMenus = toolbar;
+                }
+                if (filters) {
+                    viewDescription.irFilters = filters;
+                }
+                viewDescriptions.views[viewType] = viewDescription;
             }
-            return cache[key];
+            return viewDescriptions;
         }
         return { loadViews };
     },

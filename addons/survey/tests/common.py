@@ -5,7 +5,7 @@ import datetime
 import re
 
 from collections import Counter
-from contextlib import contextmanager
+from contextlib import nullcontext
 
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.tests import common
@@ -164,16 +164,18 @@ class SurveyCase(common.TransactionCase):
     def _access_start(self, survey):
         return self.url_open('/survey/start/%s' % survey.access_token)
 
-    def _access_page(self, survey, token):
-        return self.url_open('/survey/%s/%s' % (survey.access_token, token))
+    def _access_page(self, survey, token, query_count=None):
+        with self.assertQueryCount(query_count) if query_count else nullcontext():
+            return self.url_open('/survey/%s/%s' % (survey.access_token, token))
 
     def _access_begin(self, survey, token):
-        url = survey.get_base_url() + '/survey/begin/%s/%s' % (survey.access_token, token)
-        return self.opener.post(url=url, json={})
+        url = survey.get_base_url() + f'/survey/begin/{survey.access_token}/{token}'
+        return self.url_open(url, json={'params': {'lang_code': 'en_US'}})
 
-    def _access_submit(self, survey, token, post_data):
+    def _access_submit(self, survey, token, post_data, query_count=None):
         url = survey.get_base_url() + '/survey/submit/%s/%s' % (survey.access_token, token)
-        return self.opener.post(url=url, json={'params': post_data})
+        with self.assertQueryCount(query_count) if query_count else nullcontext():
+            return self.url_open(url, json={'params': post_data})
 
     def _find_csrf_token(self, text):
         csrf_token_re = re.compile("(input.+csrf_token.+value=\")([a-f0-9]{40}o[0-9]*)", re.MULTILINE)
@@ -196,14 +198,15 @@ class SurveyCase(common.TransactionCase):
             post_data[question.id] = str(values)
         return post_data
 
-    def _answer_question(self, question, answer, answer_token, csrf_token, button_submit='next'):
+    def _answer_question(self, question, answer, answer_token, csrf_token, button_submit='next',
+                         submit_query_count=None, access_page_query_count=None):
         # Employee submits the question answer
         post_data = self._format_submission_data(question, answer, {'csrf_token': csrf_token, 'token': answer_token, 'button_submit': button_submit})
-        response = self._access_submit(question.survey_id, answer_token, post_data)
+        response = self._access_submit(question.survey_id, answer_token, post_data, query_count=submit_query_count)
         self.assertResponse(response, 200)
 
         # Employee is redirected on next question
-        response = self._access_page(question.survey_id, answer_token)
+        response = self._access_page(question.survey_id, answer_token, query_count=access_page_query_count)
         self.assertResponse(response, 200)
 
     def _answer_page(self, page, answers, answer_token, csrf_token):
@@ -244,7 +247,7 @@ class SurveyCase(common.TransactionCase):
 
     def _create_one_question_per_type(self):
         all_questions = self.env['survey.question']
-        for (question_type, dummy) in self.env['survey.question']._fields['question_type'].selection:
+        for (question_type, _dummy) in self.env['survey.question']._fields['question_type'].selection:
             kwargs = {}
             if question_type == 'multiple_choice':
                 kwargs['labels'] = [{'value': 'MChoice0'}, {'value': 'MChoice1'}]
@@ -259,7 +262,7 @@ class SurveyCase(common.TransactionCase):
 
     def _create_one_question_per_type_with_scoring(self):
         all_questions = self.env['survey.question']
-        for (question_type, dummy) in self.env['survey.question']._fields['question_type'].selection:
+        for (question_type, _dummy) in self.env['survey.question']._fields['question_type'].selection:
             kwargs = {}
             kwargs['question_type'] = question_type
             if question_type == 'numerical_box':
@@ -301,7 +304,7 @@ class TestSurveyCommon(SurveyCase):
         """ Create test data: a survey with some pre-defined questions and various test users for ACL """
         cls.survey_manager = mail_new_test_user(
             cls.env, name='Gustave Doré', login='survey_manager', email='survey.manager@example.com',
-            groups='survey.group_survey_manager,base.group_user'
+            groups='survey.group_survey_manager,base.group_user', tz='Europe/Brussels',
         )
 
         cls.survey_user = mail_new_test_user(

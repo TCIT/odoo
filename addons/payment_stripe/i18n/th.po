@@ -1,27 +1,30 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_stripe
-# 
+# * payment_stripe
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Martin Trigaux, 2018
+# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2018
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-07 06:44+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-19/"
+"payment_stripe/th/>\n"
+"Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/payment_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/payment_form.js:0
 msgid "Cannot display the payment form"
 msgstr "ไม่สามารถแสดงแบบฟอร์มการชำระเงินได้"
 
@@ -36,16 +39,17 @@ msgid "Connect Stripe"
 msgstr "เชื่อมต่อ Stripe"
 
 #. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-msgid "Could not establish the connection to the API."
-msgstr "ไม่สามารถสร้างการเชื่อมต่อกับ API ได้"
-
-#. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/express_checkout_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/express_checkout.js:0
 msgid "Delivery"
 msgstr "การจัดส่ง"
+
+#. module: payment_stripe
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_token__display_name
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "แสดงชื่อ"
 
 #. module: payment_stripe
 #: model_terms:ir.ui.view,arch_db:payment_stripe.payment_provider_form
@@ -54,7 +58,7 @@ msgstr "เปิดใช้งาน Apple Pay"
 
 #. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/express_checkout_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/express_checkout.js:0
 msgid "Free Shipping"
 msgstr "จัดส่งฟรี"
 
@@ -69,26 +73,26 @@ msgid "Get your Secret and Publishable keys"
 msgstr "รับคีย์ลับและคีย์ที่เผยแพร่ได้ของคุณ"
 
 #. module: payment_stripe
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_token__id
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_transaction__id
+msgid "ID"
+msgstr "ไอดี"
+
+#. module: payment_stripe
 #: model:ir.model.fields,help:payment_stripe.field_payment_provider__stripe_webhook_secret
 msgid ""
 "If a webhook is enabled on your Stripe account, this signing secret must be "
 "set to authenticate the messages sent from Stripe to Odoo."
 msgstr ""
-"หากเปิดใช้งานเว็บฮุคในบัญชี Stripe ของคุณ "
-"ต้องตั้งค่าความลับในการลงนามนี้เพื่อตรวจสอบสิทธิ์ข้อความที่ส่งจาก Stripe "
-"ไปยัง Odoo"
+"หากเปิดใช้งานเว็บฮุคในบัญชี Stripe ของคุณ ต้องตั้งค่าความลับในการลงนามนี้เพื่อตรวจสอบสิทธิ์ข้อควา"
+"มที่ส่งจาก Stripe ไปยัง Odoo"
 
 #. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/payment_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/payment_form.js:0
 msgid "Incorrect payment details"
 msgstr "รายละเอียดการชำระเงินไม่ถูกต้อง"
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "ไม่พบธุรกรรมที่ตรงกับการอ้างอิง %s"
 
 #. module: payment_stripe
 #. odoo-python
@@ -118,7 +122,7 @@ msgstr "ธุรกรรมสำหรับการชำระเงิน
 
 #. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/payment_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/payment_form.js:0
 msgid "Payment processing failed"
 msgstr "การประมวลผลการชำระเงินล้มเหลว"
 
@@ -136,20 +140,14 @@ msgstr "คีย์ที่เผยแพร่ได้"
 #. module: payment_stripe
 #. odoo-python
 #: code:addons/payment_stripe/models/payment_transaction.py:0
-msgid "Received data with invalid intent status: %s"
-msgstr "ได้รับข้อมูลที่มีสถานะเจตนาที่ไม่ถูกต้อง: %s"
+msgid "Received data with invalid intent status: %s."
+msgstr ""
 
 #. module: payment_stripe
 #. odoo-python
 #: code:addons/payment_stripe/models/payment_transaction.py:0
 msgid "Received data with missing intent status."
 msgstr "ได้รับข้อมูลโดยไม่มีมีสถานะเจตนา"
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_transaction.py:0
-msgid "Received data with missing merchant reference"
-msgstr "ได้รับข้อมูลโดยไม่มีเอกสารอ้างอิงจากผู้ขาย"
 
 #. module: payment_stripe
 #: model:ir.model.fields,field_description:payment_stripe.field_payment_provider__stripe_secret_key
@@ -168,8 +166,7 @@ msgid ""
 "Stripe Connect is not available in your country, please use another payment "
 "provider."
 msgstr ""
-"Stripe Connect ไม่สามารถใช้งานได้ในประเทศของคุณ "
-"โปรดใช้ผู้ให้บริการชำระเงินรายอื่น"
+"Stripe Connect ไม่สามารถใช้งานได้ในประเทศของคุณ โปรดใช้ผู้ให้บริการชำระเงินรายอื่น"
 
 #. module: payment_stripe
 #: model:ir.model.fields,field_description:payment_stripe.field_payment_token__stripe_mandate
@@ -180,37 +177,6 @@ msgstr "ข้อบังคับ Stripe"
 #: model:ir.model.fields,field_description:payment_stripe.field_payment_token__stripe_payment_method
 msgid "Stripe Payment Method ID"
 msgstr "ไอดีวิธีการชำระเงิน Stripe"
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-msgid "Stripe Proxy error: %(error)s"
-msgstr "ข้อผิดพลาด Stripe Proxy: %(error)s"
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-msgid "Stripe Proxy: An error occurred when communicating with the proxy."
-msgstr "Stripe Proxy: เกิดข้อผิดพลาดขณะสื่อสารกับพร็อกซี"
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-msgid "Stripe Proxy: Could not establish the connection."
-msgstr "Stripe Proxy: ไม่สามารถสร้างการเชื่อมต่อได้"
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-#: code:addons/payment_stripe/models/payment_transaction.py:0
-msgid ""
-"The communication with the API failed.\n"
-"Stripe gave us the following info about the problem:\n"
-"'%s'"
-msgstr ""
-"การสื่อสารกับ API ล้มเหลว\n"
-"Stripe ให้ข้อมูลเกี่ยวกับปัญหาดังต่อไปนี้:\n"
-"'%s'"
 
 #. module: payment_stripe
 #. odoo-python
@@ -230,20 +196,13 @@ msgid ""
 "The refund did not go through. Please log into your Stripe Dashboard to get "
 "more information on that matter, and address any accounting discrepancies."
 msgstr ""
-"การคืนเงินไม่สำเร็จ โปรดเข้าสู่ระบบแดชบอร์ด Stripe "
-"ของคุณเพื่อรับข้อมูลเพิ่มเติมเกี่ยวกับเรื่องนั้น "
-"และแก้ไขความคลาดเคลื่อนทางบัญชี"
+"การคืนเงินไม่สำเร็จ โปรดเข้าสู่ระบบแดชบอร์ด Stripe ของคุณเพื่อรับข้อมูลเพิ่มเติมเกี่ยวกับเรื่องนั้น แ"
+"ละแก้ไขความคลาดเคลื่อนทางบัญชี"
 
 #. module: payment_stripe
 #: model:ir.model.fields,help:payment_stripe.field_payment_provider__code
 msgid "The technical code of this payment provider."
 msgstr "รหัสทางเทคนิคของผู้ให้บริการชำระเงินรายนี้"
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_transaction.py:0
-msgid "The transaction is not linked to a token."
-msgstr "ธุรกรรมไม่ได้เชื่อมโยงกับโทเค็น"
 
 #. module: payment_stripe
 #. odoo-python
@@ -274,21 +233,19 @@ msgstr ""
 #. odoo-python
 #: code:addons/payment_stripe/models/payment_provider.py:0
 msgid ""
-"You cannot set the provider state to Enabled until your onboarding to Stripe"
-" is completed."
+"You cannot set the provider state to Enabled until your onboarding to Stripe "
+"is completed."
 msgstr ""
-"คุณไม่สามารถตั้งค่าสถานะผู้ให้บริการเป็นเปิดใช้งานได้จนกว่าการเริ่มต้นใช้งาน"
-" Stripe จะเสร็จสมบูรณ์"
+"คุณไม่สามารถตั้งค่าสถานะผู้ให้บริการเป็นเปิดใช้งานได้จนกว่าการเริ่มต้นใช้งาน Stripe จะเสร็จสมบูรณ์"
 
 #. module: payment_stripe
 #. odoo-python
 #: code:addons/payment_stripe/models/payment_provider.py:0
 msgid ""
-"You cannot set the provider to Test Mode while it is linked with your Stripe"
-" account."
+"You cannot set the provider to Test Mode while it is linked with your Stripe "
+"account."
 msgstr ""
-"คุณไม่สามารถตั้งค่าผู้ให้บริการเป็นโหมดทดสอบในขณะที่เชื่อมโยงกับบัญชี Stripe"
-" ของคุณได้"
+"คุณไม่สามารถตั้งค่าผู้ให้บริการเป็นโหมดทดสอบในขณะที่เชื่อมโยงกับบัญชี Stripe ของคุณได้"
 
 #. module: payment_stripe
 #. odoo-python
@@ -298,7 +255,7 @@ msgstr "เว็บฮุค Stripe ของคุณได้รับกา�
 
 #. module: payment_stripe
 #. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/express_checkout_form.js:0
+#: code:addons/payment_stripe/static/src/interactions/express_checkout.js:0
 msgid "Your order"
 msgstr "คำสั่งของคุณ"
 
@@ -307,3 +264,9 @@ msgstr "คำสั่งของคุณ"
 #: code:addons/payment_stripe/models/payment_provider.py:0
 msgid "Your web domain was successfully verified."
 msgstr "โดเมนเว็บของคุณได้รับการยืนยันเรียบร้อยแล้ว"
+
+#~ msgid "Payment Acquirer"
+#~ msgstr "ผู้รับชำระ"
+
+#~ msgid "Provider"
+#~ msgstr "ผู้ให้บริการ"

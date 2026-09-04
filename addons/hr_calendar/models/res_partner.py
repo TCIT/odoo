@@ -6,24 +6,20 @@ from collections import defaultdict
 from functools import reduce
 
 from odoo import api, models
+from odoo.fields import Domain
+from odoo.tools.intervals import Intervals
 
-from odoo.osv import expression
-from odoo.addons.resource.models.utils import Intervals
 
-
-class Partner(models.Model):
-    _inherit = ['res.partner']
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
 
     def _get_employees_from_attendees(self, everybody=False):
-        domain = [
-            ('company_id', 'in', self.env.companies.ids),
-            ('work_contact_id', '!=', False),
-        ]
+        domain = (
+            Domain('company_id', 'in', self.env.companies.ids)
+            & Domain('work_contact_id', '!=', False)
+        )
         if not everybody:
-            domain = expression.AND([
-                domain,
-                [('work_contact_id', 'in', self.ids)]
-            ])
+            domain &= Domain('work_contact_id', 'in', self.ids)
         return dict(self.env['hr.employee'].sudo()._read_group(domain, groupby=['work_contact_id'], aggregates=['id:recordset']))
 
     def _get_schedule(self, start_period, stop_period, everybody=False, merge=True):
@@ -45,19 +41,19 @@ class Partner(models.Model):
             return {}
         interval_by_calendar = defaultdict()
         calendar_periods_by_employee = defaultdict(list)
-        employees_by_calendar = defaultdict(list)
+        resources_by_calendar = defaultdict(lambda: self.env['resource.resource'])
 
         # Compute employee's calendars's period and order employee by his involved calendars
         employees = sum(employees_by_partner.values(), start=self.env['hr.employee'])
         calendar_periods_by_employee = employees._get_calendar_periods(start_period, stop_period)
         for employee, calendar_periods in calendar_periods_by_employee.items():
-            for (start, stop, calendar) in calendar_periods:
-                employees_by_calendar[calendar].append(employee)
+            for _start, _stop, calendar in calendar_periods:
+                calendar = calendar or self.env.company.resource_calendar_id
+                resources_by_calendar[calendar] += employee.resource_id
 
         # Compute all work intervals per calendar
-        for calendar, employees in employees_by_calendar.items():
-            calendar = calendar or self.env.company.resource_calendar_id # No calendar if fully flexible
-            work_intervals = calendar._work_intervals_batch(start_period, stop_period, resources=employees, tz=timezone(calendar.tz))
+        for calendar, resources in resources_by_calendar.items():
+            work_intervals = calendar._work_intervals_batch(start_period, stop_period, resources=resources, tz=timezone(calendar.tz))
             del work_intervals[False]
             # Merge all employees intervals to avoid to compute it multiples times
             if merge:
@@ -75,7 +71,7 @@ class Partner(models.Model):
                 if merge:
                     calendar_interval = interval_by_calendar[calendar]
                 else:
-                    calendar_interval = interval_by_calendar[calendar][employee.id]
+                    calendar_interval = interval_by_calendar[calendar][employee.resource_id.id]
                 employee_interval = employee_interval | (calendar_interval & interval)
             schedule_by_employee[employee] = employee_interval
 

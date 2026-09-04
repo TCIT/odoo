@@ -21,7 +21,7 @@ class StockMove(models.Model):
                 date=order.date_order,
             )
 
-        uom_precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        uom_precision_digits = self.env['decimal.precision'].precision_get('Product Unit')
         if float_is_zero(self.quantity, precision_digits=uom_precision_digits):
             return 0.0
 
@@ -40,16 +40,17 @@ class StockMove(models.Model):
         """ Generate the sale.line creation value from the current stock move """
         self.ensure_one()
 
+        order = order.sudo()
         fpos = order.fiscal_position_id or order.fiscal_position_id._get_fiscal_position(order.partner_id)
-        product_taxes = self.product_id.taxes_id._filter_taxes_by_company(order.company_id)
+        product_taxes = self.product_id.sudo().taxes_id._filter_taxes_by_company(order.company_id)
         taxes = fpos.map_tax(product_taxes)
 
         return {
             'order_id': order.id,
-            'name': self.name,
+            'name': self.reference,
             'sequence': last_sequence,
             'price_unit': price,
-            'tax_id': [x.id for x in taxes],
+            'tax_ids': [x.id for x in taxes],
             'discount': 0.0,
             'product_id': self.product_id.id,
             'product_uom_qty': self.product_uom_qty,
@@ -67,3 +68,10 @@ class StockMove(models.Model):
             **super()._assign_picking_values(picking),
             'project_id': self[:1].sale_line_id.order_id.project_id.id,
         }
+
+    def _prepare_procurement_values(self):
+        res = super()._prepare_procurement_values()
+        project = self.sale_line_id.order_id.project_id
+        if project:
+            res['project_id'] = project.id
+        return res

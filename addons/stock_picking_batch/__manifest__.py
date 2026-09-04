@@ -4,7 +4,7 @@
 {
     'name': 'Warehouse Management: Batch Transfer',
     'version': '1.0',
-    'category': 'Inventory/Inventory',
+    'category': 'Supply Chain/Inventory',
     'description': """
 This module adds the batch transfer option in warehouse management
 ==================================================================
@@ -28,9 +28,11 @@ This module adds the batch transfer option in warehouse management
         'data/stock_picking_batch_demo.xml',
     ],
     'installable': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
     'assets': {
         'web.assets_backend': [
+            'stock_picking_batch/static/src/js/stock_picking_many2many_field.js',
             'stock_picking_batch/static/src/scss/*.scss',
         ],
         'web.assets_tests': [

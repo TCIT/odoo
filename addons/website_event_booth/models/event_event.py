@@ -4,7 +4,7 @@
 from odoo import api, fields, models, _
 
 
-class Event(models.Model):
+class EventEvent(models.Model):
     _inherit = 'event.event'
 
     exhibition_map = fields.Image(string='Exhibition Map', max_width=1024, max_height=1024)
@@ -33,22 +33,27 @@ class Event(models.Model):
     def toggle_booth_menu(self, val):
         self.booth_menu = val
 
+    def copy_event_menus(self, old_events):
+        super().copy_event_menus(old_events)
+        for new_event in self:
+            new_event.booth_menu_ids.menu_id.parent_id = new_event.menu_id
+
     def _get_menu_update_fields(self):
-        return super(Event, self)._get_menu_update_fields() + ['booth_menu']
+        return super()._get_menu_update_fields() + ['booth_menu']
 
     def _update_website_menus(self, menus_update_by_field=None):
-        super(Event, self)._update_website_menus(menus_update_by_field=menus_update_by_field)
+        super()._update_website_menus(menus_update_by_field=menus_update_by_field)
         for event in self:
             if event.menu_id and (not menus_update_by_field or event in menus_update_by_field.get('booth_menu')):
                 event._update_website_menu_entry('booth_menu', 'booth_menu_ids', 'booth')
 
     def _get_menu_type_field_matching(self):
-        res = super(Event, self)._get_menu_type_field_matching()
+        res = super()._get_menu_type_field_matching()
         res['booth'] = 'booth_menu'
         return res
 
     def _get_website_menu_entries(self):
         self.ensure_one()
-        return super(Event, self)._get_website_menu_entries() + [
-            (_('Get A Booth'), '/event/%s/booth' % self.env['ir.http']._slug(self), False, 90, 'booth')
+        return super()._get_website_menu_entries() + [
+            (_('Become exhibitor'), '/event/%s/booth' % self.env['ir.http']._slug(self), False, 90, 'booth', False)
         ]

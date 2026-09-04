@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
+
 from odoo import api, fields, models
 from odoo.http import request
 
@@ -7,13 +7,12 @@ from odoo.http import request
 class ProductWishlist(models.Model):
     _name = 'product.wishlist'
     _description = 'Product Wishlist'
-    _sql_constraints = [
-        ("product_unique_partner_id",
-         "UNIQUE(product_id, partner_id)",
-         "Duplicated wishlisted product for this partner."),
-    ]
+    _product_unique_partner_id = models.Constraint(
+        'UNIQUE(product_id, partner_id)',
+        'Duplicated wishlisted product for this partner.',
+    )
 
-    partner_id = fields.Many2one('res.partner', string='Owner')
+    partner_id = fields.Many2one('res.partner', string='Owner', index='btree_not_null')
     product_id = fields.Many2one('product.product', string='Product', required=True)
     currency_id = fields.Many2one('res.currency', related='website_id.currency_id', readonly=True)
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', help='Pricelist when added')
@@ -36,7 +35,7 @@ class ProductWishlist(models.Model):
         return wish.filtered(
             lambda wish:
                 wish.sudo().product_id.product_tmpl_id.website_published
-                and wish.sudo().product_id.product_tmpl_id._can_be_added_to_cart()
+                and wish.sudo().product_id.product_tmpl_id._is_add_to_cart_possible()
         )
 
     @api.model

@@ -3,24 +3,26 @@
 {
     'name': "Spreadsheet",
     'version': '1.0',
-    'category': 'Hidden',
+    'category': 'Productivity/Dashboard',
     'summary': 'Spreadsheet',
     'description': 'Spreadsheet',
     'depends': ['bus', 'web', 'portal'],
     'installable': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
     'data': [
         'views/public_readonly_spreadsheet_templates.xml',
     ],
     'assets': {
-        'spreadsheet.dependencies': [
-            'web/static/lib/Chart/Chart.js',
-            'web/static/lib/chartjs-adapter-luxon/chartjs-adapter-luxon.js',
+        'web.chartjs_lib' : [
+            'spreadsheet/static/lib/chartjs-chart-geo/chartjs-chart-geo.js',
+            'spreadsheet/static/lib/chart_js_treemap.js',
         ],
         'spreadsheet.o_spreadsheet': [
             'web/static/src/views/graph/graph_model.js',
             'web/static/src/views/pivot/pivot_model.js',
             'web/static/src/polyfills/clipboard.js',
+            ('include', 'web.chartjs_lib'),
             'spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js',
             'spreadsheet/static/src/**/*.js',
             # Load all o_spreadsheet templates first to allow to inherit them
@@ -66,9 +68,11 @@
             'web/static/src/env.js',
             'web/static/src/core/**/*.js',
             ('remove', 'web/static/src/core/emoji_picker/emoji_data.js'),
-            ('include', 'spreadsheet.dependencies'),
+            ('include', 'web.chartjs_lib'),
             'spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js',
             'spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml',
+            'spreadsheet/static/src/o_spreadsheet/o_spreadsheet_variables.scss',
+            'spreadsheet/static/src/o_spreadsheet/o_spreadsheet.scss',
             'spreadsheet/static/src/o_spreadsheet/icons.xml',
             'spreadsheet/static/src/o_spreadsheet/o_spreadsheet_extended.scss',
             'spreadsheet/static/src/o_spreadsheet/migration.js',
@@ -76,6 +80,8 @@
             'spreadsheet/static/src/pivot/pivot_helpers.js',
             'spreadsheet/static/src/o_spreadsheet/odoo_module.js',
             'spreadsheet/static/src/helpers/helpers.js',
+            'spreadsheet/static/src/o_spreadsheet/cancelled_reason.js',
+            'spreadsheet/static/src/logging/**/*',
             'spreadsheet/static/src/public_readonly_app/**/*.xml',
             'spreadsheet/static/src/public_readonly_app/**/*.scss',
             'spreadsheet/static/src/public_readonly_app/**/*',
@@ -83,10 +89,12 @@
             'spreadsheet/static/src/plugins.js',
         ],
         'web.assets_backend': [
+            'spreadsheet/static/src/o_spreadsheet/o_spreadsheet_variables.scss',
             'spreadsheet/static/src/**/*.scss',
             'spreadsheet/static/src/assets_backend/**/*',
             ('remove', 'spreadsheet/static/src/public_readonly_app/**/*.scss'),
             ('remove', 'spreadsheet/static/src/**/*.dark.scss'),
+            ('remove', 'spreadsheet/static/src/print_assets/**/*'),
         ],
         "web.assets_web_dark": [
             'spreadsheet/static/src/**/*.dark.scss',

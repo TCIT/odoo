@@ -11,11 +11,26 @@ class PurchaseOrder(models.Model):
         "Number of Source Sale",
         compute='_compute_sale_order_count',
         groups='sales_team.group_sale_salesman')
+    has_sale_order = fields.Boolean(
+        "Technical field for whether the purchase order has associated sale orders",
+        compute='_compute_sale_order_count',
+        groups='sales_team.group_sale_salesman')
 
     @api.depends('order_line.sale_order_id')
     def _compute_sale_order_count(self):
         for purchase in self:
             purchase.sale_order_count = len(purchase._get_sale_orders())
+            purchase.has_sale_order = bool(purchase.sale_order_count)
+
+    @api.depends('order_line.sale_order_id.partner_shipping_id')
+    def _compute_dest_address_id(self):
+        super()._compute_dest_address_id()
+        for po in self:
+            if not po._should_set_dest_address():
+                continue
+            sale_orders = po._get_sale_orders()
+            if len(sale_orders.partner_shipping_id) == 1:
+                po.dest_address_id = sale_orders.partner_shipping_id
 
     def action_view_sale_orders(self):
         self.ensure_one()
@@ -66,9 +81,13 @@ class PurchaseOrder(models.Model):
                     'purchase_order_lines': purchase_order_lines,
             })
 
+    def _should_set_dest_address(self):
+        self.ensure_one()
+        return bool(self.dest_address_id)
+
 
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    sale_order_id = fields.Many2one(related='sale_line_id.order_id', string="Sale Order", store=True, readonly=True)
+    sale_order_id = fields.Many2one(related='sale_line_id.order_id', string="Sale Order")
     sale_line_id = fields.Many2one('sale.order.line', string="Origin Sale Item", index='btree_not_null', copy=False)

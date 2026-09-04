@@ -3,7 +3,7 @@
 
 {
     'name': 'Project',
-    'version': '1.3',
+    'version': '1.4',
     'website': 'https://www.odoo.com/app/project',
     'category': 'Services/Project',
     'sequence': 45,
@@ -35,6 +35,7 @@
         'views/project_task_type_views.xml',
         'views/project_project_views.xml',
         'views/project_task_views.xml',
+        'views/project_role_views.xml',
         'views/project_tags_views.xml',
         'views/project_milestone_views.xml',
         'views/res_partner_views.xml',
@@ -53,7 +54,9 @@
         'data/project_data.xml',
         'data/project_tour.xml',
         'wizard/project_task_type_delete_views.xml',
+        'wizard/project_task_share_wizard_views.xml',
         'wizard/project_project_stage_delete_views.xml',
+        'wizard/project_template_create_wizard.xml',
         'views/project_menus.xml',
     ],
     'demo': [
@@ -63,11 +66,13 @@
     'installable': True,
     'application': True,
     'post_init_hook': '_project_post_init',
+    'uninstall_hook': '_project_uninstall_hook',
     'assets': {
         'web.assets_backend': [
             'project/static/src/css/project.css',
             'project/static/src/core/web/**/*',
             'project/static/src/utils/**/*',
+            'project/static/src/actions/client_actions.js',
             'project/static/src/components/**/*',
             'project/static/src/views/**/*',
             'project/static/src/js/tours/project.js',
@@ -75,30 +80,38 @@
             'project/static/src/scss/project_form.scss',
             'project/static/src/scss/project_widgets.scss',
             'project/static/src/xml/**/*',
+            ('remove', 'project/static/src/views/project_task_activity/**'),
             ('remove', 'project/static/src/views/project_task_graph/**'),
             ('remove', 'project/static/src/views/project_task_pivot/**'),
+            ('remove', 'project/static/src/views/project_task_analysis_renderer_mixin.js'),
+            ('remove', 'project/static/src/views/project_task_analysis_graph/**'),
+            ('remove', 'project/static/src/views/project_task_analysis_pivot/**'),
             ('remove', 'project/static/src/views/burndown_chart/**'),
+            ('remove', 'project/static/src/**/*.dark.scss'),
+            ('remove', 'project/static/src/views/project_project_activity/**'),
+        ],
+        "web.assets_web_dark": [
+            'project/static/src/**/*.dark.scss',
         ],
         'web.assets_backend_lazy': [
+            'project/static/src/views/project_task_model_mixin',
+            'project/static/src/views/project_task_activity/**',
             'project/static/src/views/project_task_graph/**',
             'project/static/src/views/project_task_pivot/**',
+            'project/static/src/views/project_task_analysis_renderer_mixin.js',
+            'project/static/src/views/project_task_analysis_graph/**',
+            'project/static/src/views/project_task_analysis_pivot/**',
             'project/static/src/views/burndown_chart/**',
+            'project/static/src/views/project_project_activity/**',
         ],
         'web.assets_frontend': [
             'project/static/src/scss/portal_rating.scss',
-            'project/static/src/scss/project_sharing_frontend.scss',
-            'project/static/src/js/portal_rating.js',
+            'project/static/src/interactions/*',
         ],
         'web.assets_unit_tests': [
-            'project/static/src/project_sharing/components/portal_file_input/portal_file_input.js',
             'project/static/tests/mock_server/**/*',
             'project/static/tests/project_models.js',
             'project/static/tests/**/*.test.js',
-        ],
-        'web.qunit_suite_tests': [
-            'project/static/src/project_sharing/components/portal_file_input/portal_file_input.js',
-            'project/static/tests/legacy/**/*.js',
-            'project/static/tests/tours/**/*',
         ],
         'web.assets_tests': [
             'project/static/tests/tours/**/*',
@@ -117,10 +130,9 @@
             'web/static/lib/odoo_ui_icons/*',
             'web/static/src/webclient/navbar/navbar.scss',
             'web/static/src/scss/animation.scss',
-            'web/static/src/core/colorpicker/colorpicker.scss',
+            'web/static/src/core/color_picker/color_picker.scss',
             'web/static/src/scss/mimetypes.scss',
             'web/static/src/scss/ui.scss',
-            'web/static/src/legacy/scss/ui.scss',
             'web/static/src/views/fields/translation_dialog.scss',
             'web/static/src/scss/fontawesome_overridden.scss',
 
@@ -160,7 +172,6 @@
             'web/static/lib/bootstrap/js/dist/toast.js',
             'web/static/lib/dompurify/DOMpurify.js',
             'web/static/src/libs/bootstrap.js',
-            'web/static/src/libs/pdfjs.js',
             'web/static/src/legacy/js/libs/jquery.js',
 
             'base/static/src/css/modules.css',
@@ -193,8 +204,6 @@
 
             'web/static/src/env.js',
 
-            'web/static/src/legacy/scss/fields.scss',
-
             'base/static/src/scss/res_partner.scss',
 
             # Form style should be computed before
@@ -202,7 +211,19 @@
 
             'bus/static/src/**/*.js',
 
-            'html_editor/static/src/**/*',
+            # To be able to launch tour js in project sharing
+            'web_tour/static/src/js/**/*',
+            'web_tour/static/src/tour_utils.js',
+            'web/static/lib/hoot-dom/**/*',
+
+            ('include', 'html_editor.assets_editor'),
+            'html_editor/static/src/others/dynamic_placeholder_plugin.js',
+            'html_editor/static/src/others/editor_dynamic_placeholder_popover.js',
+            'html_editor/static/src/others/editor_dynamic_placeholder_popover.xml',
+            'html_editor/static/src/backend/**/*',
+            'html_editor/static/src/fields/**/*',
+            'html_editor/static/src/scss/html_editor.common.scss',
+            'html_editor/static/src/scss/base_style.scss',
 
             'mail/static/src/scss/variables/*.scss',
             'mail/static/src/chatter/web/form_renderer.scss',
@@ -212,13 +233,19 @@
             'project/static/src/components/project_task_state_selection/*',
             'project/static/src/components/project_many2one_field/*',
             'project/static/src/views/project_task_form/*.scss',
+            'project/static/src/views/project_task_kanban/*.scss',
+            'project/static/src/views/project_task_control_panel/*',
+            'project/static/src/views/project_task_model_mixin.js',
+            'project/static/src/views/project_task_relational_model.js',
+            'project/static/src/views/project_model_mixin.js',
+            'project/static/src/views/project_relational_model.js',
 
             ('include', 'portal.assets_chatter_helpers'),
             'portal/static/src/chatter/core/**/*',
-            'project/static/src/project_sharing/search/favorite_menu/custom_favorite_item.xml',
             'project/static/src/project_sharing/**/*',
             'web/static/src/start.js',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

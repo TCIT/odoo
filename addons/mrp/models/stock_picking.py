@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from ast import literal_eval
 
 from odoo import _, api, fields, models
-from odoo.osv import expression
+from odoo.exceptions import ValidationError
+from odoo.fields import Domain
 
 
 class StockPickingType(models.Model):
@@ -71,6 +71,12 @@ class StockPickingType(models.Model):
             if picking_type.code == 'mrp_operation':
                 picking_type.use_existing_lots = True
 
+    @api.constrains('default_location_dest_id')
+    def _check_default_location(self):
+        for record in self:
+            if record.code == 'mrp_operation' and record.default_location_dest_id.usage == 'inventory':
+                raise ValidationError(_("You cannot set a scrap location as the destination location for a manufacturing type operation."))
+
     def _get_mo_count(self):
         mrp_picking_types = self.filtered(lambda picking: picking.code == 'mrp_operation')
         remaining = (self - mrp_picking_types)
@@ -116,6 +122,7 @@ class StockPickingType(models.Model):
         mrp_records = [(i, d, self.env._('Confirmed')) for i, d in picking_type_id_to_dates.items()]
         return records + mrp_records
 
+
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
@@ -125,23 +132,33 @@ class StockPicking(models.Model):
         compute='_compute_mrp_production_ids',
         groups='mrp.group_mrp_user')
 
-    production_ids = fields.Many2many(
+    production_ids = fields.One2many(
         'mrp.production',
-        compute='_compute_mrp_production_ids',
+        compute='_compute_production_ids',
+        string="Manufacturing Orders",
         groups='mrp.group_mrp_user')
+    production_group_id = fields.Many2one(
+        'mrp.production.group',
+        string="Production Group",
+        related='move_ids.production_group_id',
+    )
 
     @api.depends('move_ids')
     def _compute_has_kits(self):
         for picking in self:
             picking.has_kits = any(picking.move_ids.mapped('bom_line_id'))
 
-    @api.depends('group_id')
+    @api.depends('reference_ids.production_ids')
+    def _compute_production_ids(self):
+        for picking in self:
+            picking.production_ids = picking.move_ids.production_group_id.production_ids
+
+    @api.depends('production_ids')
     def _compute_mrp_production_ids(self):
         for picking in self:
-            production_ids = picking.group_id.mrp_production_ids | picking.move_ids.move_dest_ids.raw_material_production_id
-            # Filter out unwanted MO types
-            picking.production_ids = production_ids.filtered(lambda p: p.picking_type_id.active)
-            picking.production_count = len(picking.production_ids)
+            # hide subcontracting MO from resupply picking
+            mo = picking.production_ids.filtered(lambda mo: mo.picking_type_id.active)
+            picking.production_count = len(mo)
 
     def action_detailed_operations(self):
         action = super().action_detailed_operations()
@@ -151,6 +168,7 @@ class StockPicking(models.Model):
     def action_view_mrp_production(self):
         self.ensure_one()
         action = {
+            'name': _("Manufacturing Orders"),
             'res_model': 'mrp.production',
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', self.production_ids.ids)],
@@ -182,7 +200,7 @@ class StockPicking(models.Model):
 
         if picking_type_code == "mrp_operation":
             action = self._get_action("mrp.action_picking_tree_mrp_operation_graph")
-            action["domain"] = expression.AND([
+            action["domain"] = Domain.AND([
                 literal_eval(action["domain"] or '[]'), [('picking_type_id', '=', picking_type_id)]
             ])
             allowed_company_ids = self.env.context.get("allowed_company_ids", [])

@@ -11,11 +11,7 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'property_account_receivable_id': 'lu_2011_account_4011',
             'property_account_payable_id': 'lu_2011_account_44111',
-            'property_account_expense_categ_id': 'lu_2011_account_6061',
-            'property_account_income_categ_id': 'lu_2020_account_703001',
-            'property_stock_account_input_categ_id': 'lu_2011_account_321',
-            'property_stock_account_output_categ_id': 'lu_2011_account_321',
-            'property_stock_valuation_account_id': 'lu_2020_account_60761',
+            'property_stock_valuation_account_id': 'lu_2011_account_301',
             'code_digits': '6',
         }
 
@@ -30,11 +26,13 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_default_pos_receivable_account_id': 'lu_2011_account_40111',
                 'income_currency_exchange_account_id': 'lu_2020_account_7561',
                 'expense_currency_exchange_account_id': 'lu_2020_account_6561',
-                'account_journal_suspense_account_id': 'lu_2011_account_485',
+                'account_journal_suspense_account_id': 'lu_2011_account_484',
                 'account_journal_early_pay_discount_loss_account_id': 'lu_2020_account_65562',
                 'account_journal_early_pay_discount_gain_account_id': 'lu_2020_account_75562',
                 'account_sale_tax_id': 'lu_2015_tax_VP-PA-17',
                 'account_purchase_tax_id': 'lu_2015_tax_AP-PA-17',
+                'expense_account_id': 'lu_2011_account_6061',
+                'income_account_id': 'lu_2020_account_703001',
             },
         }
 
@@ -48,21 +46,8 @@ class AccountChartTemplate(models.AbstractModel):
     @template('lu', 'account.reconcile.model')
     def _get_lu_reconcile_model(self):
         return {
-            'bank_fees_template': {
-                'name': 'Bank Fees',
-                'rule_type': 'writeoff_button',
-                'line_ids': [
-                    Command.create({
-                        'account_id': 'lu_2011_account_61333',
-                        'amount_type': 'percentage',
-                        'amount_string': '100',
-                        'label': 'Bank Fees',
-                    }),
-                ],
-            },
             'cash_discount_template': {
                 'name': 'Cash Discount',
-                'rule_type': 'writeoff_button',
                 'line_ids': [
                     Command.create({
                         'account_id': 'lu_2020_account_65562',
@@ -73,3 +58,13 @@ class AccountChartTemplate(models.AbstractModel):
                 ],
             },
         }
+
+    def _get_bank_fees_reco_account(self, company):
+        # Luxembourgish account for the bank fees reco model. We need to be as precise
+        # as possible in case it's modified so it's missing and not replaced.
+        lu_account = self.env['account.account'].with_company(company).search([
+            ('code', '=', '613330'),
+            ('account_type', '=', 'expense'),
+            ('name', '=', 'Bank account charges and bank commissions (included custody fees on securities)'),
+        ], limit=1)
+        return lu_account or super()._get_bank_fees_reco_account(company)

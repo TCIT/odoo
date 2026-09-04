@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 import re
@@ -6,30 +5,12 @@ from ast import literal_eval
 
 from odoo import api, models, _
 from odoo.exceptions import AccessError, RedirectWarning, UserError
+from odoo.tools import str2bool
 
 _logger = logging.getLogger(__name__)
 
 
-class ResConfigModuleInstallationMixin(object):
-    __slots__ = ()
-
-    @api.model
-    def _install_modules(self, modules):
-        """ Install the requested modules.
-
-        :param modules: a recordset of ir.module.module records
-        :return: the next action to execute
-        """
-        result = None
-
-        to_install_modules = modules.filtered(lambda module: module.state == 'uninstalled')
-        if to_install_modules:
-            result = to_install_modules.button_immediate_install()
-
-        return result
-
-
-class ResConfigConfigurable(models.TransientModel):
+class ResConfig(models.TransientModel):
     ''' Base classes for new-style configuration items
 
     Configuration items should inherit from this class, implement
@@ -115,14 +96,14 @@ class ResConfigConfigurable(models.TransientModel):
         return self.cancel() or self.next()
 
 
-class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin):
+class ResConfigSettings(models.TransientModel):
     """ Base configuration wizard for application settings.  It provides support for setting
         default values, assigning groups to employee users, and installing modules.
         To make such a 'settings' wizard, define a model like::
 
             class MyConfigWizard(models.TransientModel):
                 _name = 'my.settings'
-                _inherit = 'res.config.settings'
+                _inherit = ['res.config.settings']
 
                 default_foo = fields.type(..., default_model='my.model'),
                 group_bar = fields.Boolean(..., group='base.group_user', implied_group='my.group'),
@@ -178,33 +159,26 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
     def copy(self, default=None):
         raise UserError(_("Cannot duplicate configuration!"))
 
-    def onchange_module(self, field_value, module_name):
-        module_sudo = self.env['ir.module.module']._get(module_name[7:])
-        if not int(field_value) and module_sudo.state in ('to install', 'installed', 'to upgrade'):
-            deps = module_sudo.downstream_dependencies()
-            dep_names = (deps | module_sudo).mapped('shortdesc')
-            message = '\n'.join(dep_names)
-            return {
-                'warning': {
-                    'title': _('Warning!'),
-                    'message': _('Disabling this option will also uninstall the following modules \n%s', message),
-                }
-            }
-        return {}
+    @api.model
+    def _install_modules(self, modules):
+        """ Install the requested modules.
 
-    def _register_hook(self):
-        """ Add an onchange method for each module field. """
-        def make_method(name):
-            return lambda self: self.onchange_module(self[name], name)
+        :param modules: a recordset of ir.module.module records
+        :return: the next action to execute
+        """
+        result = None
 
-        for name in self._fields:
-            if name.startswith('module_'):
-                method = make_method(name)
-                self._onchange_methods[name].append(method)
+        to_install_modules = modules.filtered(lambda module: module.state == 'uninstalled')
+        if to_install_modules:
+            result = to_install_modules.button_immediate_install()
+
+        return result
 
     @api.model
     def _get_classified_fields(self, fnames=None):
-        """ return a dictionary with the fields classified by category::
+        """ return a dictionary with the fields classified by category:
+
+            .. code-block:: python
 
                 {   'default': [('default_foo', 'model', 'foo'), ...],
                     'group':   [('group_bar', [browse_group], browse_implied_group), ...],
@@ -253,6 +227,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
 
         return {'default': defaults, 'group': groups, 'module': modules, 'config': configs, 'other': others}
 
+    @api.model
     def get_values(self):
         """
         Return values for the fields other that `default`, `group` and `module`
@@ -265,6 +240,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         if not fields:
             return res
 
+        self.check_access('read')
         IrDefault = self.env['ir.default']
         IrConfigParameter = self.env['ir.config_parameter'].sudo()
         classified = self._get_classified_fields(fields)
@@ -277,7 +253,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
 
         # groups: which groups are implied by the group Employee
         for name, groups, implied_group in classified['group']:
-            res[name] = all(implied_group in group.implied_ids for group in groups)
+            res[name] = all(implied_group in group.all_implied_ids for group in groups)
             if self._fields[name].type == 'selection':
                 res[name] = str(int(res[name]))     # True, False -> '1', '0'
 
@@ -312,7 +288,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                         _logger.warning(WARNING_MESSAGE, value, field, icp)
                         value = 0.0
                 elif field.type == 'boolean':
-                    value = bool(value)
+                    value = str2bool(value, bool(value))
             res[name] = value
 
         res.update(self.get_values())
@@ -406,15 +382,23 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
             self.env.flush_all()
 
         if to_uninstall:
-            to_uninstall.button_immediate_uninstall()
+            return {
+                'type': 'ir.actions.act_window',
+                'target': 'new',
+                'name': _('Uninstall modules'),
+                'view_mode': 'form',
+                'res_model': 'base.module.uninstall',
+                'context': {
+                    'default_module_ids': to_uninstall.ids,
+                },
+            }
 
         installation_status = self._install_modules(to_install)
 
         if installation_status or to_uninstall:
             # After the uninstall/install calls, the registry and environments
             # are no longer valid. So we reset the environment.
-            self.env.reset()
-            self = self.env()[self._name]
+            self.env.transaction.reset()
 
         # pylint: disable=next-method-called
         config = self.env['res.config'].next() or {}
@@ -447,9 +431,10 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
 
         :param string menu_xml_id: the xml id of the menuitem where the view is located,
             structured as follows: module_name.menuitem_xml_id (e.g.: "sales_team.menu_sale_config")
-        :return tuple:
-            - t[0]: string: full path to the menuitem (e.g.: "Settings/Configuration/Sales")
-            - t[1]: int or long: id of the menuitem's action
+        :return: a 2-value tuple where
+
+          - t[0]: string: full path to the menuitem (e.g.: "Settings/Configuration/Sales")
+          - t[1]: int or long: id of the menuitem's action
         """
         ir_ui_menu = self.env.ref(menu_xml_id)
         return (ir_ui_menu.complete_name, ir_ui_menu.action.id)
@@ -461,7 +446,8 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
 
         :param string full_field_name: the full name of the field, structured as follows:
             model_name.field_name (e.g.: "sale.config.settings.fetchmail_lead")
-        :return string: human readable name of the field (e.g.: "Create leads from incoming mails")
+        :return: human readable name of the field (e.g.: "Create leads from incoming mails")
+        :rtype: str
         """
         model_name, field_name = full_field_name.rsplit('.', 1)
         return self.env[model_name].fields_get([field_name])[field_name]['string']
@@ -469,31 +455,51 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
     @api.model
     def get_config_warning(self, msg):
         """
-        Helper: return a Warning exception with the given message where the %(field:xxx)s
-        and/or %(menu:yyy)s are replaced by the human readable field's name and/or menuitem's
-        full path.
+        Helper: return a Warning exception with the given message where the ``%(field:xxx)s``
+        and/or ``%(menu:yyy)s`` are replaced by the human readable field's name and/or
+        menuitem's full path.
 
         Usage:
         ------
-        Just include in your error message %(field:model_name.field_name)s to obtain the human
-        readable field's name, and/or %(menu:module_name.menuitem_xml_id)s to obtain the menuitem's
-        full path.
+        Just include in your error message ``%(field:model_name.field_name)s`` to obtain the
+        human readable field's name, and/or %(menu:module_name.menuitem_xml_id)s to obtain the
+        menuitem's full path.
 
         Example of use:
         ---------------
-        from odoo.addons.base.models.res_config import get_warning_config
-        raise get_warning_config(cr, _("Error: this action is prohibited. You should check the field %(field:sale.config.settings.fetchmail_lead)s in %(menu:sales_team.menu_sale_config)s."), context=context)
+
+        .. code-block:: python
+
+            raise env['ir..config.settings'](_(
+                "Error: this action is prohibited. You should check the "
+                "field %(field:sale.config.settings.fetchmail_lead)s in "
+                "%(menu:sales_team.menu_sale_config)s."))
 
         This will return an exception containing the following message:
-            Error: this action is prohibited. You should check the field Create leads from incoming mails in Settings/Configuration/Sales.
+
+            Error: this action is prohibited. You should check the field Create
+            leads from incoming mails in Settings/Configuration/Sales.
 
         What if there is another substitution in the message already?
         -------------------------------------------------------------
-        You could have a situation where the error message you want to upgrade already contains a substitution. Example:
-            Cannot find any account journal of %s type for this company.\n\nYou can create one in the menu: \nConfiguration\\Journals\\Journals.
-        What you want to do here is simply to replace the path by %menu:account.menu_account_config)s, and leave the rest alone.
-        In order to do that, you can use the double percent (%%) to escape your new substitution, like so:
-            Cannot find any account journal of %s type for this company.\n\nYou can create one in the %%(menu:account.menu_account_config)s.
+        You could have a situation where the error message you want to upgrade already contains
+        a substitution.
+
+        Example:
+
+            Cannot find any account journal of %s type for this company.
+
+            You can create one in the menu:
+            Configuration/Journals/Journals.
+
+        What you want to do here is simply to replace the path by
+        ``%menu:account.menu_account_config)s``, and leave the rest alone.
+        In order to do that, you can use the double percent (``%%``) to escape your new
+        substitution, like so:
+
+            Cannot find any account journal of %s type for this company.
+
+            You can create one in the %%(menu:account.menu_account_config)s.
         """
         self = self.sudo()
 

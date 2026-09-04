@@ -32,17 +32,20 @@
                 <separator/>
                 <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction', '=', True)]" groups="mail.group_mail_notification_type_inbox"/>
                 <separator/>
+                <filter invisible="1" string="My Activities" name="filter_activities_my"
+                    domain="[('activity_user_id', '=', uid)]"/>
+                <separator invisible="1"/>
                 <filter invisible="1" string="Late Activities" name="activities_overdue"
-                    domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
-                    help="Show all records which has next action date is before today"/>
+                    domain="[('my_activity_date_deadline', '&lt;', 'today')]"
+                    help="Show all records whose next activity date is past"/>
                 <filter invisible="1" string="Today Activities" name="activities_today"
-                    domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                    domain="[('my_activity_date_deadline', '=', 'today')]"/>
                 <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
-                    domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
+                    domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
                 <separator/>
                 <filter string="Active" name="active" domain="[('archive', '=', False)]"/>
                 <filter string="Cancelled" name="inactive" domain="[('archive', '=', True)]"/>
-                <group  expand='0' string='Group by...'>
+                <group>
                     <filter string='Assigned to' name="assigned" domain="[]" context="{'group_by': 'user_id'}"/>
                     <filter string='Category' name="category" domain="[]" context="{'group_by' : 'category_id'}"/>
                     <filter string='Stage' name="stages" domain="[]" context="{'group_by' : 'stage_id'}"/>
@@ -111,12 +114,7 @@
                             <field name="maintenance_team_id" options="{'no_create': True, 'no_open': True}"/>
                             <field name="user_id" string="Responsible"/>
                             <field name="schedule_date"/>
-                            <label for="duration"/>
-                            <div>
-                                <field name="duration"
-                                       widget="float_time"
-                                       class="oe_inline"/> <span class="ml8">hours</span>
-                            </div>
+                            <field name="schedule_end"/>
                             <label for="recurring_maintenance" invisible="maintenance_type == 'corrective'"/>
                             <div class="d-inline-flex" invisible="maintenance_type == 'corrective'">
                                 <field name="recurring_maintenance" nolabel="1" class="ms-0" style="width: fit-content;"/>
@@ -141,7 +139,7 @@
                             <group col="1">
                                 <field name="instruction_type" widget="radio" nolabel="1"/>
                                 <field name="instruction_pdf" help="Upload your PDF file." widget="pdf_viewer" invisible="instruction_type != 'pdf'" required="instruction_type == 'pdf'" nolabel="1"/>
-                                <field name="instruction_google_slide" placeholder="Google Slide Link" widget="embed_viewer" invisible="instruction_type != 'google_slide'" required="instruction_type == 'google_slide'" nolabel="1"/>
+                                <field name="instruction_google_slide" placeholder="Google Slide Link" widget="google_slide_viewer" invisible="instruction_type != 'google_slide'" required="instruction_type == 'google_slide'" nolabel="1"/>
                                 <field name="instruction_text" placeholder="Your instructions" invisible="instruction_type != 'text'" nolabel="1"/>
                             </group>
                         </page>
@@ -193,7 +191,7 @@
         <field name="name">equipment.request.list</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
-            <list string="maintenance Request" multi_edit="1" sample="1">
+            <list string="Maintenance Request" multi_edit="1" sample="1">
                 <field name="message_needaction" column_invisible="True"/>
                 <field name="name"/>
                 <field name="request_date" groups="base.group_no_one"/>
@@ -211,9 +209,12 @@
         <field name="name">equipment.request.graph</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
-            <graph string="maintenance Request" sample="1">
+            <graph string="Maintenance Request" sample="1">
                 <field name="user_id"/>
                 <field name="stage_id"/>
+                <field name="duration" type="measure"/>
+                <field name="color" type="measure" invisible="1"/>
+                <field name="repeat_interval" type="measure" invisible="1"/>
             </graph>
         </field>
     </record>
@@ -222,7 +223,7 @@
         <field name="name">equipment.request.pivot</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
-            <pivot string="maintenance Request" sample="1">
+            <pivot string="Maintenance Request" sample="1">
                 <field name="user_id"/>
                 <field name="stage_id"/>
                 <field name="color" invisible="1"/>
@@ -235,7 +236,7 @@
         <field name="name">equipment.request.calendar</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
-            <calendar date_start="schedule_date" date_delay="duration" color="user_id" event_limit="5" js_class="calendar_with_recurrence">
+            <calendar date_start="schedule_date" date_stop="schedule_end" color="user_id" event_limit="5" js_class="calendar_with_recurrence">
                 <field name="user_id" filters="1"/>
                 <field name="priority"/>
                 <field name="maintenance_type"/>
@@ -246,6 +247,7 @@
                 <field name="repeat_until" invisible="1"/>
                 <field name="done" invisible="1"/>
                 <field name="archive" invisible="1"/>
+                <field name="duration" invisible="1"/>
             </calendar>
         </field>
     </record>
@@ -254,6 +256,7 @@
     <record id="hr_equipment_request_action" model="ir.actions.act_window">
         <field name="name">Maintenance Requests</field>
         <field name="res_model">maintenance.request</field>
+        <field name="path">maintenance-requests</field>
         <field name="view_mode">kanban,list,form,pivot,graph,calendar,activity</field>
         <field name="view_id" ref="hr_equipment_request_view_kanban"/>
         <field name="context">{
@@ -330,6 +333,7 @@
     <record id="hr_equipment_request_action_cal" model="ir.actions.act_window">
         <field name="name">Maintenance Requests</field>
         <field name="res_model">maintenance.request</field>
+        <field name="path">maintenance-calendar</field>
         <field name="view_mode">calendar,kanban,list,form,pivot,graph,activity</field>
         <field name="view_id" ref="hr_equipment_view_calendar"/>
         <field name="context">{
@@ -346,8 +350,9 @@
     </record>
 
     <record id="maintenance_request_action_reports" model="ir.actions.act_window">
-        <field name="name">Maintenance Requests</field>
+        <field name="name">Maintenance Requests Analysis</field>
         <field name="res_model">maintenance.request</field>
+        <field name="path">maintenance-requests-analysis</field>
         <field name="view_mode">graph,pivot,kanban,list,form,calendar,activity</field>
         <field name="context">{
             'search_default_active': True,
@@ -370,12 +375,6 @@
                 <sheet>
                     <field name="company_id" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
-                        <button type="object"
-                            name="action_open_matched_serial"
-                            icon="fa-bars" class="oe_stat_button"
-                            invisible="not match_serial"> <!-- The button must stay invisible without any access to `stock.lot` -->
-                            <field string="Serial Number" name="serial_no" widget="statinfo"/>
-                        </button>
                         <button name="%(hr_equipment_request_action_from_equipment)d"
                             type="action"
                             class="oe_stat_button"
@@ -389,11 +388,11 @@
                         <label for="name"/>
                         <h1><field name="name" string="Name" placeholder="e.g. LED Monitor"/></h1>
                     </div>
-                    <group>
+                    <group name="service_info_group">
                         <group>
                             <field name="active" invisible="1"/>
                             <field name="category_id" options="{&quot;no_open&quot;: True}" context="{'default_company_id':company_id}"/>
-                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                             <field name="owner_user_id" string="Owner"/>
                         </group>
                         <group>
@@ -401,7 +400,6 @@
                             <field name="technician_user_id" domain="[('share', '=', False)]"/>
                             <field name="assign_date" groups="base.group_no_one"/>
                             <field name="scrap_date" groups="base.group_no_one"/>
-                            <field name="location" string="Used in location"/>
                         </group>
                     </group>
                     <field name="equipment_properties" nolabel="1" columns="2"/>
@@ -473,6 +471,7 @@
                             <span t-if="record.model.raw_value" class="fw-bold small"> (<field name="model"/>)</span>
                         </div>
                         <field t-if="record.serial_no.raw_value" name="serial_no"/>
+                        <field name="equipment_properties" widget="properties"/>
                         <footer>
                             <div class="badge text-bg-danger" t-if="record.maintenance_open_count.raw_value">
                                 <field name="maintenance_open_count" /> Request
@@ -526,20 +525,24 @@
                 <separator/>
                 <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]" groups="mail.group_mail_notification_type_inbox"/>
                 <separator/>
+                <filter invisible="1" string="My Activities" name="filter_activities_my"
+                    domain="[('activity_user_id', '=', uid)]"/>
+                <separator invisible="1"/>
                 <filter invisible="1" string="Late Activities" name="activities_overdue"
-                    domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
-                    help="Show all records which has next action date is before today"/>
+                    domain="[('my_activity_date_deadline', '&lt;', 'today')]"
+                    help="Show all records whose next activity date is past"/>
                 <filter invisible="1" string="Today Activities" name="activities_today"
-                    domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                    domain="[('my_activity_date_deadline', '=', 'today')]"/>
                 <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
-                    domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
+                    domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
                 <separator/>
                 <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
-                <group  expand='0' string='Group by...'>
+                <group>
                     <filter string='Technician' name="technicians" domain="[]" context="{'group_by': 'technician_user_id'}"/>
                     <filter string='Category' name="category" domain="[]" context="{'group_by': 'category_id'}"/>
                     <filter string='Owner' name="owner" domain="[]" context="{'group_by': 'owner_user_id'}"/>
                     <filter string='Vendor' name="vendor" domain="[]" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Properties" name="group_by_equipment_properties" context="{'group_by': 'equipment_properties'}"/>
                 </group>
             </search>
         </field>
@@ -548,6 +551,7 @@
     <record id="hr_equipment_action" model="ir.actions.act_window">
         <field name="name">Equipment</field>
         <field name="res_model">maintenance.equipment</field>
+        <field name="path">equipments</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="view_id" ref="hr_equipment_view_kanban"/>
         <field name="help" type="html">
@@ -610,24 +614,13 @@
                 </div>
                 <group>
                     <field name="technician_user_id" class="oe_inline" domain="[('share', '=', False)]"/>
-                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" class="oe_inline"/>
-                </group>
-                <group name="group_alias">
-                    <label for="alias_name" string="Email Alias"/>
-                    <div name="alias_def">
-                        <field name="alias_id" class="oe_read_only oe_inline" string="Email Alias" required="0"/>
-                        <div class="oe_edit_only oe_inline" name="edit_alias" style="display: inline;" dir="ltr">
-                            <field name="alias_name" placeholder="alias" class="oe_inline"/>@
-                            <field name="alias_domain_id" class="oe_inline" placeholder="e.g. mycompany.com"
-                                   options="{'no_create': True, 'no_open': True}"/>
-                        </div>
-                    </div>
+                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"
+                           class="oe_inline" placeholder="Visible to all"/>
                 </group>
                 <group>
                     <field name="note"/>
                 </group>
                 </sheet>
-                <chatter/>
             </form>
         </field>
     </record>
@@ -650,7 +643,7 @@
         <field name="arch" type="xml">
             <search string="Search">
                 <field name="name" string="Category Name" filter_domain="[('name','ilike',self)]"/>
-                <group  expand='0' string='Group by...'>
+                <group>
                     <filter string='Responsible' name="responsible" domain="[]" context="{'group_by' : 'technician_user_id'}"/>
                 </group>
             </search>
@@ -682,6 +675,7 @@
     <record id="hr_equipment_category_action" model="ir.actions.act_window">
         <field name="name">Equipment Categories</field>
         <field name="res_model">maintenance.equipment.category</field>
+        <field name="path">equipement-categories</field>
         <field name="view_mode">list,kanban,form</field>
         <field name="view_id" ref="hr_equipment_category_view_tree"/>
         <field name="help" type="html">
@@ -732,6 +726,7 @@
     <record id="hr_equipment_stage_action" model="ir.actions.act_window">
         <field name="name">Stages</field>
         <field name="res_model">maintenance.stage</field>
+        <field name="path">maintenance-stages</field>
         <field name="view_mode">list,kanban,form</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
@@ -759,8 +754,19 @@
                         <field name="active" invisible="1"/>
                         <field name="member_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create': True}" domain="[('share', '=', False)]"/>
                     </group>
+                    <group name="group_alias">
+                        <label for="alias_name" string="Email Alias"/>
+                        <div name="alias_def">
+                            <field name="alias_id" class="oe_read_only oe_inline" string="Email Alias" required="0"/>
+                            <div class="oe_edit_only oe_inline" name="edit_alias" style="display: inline;" dir="ltr">
+                                <field name="alias_name" placeholder="alias" class="oe_inline"/>@
+                                <field name="alias_domain_id" class="oe_inline" placeholder="e.g. mycompany.com"
+                                    options="{'no_create': True, 'no_open': True}"/>
+                            </div>
+                        </div>
+                    </group>
                     <group>
-                        <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                        <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                     </group>
                 </group>
                 </sheet>
@@ -775,7 +781,7 @@
             <list string="Maintenance Team" editable="bottom">
                 <field name="name"/>
                 <field name="member_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create': True}" domain="[('share', '=', False)]"/>
-                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
             </list>
         </field>
     </record>
@@ -899,6 +905,7 @@
     <record id="maintenance_team_action_settings" model="ir.actions.act_window">
         <field name="name">Teams</field>
         <field name="res_model">maintenance.team</field>
+        <field name="path">maintenance-teams</field>
         <field name="view_mode">list,kanban,form</field>
         <field name="search_view_id" ref="maintenance_team_view_search"/>
         <field name="view_ids" eval="[(5, 0, 0),

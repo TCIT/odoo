@@ -1,9 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from json.decoder import JSONDecodeError
 from unittest.mock import patch
 
-from odoo import Command
+import requests
+
+from odoo.exceptions import ValidationError
+from odoo.fields import Command
 from odoo.tests import tagged
+from odoo.tools import mute_logger
 
 from odoo.addons.payment.const import REPORT_REASONS_MAPPING
 from odoo.addons.payment.tests.common import PaymentCommon
@@ -30,10 +35,33 @@ class TestPaymentProvider(PaymentCommon):
             self.provider.state = 'disabled'
             with patch(
                 'odoo.addons.payment.models.payment_provider.PaymentProvider'
-                '._get_default_payment_method_codes', return_value=self.payment_method_code,
+                '._get_default_payment_method_codes', return_value={self.payment_method_code},
             ):
                 self.provider.state = new_state
                 self.assertTrue(self.payment_methods.active)
+
+    def test_enabling_manual_capture_provider_activates_compatible_default_pms(self):
+        """Test that only payment methods supporting manual capture are activated when a provider
+        requiring manual capture is enabled."""
+        payment_method_with_manual_capture = self.env['payment.method'].create({
+            'name': 'Payment Method With Manual Capture',
+            'code': 'pm_with_manual_capture',
+            'support_manual_capture': 'full_only',
+        })
+        self.provider.state = 'disabled'
+        self.provider.capture_manually = True
+        self.provider.payment_method_ids = [Command.set([
+            self.payment_method.id, payment_method_with_manual_capture.id
+        ])]
+        self.payment_method.support_manual_capture = 'none'
+        default_codes = {self.payment_method_code, payment_method_with_manual_capture.code}
+        with patch(
+            'odoo.addons.payment.models.payment_provider.PaymentProvider'
+            '._get_default_payment_method_codes', return_value=default_codes,
+        ):
+            self.provider.state = 'test'
+            self.assertFalse(self.payment_methods.active)
+            self.assertTrue(payment_method_with_manual_capture.active)
 
     def test_disabling_provider_deactivates_default_payment_methods(self):
         """ Test that the default payment methods of a provider are deactivated when it is
@@ -97,6 +125,17 @@ class TestPaymentProvider(PaymentCommon):
                 self.company.id, self.partner.id, self.amount
             )
             self.assertNotIn(self.provider, compatible_providers)
+
+    def test_provider_compatible_with_branch_companies(self):
+        """ Test that the provider is available to branch companies. """
+        branch_company = self.env['res.company'].create({
+            'name': "Provider Branch Company",
+            'parent_id': self.provider.company_id.id,
+        })
+        compatible_providers = self.provider._get_compatible_providers(
+            branch_company.id, self.partner.id, self.amount,
+        )
+        self.assertIn(self.provider, compatible_providers)
 
     def test_provider_compatible_with_available_countries(self):
         """ Test that the provider is compatible with its available countries. """
@@ -372,3 +411,23 @@ class TestPaymentProvider(PaymentCommon):
         )._get_validation_currency()
         self.assertIn(validation_currency, self.provider.available_currency_ids)
         self.assertIn(validation_currency, self.payment_method.supported_currency_ids)
+
+    @mute_logger('odoo.addons.payment.models.payment_provider')
+    def test_parsing_non_json_response_falls_back_to_text_response(self):
+        """Test that a non-JSON response is smoothly parsed as a text response."""
+        response = requests.Response()
+        response.status_code = 502
+        response._content = b"<html><body>Cloudflare Error</body></html>"
+        with (
+            patch('requests.request', return_value=response),
+            patch(
+                'odoo.addons.payment.models.payment_provider.PaymentProvider._parse_response_error',
+                new=lambda _self, _response: _response.json(),
+            ),
+        ):
+            try:
+                self.provider._send_api_request('GET', '/dummy')
+            except Exception as e:  # noqa: BLE001
+                self.assertNotIsInstance(e, JSONDecodeError)
+                self.assertIsInstance(e, ValidationError)
+                self.assertIn("Cloudflare Error", e.args[0])

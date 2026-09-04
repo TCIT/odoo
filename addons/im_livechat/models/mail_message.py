@@ -1,33 +1,22 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo import api, fields, models
+from odoo import models
 from odoo.addons.mail.tools.discuss import Store
 
 
 class MailMessage(models.Model):
     _inherit = 'mail.message'
 
-    parent_author_name = fields.Char(compute="_compute_parent_author_name")
-    parent_body = fields.Html(compute="_compute_parent_body")
+    def _to_store_defaults(self, target):
+        return super()._to_store_defaults(target) + ["chatbot_current_step"]
 
-    @api.depends('parent_id')
-    def _compute_parent_author_name(self):
-        for message in self:
-            author = message.parent_id.author_id or message.parent_id.author_guest_id
-            message.parent_author_name = author.name if author else False
-
-    @api.depends('parent_id.body')
-    def _compute_parent_body(self):
-        for message in self:
-            message.parent_body = message.parent_id.body if message.parent_id else False
-
-    def _to_store(self, store: Store, **kwargs):
+    def _to_store(self, store: Store, fields, **kwargs):
         """If we are currently running a chatbot.script, we include the information about
         the chatbot.message related to this mail.message.
         This allows the frontend display to include the additional features
         (e.g: Show additional buttons with the available answers for this step)."""
-        super()._to_store(store, **kwargs)
-        channel_messages = self.filtered(lambda message: message.model == "discuss.channel")
+        super()._to_store(store, [f for f in fields if f != "chatbot_current_step"], **kwargs)
+        if "chatbot_current_step" not in fields:
+            return
+        channel_messages = self.filtered(lambda message: message.channel_id)
         channel_by_message = channel_messages._record_by_message()
         for message in channel_messages.filtered(
             lambda message: channel_by_message[message].channel_type == "livechat"
@@ -35,7 +24,7 @@ class MailMessage(models.Model):
             channel = channel_by_message[message]
             # sudo: chatbot.script.step - checking whether the current message is from chatbot
             chatbot = channel.chatbot_current_step_id.sudo().chatbot_script_id.operator_partner_id
-            if (channel.chatbot_current_step_id and message.author_id == chatbot):
+            if channel.chatbot_current_step_id and message.author_id == chatbot:
                 chatbot_message = (
                     self.env["chatbot.message"]
                     .sudo()
@@ -44,37 +33,45 @@ class MailMessage(models.Model):
                 if step := chatbot_message.script_step_id:
                     step_data = {
                         "id": (step.id, message.id),
-                        "message": Store.one(message, only_id=True),
-                        "scriptStep": Store.one(step, only_id=True),
-                        "operatorFound": step.step_type == "forward_operator"
-                        and len(channel.channel_member_ids) > 2,
+                        "message": message.id,
+                        "scriptStep": Store.One(step, ["id", "message", "step_type"]),
+                        "operatorFound": step.is_forward_operator
+                        and channel.livechat_operator_id != chatbot,
                     }
                     if answer := chatbot_message.user_script_answer_id:
-                        step_data["selectedAnswer"] = Store.one(answer, only_id=True)
-                    store.add("ChatbotStep", step_data)
+                        step_data["selectedAnswer"] = {
+                            "id": answer.id,
+                            "label": answer.name,
+                        }
+                    if step.step_type in [
+                        "free_input_multi",
+                        "free_input_single",
+                        "question_email",
+                        "question_phone",
+                    ]:
+                        # sudo: chatbot.message - checking the user answer to the step is allowed
+                        user_answer_message = (
+                            self.env["chatbot.message"]
+                            .sudo()
+                            .search(
+                                [
+                                    ("script_step_id", "=", step.id),
+                                    ("id", "!=", chatbot_message.id),
+                                    ("discuss_channel_id", "=", channel.id),
+                                ],
+                                limit=1,
+                            )
+                        )
+                        step_data["rawAnswer"] = [
+                            "markup",
+                            user_answer_message.user_raw_answer,
+                        ]
+                    store.add_model_values("ChatbotStep", step_data)
                     store.add(
-                        message,
-                        {"chatbotStep": {"scriptStep": step.id, "message": message.id}},
+                        message, {"chatbotStep": {"scriptStep": step.id, "message": message.id}}
                     )
 
-    def _author_to_store(self, store: Store):
-        messages_w_author_channel = self.filtered(
-            lambda message: message.author_id
-            and message.model == "discuss.channel"
-            and message.res_id
-        )
-        channel_by_message = messages_w_author_channel._record_by_message()
-        messages_w_author_livechat = messages_w_author_channel.filtered(
-            lambda message: channel_by_message[message].channel_type == "livechat"
-        )
-        super(MailMessage, self - messages_w_author_livechat)._author_to_store(store)
-        for message in messages_w_author_livechat:
-            store.add(
-                message,
-                {
-                    "author": Store.one(
-                        message.author_id,
-                        fields=["avatar_128", "is_company", "user_livechat_username", "user"],
-                    ),
-                },
-            )
+    def _get_store_partner_name_fields(self):
+        if self.channel_id.channel_type == "livechat":
+            return self.env["res.partner"]._get_store_livechat_username_fields()
+        return super()._get_store_partner_name_fields()

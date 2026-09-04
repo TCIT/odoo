@@ -3,13 +3,13 @@ from datetime import datetime, timedelta
 from odoo import api, fields, models
 
 
-class MarketingCard(models.Model):
+class CardCard(models.Model):
     """Mapping from a unique ID to a 'sharer' of a campaign. Storing state of sharing and their specific card."""
     _name = 'card.card'
     _description = 'Marketing Card'
 
     active = fields.Boolean('Active', default=True)
-    campaign_id = fields.Many2one('card.campaign', required=True, ondelete="cascade")
+    campaign_id = fields.Many2one('card.campaign', required=True, index=True, ondelete="cascade")
     res_model = fields.Selection(related='campaign_id.res_model')
     res_id = fields.Many2oneReference('Record ID', model_field='res_model', required=True)
     image = fields.Image()
@@ -19,10 +19,10 @@ class MarketingCard(models.Model):
         ('visited', 'Visited'),
     ])
 
-    _sql_constraints = [
-        ('campaign_record_unique', 'unique(campaign_id, res_id)',
-         'Each record should be unique for a campaign'),
-    ]
+    _campaign_record_unique = models.Constraint(
+        'unique(campaign_id, res_id)',
+        'Each record should be unique for a campaign',
+    )
 
     @api.depends('res_model', 'res_id')
     def _compute_display_name(self):

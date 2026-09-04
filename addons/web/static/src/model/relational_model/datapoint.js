@@ -1,38 +1,20 @@
 import { markRaw } from "@odoo/owl";
-import { evalDomain } from "@web/core/domain";
 import { Reactive } from "@web/core/utils/reactive";
 import { getId } from "./utils";
 
 /**
- * @typedef Params
- * @property {string} resModel
- * @property {Object} context
- * @property {{[key: string]: FieldInfo}} activeFields
- * @property {{[key: string]: Field}} fields
- */
-
-/**
- * @typedef Field
- * @property {string} name
- * @property {string} type
- * @property {[string,string][]} [selection]
- */
-
-/**
- * @typedef FieldInfo
- * @property {string} context
- * @property {boolean} invisible
- * @property {boolean} readonly
- * @property {boolean} required
- * @property {boolean} onChange
+ * @typedef {import("@web/search/search_model").Field} Field
+ * @typedef {import("@web/search/search_model").FieldInfo} FieldInfo
+ * @typedef {import("./relational_model").RelationalModel} RelationalModel
+ * @typedef {import("./relational_model").RelationalModelConfig} RelationalModelConfig
  */
 
 export class DataPoint extends Reactive {
     /**
-     * @param {import("./relational_model").RelationalModel} model
-     * @param {import("./relational_model").Config"} config
-     * @param {any} data
-     * @param {Object} [options]
+     * @param {RelationalModel} model
+     * @param {RelationalModelConfig} config
+     * @param {Record<string, unknown>} data
+     * @param {unknown} [options]
      */
     constructor(model, config, data, options) {
         super(...arguments);
@@ -40,16 +22,19 @@ export class DataPoint extends Reactive {
         this.model = model;
         markRaw(config.activeFields);
         markRaw(config.fields);
+        /** @type {RelationalModelConfig} */
         this._config = config;
         this.setup(config, data, options);
     }
 
     /**
      * @abstract
-     * @param {Object} params
-     * @param {Object} state
+     * @template [O={}]
+     * @param {RelationalModelConfig} _config
+     * @param {Record<string, unknown>} _data
+     * @param {O | undefined} _options
      */
-    setup() {}
+    setup(_config, _data, _options) {}
 
     get activeFields() {
         return this.config.activeFields;
@@ -75,23 +60,5 @@ export class DataPoint extends Reactive {
 
     get context() {
         return this.config.context;
-    }
-
-    get currentCompanyId() {
-        return this.config.currentCompanyId;
-    }
-
-    // -------------------------------------------------------------------------
-    // Public
-    // -------------------------------------------------------------------------
-
-    /**
-     * @param {string} fieldName
-     * @returns {boolean}
-     */
-    isFieldReadonly(fieldName) {
-        const activeField = this.activeFields[fieldName];
-        const { readonly } = activeField || this.fields[fieldName];
-        return readonly && evalDomain(readonly, this.evalContext);
     }
 }

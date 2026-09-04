@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+"""Utility functions to manage module manifest files and discovery."""
+from __future__ import annotations
 
 import ast
-import collections.abc
 import copy
 import functools
 import importlib
@@ -12,21 +12,23 @@ import os
 import re
 import sys
 import traceback
+import typing
 import warnings
-from os.path import join as opj, normpath
+from collections.abc import Collection, Iterable, Mapping
+from os.path import join as opj
 
-import odoo
-import odoo.tools as tools
+import odoo.addons
 import odoo.release as release
-from odoo.tools.misc import file_path
+import odoo.tools as tools
+import odoo.upgrade
 
 try:
     from packaging.requirements import InvalidRequirement, Requirement
 except ImportError:
-    class InvalidRequirement(Exception):
+    class InvalidRequirement(Exception):  # type: ignore[no-redef]
         ...
 
-    class Requirement:
+    class Requirement:  # type: ignore[no-redef]
         def __init__(self, pydep):
             if not re.fullmatch(r'[\w\-]+', pydep):  # check that we have no versions or marker in pydep
                 msg = f"Package `packaging` is required to parse `{pydep}` external dependency and is not installed"
@@ -35,42 +37,57 @@ except ImportError:
             self.specifier = None
             self.name = pydep
 
+__all__ = [
+    "Manifest",
+    "adapt_version",
+    "get_manifest",
+    "get_module_path",
+    "get_modules",
+    "get_modules_with_version",
+    "get_resource_from_path",
+    "initialize_sys_path",
+    "load_openerp_module",
+]
 
-MANIFEST_NAMES = ('__manifest__.py', '__openerp__.py')
-README = ['README.rst', 'README.md', 'README.txt']
+MODULE_NAME_RE = re.compile(r'^\w{1,256}$')
+MANIFEST_NAMES = ['__manifest__.py']
+README = ['README.rst', 'README.md', 'README.txt', 'README']
 
 _DEFAULT_MANIFEST = {
-    #addons_path: f'/path/to/the/addons/path/of/{module}',  # automatic
+    # Mandatory fields (with no defaults):
+    # - author
+    # - license
+    # - name
+    # Derived fields are computed in the Manifest class.
     'application': False,
     'bootstrap': False,  # web
     'assets': {},
-    'author': 'Odoo S.A.',
     'auto_install': False,
     'category': 'Uncategorized',
     'cloc_exclude': [],
     'configurator_snippets': {},  # website themes
+    'configurator_snippets_addons': {},  # website themes
     'countries': [],
     'data': [],
     'demo': [],
     'demo_xml': [],
     'depends': [],
-    'description': '',
+    'description': '',  # defaults to README file
     'external_dependencies': {},
-    #icon: f'/{module}/static/description/icon.png',  # automatic
     'init_xml': [],
     'installable': True,
     'images': [],  # website
     'images_preview_theme': {},  # website themes
-    #license, mandatory
+    'kpi_providers': [],
     'live_test_url': '',  # website themes
     'new_page_templates': {},  # website themes
-    #name, mandatory
     'post_init_hook': '',
     'post_load': '',
     'pre_init_hook': '',
     'sequence': 100,
     'summary': '',
     'test': [],
+    'theme_customizations': {},  # themes
     'update_xml': [],
     'uninstall_hook': '',
     'version': '1.0',
@@ -91,8 +108,11 @@ TYPED_FIELD_DEFINITION_RE = re.compile(r'''
 
 _logger = logging.getLogger(__name__)
 
+current_test: bool = False
+"""Indicates whteher we are in a test mode"""
 
-class UpgradeHook(object):
+
+class UpgradeHook:
     """Makes the legacy `migrations` package being `odoo.upgrade`"""
 
     def find_spec(self, fullname, path=None, target=None):
@@ -118,49 +138,200 @@ class UpgradeHook(object):
         return sys.modules[name]
 
 
-def initialize_sys_path():
+def initialize_sys_path() -> None:
     """
     Setup the addons path ``odoo.addons.__path__`` with various defaults
     and explicit directories.
     """
-    # hook odoo.addons on data dir
-    dd = os.path.normcase(tools.config.addons_data_dir)
-    if os.access(dd, os.R_OK) and dd not in odoo.addons.__path__:
-        odoo.addons.__path__.append(dd)
-
-    # hook odoo.addons on addons paths
-    for ad in tools.config['addons_path'].split(','):
-        ad = os.path.normcase(os.path.abspath(ad.strip()))
-        if ad not in odoo.addons.__path__:
-            odoo.addons.__path__.append(ad)
-
-    # hook odoo.addons on base module path
-    base_path = os.path.normcase(os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'addons')))
-    if base_path not in odoo.addons.__path__ and os.path.isdir(base_path):
-        odoo.addons.__path__.append(base_path)
+    for path in (
+        # tools.config.addons_base_dir,  # already present
+        tools.config.addons_data_dir,
+        *tools.config['addons_path'],
+        tools.config.addons_community_dir,
+    ):
+        if os.access(path, os.R_OK) and path not in odoo.addons.__path__:
+            odoo.addons.__path__.append(path)
 
     # hook odoo.upgrade on upgrade-path
-    from odoo import upgrade
-    legacy_upgrade_path = os.path.join(base_path, 'base', 'maintenance', 'migrations')
-    for up in (tools.config['upgrade_path'] or legacy_upgrade_path).split(','):
-        up = os.path.normcase(os.path.abspath(up.strip()))
-        if os.path.isdir(up) and up not in upgrade.__path__:
-            upgrade.__path__.append(up)
+    legacy_upgrade_path = os.path.join(tools.config.addons_base_dir, 'base/maintenance/migrations')
+    for up in tools.config['upgrade_path'] or [legacy_upgrade_path]:
+        if up not in odoo.upgrade.__path__:
+            odoo.upgrade.__path__.append(up)
 
     # create decrecated module alias from odoo.addons.base.maintenance.migrations to odoo.upgrade
     spec = importlib.machinery.ModuleSpec("odoo.addons.base.maintenance", None, is_package=True)
     maintenance_pkg = importlib.util.module_from_spec(spec)
-    maintenance_pkg.migrations = upgrade
+    maintenance_pkg.migrations = odoo.upgrade  # type: ignore
     sys.modules["odoo.addons.base.maintenance"] = maintenance_pkg
-    sys.modules["odoo.addons.base.maintenance.migrations"] = upgrade
+    sys.modules["odoo.addons.base.maintenance.migrations"] = odoo.upgrade
 
-    # hook deprecated module alias from openerp to odoo and "crm"-like to odoo.addons
-    if not getattr(initialize_sys_path, 'called', False): # only initialize once
+    # hook for upgrades and namespace freeze
+    if not getattr(initialize_sys_path, 'called', False):  # only initialize once
+        odoo.addons.__path__._path_finder = lambda *a: None  # prevent path invalidation
+        odoo.upgrade.__path__._path_finder = lambda *a: None  # prevent path invalidation
         sys.meta_path.insert(0, UpgradeHook())
-        initialize_sys_path.called = True
+        initialize_sys_path.called = True  # type: ignore
 
 
-def get_module_path(module, downloaded=False, display_warning=True):
+@typing.final
+class Manifest(Mapping[str, typing.Any]):
+    """The manifest data of a module."""
+
+    def __init__(self, *, path: str, manifest_content: dict):
+        assert os.path.isabs(path), "path of module must be absolute"
+        self.path = path
+        _, self.name = os.path.split(path)
+        if not MODULE_NAME_RE.match(self.name):
+            raise FileNotFoundError(f"Invalid module name: {self.name}")
+        self.__manifest_content = manifest_content
+
+    @property
+    def addons_path(self) -> str:
+        parent_path, name = os.path.split(self.path)
+        assert name == self.name
+        return parent_path
+
+    @functools.cached_property
+    def __manifest_cached(self) -> dict:
+        """Parsed and validated manifest data from the file."""
+        return _load_manifest(self.name, self.__manifest_content)
+
+    @functools.cached_property
+    def description(self):
+        """The description of the module defaulting to the README file."""
+        if (desc := self.__manifest_cached.get('description')):
+            return desc
+        for file_name in README:
+            try:
+                with tools.file_open(opj(self.path, file_name)) as f:
+                    return f.read()
+            except OSError:
+                pass
+        return ''
+
+    @functools.cached_property
+    def version(self):
+        try:
+            return self.__manifest_cached['version']
+        except Exception:  # noqa: BLE001
+            return adapt_version('1.0')
+
+    @functools.cached_property
+    def icon(self) -> str:
+        return get_module_icon(self.name)
+
+    @functools.cached_property
+    def static_path(self) -> str | None:
+        static_path = opj(self.path, 'static')
+        manifest = self.__manifest_cached
+        if (manifest['installable'] or manifest['assets']) and os.path.isdir(static_path):
+            return static_path
+        return None
+
+    def __getitem__(self, key: str):
+        if key in ('description', 'icon', 'addons_path', 'version', 'static_path'):
+            return getattr(self, key)
+        return copy.deepcopy(self.__manifest_cached[key])
+
+    def raw_value(self, key):
+        return copy.deepcopy(self.__manifest_cached.get(key))
+
+    def __iter__(self):
+        manifest = self.__manifest_cached
+        yield from manifest
+        for key in ('description', 'icon', 'addons_path', 'version', 'static_path'):
+            if key not in manifest:
+                yield key
+
+    def check_manifest_dependencies(self) -> None:
+        """Check that the dependecies of the manifest are available.
+
+        - Checking for external python dependencies
+        - Checking binaries are available in PATH
+
+        On missing dependencies, raise an error.
+        """
+        depends = self.get('external_dependencies')
+        if not depends:
+            return
+        for pydep in depends.get('python', []):
+            check_python_external_dependency(pydep)
+
+        for binary in depends.get('bin', []):
+            try:
+                tools.find_in_path(binary)
+            except OSError:
+                msg = "Unable to find {dependency!r} in path"
+                raise MissingDependency(msg, binary)
+
+    def __bool__(self):
+        return True
+
+    def __len__(self):
+        return sum(1 for _ in self)
+
+    def __repr__(self):
+        return f'Manifest({self.name})'
+
+    # limit cache size because this may get called from any module with any input
+    @staticmethod
+    @functools.lru_cache(10_000)
+    def _get_manifest_from_addons(module: str) -> Manifest | None:
+        """Get the module's manifest from a name. Searching only in addons paths."""
+        for adp in odoo.addons.__path__:
+            if manifest := Manifest._from_path(opj(adp, module)):
+                return manifest
+        return None
+
+    @staticmethod
+    def for_addon(module_name: str, *, display_warning: bool = True) -> Manifest | None:
+        """Get the module's manifest from a name.
+
+        :param module: module's name
+        :param display_warning: log a warning if the module is not found
+        """
+        if not MODULE_NAME_RE.match(module_name):
+            # invalid module name
+            return None
+        if mod := Manifest._get_manifest_from_addons(module_name):
+            return mod
+        if display_warning:
+            _logger.warning('module %s: manifest not found', module_name)
+        return None
+
+    @staticmethod
+    def _from_path(path: str, env=None) -> Manifest | None:
+        """Given a path, read the manifest file."""
+        for manifest_name in MANIFEST_NAMES:
+            try:
+                with tools.file_open(opj(path, manifest_name), env=env) as f:
+                    manifest_content = ast.literal_eval(f.read())
+            except OSError:
+                pass
+            except Exception:  # noqa: BLE001
+                _logger.debug("Failed to parse the manifest file at %r", path, exc_info=True)
+            else:
+                return Manifest(path=path, manifest_content=manifest_content)
+        return None
+
+    @staticmethod
+    def all_addon_manifests() -> list[Manifest]:
+        """Read all manifests in the addons paths."""
+        modules: dict[str, Manifest] = {}
+        for adp in odoo.addons.__path__:
+            if not os.path.isdir(adp):
+                _logger.warning("addons path is not a directory: %s", adp)
+                continue
+            for file_name in os.listdir(adp):
+                if file_name in modules:
+                    continue
+                if mod := Manifest._from_path(opj(adp, file_name)):
+                    assert file_name == mod.name
+                    modules[file_name] = mod
+        return sorted(modules.values(), key=lambda m: m.name)
+
+
+def get_module_path(module: str, display_warning: bool = True) -> str | None:
     """Return the path of the given module.
 
     Search the addons paths and return the first path where the given
@@ -168,44 +339,12 @@ def get_module_path(module, downloaded=False, display_warning=True):
     path if nothing else is found.
 
     """
-    if re.search(r"[\/\\]", module):
-        return False
-    for adp in odoo.addons.__path__:
-        files = [opj(adp, module, manifest) for manifest in MANIFEST_NAMES] +\
-                [opj(adp, module + '.zip')]
-        if any(os.path.exists(f) for f in files):
-            return opj(adp, module)
+    # TODO deprecate
+    mod = Manifest.for_addon(module, display_warning=display_warning)
+    return mod.path if mod else None
 
-    if downloaded:
-        return opj(tools.config.addons_data_dir, module)
-    if display_warning:
-        _logger.warning('module %s: module not found', module)
-    return False
 
-def get_resource_path(module, *args):
-    """Return the full path of a resource of the given module.
-
-    :param module: module name
-    :param list(str) args: resource path components within module
-
-    :rtype: str
-    :return: absolute path to the resource
-    """
-    warnings.warn(
-        f"Since 17.0: use tools.misc.file_path instead of get_resource_path({module}, {args})",
-        DeprecationWarning,
-    )
-    resource_path = opj(module, *args)
-    try:
-        return file_path(resource_path)
-    except (FileNotFoundError, ValueError):
-        return False
-
-# backwards compatibility
-get_module_resource = get_resource_path
-check_resource_path = get_resource_path
-
-def get_resource_from_path(path):
+def get_resource_from_path(path: str) -> tuple[str, str, str] | None:
     """Tries to extract the module name and the resource's relative path
     out of an absolute resource path.
 
@@ -220,7 +359,7 @@ def get_resource_from_path(path):
     :rtype: tuple
     :return: tuple(module_name, relative_path, os_relative_path) if possible, else None
     """
-    resource = False
+    resource = None
     sorted_paths = sorted(odoo.addons.__path__, key=len, reverse=True)
     for adpath in sorted_paths:
         # force trailing separator
@@ -237,118 +376,100 @@ def get_resource_from_path(path):
         return (module, '/'.join(relative), os.path.sep.join(relative))
     return None
 
-def get_module_icon(module):
-    fpath = f"{module}/static/description/icon.png"
+
+def get_module_icon(module: str) -> str:
+    """ Get the path to the module's icon. Invalid module names are accepted. """
+    manifest = Manifest.for_addon(module, display_warning=False)
+    if manifest and 'icon' in manifest.__dict__:
+        # we have a value in the cached property
+        return manifest.icon
+    fpath = ''
+    if manifest:
+        fpath = manifest.raw_value('icon') or ''
+        fpath = fpath.lstrip('/')
+    if not fpath:
+        fpath = f"{module}/static/description/icon.png"
     try:
-        file_path(fpath)
+        tools.file_path(fpath)
         return "/" + fpath
     except FileNotFoundError:
         return "/base/static/description/icon.png"
 
-def get_module_icon_path(module):
-    try:
-        return file_path(f"{module}/static/description/icon.png")
-    except FileNotFoundError:
-        return file_path("base/static/description/icon.png")
 
-def module_manifest(path):
-    """Returns path to module manifest if one can be found under `path`, else `None`."""
-    if not path:
-        return None
-    for manifest_name in MANIFEST_NAMES:
-        candidate = opj(path, manifest_name)
-        if os.path.isfile(candidate):
-            if manifest_name == '__openerp__.py':
-                warnings.warn(
-                    "__openerp__.py manifests are deprecated since 17.0, "
-                    f"rename {candidate!r} to __manifest__.py "
-                    "(valid since 10.0)",
-                    category=DeprecationWarning
-                )
-            return candidate
-
-def get_module_root(path):
-    """
-    Get closest module's root beginning from path
-
-        # Given:
-        # /foo/bar/module_dir/static/src/...
-
-        get_module_root('/foo/bar/module_dir/static/')
-        # returns '/foo/bar/module_dir'
-
-        get_module_root('/foo/bar/module_dir/')
-        # returns '/foo/bar/module_dir'
-
-        get_module_root('/foo/bar')
-        # returns None
-
-    @param path: Path from which the lookup should start
-
-    @return:  Module root path or None if not found
-    """
-    while not module_manifest(path):
-        new_path = os.path.abspath(opj(path, os.pardir))
-        if path == new_path:
-            return None
-        path = new_path
-    return path
-
-def load_manifest(module, mod_path=None):
+def load_manifest(module: str, mod_path: str | None = None) -> dict:
     """ Load the module manifest from the file system. """
+    warnings.warn("Since 19.0, use Manifest", DeprecationWarning)
 
-    if not mod_path:
-        mod_path = get_module_path(module, downloaded=True)
-    manifest_file = module_manifest(mod_path)
-
-    if not manifest_file:
+    if mod_path:
+        mod = Manifest._from_path(mod_path)
+        assert mod.path == mod_path
+    else:
+        mod = Manifest.for_addon(module)
+    if not mod:
         _logger.debug('module %s: no manifest file found %s', module, MANIFEST_NAMES)
         return {}
 
+    return dict(mod)
+
+
+def _load_manifest(module: str, manifest_content: dict) -> dict:
+    """ Load and validate the module manifest.
+
+    Return a new dictionary with cleaned and validated keys.
+    """
+
     manifest = copy.deepcopy(_DEFAULT_MANIFEST)
+    manifest.update(manifest_content)
 
-    manifest['icon'] = get_module_icon(module)
-
-    with tools.file_open(manifest_file, mode='r') as f:
-        manifest.update(ast.literal_eval(f.read()))
-
-    if not manifest['description']:
-        readme_path = [opj(mod_path, x) for x in README
-                       if os.path.isfile(opj(mod_path, x))]
-        if readme_path:
-            with tools.file_open(readme_path[0]) as fd:
-                manifest['description'] = fd.read()
+    if not manifest.get('author'):
+        # Altought contributors and maintainer are not documented, it is
+        # not uncommon to find them in manifest files, use them as
+        # alternative.
+        author = manifest.get('contributors') or manifest.get('maintainer') or ''
+        manifest['author'] = str(author)
+        _logger.warning("Missing `author` key in manifest for %r, defaulting to %r", module, str(author))
 
     if not manifest.get('license'):
         manifest['license'] = 'LGPL-3'
         _logger.warning("Missing `license` key in manifest for %r, defaulting to LGPL-3", module)
+
+    if module == 'base':
+        manifest['depends'] = []
+    elif not manifest['depends']:
+        # prevent the hack `'depends': []` except 'base' module
+        manifest['depends'] = ['base']
+
+    depends = manifest['depends']
+    assert isinstance(depends, Collection)
 
     # auto_install is either `False` (by default) in which case the module
     # is opt-in, either a list of dependencies in which case the module is
     # automatically installed if all dependencies are (special case: [] to
     # always install the module), either `True` to auto-install the module
     # in case all dependencies declared in `depends` are installed.
-    if isinstance(manifest['auto_install'], collections.abc.Iterable):
-        manifest['auto_install'] = set(manifest['auto_install'])
-        non_dependencies = manifest['auto_install'].difference(manifest['depends'])
-        assert not non_dependencies,\
-            "auto_install triggers must be dependencies, found " \
-            "non-dependencies [%s] for module %s" % (
-                ', '.join(non_dependencies), module
-            )
+    if isinstance(manifest['auto_install'], Iterable):
+        manifest['auto_install'] = auto_install_set = set(manifest['auto_install'])
+        non_dependencies = auto_install_set.difference(depends)
+        assert not non_dependencies, (
+            "auto_install triggers must be dependencies,"
+            f" found non-dependencies [{', '.join(non_dependencies)}] for module {module}"
+        )
     elif manifest['auto_install']:
-        manifest['auto_install'] = set(manifest['depends'])
+        manifest['auto_install'] = set(depends)
 
     try:
-        manifest['version'] = adapt_version(manifest['version'])
+        manifest['version'] = adapt_version(str(manifest['version']))
     except ValueError as e:
-        if manifest.get("installable", True):
+        if manifest['installable']:
             raise ValueError(f"Module {module}: invalid manifest") from e
-    manifest['addons_path'] = normpath(opj(mod_path, os.pardir))
+    if manifest['installable'] and not check_version(str(manifest['version']), should_raise=False):
+        _logger.warning("The module %s has an incompatible version, setting installable=False", module)
+        manifest['installable'] = False
 
     return manifest
 
-def get_manifest(module, mod_path=None):
+
+def get_manifest(module: str, mod_path: str | None = None) -> Mapping[str, typing.Any]:
     """
     Get the module manifest.
 
@@ -358,16 +479,17 @@ def get_manifest(module, mod_path=None):
         addons-paths.
     :returns: The module manifest as a dict or an empty dict
         when the manifest was not found.
-    :rtype: dict
     """
-    return copy.deepcopy(_get_manifest_cached(module, mod_path))
+    if mod_path:
+        mod = Manifest._from_path(mod_path)
+        if mod and mod.name != module:
+            raise ValueError(f"Invalid path for module {module}: {mod_path}")
+    else:
+        mod = Manifest.for_addon(module, display_warning=False)
+    return mod if mod is not None else {}
 
-@functools.lru_cache(maxsize=None)
-def _get_manifest_cached(module, mod_path=None):
-    return load_manifest(module, mod_path)
 
-
-def load_openerp_module(module_name):
+def load_openerp_module(module_name: str) -> None:
     """ Load an OpenERP module, if not already loaded.
 
     This loads the module and register all of its models, thanks to either
@@ -386,9 +508,9 @@ def load_openerp_module(module_name):
         # Call the module's post-load hook. This can done before any model or
         # data has been initialized. This is ok as the post-load hook is for
         # server-wide (instead of registry-specific) functionalities.
-        info = get_manifest(module_name)
-        if info['post_load']:
-            getattr(sys.modules[qualname], info['post_load'])()
+        manifest = Manifest.for_addon(module_name)
+        if post_load := manifest.get('post_load'):
+            getattr(sys.modules[qualname], post_load)()
 
     except AttributeError as err:
         _logger.critical("Couldn't load module %s", module_name)
@@ -412,69 +534,63 @@ def load_openerp_module(module_name):
         _logger.critical("Couldn't load module %s", module_name)
         raise
 
-def get_modules():
-    """Returns the list of module names
+
+def get_modules() -> list[str]:
+    """Get the list of module names that can be loaded.
     """
-    def listdir(dir):
-        def clean(name):
-            name = os.path.basename(name)
-            if name[-4:] == '.zip':
-                name = name[:-4]
-            return name
+    return [m.name for m in Manifest.all_addon_manifests()]
 
-        def is_really_module(name):
-            for mname in MANIFEST_NAMES:
-                if os.path.isfile(opj(dir, name, mname)):
-                    return True
-        return [
-            clean(it)
-            for it in os.listdir(dir)
-            if is_really_module(it)
-        ]
 
-    plist = []
-    for ad in odoo.addons.__path__:
-        if not os.path.exists(ad):
-            _logger.warning("addons path does not exist: %s", ad)
-            continue
-        plist.extend(listdir(ad))
-    return sorted(set(plist))
+def get_modules_with_version() -> dict[str, str]:
+    """Get the module list with the linked version."""
+    warnings.warn("Since 19.0, use Manifest.all_addon_manifests", DeprecationWarning)
+    return {m.name: m.version for m in Manifest.all_addon_manifests()}
 
-def get_modules_with_version():
-    modules = get_modules()
-    res = dict.fromkeys(modules, adapt_version('1.0'))
-    for module in modules:
-        try:
-            info = get_manifest(module)
-            res[module] = info['version']
-        except Exception:
-            continue
-    return res
 
-def adapt_version(version):
+def adapt_version(version: str) -> str:
+    """Reformat the version of the module into a canonical format."""
+    version_str_parts = version.split('.')
+    if not (2 <= len(version_str_parts) <= 5):
+        raise ValueError(f"Invalid version {version!r}, must have between 2 and 5 parts")
     serie = release.major_version
-    if version == serie or not version.startswith(serie + '.'):
-        base_version = version
-        version = '%s.%s' % (serie, version)
-    else:
-        base_version = version[len(serie) + 1:]
-
-    if not re.match(r"^[0-9]+\.[0-9]+(?:\.[0-9]+)?$", base_version):
-        raise ValueError(f"Invalid version {base_version!r}. Modules should have a version in format `x.y`, `x.y.z`,"
-                         f" `{serie}.x.y` or `{serie}.x.y.z`.")
-
+    if version.startswith(serie) and not version_str_parts[0].isdigit():
+        # keep only digits for parsing
+        version_str_parts[0] = ''.join(c for c in version_str_parts[0] if c.isdigit())
+    try:
+        version_parts = [int(v) for v in version_str_parts]
+    except ValueError as e:
+        raise ValueError(f"Invalid version {version!r}") from e
+    if len(version_parts) <= 3 and not version.startswith(serie):
+        # prefix the version with serie
+        return f"{serie}.{version}"
     return version
 
 
-current_test = False
+def check_version(version: str, should_raise: bool = True) -> bool:
+    """Check that the version is in a valid format for the current release."""
+    version = adapt_version(version)
+    serie = release.major_version
+    if version.startswith(serie + '.'):
+        return True
+    if should_raise:
+        raise ValueError(
+            f"Invalid version {version!r}. Modules should have a version in format"
+            f" `x.y`, `x.y.z`, `{serie}.x.y` or `{serie}.x.y.z`.")
+    return False
 
 
-def check_python_external_dependency(pydep):
+class MissingDependency(Exception):
+    def __init__(self, msg_template: str, dependency: str):
+        self.dependency = dependency
+        super().__init__(msg_template.format(dependency=dependency))
+
+
+def check_python_external_dependency(pydep: str) -> None:
     try:
         requirement = Requirement(pydep)
     except InvalidRequirement as e:
         msg = f"{pydep} is an invalid external dependency specification: {e}"
-        raise Exception(msg) from e
+        raise ValueError(msg) from e
     if requirement.marker and not requirement.marker.evaluate():
         _logger.debug(
             "Ignored external dependency %s because environment markers do not match",
@@ -491,22 +607,17 @@ def check_python_external_dependency(pydep):
             return
         except ImportError:
             pass
-        msg = f"External dependency {pydep} not installed: {e}"
-        raise Exception(msg) from e
+        msg = "External dependency {dependency!r} not installed: %s" % (e,)
+        raise MissingDependency(msg, pydep) from e
     if requirement.specifier and not requirement.specifier.contains(version):
-        msg = f"External dependency version mismatch: {pydep} (installed: {version})"
-        raise Exception(msg)
+        msg = f"External dependency version mismatch: {{dependency}} (installed: {version})"
+        raise MissingDependency(msg, pydep)
 
 
-def check_manifest_dependencies(manifest):
-    depends = manifest.get('external_dependencies')
-    if not depends:
-        return
-    for pydep in depends.get('python', []):
-        check_python_external_dependency(pydep)
-
-    for binary in depends.get('bin', []):
-        try:
-            tools.find_in_path(binary)
-        except IOError:
-            raise Exception('Unable to find %r in path' % (binary,))
+def load_script(path: str, module_name: str):
+    full_path = tools.file_path(path) if not os.path.isabs(path) else path
+    spec = importlib.util.spec_from_file_location(module_name, full_path)
+    assert spec and spec.loader, f"spec not found for {module_name}"
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module

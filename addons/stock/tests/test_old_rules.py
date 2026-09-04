@@ -2,6 +2,8 @@
 
 from datetime import timedelta
 
+from odoo import Command
+from odoo.addons.stock.models.stock_rule import StockRule
 from odoo.tests import Form
 from odoo.addons.stock.tests.common import TestStockCommon
 
@@ -51,9 +53,8 @@ class TestOldRules(TestStockCommon):
     def test_delay_alert_3_old(self):
         partner_demo_customer = self.partner
         final_location = partner_demo_customer.property_stock_customer
-        pg = self.env['procurement.group'].create({'name': 'Test-delay_alert_3'})
-        self.env['procurement.group'].run([
-            pg.Procurement(
+        self.env['stock.rule'].run([
+            StockRule.Procurement(
                 self.productA,
                 4.0,
                 self.productA.uom_id,
@@ -63,7 +64,6 @@ class TestOldRules(TestStockCommon):
                 self.warehouse_3_steps.company_id,
                 {
                     'warehouse_id': self.warehouse_3_steps,
-                    'group_id': pg
                 }
             ),
         ])
@@ -139,14 +139,14 @@ class TestOldRules(TestStockCommon):
         self.env['stock.quant']._update_available_quantity(self.productA, self.warehouse_3_steps.lot_stock_id, 4.0)
 
         # We alter one rule and we set it to 'mts_else_mto'
-        self.warehouse_3_steps.delivery_route_id.rule_ids.filtered(lambda r: r.procure_method == "make_to_order").write({
-            'procure_method': 'mts_else_mto',
-        })
+        self.warehouse_3_steps.delivery_route_id.rule_ids.filtered(
+            lambda r: r.procure_method == "make_to_order"
+        ).procure_method = 'mts_else_mto'
 
-        pg = self.env['procurement.group'].create({'name': 'Test-pg-mtso-mto'})
+        reference = self.env['stock.reference'].create({'name': 'Test-pg-mtso-mto'})
 
-        self.env['procurement.group'].run([
-            pg.Procurement(
+        self.env['stock.rule'].run([
+            StockRule.Procurement(
                 self.productA,
                 5.0,
                 self.productA.uom_id,
@@ -156,7 +156,7 @@ class TestOldRules(TestStockCommon):
                 self.warehouse_3_steps.company_id,
                 {
                     'warehouse_id': self.warehouse_3_steps,
-                    'group_id': pg
+                    'reference_ids': reference,
                 }
             )
         ])
@@ -164,7 +164,7 @@ class TestOldRules(TestStockCommon):
         qty_available = self.env['stock.quant']._get_available_quantity(self.productA, self.warehouse_3_steps.wh_output_stock_loc_id)
 
         # 3 pickings should be created.
-        picking_ids = self.env['stock.picking'].search([('group_id', '=', pg.id)])
+        picking_ids = self.env['stock.picking'].search([('reference_ids', 'in', reference.id)])
         self.assertEqual(len(picking_ids), 3)
         for picking in picking_ids:
             self.assertEqual(picking.move_ids.procure_method, 'make_to_stock')
@@ -193,16 +193,14 @@ class TestOldRules(TestStockCommon):
         # We alter one rule and we set it to 'mts_else_mto'
         self.warehouse_3_steps.delivery_route_id.rule_ids.filtered(
             lambda r: r.procure_method == "make_to_order"
-        ).write({
-            'procure_method': 'mts_else_mto',
-        })
+        ).procure_method = 'mts_else_mto'
 
-        pg1 = self.env['procurement.group'].create({'name': 'Test-pg-mtso-mts-1'})
-        pg2 = self.env['procurement.group'].create({'name': 'Test-pg-mtso-mts-2'})
-        pg3 = self.env['procurement.group'].create({'name': 'Test-pg-mtso-mts-3'})
+        reference_1 = self.env['stock.reference'].create({'name': 'Test-pg-mtso-mts-1'})
+        reference_2 = self.env['stock.reference'].create({'name': 'Test-pg-mtso-mts-2'})
+        reference_3 = self.env['stock.reference'].create({'name': 'Test-pg-mtso-mts-3'})
 
-        self.env['procurement.group'].run([
-            pg1.Procurement(
+        self.env['stock.rule'].run([
+            StockRule.Procurement(
                 product_a,
                 2.0,
                 product_a.uom_id,
@@ -212,10 +210,10 @@ class TestOldRules(TestStockCommon):
                 warehouse.company_id,
                 {
                     'warehouse_id': warehouse,
-                    'group_id': pg1
+                    'reference_ids': reference_1,
                 }
             ),
-            pg2.Procurement(
+            StockRule.Procurement(
                 product_a,
                 2.0,
                 product_a.uom_id,
@@ -225,10 +223,10 @@ class TestOldRules(TestStockCommon):
                 warehouse.company_id,
                 {
                     'warehouse_id': warehouse,
-                    'group_id': pg2
+                    'reference_ids': reference_2,
                 }
             ),
-            pg3.Procurement(
+            StockRule.Procurement(
                 product_a,
                 2.0,
                 product_a.uom_id,
@@ -238,14 +236,14 @@ class TestOldRules(TestStockCommon):
                 warehouse.company_id,
                 {
                     'warehouse_id': warehouse,
-                    'group_id': pg3
+                    'reference_ids': reference_3,
                 }
             )
         ])
 
-        pickings_pg1 = self.env['stock.picking'].search([('group_id', '=', pg1.id)])
-        pickings_pg2 = self.env['stock.picking'].search([('group_id', '=', pg2.id)])
-        pickings_pg3 = self.env['stock.picking'].search([('group_id', '=', pg3.id)])
+        pickings_pg1 = self.env['stock.picking'].search([('reference_ids', 'in', reference_1.id)])
+        pickings_pg2 = self.env['stock.picking'].search([('reference_ids', 'in', reference_2.id)])
+        pickings_pg3 = self.env['stock.picking'].search([('reference_ids', 'in', reference_3.id)])
 
         # The 2 first procurements should have create only 1 picking since enough quantities
         # are left in the delivery location
@@ -275,7 +273,6 @@ class TestOldRules(TestStockCommon):
                 'state': 'draft',
             })
             move_A, move_B = self.env['stock.move'].create([{
-                'name': self.productA.name,
                 'product_id': self.productA.id,
                 'product_uom_qty': 1,
                 'product_uom': self.productA.uom_id.id,
@@ -283,7 +280,6 @@ class TestOldRules(TestStockCommon):
                 'location_id': from_loc.id,
                 'location_dest_id': to_loc.id,
             }, {
-                'name': self.productB.name,
                 'product_id': self.productB.id,
                 'product_uom_qty': 1,
                 'product_uom': self.productB.uom_id.id,
@@ -308,19 +304,18 @@ class TestOldRules(TestStockCommon):
         moveB.picked = True
         picking.action_put_in_pack()
         picking.button_validate()
-        delivery_type.show_entire_packs = True
         picking, _, _ = create_picking(delivery_type, delivery_type.default_location_src_id, customer_location)
-        packB = picking.package_level_ids[1]
-        picking.package_level_ids_details[0].is_done = True
+        packB = picking.move_ids[1].move_line_ids.package_id
+        picking.move_ids[0].picked = True
 
         action_data = picking.button_validate()
         backorder_wizard = Form(self.env['stock.backorder.confirmation'].with_context(action_data['context'])).save()
         backorder_wizard.process()
         bo = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
 
-        self.assertNotIn(packB, picking.package_level_ids)
-        self.assertEqual(packB, bo.package_level_ids)
-        self.assertEqual(bo.package_level_ids.state, 'assigned')
+        self.assertNotIn(packB, picking.move_line_ids.package_id)
+        self.assertEqual(packB, bo.move_line_ids.package_id)
+        self.assertEqual(bo.move_ids.state, 'assigned')
 
     def test_pack_delivery_three_step_propagate_package_consumable_old(self):
         """ Checks all works right in the following case:
@@ -330,12 +325,11 @@ class TestOldRules(TestStockCommon):
         """
         prod = self.env['product.product'].create({'name': 'bad dragon', 'type': 'consu'})
         ship_move = self.env['stock.move'].create({
-            'name': 'The ship move',
             'product_id': prod.id,
             'product_uom_qty': 5.0,
             'product_uom': prod.uom_id.id,
             'location_id': self.warehouse_3_steps.wh_output_stock_loc_id.id,
-            'location_dest_id': self.env.ref('stock.stock_location_customers').id,
+            'location_dest_id': self.customer_location.id,
             'warehouse_id':  self.warehouse_3_steps.id,
             'picking_type_id':  self.warehouse_3_steps.out_type_id.id,
             'procure_method': 'make_to_order',
@@ -355,153 +349,6 @@ class TestOldRules(TestStockCommon):
         picking.button_validate()
         self.assertEqual(pack_move.move_line_ids.result_package_id, picking.move_line_ids.result_package_id)
 
-    def test_procurement_group_merge(self):
-        """ Enable the pick ship route, force a procurement group on the
-        pick. When a second move is added, make sure the `partner_id` and
-        `origin` fields are erased.
-        """
-        # create a procurement group and set in on the pick stock rule
-        procurement_group0 = self.env['procurement.group'].create({})
-        product1 = self.env['product.product'].create({
-            'name': 'test_procurement_group_merge',
-            'is_storable': True,
-        })
-        pick_ship_route = self.warehouse_2_steps.delivery_route_id
-        ship_rule = pick_ship_route.rule_ids.filtered(lambda rule: '2S: Output → Customers' in rule.name)
-        pick_rule = pick_ship_route.rule_ids - ship_rule
-        pick_rule.write({
-            'group_propagation_option': 'fixed',
-            'group_id': procurement_group0.id,
-        })
-
-        pick_location = ship_rule.picking_type_id.default_location_src_id
-        customer_location = ship_rule.location_dest_id
-        partners = self.env['res.partner'].search([], limit=2)
-        partner0 = partners[0]
-        partner1 = partners[1]
-        procurement_group1 = self.env['procurement.group'].create({'partner_id': partner0.id})
-        procurement_group2 = self.env['procurement.group'].create({'partner_id': partner1.id})
-
-        move1 = self.env['stock.move'].create({
-            'name': 'first out move',
-            'procure_method': 'make_to_order',
-            'location_id': pick_location.id,
-            'location_dest_id': customer_location.id,
-            'product_id': product1.id,
-            'product_uom': self.uom_unit.id,
-            'product_uom_qty': 1.0,
-            'warehouse_id': self.warehouse_2_steps.id,
-            'group_id': procurement_group1.id,
-            'origin': 'origin1',
-        })
-
-        move2 = self.env['stock.move'].create({
-            'name': 'second out move',
-            'procure_method': 'make_to_order',
-            'location_id': pick_location.id,
-            'location_dest_id': customer_location.id,
-            'product_id': product1.id,
-            'product_uom': self.uom_unit.id,
-            'product_uom_qty': 1.0,
-            'warehouse_id': self.warehouse_2_steps.id,
-            'group_id': procurement_group2.id,
-            'origin': 'origin2',
-        })
-
-        # first out move, the "pick" picking should have a partner and an origin
-        move1._action_confirm()
-        picking_pick = move1.move_orig_ids.picking_id
-        self.assertEqual(picking_pick.partner_id.id, procurement_group1.partner_id.id)
-        self.assertEqual(picking_pick.origin, move1.group_id.name)
-
-        # second out move, the "pick" picking should have lost its partner and origin
-        move2._action_confirm()
-        self.assertEqual(picking_pick.partner_id.id, False)
-        self.assertEqual(picking_pick.origin, False)
-
-    def test_fixed_procurement_01(self):
-        """ Run a procurement for 5 products when there are only 4 in stock then
-        check that MTO is applied on the moves when the rule is set to 'mts_else_mto'
-        """
-        self.partner = self.env['res.partner'].create({'name': 'Partner'})
-        final_location = self.partner.property_stock_customer
-
-        # Create a product and add 10 units in stock
-        product_a = self.env['product.product'].create({
-            'name': 'ProductA',
-            'is_storable': True,
-        })
-        self.env['stock.quant']._update_available_quantity(product_a, self.warehouse_2_steps.lot_stock_id, 10.0)
-        warehouse = self.warehouse_2_steps
-        # Create a route which will allows 'wave picking'
-        wave_pg = self.env['procurement.group'].create({'name': 'Wave PG'})
-        wave_route = self.env['stock.route'].create({
-            'name': 'Wave for ProductA',
-            'product_selectable': True,
-            'sequence': 1,
-            'rule_ids': [(0, 0, {
-                'name': 'Stock -> output rule',
-                'action': 'pull',
-                'picking_type_id': warehouse.pick_type_id.id,
-                'location_src_id': warehouse.lot_stock_id.id,
-                'location_dest_id': warehouse.wh_output_stock_loc_id.id,
-                'group_propagation_option': 'fixed',
-                'group_id': wave_pg.id,
-            })],
-        })
-
-        # Set this route on `product_a`
-        product_a.write({
-            'route_ids': [(4, wave_route.id)]
-        })
-
-        # Create a procurement for 2 units
-        pg = self.env['procurement.group'].create({'name': 'Wave 1'})
-        self.env['procurement.group'].run([
-            pg.Procurement(
-                product_a,
-                2.0,
-                product_a.uom_id,
-                final_location,
-                'wave_part_1',
-                'wave_part_1',
-                warehouse.company_id,
-                {
-                    'warehouse_id': warehouse,
-                    'group_id': pg
-                }
-            )
-        ])
-
-        # 2 pickings should be created: 1 for pick, 1 for ship
-        picking_pick = self.env['stock.picking'].search([('group_id', '=', wave_pg.id)])
-        picking_ship = self.env['stock.picking'].search([('group_id', '=', pg.id)])
-        self.assertAlmostEqual(picking_pick.move_ids.product_uom_qty, 2.0)
-        self.assertAlmostEqual(picking_ship.move_ids.product_uom_qty, 2.0)
-
-        # Create a procurement for 3 units
-        pg = self.env['procurement.group'].create({'name': 'Wave 2'})
-        self.env['procurement.group'].run([
-            pg.Procurement(
-                product_a,
-                3.0,
-                product_a.uom_id,
-                final_location,
-                'wave_part_2',
-                'wave_part_2',
-                warehouse.company_id,
-                {
-                    'warehouse_id': warehouse,
-                    'group_id': pg
-                }
-            )
-        ])
-
-        # The picking for the pick operation should be reused and the lines merged.
-        picking_ship = self.env['stock.picking'].search([('group_id', '=', pg.id)])
-        self.assertAlmostEqual(picking_pick.move_ids.product_uom_qty, 5.0)
-        self.assertAlmostEqual(picking_ship.move_ids.product_uom_qty, 3.0)
-
     def test_report_reception_4_pick_pack(self):
         """ Check that reception report ignores outgoing moves that are not beginning of chain
         """
@@ -513,12 +360,11 @@ class TestOldRules(TestStockCommon):
         })
 
         ship_move = self.env['stock.move'].create({
-            'name': 'The ship move',
             'product_id': self.product.id,
             'product_uom_qty': 5.0,
             'product_uom': self.product.uom_id.id,
             'location_id': warehouse.wh_output_stock_loc_id.id,
-            'location_dest_id': self.env.ref('stock.stock_location_customers').id,
+            'location_dest_id': self.customer_location.id,
             'warehouse_id': warehouse.id,
             'picking_type_id': warehouse.out_type_id.id,
             'procure_method': 'make_to_order',
@@ -537,7 +383,7 @@ class TestOldRules(TestStockCommon):
         receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = warehouse.in_type_id
-        with receipt_form.move_ids_without_package.new() as move_line:
+        with receipt_form.move_ids.new() as move_line:
             move_line.product_id = self.product
             move_line.product_uom_qty = 15
         receipt = receipt_form.save()
@@ -546,62 +392,90 @@ class TestOldRules(TestStockCommon):
         report_values = report._get_report_values(docids=[receipt.id])
         self.assertEqual(len(report_values['sources_to_lines']), 1, "There should only be 1 line (pick move)")
 
-    def test_pick_ship_1(self):
-        """ Enable the pick ship route, force a procurement group on the
-        pick. When a second move is added, make sure the `partner_id` and
-        `origin` fields are erased.
+    def test_update_picking_origin(self):
+        """ Check that adding new moves to a picking updates its origin without duplicate nor order mismatch
         """
-        pick_ship_route = self.warehouse_2_steps.delivery_route_id
-        # create a procurement group and set in on the pick stock rule
-        procurement_group0 = self.env['procurement.group'].create({})
-        pick_rule = pick_ship_route.rule_ids.filtered(lambda rule: 'Stock → Output' in rule.name)
-        push_rule = pick_ship_route.rule_ids - pick_rule
-        pick_rule.write({
-            'group_propagation_option': 'fixed',
-            'group_id': procurement_group0.id,
+        reference = self.env['stock.reference'].create({'name': 'reference'})
+        moves = self.env['stock.move'].create([
+            {
+                'picking_type_id': self.warehouse_1.out_type_id.id,
+                'location_id': self.warehouse_1.lot_stock_id.id,
+                'location_dest_id': self.customer_location.id,
+                'product_id': product.id,
+                'product_uom': product.uom_id.id,
+                'product_uom_qty': 1.0,
+                'origin': origin,
+                'reference_ids': [Command.link(reference.id)],
+            } for product, origin in [(self.productA, 'origin1'), (self.productA, 'origin2'), (self.productB, 'origin2'), (self.productB, 'origin1')]
+        ])
+        moves[0]._action_confirm()
+        receipt = moves.picking_id
+        self.assertEqual(receipt.origin, 'origin1')
+        moves[1:]._action_confirm()
+        self.assertEqual(receipt.origin, 'origin1,origin2')
+
+    def test_propagate_cancel_in_pull_setup(self):
+        """
+        Check the cancellation propagation in pull set ups.
+        """
+        # create a procurement group
+        product1 = self.env['product.product'].create({
+            'name': 'test_procurement_cancel_propagation',
+            'is_storable': True,
         })
+        pick_pack_ship_route = self.warehouse_3_steps.delivery_route_id
+        pick_rule = pick_pack_ship_route.rule_ids.filtered(lambda rule: rule.picking_type_id == self.warehouse_3_steps.pick_type_id)
+        pack_rule = pick_pack_ship_route.rule_ids.filtered(lambda rule:  rule.picking_type_id == self.warehouse_3_steps.pack_type_id)
+        (pick_rule | pack_rule).propagate_cancel = True
+        ship_rule = pick_pack_ship_route.rule_ids - (pick_rule | pack_rule)
+        self.env['stock.rule'].run([
+            self.env['stock.rule'].Procurement(
+                product1,
+                1.0,
+                product1.uom_id,
+                ship_rule.location_dest_id,
+                'test_mtso_mts_1',
+                'test_mtso_mts_1',
+                self.warehouse_3_steps.company_id,
+                {
+                    'warehouse_id': self.warehouse_3_steps,
+                }
+            ),
+        ])
+        move_chain = self.env['stock.move'].search([('product_id', '=', product1.id)])
+        self.assertEqual(len(move_chain), 3)
+        pick_move = move_chain.filtered(lambda m: m.picking_type_id == self.warehouse_3_steps.pick_type_id)
+        pick_move.picking_id.action_cancel()
+        self.assertEqual(move_chain.mapped('state'), ['cancel', 'cancel', 'cancel'])
 
-        ship_location = pick_rule.location_dest_id
-        customer_location = push_rule.location_dest_id
-        partners = self.env['res.partner'].search([], limit=2)
-        partner0 = partners[0]
-        partner1 = partners[1]
-        procurement_group1 = self.env['procurement.group'].create({'partner_id': partner0.id})
-        procurement_group2 = self.env['procurement.group'].create({'partner_id': partner1.id})
-
-        move1 = self.env['stock.move'].create({
-            'name': 'first out move',
-            'procure_method': 'make_to_order',
-            'location_id': ship_location.id,
-            'location_dest_id': customer_location.id,
-            'product_id': self.productA.id,
-            'product_uom': self.uom_unit.id,
-            'product_uom_qty': 1.0,
-            'warehouse_id': self.warehouse_2_steps.id,
-            'group_id': procurement_group1.id,
-            'origin': 'origin1',
+    def test_negative_move_with_take_loc_from_rule(self):
+        """
+        This test checks if t a negative move will be merged correctly when the loc_dest_id
+        is taken from the rule instead of the picking type.
+        """
+        rule = self.warehouse_1.reception_route_id.rule_ids.filtered(lambda r: r.action == 'pull')
+        new_loc = self.env['stock.location'].create({
+            'name': 'Shelf',
+            'usage': 'transit',
+            'location_id': rule.location_dest_id.id,
         })
-
-        move2 = self.env['stock.move'].create({
-            'name': 'second out move',
-            'procure_method': 'make_to_order',
-            'location_id': ship_location.id,
-            'location_dest_id': customer_location.id,
-            'product_id': self.productA.id,
-            'product_uom': self.uom_unit.id,
-            'product_uom_qty': 1.0,
-            'warehouse_id': self.warehouse_2_steps.id,
-            'group_id': procurement_group2.id,
-            'origin': 'origin2',
+        rule.write({
+            'location_dest_id': new_loc.id,
         })
-
-        # first out move, the "pick" picking should have a partner and an origin
-        move1._action_confirm()
-        picking_pick = move1.move_orig_ids.picking_id
-        self.assertEqual(picking_pick.partner_id.id, procurement_group1.partner_id.id)
-        self.assertEqual(picking_pick.origin, move1.group_id.name)
-
-        # second out move, the "pick" picking should have lost its partner and origin
-        move2._action_confirm()
-        self.assertEqual(picking_pick.partner_id.id, False)
-        self.assertEqual(picking_pick.origin, False)
+        rule.location_dest_from_rule = True
+        picking = self.env['stock.picking'].create({
+            'picking_type_id': rule.picking_type_id.id,
+            'location_dest_id': rule.location_dest_id.id,
+        })
+        pos_move = self.env['stock.move'].create({
+            'product_id': self.product_1.id,
+            'product_uom_qty': 5.0,
+            'picking_id': picking.id,
+            'rule_id': rule.id,
+        })
+        pos_move._action_confirm()
+        neg_move = pos_move.copy({
+            'product_uom_qty': -2.0,
+        })
+        neg_move._action_confirm()
+        self.assertEqual(picking.move_ids.product_uom_qty, 3.0)

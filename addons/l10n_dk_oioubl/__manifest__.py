@@ -11,10 +11,8 @@ E-invoice implementation for the Denmark
         'account_edi_ubl_cii',
         'l10n_dk',
     ],
-    'data': [
-        'data/oioubl_templates.xml',
-    ],
     'installable': True,
     'auto_install': True,
     'license': 'LGPL-3',
+    'uninstall_hook': 'uninstall_hook',
 }

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.fields import Command
 from odoo.tests import common, Form
 from odoo.exceptions import UserError
 
@@ -24,14 +25,14 @@ class TestMrpMulticompany(common.TransactionCase):
         cls.user_a = cls.env['res.users'].create({
             'name': 'user company a with access to company b',
             'login': 'user a',
-            'groups_id': [(6, 0, [group_user.id, group_mrp_manager.id])],
+            'group_ids': [(6, 0, [group_user.id, group_mrp_manager.id])],
             'company_id': cls.company_a.id,
             'company_ids': [(6, 0, [cls.company_a.id, cls.company_b.id])]
         })
         cls.user_b = cls.env['res.users'].create({
             'name': 'user company a with access to company b',
             'login': 'user b',
-            'groups_id': [(6, 0, [group_user.id, group_mrp_manager.id])],
+            'group_ids': [(6, 0, [group_user.id, group_mrp_manager.id])],
             'company_id': cls.company_b.id,
             'company_ids': [(6, 0, [cls.company_a.id, cls.company_b.id])]
         })
@@ -135,12 +136,12 @@ class TestMrpMulticompany(common.TransactionCase):
         })
         mo_form = Form(self.env['mrp.production'].with_user(self.user_a))
         mo_form.product_id = product
-        # The mo must be confirmed, no longer in draft, in order for `lot_producing_id` to be visible in the view
+        # The mo must be confirmed, no longer in draft, in order for `lot_producing_ids` to be visible in the view
         # <div class="o_row" invisible="state == 'draft' or product_tracking in ('none', False)">
         mo = mo_form.save()
         mo.action_confirm()
         mo_form = Form(mo)
-        mo_form.lot_producing_id = lot_b
+        mo_form.lot_producing_ids.set(lot_b)
         mo = mo_form.save()
         with self.assertRaises(UserError):
             mo.with_user(self.user_b).action_confirm()
@@ -249,3 +250,91 @@ class TestMrpMulticompany(common.TransactionCase):
         new_company = self.env['res.company'].create({'name': 'Super Company'})
         new_warehouse = self.env['stock.warehouse'].search([('company_id', '=', new_company.id)], limit=1)
         self.assertEqual(new_warehouse.manufacture_pull_id.route_id.company_id, new_company)
+
+    def test_company_specific_routes_and_warehouse_creation(self):
+        """ Check that we are able to create a new warehouse when the generic manufacture route
+        is in a different company. """
+        group_stock_manager = self.env.ref('stock.group_stock_manager')
+        self.user_a.write({'group_ids': [(4, group_stock_manager.id)]})
+
+        manufacture_route = self.env.ref('mrp.route_warehouse0_manufacture')
+        for rule in manufacture_route.rule_ids.sudo():
+            rule_company = rule.company_id
+            if not rule_company or rule_company == self.company_a:
+                continue
+            manufacture_route.copy({
+                'company_id': rule_company.id,
+                'rule_ids': [(4, rule.id)],
+            })
+        manufacture_route.company_id = self.company_a
+
+        # Enable multi warehouse
+        group_user = self.env.ref('base.group_user')
+        group_stock_multi_warehouses = self.env.ref('stock.group_stock_multi_warehouses')
+        group_stock_multi_locations = self.env.ref('stock.group_stock_multi_locations')
+        self.env['res.config.settings'].create({
+            'group_stock_multi_locations': True,
+        }).execute()
+        group_user.write({'implied_ids': [(4, group_stock_multi_warehouses.id), (4, group_stock_multi_locations.id)]})
+
+        new_warehouse = self.env['stock.warehouse'].with_user(self.user_a).with_context(allowed_company_ids=[self.company_b.id]).create({
+            'name': 'Warehouse #2',
+            'code': 'WH2',
+        })
+        self.assertEqual(new_warehouse.manufacture_pull_id.route_id.company_id, self.company_b)
+
+    def test_multi_company_kit_reservation(self):
+        """
+        Create and assign a delivery in company_b for a product that is a kit in company_a.
+        Check that the move is treated just as a non-kit product.
+        """
+        """ Check that is_kits is company dependant """
+        semi_kit_product = self.env['product.product'].create({
+            'name': 'Kit Kat',
+            'is_storable': True,
+        })
+        self.env['mrp.bom'].create([{
+            'product_id': semi_kit_product.id,
+            'product_tmpl_id': semi_kit_product.product_tmpl_id.id,
+            'company_id': self.company_a.id,
+            'type': 'phantom',
+        }])
+        warehouse_b = self.env['stock.warehouse'].search([('company_id', '=', self.company_b.id)], limit=1)
+        delivery = self.env['stock.picking'].with_company(self.company_b.id).create({
+            'picking_type_id': warehouse_b.out_type_id.id,
+            'location_id': warehouse_b.lot_stock_id.id,
+            'location_dest_id': self.ref('stock.stock_location_customers'),
+            'move_ids': [Command.create({
+                'product_id': semi_kit_product.id,
+                'product_uom_qty': 1,
+                'location_id':  warehouse_b.lot_stock_id.id,
+                'location_dest_id': self.ref('stock.stock_location_customers'),
+            })]
+        })
+        # confirm and assign the delivery with company_a and check that it was treated as a non-kit product
+        delivery.with_company(self.company_a).action_confirm()
+        delivery.with_company(self.company_a).action_assign()
+        self.assertRecordValues(delivery.move_ids, [{'state': 'confirmed', 'quantity': 0.0}])
+
+    def test_bom_report_without_warehouse(self):
+        """
+        Checks that bom overview/report shows availabilities as "Not Available" when the warehouse is not active.
+        """
+        self.warehouse_a.active = False
+        product, component = self.env['product.product'].create([
+            {'name': 'p1', 'is_storable': True},
+            {'name': 'c1', 'is_storable': True},
+        ])
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'company_id': self.company_a.id,
+            'bom_line_ids': [(0, 0, {'product_id': component.id})]
+        })
+        report = self.env['report.mrp.report_bom_structure'].with_company(self.company_a)
+        bom_overview = report._get_report_data(bom_id=bom.id)
+        bom_report = report._get_report_values(docids=[bom.id], data={})
+
+        self.assertFalse(bom_overview["lines"]["availability_delay"])
+        self.assertFalse(bom_report["docs"][0]["availability_delay"])
+        self.assertEqual("unavailable", bom_overview["lines"]["availability_state"])
+        self.assertEqual("unavailable", bom_report["docs"][0]["availability_state"])

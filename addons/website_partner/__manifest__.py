@@ -3,7 +3,7 @@
 
 {
     'name': 'Website Partner',
-    'category': 'Hidden',
+    'category': 'Website/Website',
     'summary': 'Partner module for website',
     'version': '0.1',
     'description': """
@@ -17,5 +17,6 @@ This is a base module. It holds website-related stuff for Contact model (res.par
     ],
     'demo': ['data/website_partner_demo.xml'],
     'installable': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

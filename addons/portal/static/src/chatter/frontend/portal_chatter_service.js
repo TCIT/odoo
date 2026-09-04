@@ -1,11 +1,11 @@
 import { PortalChatter } from "@portal/chatter/frontend/portal_chatter";
 import { App } from "@odoo/owl";
-import { getBundle } from "@web/core/assets";
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 import { session } from "@web/session";
-import { _t } from "@web/core/l10n/translation";
+import { appTranslateFn } from "@web/core/l10n/translation";
 import { getTemplate } from "@web/core/templates";
+import { loadCssFromBundle } from "@mail/utils/common/misc";
 
 export class PortalChatterService {
     constructor(env, services) {
@@ -19,17 +19,7 @@ export class PortalChatterService {
 
     async createShadow(root) {
         const shadow = root.attachShadow({ mode: "open" });
-        const res = await getBundle("portal.assets_chatter_style");
-        for (const url of res.cssLibs) {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = url;
-            shadow.appendChild(link);
-            await new Promise((res, rej) => {
-                link.addEventListener("load", res);
-                link.addEventListener("error", rej);
-            });
-        }
+        await loadCssFromBundle(shadow, "portal.assets_chatter_style");
         return shadow;
     }
 
@@ -52,11 +42,13 @@ export class PortalChatterService {
         chatterEl.appendChild(root);
         this.createShadow(root).then((shadow) => {
             new App(PortalChatter, {
-                env,
+                env: Object.assign(Object.create(env), {
+                    rootId: root.getAttribute("id"),
+                }),
                 getTemplate,
                 props,
                 translatableAttributes: ["data-tooltip"],
-                translateFn: _t,
+                translateFn: appTranslateFn,
                 dev: env.debug,
             }).mount(shadow);
         });

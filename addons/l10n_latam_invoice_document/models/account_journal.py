@@ -3,8 +3,8 @@
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
 
-class AccountJournal(models.Model):
 
+class AccountJournal(models.Model):
     _inherit = "account.journal"
 
     l10n_latam_use_documents = fields.Boolean(

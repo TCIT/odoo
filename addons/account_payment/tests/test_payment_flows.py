@@ -3,12 +3,13 @@
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from odoo import Command
+from odoo import Command, fields
 from odoo.exceptions import AccessError
 from odoo.tests import tagged, JsonRpcException
 from odoo.tools import mute_logger
 
 from odoo.addons.account_payment.controllers.payment import PaymentPortal
+from odoo.addons.account_payment.controllers.portal import PortalAccount
 from odoo.addons.account_payment.tests.common import AccountPaymentCommon
 from odoo.addons.payment.tests.http_common import PaymentHttpCommon
 from odoo.addons.portal.controllers.portal import CustomerPortal
@@ -150,7 +151,7 @@ class TestFlows(AccountPaymentCommon, PaymentHttpCommon):
         account_user = self.env['res.users'].create({
             'login': 'TestUser',
             'password': 'Odoo@123',
-            'groups_id': [Command.set(self.env.ref('account.group_account_manager').ids)],
+            'group_ids': [Command.set(self.env.ref('account.group_account_manager').ids)],
             'partner_id': partner.id
         })
         # Create an invoice with invoice due date must be in past with payment status to be not paid
@@ -204,3 +205,59 @@ class TestFlows(AccountPaymentCommon, PaymentHttpCommon):
 
         self.assertEqual(resp['state'], 'done')
         self.assertTrue(invoice.payment_state == invoice._get_invoice_in_payment_state())
+
+    def test_out_invoice_get_page_view_values(self):
+        """Test the invoice-specific portal page view values of an out invoice"""
+        invoice = self.init_invoice(
+            'out_invoice', partner=self.partner, amounts=[50.0], currency=self.currency,
+        )
+
+        def mock_get_page_view_values(self, document, access_token, values, *args, **kwargs):
+            return values
+
+        with patch.object(PortalAccount, '_get_page_view_values', mock_get_page_view_values):
+            values = PortalAccount()._invoice_get_page_view_values(
+                invoice, invoice.access_token, amount=26.0, payment=True,
+            )
+
+        self.assertEqual(values['page_name'], 'invoice')
+        self.assertEqual(values['invoice'], invoice)
+        self.assertEqual(values['amount_paid'], 0.0)
+        self.assertEqual(values['amount_due'], 50.0)
+        self.assertEqual(values['next_amount_to_pay'], 26.0)
+        self.assertEqual(values['payment_state'], 'not_paid')
+        self.assertTrue(values['payment'])
+
+    def test_payment_link_wizard_defaults_from_invoice(self):
+        """
+        Test that the payment link wizard opened from the QR code
+        correctly uses default values from the invoice.
+        """
+        payment_term = self.env['account.payment.term'].create({
+            'name': '30% now, rest in 60 days',
+            'line_ids': [
+                Command.create({
+                    'value': 'percent',
+                    'value_amount': 30.00,
+                    'delay_type': 'days_after',
+                    'nb_days': 0,
+                }),
+                Command.create({
+                    'value': 'percent',
+                    'value_amount': 70.00,
+                    'delay_type': 'days_after',
+                    'nb_days': 60,
+                }),
+            ],
+        })
+        invoice_date = fields.Date.today() - timedelta(days=1)
+        invoice = self.init_invoice(
+            'out_invoice', partner=self.partner, invoice_date=invoice_date, amounts=[1000.0]
+        )
+        invoice.invoice_payment_term_id = payment_term
+        invoice.action_post()
+
+        # Simulate the opening of the payment link wizard from the invoice QR code.
+        link = invoice._get_portal_payment_link()
+        self.assertIsNotNone(link, "A payment link should be generated for the invoice.")
+        self.assertIn('amount=300.0', link)  # 30% of 1000 first installment

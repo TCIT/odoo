@@ -10,6 +10,14 @@
                     <button type="object" name="action_capture" invisible="state != 'authorized'" string="Capture Transaction" class="oe_highlight"/>
                     <button type="object" name="action_void" invisible="state != 'authorized'" string="Void Transaction"
                             confirm="Are you sure you want to void the authorized transaction? This action can't be undone."/>
+                    <button
+                        string="Post-process"
+                        help="Run the post-processing step for this transaction."
+                        type="object"
+                        name="action_post_process"
+                        invisible="is_post_processed"
+                        groups="base.group_no_one"
+                    />
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -38,6 +46,7 @@
                             <field name="token_id" invisible="not token_id"/>
                             <field name="create_date"/>
                             <field name="last_state_change"/>
+                            <field name="is_live"/>
                             <field name="is_post_processed" groups="base.group_no_one"/>
                         </group>
                         <group name="transaction_partner">
@@ -58,7 +67,7 @@
                     <separator string="Child transactions" invisible="not child_transaction_ids"/>
                     <field name="child_transaction_ids" invisible="not child_transaction_ids"/>
                     <group string="Message" invisible="not state_message">
-                        <field name="state_message" nolabel="1"/>
+                        <field colspan="2" name="state_message" nolabel="1"/>
                     </group>
                 </sheet>
             </form>
@@ -81,6 +90,7 @@
                 <field name="amount"/>
                 <field name="state"/>
                 <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="is_live" optional="hide"/>
             </list>
         </field>
     </record>
@@ -113,20 +123,54 @@
                 <field name="provider_id"/>
                 <field name="partner_id"/>
                 <field name="partner_name"/>
-                <group expand="1" string="Group By">
+                <filter
+                    string="Production Environment"
+                    name="live_transactions"
+                    domain="[('is_live', '=', True)]"
+                />
+                <group>
                     <filter string="Provider" name="provider_id" context="{'group_by': 'provider_id'}"/>
                     <filter string="Partner" name="partner_id" context="{'group_by': 'partner_id'}"/>
                     <filter string="Status" name="state" context="{'group_by': 'state'}"/>
+                    <filter
+                        string="Production Environment"
+                        name="is_live"
+                        context="{'group_by': 'is_live'}"
+                    />
                     <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                 </group>
             </search>
         </field>
     </record>
 
+    <record id="payment_transaction_graph" model="ir.ui.view">
+        <field name="name">payment.transaction.graph</field>
+        <field name="model">payment.transaction</field>
+        <field name="arch" type="xml">
+            <graph string="Payment Transactions">
+                <field name="create_date" interval="month"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="payment_transaction_pivot" model="ir.ui.view">
+        <field name="name">payment.transaction.pivot</field>
+        <field name="model">payment.transaction</field>
+        <field name="arch" type="xml">
+            <pivot string="Payment Transactions" display_quantity="1">
+                <field name="create_date" interval="month" type="row"/>
+                <field name="state" type="col"/>
+                <field name="amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="action_payment_transaction" model="ir.actions.act_window">
         <field name="name">Payment Transactions</field>
         <field name="res_model">payment.transaction</field>
-        <field name="view_mode">list,kanban,form</field>
+        <field name="path">payment-transactions</field>
+        <field name="view_mode">list,kanban,form,graph,pivot</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_neutral_face">
                 There are no transactions to show

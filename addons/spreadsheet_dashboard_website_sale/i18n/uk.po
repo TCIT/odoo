@@ -1,166 +1,162 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* spreadsheet_dashboard_website_sale
-# 
-# Translators:
-# Wil Odoo, 2024
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Ukrainian (https://app.transifex.com/odoo/teams/41243/uk/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-06 22:02+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Ukrainian <https://translate.odoo.com/projects/odoo-19/"
+"spreadsheet_dashboard_website_sale/uk/>\n"
+"Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: uk\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Abandoned Carts"
-msgstr "Залишені кошики"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Carts"
-msgstr "Кошики"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Categories"
-msgstr "Категорії"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 msgid "Category"
-msgstr "Категорія"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 msgid "Country"
-msgstr "Країна"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Current"
-msgstr "Поточний"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 msgid "Customer"
-msgstr "Клієнт"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "KPI"
-msgstr "KPI"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Monthly Sales"
-msgstr "Щомісячні продажі"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Orders"
-msgstr "Замовлення"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 msgid "Period"
-msgstr "Період"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Previous"
-msgstr "Попередній"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 msgid "Product"
-msgstr "Товар"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Products"
-msgstr "Товари"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Revenue"
-msgstr "Дохід"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Top Categories"
-msgstr "Топ категорій"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Top Products"
-msgstr "Топ товарів"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Total Revenue"
-msgstr "Загальний дохід"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Units"
-msgstr "Одиниці"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 msgid "Website"
-msgstr "Веб-сайт"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #: model:spreadsheet.dashboard,name:spreadsheet_dashboard_website_sale.spreadsheet_dashboard_ecommerce
 msgid "eCommerce"
-msgstr "Електронна комерція"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "since last period"
-msgstr "з попереднього періоду"
+msgstr ""

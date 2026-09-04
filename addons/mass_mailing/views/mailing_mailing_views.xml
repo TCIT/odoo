@@ -19,7 +19,7 @@
                         domain="[('ab_testing_enabled', '=', True), ('ab_testing_winner_selection', '=', 'manual'), ('ab_testing_completed', '=', False)]"/>
                     <separator/>
                     <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
-                    <group expand="0" string="Group By">
+                    <group>
                         <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
                         <filter string="Sent By" name="sent_by" domain="[]" context="{'group_by': 'email_from'}"/>
                         <filter string="Mailing List" name="group_by_contact_list_ids" domain="[]" context="{'group_by': 'contact_list_ids'}"/>
@@ -84,7 +84,7 @@
                             string="Remove from Templates"/>
                         <field name="state" readonly="1" widget="statusbar" statusbar_visible="draft,in_queue,sending,done"/>
                     </header>
-                    <div class="alert alert-info" role="alert"
+                    <div class="alert alert-info o_mass_mailing_alert_message" role="alert"
                             invisible="state not in ['in_queue', 'done'] and sent == 0 and canceled == 0 and scheduled == 0 and failed == 0 and not warning_message">
                         <div class="o_mails_canceled" invisible="canceled == 0">
                             <button class="btn btn-link py-0"
@@ -260,23 +260,14 @@
                         <notebook>
                             <page string="Mail Body" name="mail_body">
                                 <div class="position-relative">
-                                    <field name="body_arch" class="o_mail_body" widget="mass_mailing_html"
+                                    <field name="body_arch" class="o_mail_body_mailing" widget="mass_mailing_html"
                                         options="{
-                                            'snippets': 'mass_mailing.email_designer_snippets',
-                                            'cssEdit': 'mass_mailing.iframe_css_assets_edit',
-                                            'inline-field': 'body_html',
+                                            'inline_field': 'body_html',
                                             'dynamic_placeholder': true,
                                             'dynamic_placeholder_model_reference_field': 'mailing_model_real',
-                                            'cssReadonly': 'mass_mailing.iframe_css_assets_edit'
-                                    }" readonly="state in ('sending', 'done')"/>
+                                        }" readonly="state in ('sending', 'done')"/>
+                                    <field name="body_html" invisible="1" required="body_arch"/>
                                     <field name="is_body_empty" invisible="1"/>
-                                    <div class="o_view_nocontent oe_read_only" invisible="not is_body_empty or state in ('sending', 'done')">
-                                        <div class="o_nocontent_help">
-                                            <p class="o_view_nocontent_smiling_face">
-                                                This mailing has no selected design (yet!).
-                                            </p>
-                                        </div>
-                                    </div>
                                 </div>
                             </page>
                             <page string="A/B Tests" name="ab_testing">
@@ -355,7 +346,7 @@
                                         </div>
                                         <label for="attachment_ids"/>
                                         <div name="attachment_ids_details">
-                                            <field name="attachment_ids"  widget="many2many_binary" string="Attach a file" class="oe_inline"
+                                            <field name="attachment_ids"  widget="many2many_binary" string="Attach a file"
                                                 readonly="state in ('sending', 'done')"/>
                                         </div>
                                     </group>
@@ -382,8 +373,13 @@
                                     <group string="Advanced" groups="base.group_no_one">
                                         <field name="mail_server_available" invisible="1"/>
                                         <field name="name" string="Name" required="False" readonly="state in ('sending', 'done')"/>
-                                        <field name="mail_server_id" invisible="not mail_server_available" readonly="state in ('sending', 'done')"/>
+                                        <field name="mail_server_id"
+                                            invisible="not mail_server_available"
+                                            readonly="state in ('sending', 'done')"
+                                            domain="[('owner_user_id', '=', False)]" />
                                         <field name="keep_archives" readonly="state in ('sending', 'done')"/>
+                                        <!-- Not using a dedicated server and being set means generic sending, won't allow disabling it. -->
+                                        <field name="use_exclusion_list" invisible="not mail_server_id and use_exclusion_list" readonly="state != 'draft'"/>
                                     </group>
                                 </group>
                             </page>
@@ -408,10 +404,8 @@
                             <t t-if="widget.deletable">
                                 <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
                             </t>
-                            <a role="menuitem" class="dropdown-item o_kanban_mailing_active" name="toggle_active" type="object">
-                                <t t-if="record.active.raw_value">Archive</t>
-                                <t t-if="!record.active.raw_value">Restore</t>
-                            </a>
+                            <a role="menuitem" type="object" name="action_archive" class="dropdown-item o_kanban_mailing_active" t-if="record.active.raw_value">Archive</a>
+                            <a role="menuitem" type="object" name="action_unarchive" class="dropdown-item o_kanban_mailing_active" t-if="!record.active.raw_value">Restore</a>
                         </t>
                         <t t-name="card">
                             <field name="subject" class="my-1 text-truncate fs-3 fw-bold"/>

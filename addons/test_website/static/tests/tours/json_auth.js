@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 
@@ -16,6 +14,7 @@ registry.category("web_tour.tours").add('test_json_auth', {
         });
         window.location.href = window.location.origin;
     },
+    expectUnloadPage: true,
 }, {
     trigger: 'span:contains(Mitchell Admin), span:contains(Administrator)',
 }

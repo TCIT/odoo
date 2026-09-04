@@ -1,8 +1,6 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 import { markup } from "@odoo/owl";
 
@@ -28,6 +26,12 @@ registry.category("web_tour.tours").add('project_tour', {
     trigger: '.o-kanban-button-new',
     content: markup(_t('Let\'s create your first <b>project</b>.')),
     tooltipPosition: 'bottom',
+    run: "click",
+}, {
+    isActive: ['.o-kanban-button-new.dropdown'], // if the project template dropdown is active
+    trigger: 'button.o-dropdown-item:contains("New Project")',
+    content: markup(_t('Let\'s create a regular <b>project</b>.')),
+    tooltipPosition: 'right',
     run: "click",
 }, {
     trigger: '.o_project_name input',
@@ -123,7 +127,7 @@ registry.category("web_tour.tours").add('project_tour', {
 },
 {
     trigger: "button.o-mail-Chatter-logNote",
-    content: markup(_t("<b>Log notes</b> for internal communications <i>(the people following this task won't be notified of the note you are logging unless you specifically tag them)</i>. Use @ <b>mentions</b> to ping a colleague or # <b>mentions</b> to reach an entire team.")),
+    content: markup(_t("<b>Log internal notes</b> and use @<b>mentions</b> to notify your colleagues.")),
     tooltipPosition: "bottom",
     run: "click",
 },

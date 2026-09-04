@@ -13,5 +13,6 @@
     'data': [
         'views/project_task_views.xml',
     ],
-    'license': 'OEEL-1',
+    'author': 'Odoo S.A.',
+    'license': 'LGPL-3',
 }

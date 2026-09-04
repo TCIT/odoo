@@ -1,24 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* utm
-# 
+# * utm
+#
 # Translators:
-# Wil Odoo, 2024
-# Manon Rondou, 2024
-# 
+# Martin Trigaux, 2022
+# Erwin van der Ploeg <erwin@odooexperts.nl>, 2022
+# Jolien De Paepe, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Bren Driesen <brdri@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Manon Rondou, 2024\n"
-"Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-24 07:57+0000\n"
+"Last-Translator: Bren Driesen <brdri@odoo.com>\n"
+"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-19/utm/nl/>\n"
+"Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: nl\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: utm
 #. odoo-python
@@ -65,8 +68,7 @@ msgstr "Gearchiveerd"
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_tag
 msgid "Assign tags to your campaigns to organize, filter and track them."
 msgstr ""
-"Wijs labels toe aan campagnes om ze te ordenen, te filteren en bij te "
-"houden."
+"Wijs labels toe aan campagnes om ze te ordenen, te filteren en bij te houden."
 
 #. module: utm
 #. odoo-javascript
@@ -120,8 +122,8 @@ msgid ""
 "Campaigns are used to centralize your marketing efforts and track their "
 "results."
 msgstr ""
-"Campagnes worden gebruikt om je marketinginspanningen te centraliseren en de"
-" resultaten daarvan bij te houden."
+"Campagnes worden gebruikt om je marketinginspanningen te centraliseren en de "
+"resultaten daarvan bij te houden."
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
@@ -211,7 +213,7 @@ msgstr "Inzetten"
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid "Deployed"
-msgstr "ingezet"
+msgstr "Geïmplementeerd"
 
 #. module: utm
 #. odoo-javascript
@@ -221,9 +223,12 @@ msgid "Design"
 msgstr "Ontwerp"
 
 #. module: utm
+#: model:ir.model.fields,field_description:utm.field_ir_http__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_medium__display_name
+#: model:ir.model.fields,field_description:utm.field_utm_mixin__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_source__display_name
+#: model:ir.model.fields,field_description:utm.field_utm_source_mixin__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_stage__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_tag__display_name
 msgid "Display Name"
@@ -233,7 +238,7 @@ msgstr "Schermnaam"
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid "Done"
-msgstr "Gereed"
+msgstr "Voltooid"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
@@ -273,19 +278,17 @@ msgstr ""
 "van je marketingdoel."
 
 #. module: utm
-#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
-msgid "Group By"
-msgstr "Groeperen op"
-
-#. module: utm
 #: model:ir.model,name:utm.model_ir_http
 msgid "HTTP Routing"
 msgstr "HTTP routing"
 
 #. module: utm
+#: model:ir.model.fields,field_description:utm.field_ir_http__id
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__id
 #: model:ir.model.fields,field_description:utm.field_utm_medium__id
+#: model:ir.model.fields,field_description:utm.field_utm_mixin__id
 #: model:ir.model.fields,field_description:utm.field_utm_source__id
+#: model:ir.model.fields,field_description:utm.field_utm_source_mixin__id
 #: model:ir.model.fields,field_description:utm.field_utm_stage__id
 #: model:ir.model.fields,field_description:utm.field_utm_tag__id
 msgid "ID"
@@ -399,8 +402,7 @@ msgstr "Prelancering"
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid "Prepare Campaigns and get them approved before making them go live."
 msgstr ""
-"Bereid campagnes voor en zorg dat ze worden goedgekeurd voordat ze live "
-"gaan."
+"Bereid campagnes voor en zorg dat ze worden goedgekeurd voordat ze live gaan."
 
 #. module: utm
 #. odoo-javascript
@@ -521,11 +523,11 @@ msgstr "Fases"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_stage
 msgid ""
-"Stages allow you to organize your workflow  (e.g. plan, design, in progress,"
-" done, …)."
+"Stages allow you to organize your workflow  (e.g. plan, design, in progress, "
+"done, …)."
 msgstr ""
-"Fases die je toelaten je workflow te organiseren (bijv. planning, design, in"
-" behandeling, gereed,...)."
+"Met fases kun je je workflow organiseren (bijv. planning, design, in "
+"behandeling, voltooid,...)."
 
 #. module: utm
 #: model:ir.model.fields,help:utm.field_utm_tag__color
@@ -533,8 +535,8 @@ msgid ""
 "Tag color. No color means no display in kanban to distinguish internal tags "
 "from public categorization tags."
 msgstr ""
-"Labelkleur. Geen kleur betekent geen weergave in kanban om interne labels te"
-" onderscheiden van openbare labelcategorisatie."
+"Labelkleur. Geen kleur betekent geen weergave in kanban om interne labels te "
+"onderscheiden van openbare labelcategorisatie."
 
 #. module: utm
 #: model:ir.model.constraint,message:utm.constraint_utm_tag_name_uniq
@@ -569,8 +571,8 @@ msgstr "Deze week"
 #. module: utm
 #: model:ir.model.fields,help:utm.field_utm_mixin__campaign_id
 msgid ""
-"This is a name that helps you keep track of your different campaign efforts,"
-" e.g. Fall_Drive, Christmas_Special"
+"This is a name that helps you keep track of your different campaign efforts, "
+"e.g. Fall_Drive, Christmas_Special"
 msgstr ""
 "Dit is een naam die je helpt bij het volgen van je verschillende campagne "
 "inspanningen, bijvoorbeeld Herfst_Rit, Kerstmis_Special"
@@ -587,8 +589,8 @@ msgid ""
 "This is the source of the link, e.g. Search Engine, another domain, or name "
 "of email list"
 msgstr ""
-"Dit is de bron van de link, bijv, zoekmachine, een ander domein, of een naam"
-" of e-mail lijst"
+"Dit is de bron van de link, bijv, zoekmachine, een ander domein, of een naam "
+"of e-mail lijst"
 
 #. module: utm
 #. odoo-javascript
@@ -600,8 +602,8 @@ msgstr "Om goedgekeurd te worden"
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid ""
-"Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely"
-" content."
+"Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely "
+"content."
 msgstr ""
 "Volg inkomende evenementen (bijv. Kerstmis, Black Friday, ...) en publiceer "
 "actuele inhoud."
@@ -650,8 +652,8 @@ msgstr "UTM Bron Mixin"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.utm_source_action
 msgid ""
-"UTM Sources track where traffic comes from  (e.g. \"May Newsletter\", \"\", "
-"...)."
+"UTM Sources track where traffic comes from  (e.g. \"May Newsletter\", "
+"\"\", ...)."
 msgstr ""
 "UTM-bronnen houden bij waar het verkeer vandaan komt (bijv. \"Mei "
 "nieuwsbrief\", \"\", ...)."
@@ -676,6 +678,12 @@ msgstr "UTMs"
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid "Use This For My Campaigns"
 msgstr "Gebruik dit voor 'mijn campagnes'."
+
+#. module: utm
+#. odoo-python
+#: code:addons/utm/models/utm_source.py:0
+msgid "You cannot delete the 'Referral' UTM source record."
+msgstr "Je kunt de UTM-bron 'Aanbeveling' niet verwijderen."
 
 #. module: utm
 #. odoo-python
@@ -707,3 +715,21 @@ msgstr "bijv. \"E-mail\""
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form_quick_create
 msgid "e.g. Black Friday"
 msgstr "Bijv. Black Friday"
+
+#~ msgid "Group By"
+#~ msgstr "Groepeer op"
+
+#~ msgid ""
+#~ "The UTM medium '%s' cannot be deleted as it is used in some main "
+#~ "functional flows, such as the recruitment and the mass mailing."
+#~ msgstr ""
+#~ "Het UTM-medium '%s' kan niet worden verwijderd omdat het wordt gebruikt "
+#~ "in een aantal belangrijke functionele stromen, zoals werving & selectie "
+#~ "en bulkmailing."
+
+#~ msgid ""
+#~ "UTM Mediums track the mean that was used to attract traffic (e.g. "
+#~ "\"Website\", \"Twitter\", ...)."
+#~ msgstr ""
+#~ "UTM-mediums volgen het gemiddelde dat werd gebruikt om verkeer aan te "
+#~ "trekken (bijv. \"Website\", \"Twitter\", ...)."

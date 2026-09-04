@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-from odoo.osv import expression
 
-class City(models.Model):
+
+class ResCity(models.Model):
     _name = 'res.city'
     _description = 'City'
     _order = 'name'

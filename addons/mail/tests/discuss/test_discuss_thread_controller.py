@@ -1,14 +1,10 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-import odoo
-from odoo.addons.mail.tests.test_thread_controller import (
-    MessagePostSubTestData,
-    TestThreadControllerCommon,
-)
+from odoo.addons.mail.tests.common_controllers import MailControllerThreadCommon, MessagePostSubTestData
+from odoo.tests import tagged
 
 
-@odoo.tests.tagged("-at_install", "post_install")
-class TestDiscussThreadController(TestThreadControllerCommon):
+@tagged("-at_install", "post_install", "mail_controller")
+class TestDiscussThreadController(MailControllerThreadCommon):
+
     def test_internal_channel_message_post_access(self):
         """Test access of message_post on internal channel."""
         channel = self.env["discuss.channel"].create({"name": "Internal Channel"})
@@ -23,7 +19,6 @@ class TestDiscussThreadController(TestThreadControllerCommon):
                 test_access(self.guest, False),
                 test_access(self.user_portal, False),
                 test_access(self.user_employee, True),
-                test_access(self.user_demo, True),
                 test_access(self.user_admin, True),
             ),
         )
@@ -44,36 +39,34 @@ class TestDiscussThreadController(TestThreadControllerCommon):
                 test_access(self.guest, True),
                 test_access(self.user_portal, True),
                 test_access(self.user_employee, True),
-                test_access(self.user_demo, True),
                 test_access(self.user_admin, True),
             ),
         )
 
     def test_public_channel_message_post_partner_ids(self):
         """Test partner_ids of message_post on public channel.
-        Only members are allowed to be mentioned by non-internal users."""
+        Non-internal users cannot use mentions without mention_token."""
         channel = self.env["discuss.channel"].create(
             {"name": "Public Channel", "group_public_id": None}
         )
-        channel.add_members(partner_ids=self.user_demo.partner_id.ids)
+        channel._add_members(users=self.user_employee_nopartner)
         partners = (
-            self.user_portal + self.user_employee + self.user_demo + self.user_admin
+            self.user_portal + self.user_employee + self.user_employee_nopartner + self.user_admin
         ).partner_id
-        members = self.user_demo.partner_id
 
-        def test_partners(user, allowed, exp_partners, exp_author=None):
+        def test_partners(user, allowed, exp_partners):
             return MessagePostSubTestData(
-                user, allowed, partners=partners, exp_author=exp_author, exp_partners=exp_partners
+                user, allowed, partners=partners, exp_partners=exp_partners
             )
 
         self._execute_message_post_subtests(
             channel,
             (
-                test_partners(self.user_public, True, members),
-                test_partners(self.guest, True, members),
-                test_partners(self.user_portal, True, members),
+                test_partners(self.user_public, True, self.env["res.partner"]),
+                test_partners(self.guest, True, self.env["res.partner"]),
+                test_partners(self.user_portal, True, self.env["res.partner"]),
                 test_partners(self.user_employee, True, partners),
-                test_partners(self.user_demo, True, partners),
+                test_partners(self.user_employee_nopartner, True, partners),
                 test_partners(self.user_admin, True, partners),
             ),
         )
@@ -85,7 +78,8 @@ class TestDiscussThreadController(TestThreadControllerCommon):
             {"name": "Public Channel", "group_public_id": None}
         )
         no_emails = []
-        partner_emails = [self.user_demo.email, "test@example.com"]
+        existing_emails = [self.user_employee.email]
+        partner_emails = [self.user_employee.email, "test@example.com"]
 
         def test_emails(user, allowed, exp_emails, exp_author=None):
             return MessagePostSubTestData(
@@ -102,9 +96,9 @@ class TestDiscussThreadController(TestThreadControllerCommon):
                 test_emails(self.user_public, True, no_emails),
                 test_emails(self.guest, True, no_emails),
                 test_emails(self.user_portal, True, no_emails),
-                # restricted because not base.group_partner_manager
-                test_emails(self.user_employee, True, no_emails),
-                test_emails(self.user_demo, True, partner_emails),
+                # restricted because not base.group_partner_manager: find existing only
+                test_emails(self.user_employee_nopartner, True, existing_emails),
+                test_emails(self.user_employee, True, partner_emails),
                 test_emails(self.user_admin, True, partner_emails),
             ),
         )

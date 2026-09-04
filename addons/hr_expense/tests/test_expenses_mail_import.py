@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo.addons.hr_expense.tests.common import TestExpenseCommon
 from odoo.tests import tagged
 from odoo.exceptions import UserError
@@ -7,29 +8,29 @@ from odoo.exceptions import UserError
 @tagged('-at_install', 'post_install')
 class TestExpensesMailImport(TestExpenseCommon):
     def test_import_expense_from_email(self):
-        # pylint: disable=bad-whitespace
-        messages = ({
-                        'message_id': "the-world-is-a-ghetto",
-                        'subject': f'{self.product_a.default_code} {self.product_a.standard_price}',
-                        'email_from': self.expense_user_employee.email,
-                        'to': 'catchall@yourcompany.com',
-                        'body': "Don't you know, that for me, and for you",
-                        'attachments': [],
-                    }, {
-                        'message_id': "the-world-is-a-ghetto",
-                        'subject': 'no product code 800',
-                        'email_from': self.expense_user_employee.email,
-                        'to': 'catchall@yourcompany.com',
-                        'body': "Don't you know, that for me, and for you",
-                        'attachments': [],
-                    }, {
-                        'message_id': "test",
-                        'subject': 'product_c my description 100',
-                        'email_from': self.expense_user_employee.email,
-                        'to': 'catchall@yourcompany.com',
-                        'body': "test",
-                        'attachments': [],
-                    }
+        messages = (
+            {
+                'message_id': "the-world-is-a-ghetto",
+                'subject': f'{self.product_a.default_code} {self.product_a.standard_price}',
+                'email_from': self.expense_user_employee.email,
+                'to': 'catchall@yourcompany.com',
+                'body': "Don't you know, that for me, and for you",
+                'attachments': [],
+            }, {
+                'message_id': "the-world-is-a-ghetto",
+                'subject': 'no product code 800',
+                'email_from': self.expense_user_employee.email,
+                'to': 'catchall@yourcompany.com',
+                'body': "Don't you know, that for me, and for you",
+                'attachments': [],
+            }, {
+                'message_id': "test",
+                'subject': 'product_c my description 100',
+                'email_from': self.expense_user_employee.email,
+                'to': 'catchall@yourcompany.com',
+                'body': "test",
+                'attachments': [],
+            }
         )
         expenses = self.env['hr.expense']
         for message in messages:
@@ -48,12 +49,12 @@ class TestExpensesMailImport(TestExpenseCommon):
         user.company_id = company_2.id
 
         # Create a second employee linked to the user for another company
-        company_2_employee = self.env['hr.employee'].create({
+        company_2_employee = self.env['hr.employee'].sudo().create({
             'name': 'expense_employee_2',
             'company_id': company_2.id,
             'user_id': user.id,
             'work_email': user.email,
-        })
+        }).sudo(False)
 
         message_parsed = {
             'message_id': "the-world-is-a-ghetto",
@@ -69,9 +70,9 @@ class TestExpensesMailImport(TestExpenseCommon):
         }])
 
     def test_import_expense_from_email_employee_without_user(self):
-        """When an employee is not linked to a user, he has to be able to create expenses from email"""
+        """ When an employee is not linked to a user, he has to be able to create expenses from email """
         employee = self.expense_employee
-        employee.user_id = False
+        employee.sudo().user_id = False
 
         message_parsed = {
             'message_id': "the-world-is-a-ghetto",
@@ -137,7 +138,7 @@ class TestExpensesMailImport(TestExpenseCommon):
         )
 
         # With Multi currency access
-        self.expense_user_employee.groups_id |= self.env.ref('base.group_multi_currency')
+        self.expense_user_employee.group_ids |= self.env.ref('base.group_multi_currency')
         assertParsedValues(
             "product_a foo bar $2205.92 elite barbarians",
             self.company_data['currency'],
@@ -214,8 +215,8 @@ class TestExpensesMailImport(TestExpenseCommon):
             self.company_data['currency'],
         )
 
-    def test_import_expense_from_mail_get_default_expense_sheet_values_errors(self):
-        # Make sure we get the expected UserError when trying to validate an expense with no product
+    def test_import_expense_from_mail_action_submit_errors(self):
+        """ Make sure we get the expected UserError when trying to validate an expense with no product """
         message = {
             'message_id': "the-world-is-a-ghetto",
             'subject': 'no product code 800',
@@ -226,4 +227,28 @@ class TestExpensesMailImport(TestExpenseCommon):
         }
 
         expense = self.env['hr.expense'].message_new(message)
-        self.assertRaisesRegex(UserError, r"You can not create report without category\.", expense._get_default_expense_sheet_values)
+        self.assertRaisesRegex(UserError, r"You can not submit an expense without a category\.", expense.action_submit)
+
+    def test_import_expense_from_email_several_companies_one_employee(self):
+        """ Import an expense for a user who has access to several companies,
+            but has only one employee profile in the company that is not his default one.
+        """
+        user = self.expense_user_employee
+        company_2 = user.company_ids[1]
+        # Change the default company of the user to the second one,
+        # which is different from the company of the employee
+        user.company_id = company_2.id
+
+        message_parsed = {
+            'message_id': "XYZ",
+            'subject': 'New expense',
+            'email_from': user.email,
+            'to': 'catchall@yourcompany.com',
+            'body': "For which company is this expense?",
+            'attachments': [],
+        }
+        expense = self.env['hr.expense'].message_new(message_parsed)
+        self.assertRecordValues(expense, [{
+            'employee_id': self.expense_employee.id,
+            'company_id': self.expense_employee.company_id.id,
+        }])

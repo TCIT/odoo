@@ -9,7 +9,7 @@ from odoo.exceptions import ValidationError, UserError
 
 
 class PosCategory(models.Model):
-    _name = "pos.category"
+    _name = 'pos.category'
     _description = "Point of Sale Category"
     _inherit = ['pos.load.mixin']
     _order = "sequence, name"
@@ -26,22 +26,28 @@ class PosCategory(models.Model):
     parent_id = fields.Many2one('pos.category', string='Parent Category', index=True)
     child_ids = fields.One2many('pos.category', 'parent_id', string='Children Categories')
     sequence = fields.Integer(help="Gives the sequence order when displaying a list of product categories.")
-    image_128 = fields.Image("Image", max_width=128, max_height=128)
+    image_512 = fields.Image("Image", max_width=512, max_height=512)
+    image_128 = fields.Image("Image 128", related="image_512", max_width=128, max_height=128, store=True)
     color = fields.Integer('Color', required=False, default=get_default_color)
+    hour_until = fields.Float(string='Availability Until', default=24.0, help="The product will be available until this hour for online order and self order.")
+    hour_after = fields.Float(string='Availability After', default=0.0, help="The product will be available after this hour for online order and self order.")
 
     # During loading of data, the image is not loaded so we expose a lighter
     # field to determine whether a pos.category has an image or not.
     has_image = fields.Boolean(compute='_compute_has_image')
 
     @api.model
-    def _load_pos_data_domain(self, data):
-        config_id = self.env['pos.config'].browse(data['pos.config']['data'][0]['id'])
-        domain = [('id', 'in', config_id._get_available_categories().ids)] if config_id.limit_categories and config_id.iface_available_categ_ids else []
+    def _load_pos_data_domain(self, data, config):
+        domain = []
+        if config.limit_categories:
+            preparation_categories = [printer['product_categories_ids'] for printer in data['pos.printer']]
+            flattened_preparation_categories = [item for sublist in preparation_categories for item in sublist]
+            domain += [('id', 'in', flattened_preparation_categories + config.iface_available_categ_ids.ids)]
         return domain
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
-        return ['id', 'name', 'parent_id', 'child_ids', 'write_date', 'has_image', 'color', 'sequence']
+    def _load_pos_data_fields(self, config):
+        return ['id', 'name', 'parent_id', 'child_ids', 'write_date', 'has_image', 'color', 'sequence', 'hour_until', 'hour_after']
 
     def _get_hierarchy(self) -> List[str]:
         """ Returns a list representing the hierarchy of the categories. """
@@ -64,25 +70,19 @@ class PosCategory(models.Model):
         for category in self:
             category.has_image = bool(category.image_128)
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            if vals.get("parent_id"):
-                vals["color"] = self.search_read([("id", "=", vals["parent_id"])])[0][
-                    "color"
-                ]
-        return super().create(vals_list)
-
-    def write(self, vals):
-        if vals.get('parent_id') and not ("color" in vals):
-            vals["color"] = self.search_read([("id", "=", vals["parent_id"])])[0][
-                "color"
-            ]
-        return super().write(vals)
-
     def _get_descendants(self):
         available_categories = self
         for child in self.child_ids:
             available_categories |= child
             available_categories |= child._get_descendants()
         return available_categories
+
+    @api.constrains('hour_until', 'hour_after')
+    def _check_hour(self):
+        for category in self:
+            if category.hour_until and not (0.0 <= category.hour_until <= 24.0):
+                raise ValidationError(_('The Availability Until must be set between 00:00 and 24:00'))
+            if category.hour_after and not (0.0 <= category.hour_after <= 24.0):
+                raise ValidationError(_('The Availability After must be set between 00:00 and 24:00'))
+            if category.hour_until and category.hour_after and category.hour_until < category.hour_after:
+                raise ValidationError(_('The Availability Until must be greater than Availability After.'))

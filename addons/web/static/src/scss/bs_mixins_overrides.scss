@@ -54,8 +54,8 @@ $o-color-extras-nesting-selector: '&' !default;
 
         // Generate a pair of CSS variables for bg-* classes to then use them
         // within the .badge design definition (see website.scss)
-        --bg-light: #{$color};
-        --color-light: #{$-yiq-color};
+        --background-color: #{$color};
+        --color: #{$-yiq-color};
 
         background-color: $color#{if($important, ' !important', '')};
         color: $-yiq-color; // not important so that text utilities still work

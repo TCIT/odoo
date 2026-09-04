@@ -7,7 +7,7 @@
             <search string="Search Quotation Template">
                 <field name="name"/>
                 <filter string="Archived" name="inactive" domain="[('active','=', False)]"/>
-                <group expand="1" string="Group By">
+                <group>
                     <filter string="Company" name="company_id" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                 </group>
             </search>
@@ -37,7 +37,7 @@
                                 <div class="d-inline-block">days</div>
                             </div>
                             <field name="mail_template_id" context="{'default_model': 'sale.order'}"/>
-                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" placeholder="Visible to all"/>
                             <field name="journal_id"/>
                         </group>
                         <group name="so_confirmation">
@@ -55,7 +55,11 @@
                     </group>
                     <notebook name="main_book">
                         <page string="Lines" name="order_lines">
-                        <field name="sale_order_template_line_ids" widget="section_and_note_one2many">
+                        <field
+                            name="sale_order_template_line_ids"
+                            widget="so_template_line_o2m"
+                            options="{ 'subsections': True }"
+                        >
                             <form string="Quotation Template Lines">
                                 <!--
                                     We need the sequence field to be here for new lines to be added at the correct position.
@@ -63,8 +67,6 @@
                                 -->
                                 <field name="sequence" invisible="1"/>
                                 <field name="display_type" invisible="1"/>
-                                <field name="product_uom_category_id" invisible="1"/>
-                                <field name="company_id" invisible="1"/>
                                 <group invisible="display_type">
                                     <group>
                                         <field name="product_id" required="not display_type"/>
@@ -92,14 +94,12 @@
                                     <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
                                     <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
                                 </control>
-
                                 <field name="display_type" column_invisible="True"/>
-                                <field name="company_id" column_invisible="True"/>
+                                <field name="is_optional" column_invisible="True"/>
                                 <field name="sequence" widget="handle"/>
                                 <field name="product_id"/>
-                                <field name="name"/>
+                                <field name="name" widget="section_and_note_text"/>
                                 <field name="product_uom_qty"/>
-                                <field name="product_uom_category_id" column_invisible="True"/>
                                 <field
                                     name="product_uom_id"
                                     groups="uom.group_uom"
@@ -107,21 +107,11 @@
                             </list>
                         </field>
                     </page>
-                    <page string="Optional Products" name="optional_products">
-                        <field name="sale_order_template_option_ids">
-                          <list string="Quotation Template Lines" editable="bottom">
-                            <field name="product_id"/>
-                            <field name="name"/>
-                            <field name="quantity"/>
-                            <field name="product_uom_category_id" column_invisible="True"/>
-                            <field name="uom_id" groups="uom.group_uom"/>
-                            <field name="company_id" column_invisible="True"/>
-                          </list>
-                        </field>
-                    </page>
                         <page string="Terms &amp; Conditions" name="terms_and_conditions">
-                            <field name="note" nolabel="1"
-                                   placeholder="The Administrator can set default Terms &amp; Conditions in Sales Settings. Terms set here will show up instead if you select this quotation template."/>
+                            <field
+                                name="note"
+                                nolabel="1"
+                                placeholder="The Administrator can set default Terms &amp; Conditions in Sales Settings. Terms set here will show up instead if you select this quotation template."/>
                         </page>
                     </notebook>
                 </sheet>

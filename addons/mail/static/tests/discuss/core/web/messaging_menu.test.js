@@ -5,18 +5,18 @@ import {
     defineMailModels,
     insertText,
     openDiscuss,
-    patchBrowserNotification,
     patchUiSize,
     start,
     startServer,
-    triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
-import { describe, expect, test } from "@odoo/hoot";
+import { describe, disableAnimations, expect, mockPermission, mockTouch, test } from "@odoo/hoot";
 import {
     Command,
+    contains as webContains,
     getService,
-    patchWithCleanup,
     serverState,
+    swipeLeft,
+    swipeRight,
     withUser,
 } from "@web/../tests/web_test_helpers";
 
@@ -25,59 +25,60 @@ import { rpc } from "@web/core/network/rpc";
 describe.current.tags("desktop");
 defineMailModels();
 
-test('"Start a conversation" item selection opens chat', async () => {
+test("can make DM chat in mobile", async () => {
     patchUiSize({ size: SIZES.SM });
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Gandalf" });
     pyEnv["res.users"].create({ partner_id: partnerId });
     await start();
     await openDiscuss();
-    await contains("button.active", { text: "Inbox" });
-    await click("button", { text: "Chat" });
-    await click("button", { text: "Start a conversation" });
-    await insertText("input[placeholder='Start a conversation']", "Gandalf");
-    await click(".o-discuss-ChannelSelector-suggestion");
-    await contains(".o-discuss-ChannelSelector-suggestion", { count: 0 });
-    triggerHotkey("Enter");
+    await contains("button.active", { text: "Notifications" });
+    await click("button", { text: "Chats" });
+    await click(".o-mail-DiscussSearch-inputContainer");
+    await contains(".o_command_name", { count: 4 });
+    await insertText("input[placeholder='Search a conversation']", "Gandalf");
+    await contains(".o_command_name", { count: 3 });
+    await click(".o_command_name", { text: "Gandalf" });
     await contains(".o-mail-ChatWindow", { text: "Gandalf" });
 });
 
-test('"New channel" item selection opens channel (existing)', async () => {
+test("can search channel in mobile", async () => {
     patchUiSize({ size: SIZES.SM });
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create({ name: "Gryffindors" });
     await start();
     await openDiscuss();
-    await contains("button.active", { text: "Inbox" });
-    await click("button", { text: "Channel" });
-    await click("button", { text: "New Channel" });
-    await insertText("input[placeholder='Add or join a channel']", "Gryff");
-    await click(":nth-child(1 of .o-discuss-ChannelSelector-suggestion)");
-    await contains(".o-discuss-ChannelSelector-suggestion", { count: 0 });
-    await contains(".o-mail-ChatWindow", { text: "Gryffindors" });
+    await contains("button.active", { text: "Notifications" });
+    await click("button", { text: "Channels" });
+    await click(".o-mail-DiscussSearch-inputContainer");
+    await contains(".o_command_name", { count: 4 });
+    await insertText("input[placeholder='Search a conversation']", "Gryff");
+    await contains(".o_command_name", { count: 3 });
+    await click(".o_command_name", { text: "Gryffindors" });
+    await contains(".o-mail-ChatWindow div[title='Gryffindors']");
 });
 
-test('"New channel" item selection opens channel (new)', async () => {
+test("can make new channel in mobile", async () => {
     patchUiSize({ size: SIZES.SM });
     await start();
     await openDiscuss();
-    await contains("button.active", { text: "Inbox" });
-    await click("button", { text: "Channel" });
-    await click("button", { text: "New Channel" });
-    await insertText("input[placeholder='Add or join a channel']", "slytherins");
-    await click(".o-discuss-ChannelSelector-suggestion");
-    await contains(".o-discuss-ChannelSelector-suggestion", { count: 0 });
+    await contains("button.active", { text: "Notifications" });
+    await click("button", { text: "Channels" });
+    await click(".o-mail-DiscussSearch-inputContainer");
+    await insertText("input[placeholder='Search a conversation']", "slytherins");
+    await click("a", { text: "Create Channel" });
     await contains(".o-mail-ChatWindow", { text: "slytherins" });
 });
 
-test("new message [REQUIRE FOCUS]", async () => {
+test("new message opens the @ command palette", async () => {
     await start();
     await click(".o_menu_systray .dropdown-toggle i[aria-label='Messages']");
     await click(".o-mail-MessagingMenu button", { text: "New Message" });
-    await contains(".o-mail-ChatWindow .o-discuss-ChannelSelector input:focus");
+    await contains(".o_command_palette_search .o_namespace", { text: "@" });
+    await contains(".o_command_palette input[placeholder='Search a conversation']");
 });
 
-test("channel preview ignores empty message", async () => {
+test("channel preview show deleted messages", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
     const channelId = pyEnv["discuss.channel"].create({
@@ -99,7 +100,43 @@ test("channel preview ignores empty message", async () => {
     await openDiscuss(channelId);
     await contains(".o-mail-Message", { text: "before last" });
     await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
-    await contains(".o-mail-NotificationItem-text", { text: "Demo: before last" });
+    await contains(".o-mail-NotificationItem-text", {
+        text: "Demo: This message has been removed",
+    });
+});
+
+test("deleted message should not show parent message reference and mentions", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const messageId = pyEnv["mail.message"].create({
+        body: "<p>Parent Message</p>",
+        message_type: "comment",
+        model: "discuss.channel",
+        res_id: channelId,
+    });
+    pyEnv["mail.message"].create({
+        body: "<p>reply message</p>",
+        message_type: "comment",
+        model: "discuss.channel",
+        parent_id: messageId,
+        partner_ids: [serverState.partnerId],
+        res_id: channelId,
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-MessageInReply", { text: "Parent Message" });
+    await webContains(
+        ".o-mail-Message:has(.o-mail-Message-bubble.o-orange):contains('reply message')"
+    ).hover();
+    await webContains(
+        ".o-mail-Message:has(.o-mail-Message-bubble.o-orange):contains('reply message') [title='Expand']"
+    ).click();
+    await click(".o-mail-Message-moreMenu .o-dropdown-item:contains(Delete)");
+    await click(".o_dialog button:contains(Delete)");
+    await contains(".o-mail-Message:not(:has(.o-mail-Message-bubble.o-orange))", {
+        text: "This message has been removed",
+    });
+    await contains(".o-mail-MessageInReply", { count: 0 });
 });
 
 test("channel preview ignores transient message", async () => {
@@ -117,19 +154,14 @@ test("channel preview ignores transient message", async () => {
     await start();
     await openDiscuss(channelId);
     await insertText(".o-mail-Composer-input", "/who");
-    await click(".o-mail-Composer-send:enabled");
+    await click(".o-mail-Composer button[title='Send']:enabled");
     await contains(".o_mail_notification", { text: "You are alone in this channel." });
     await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
     await contains(".o-mail-NotificationItem-text", { text: "Demo: test" });
 });
 
 test("channel preview ignores messages from the past", async () => {
-    // make scroll behavior instantaneous.
-    patchWithCleanup(Element.prototype, {
-        scrollIntoView() {
-            return super.scrollIntoView(true);
-        },
-    });
+    disableAnimations();
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     const messageId = pyEnv["mail.message"].create({
@@ -182,17 +214,13 @@ test("channel preview ignores messages from the past", async () => {
 });
 
 test("counter is taking into account non-fetched channels", async () => {
-    patchBrowserNotification("denied");
+    mockPermission("notifications", "denied");
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Jane" });
     const channelId = pyEnv["discuss.channel"].create({
         name: "General",
         channel_member_ids: [
-            Command.create({
-                fold_state: "closed", // minimized channels are fetched at init
-                message_unread_counter: 1,
-                partner_id: serverState.partnerId,
-            }),
+            Command.create({ message_unread_counter: 1, partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -211,17 +239,14 @@ test("counter is taking into account non-fetched channels", async () => {
 });
 
 test("counter is updated on receiving message on non-fetched channels", async () => {
-    patchBrowserNotification("denied");
+    mockPermission("notifications", "denied");
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Jane" });
     const userId = pyEnv["res.users"].create({ partner_id: partnerId });
     const channelId = pyEnv["discuss.channel"].create({
         name: "General",
         channel_member_ids: [
-            Command.create({
-                fold_state: "closed", // minimized channels are fetched at init
-                partner_id: serverState.partnerId,
-            }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -246,4 +271,64 @@ test("counter is updated on receiving message on non-fetched channels", async ()
         })
     );
     await contains(".o-mail-MessagingMenu-counter", { text: "1" });
+});
+
+test("can use notification item swipe actions", async () => {
+    mockTouch(true);
+    patchUiSize({ size: SIZES.SM });
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo", email: "demo@odoo.com" });
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_type: "chat",
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: partnerId }),
+        ],
+    });
+    pyEnv["mail.message"].create({
+        author_id: partnerId,
+        body: "A message",
+        message_type: "comment",
+        model: "discuss.channel",
+        res_id: channelId,
+    });
+    await start();
+    await openDiscuss();
+    await contains("button.active", { text: "Notifications" });
+    await click("button", { text: "Chats" });
+    await contains(".o-mail-NotificationItem .o-mail-NotificationItem-badge:contains(1)");
+    await swipeRight(".o_actionswiper"); // marks as read
+    await contains(".o-mail-NotificationItem-badge", { count: 0 });
+    await swipeLeft(".o_actionswiper"); // unpins
+    await contains(".o-mail-NotificationItem", { count: 0 });
+});
+
+test("counter does not double count channel needaction messages", async () => {
+    const pyEnv = await startServer();
+    pyEnv["res.users"].write(serverState.userId, { notification_type: "inbox" });
+    const partnerId = pyEnv["res.partner"].create({ name: "Jane" });
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "General",
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: partnerId }),
+        ],
+    });
+    const messageId = pyEnv["mail.message"].create({
+        author_id: partnerId,
+        body: "Hey @Mitchell Admin",
+        message_type: "comment",
+        model: "discuss.channel",
+        res_id: channelId,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: messageId,
+        notification_status: "sent",
+        notification_type: "inbox",
+        res_partner_id: serverState.partnerId,
+    });
+    await start();
+    await click(".o_menu_systray i[aria-label='Messages']"); // fetch channels
+    await contains(".o-mail-NotificationItem", { text: "General" }); // ensure channels fetched
+    await contains(".o-mail-MessagingMenu-counter:text('1')");
 });

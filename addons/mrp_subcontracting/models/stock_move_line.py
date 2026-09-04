@@ -12,7 +12,7 @@ class StockMoveLine(models.Model):
     def _onchange_serial_number(self):
         current_location_id = self.location_id
         res = super()._onchange_serial_number()
-        if res and not self.lot_name and current_location_id.is_subcontracting_location:
+        if res and not self.lot_name and current_location_id.is_subcontract():
             # we want to avoid auto-updating source location in this case + change the warning message
             self.location_id = current_location_id
             res['warning']['message'] = res['warning']['message'].split("\n\n", 1)[0] + "\n\n" + \
@@ -20,10 +20,21 @@ class StockMoveLine(models.Model):
         return res
 
     def write(self, vals):
-        for move_line in self:
-            if vals.get('lot_id') and move_line.move_id.is_subcontract and move_line.location_id.is_subcontracting_location:
-                # Update related subcontracted production to keep consistency between production and reception.
-                subcontracted_production = move_line.move_id._get_subcontract_production().filtered(lambda p: p.state not in ('done', 'cancel') and p.lot_producing_id == move_line.lot_id)
-                if subcontracted_production:
-                    subcontracted_production.lot_producing_id = vals['lot_id']
-        return super().write(vals)
+        res = super().write(vals)
+        if not self.env.context.get('mrp_subcontracting') and ('quantity' in vals or 'lot_id' in vals):
+            self.move_id.filtered(lambda m: m.is_subcontract).with_context(no_procurement=True)._sync_subcontracting_productions()
+        return res
+
+    def unlink(self):
+        moves_to_sync = self.move_id.filtered(lambda m: m.is_subcontract)
+        res = super().unlink()
+        moves_to_sync._sync_subcontracting_productions()
+        return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        context = dict(self.env.context)
+        context.pop('auto_pick_move_lines', None)
+        res.move_id.filtered(lambda m: m.is_subcontract).with_context(context)._sync_subcontracting_productions()
+        return res

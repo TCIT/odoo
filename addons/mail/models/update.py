@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import datetime
 import logging
+import json
 from ast import literal_eval
 
 import requests
@@ -15,8 +16,8 @@ from odoo.tools import config
 _logger = logging.getLogger(__name__)
 
 
-class PublisherWarrantyContract(AbstractModel):
-    _name = "publisher_warranty.contract"
+class Publisher_WarrantyContract(AbstractModel):
+    _name = 'publisher_warranty.contract'
     _description = 'Publisher Warranty Contract'
 
     @api.model
@@ -47,7 +48,7 @@ class PublisherWarrantyContract(AbstractModel):
             "nbr_active_users": nbr_active_users,
             "nbr_share_users": nbr_share_users,
             "nbr_active_share_users": nbr_active_share_users,
-            "dbname": self._cr.dbname,
+            "dbname": self.env.cr.dbname,
             "db_create_date": db_create_date,
             "version": release.version,
             "language": user.lang,
@@ -66,7 +67,7 @@ class PublisherWarrantyContract(AbstractModel):
         Utility method to send a publisher warranty get logs messages.
         """
         msg = self._get_message()
-        arguments = {'arg0': str(msg), "action": "update"}
+        arguments = {'arg0': json.dumps(msg), "action": "update"}
 
         url = config.get("publisher_warranty_url")
 

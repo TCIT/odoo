@@ -1,19 +1,30 @@
 import { describe, expect, test } from "@odoo/hoot";
 
 import {
-    assertSteps,
     click,
     contains,
     defineMailModels,
     inputFiles,
+    insertText,
     openFormView,
     start,
     startServer,
-    step,
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
+import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
+import { MailActivity } from "@mail/../tests/mock_server/mock_models/mail_activity";
+
 import { advanceTime, mockDate } from "@odoo/hoot-mock";
-import { mockService, onRpc, patchWithCleanup, serverState } from "@web/../tests/web_test_helpers";
+import {
+    asyncStep,
+    getService,
+    makeKwArgs,
+    mockService,
+    onRpc,
+    patchWithCleanup,
+    serverState,
+    waitForSteps,
+} from "@web/../tests/web_test_helpers";
 import { deserializeDateTime, serializeDate, today } from "@web/core/l10n/dates";
 import { getOrigin } from "@web/core/utils/urls";
 
@@ -23,9 +34,7 @@ defineMailModels();
 test("activity upload document is available", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
-    const activityType = pyEnv["mail.activity.type"]._records.find(
-        (r) => r.name === "Upload Document"
-    );
+    const activityType = pyEnv["mail.activity.type"].find((r) => r.name === "Upload Document");
     pyEnv["mail.activity"].create({
         activity_category: "upload_file",
         activity_type_id: activityType.id,
@@ -43,9 +52,7 @@ test("activity upload document is available", async () => {
 test("activity can upload a document", async () => {
     const pyEnv = await startServer();
     const fakeId = pyEnv["res.partner"].create({});
-    const activityType = pyEnv["mail.activity.type"]._records.find(
-        (r) => r.name === "Upload Document"
-    );
+    const activityType = pyEnv["mail.activity.type"].find((r) => r.name === "Upload Document");
     pyEnv["mail.activity"].create({
         activity_category: "upload_file",
         activity_type_id: activityType.id,
@@ -64,8 +71,6 @@ test("activity can upload a document", async () => {
     await contains(".o-mail-Activity .btn", { text: "Upload Document" });
     const file = new File(["hello, world"], "text.txt", { type: "text/plain" });
     await inputFiles(".o-mail-Activity .o_input_file", [file]);
-    await contains(".o-mail-Activity .btn", { count: 0, text: "Upload Document" });
-    await contains("button[aria-label='Attach files']", { text: "1" });
 });
 
 test("activity simplest layout", async () => {
@@ -253,7 +258,7 @@ test("activity with mail template layout", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
     const mailTemplateId = pyEnv["mail.template"].create({ name: "Dummy mail template" });
-    const activityType = pyEnv["mail.activity.type"]._records.find((r) => r.name === "Email");
+    const activityType = pyEnv["mail.activity.type"].find((r) => r.name === "Email");
     pyEnv["mail.activity.type"].write(activityType.id, { mail_template_ids: [mailTemplateId] });
     pyEnv["mail.activity"].create({
         activity_type_id: activityType.id,
@@ -274,7 +279,7 @@ test("activity with mail template: preview mail", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
     const mailTemplateId = pyEnv["mail.template"].create({ name: "Dummy mail template" });
-    const activityType = pyEnv["mail.activity.type"]._records.find((r) => r.name === "Email");
+    const activityType = pyEnv["mail.activity.type"].find((r) => r.name === "Email");
     pyEnv["mail.activity.type"].write(activityType.id, { mail_template_ids: [mailTemplateId] });
     pyEnv["mail.activity"].create({
         activity_type_id: activityType.id,
@@ -285,7 +290,7 @@ test("activity with mail template: preview mail", async () => {
         doAction(action) {
             if (action?.res_model !== "res.partner") {
                 // Click on Preview Mail Template
-                step("do_action");
+                asyncStep("do_action");
                 expect(action.context.default_res_ids).toEqual([partnerId]);
                 expect(action.context.default_model).toBe("res.partner");
                 expect(action.context.default_template_id).toBe(mailTemplateId);
@@ -300,26 +305,25 @@ test("activity with mail template: preview mail", async () => {
     await contains(".o-mail-Activity");
     await contains(".o-mail-ActivityMailTemplate-preview");
     await click(".o-mail-ActivityMailTemplate-preview");
-    await assertSteps(["do_action"]);
+    await waitForSteps(["do_action"]);
 });
 
 test("activity with mail template: send mail", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
     const mailTemplateId = pyEnv["mail.template"].create({ name: "Dummy mail template" });
-    const activityType = pyEnv["mail.activity.type"]._records.find((r) => r.name === "Email");
+    const activityType = pyEnv["mail.activity.type"].find((r) => r.name === "Email");
     pyEnv["mail.activity.type"].write(activityType.id, { mail_template_ids: [mailTemplateId] });
     pyEnv["mail.activity"].create({
         activity_type_id: activityType.id,
         res_id: partnerId,
         res_model: "res.partner",
     });
-    onRpc("/web/dataset/call_kw/res.partner/activity_send_mail", async (request) => {
-        step("activity_send_mail");
-        const { params } = await request.json();
-        expect(params.args[0]).toHaveLength(1);
-        expect(params.args[0][0]).toBe(partnerId);
-        expect(params.args[1]).toBe(mailTemplateId);
+    onRpc("res.partner", "activity_send_mail", ({ args, method }) => {
+        asyncStep(method);
+        expect(args[0]).toHaveLength(1);
+        expect(args[0][0]).toBe(partnerId);
+        expect(args[1]).toBe(mailTemplateId);
         // random value returned in order for the mock server to know that this route is implemented.
         return true;
     });
@@ -328,7 +332,7 @@ test("activity with mail template: send mail", async () => {
     await contains(".o-mail-Activity");
     await contains(".o-mail-ActivityMailTemplate-send");
     await click(".o-mail-ActivityMailTemplate-send");
-    await assertSteps(["activity_send_mail"]);
+    await waitForSteps(["activity_send_mail"]);
 });
 
 test("activity click on mark as done", async () => {
@@ -385,7 +389,7 @@ test("activity click on edit", async () => {
     mockService("action", {
         doAction(action) {
             if (action?.res_model !== "res.partner") {
-                step("do_action");
+                asyncStep("do_action");
                 expect(action.type).toBe("ir.actions.act_window");
                 expect(action.res_model).toBe("mail.activity");
                 expect(action.res_id).toBe(activityId);
@@ -396,7 +400,7 @@ test("activity click on edit", async () => {
     await start();
     await openFormView("res.partner", partnerId);
     await click(".o-mail-Activity .btn", { text: "Edit" });
-    await assertSteps(["do_action"]);
+    await waitForSteps(["do_action"]);
 });
 
 test("activity click on edit should pass correct context", async () => {
@@ -411,23 +415,24 @@ test("activity click on edit should pass correct context", async () => {
         res_id: partnerId,
         res_model: "res.partner",
     });
-    const env = await start();
+    await start();
     await openFormView("res.partner", partnerId);
-    patchWithCleanup(env.services.action, {
+    mockService("action", {
         async doAction(action) {
-            step("do_action");
+            asyncStep("do_action");
             expect(action.type).toBe("ir.actions.act_window");
             expect(action.res_model).toBe("mail.activity");
             expect(action.res_id).toBe(activityId);
             expect(action.context).toEqual({
                 default_res_model: "res.partner",
                 default_res_id: partnerId,
+                dialog_size: "large",
             });
             return super.doAction(...arguments);
         },
     });
     await click(".o-mail-Activity .btn", { text: "Edit" });
-    await assertSteps(["do_action"]);
+    await waitForSteps(["do_action"]);
 });
 
 test("activity click on cancel", async () => {
@@ -440,17 +445,16 @@ test("activity click on cancel", async () => {
         res_id: partnerId,
         res_model: "res.partner",
     });
-    onRpc("/web/dataset/call_kw/mail.activity/unlink", async (request) => {
-        step("unlink");
-        const { params } = await request.json();
-        expect(params.args[0]).toHaveLength(1);
-        expect(params.args[0][0]).toBe(activityId);
+    onRpc("mail.activity", "unlink", ({ args, method }) => {
+        asyncStep(method);
+        expect(args[0]).toHaveLength(1);
+        expect(args[0][0]).toBe(activityId);
     });
     await start();
     await openFormView("res.partner", partnerId);
     await click(".o-mail-Activity .btn", { text: "Cancel" });
     await contains(".o-mail-Activity", { count: 0 });
-    await assertSteps(["unlink"]);
+    await waitForSteps(["unlink"]);
 });
 
 test("activity mark done popover close on ESCAPE", async () => {
@@ -521,13 +525,13 @@ test("Activity are sorted by deadline", async () => {
     await contains(":nth-child(3 of .o-mail-Activity)", { text: "Due in 4 days:" });
 });
 
-test("chatter 'activities' button open the activity schedule wizard", async () => {
+test("chatter 'activity' button open the activity schedule wizard", async () => {
     const pyEnv = await startServer();
     const fakeId = pyEnv["res.partner"].create({});
     mockService("action", {
         async doAction(action, options) {
             if (action?.res_model !== "res.partner") {
-                step("doAction");
+                asyncStep("doAction");
                 const expectedAction = {
                     context: {
                         active_ids: [fakeId],
@@ -557,8 +561,8 @@ test("chatter 'activities' button open the activity schedule wizard", async () =
                 <chatter/>
             </form>`,
     });
-    await click("button", { text: "Activities" });
-    await assertSteps(["doAction"]);
+    await click("button", { text: "Activity" });
+    await waitForSteps(["doAction"]);
 });
 
 test("Activity avatar should have a unique timestamp", async () => {
@@ -598,6 +602,7 @@ test("activity with a user mention", async () => {
     const pyEnv = await startServer();
     const partnerId1 = pyEnv["res.partner"].create({ name: "Partner 1" });
     const partnerId2 = pyEnv["res.partner"].create({ name: "Partner 2" });
+    pyEnv["res.users"].create({ partner_id: partnerId2 });
     pyEnv["mail.activity"].create({
         note: `<p>How are you, <a class="o_mail_redirect" href="#" data-oe-model="res.partner" data-oe-id="${partnerId2}">@Partner 2</a>?</p>`,
         res_id: partnerId1,
@@ -606,7 +611,7 @@ test("activity with a user mention", async () => {
     await start();
     await openFormView("res.partner", partnerId1);
     await click(".o-mail-Activity-note a", { text: "@Partner 2" });
-    await contains(".o-mail-ChatWindow-header", { text: "Partner 2" });
+    await contains(".o_avatar_card:contains('Partner 2')");
 });
 
 test("activity with a channel mention", async () => {
@@ -622,4 +627,107 @@ test("activity with a channel mention", async () => {
     await openFormView("res.partner", partnerId);
     await click(".o-mail-Activity-note a", { text: "#Channel" });
     await contains(".o-mail-ChatWindow-header", { text: "Channel" });
+});
+
+test("activity updates are shared between tabs", async () => {
+    const pyEnv = await startServer();
+    MailActivity._views.form = "<form><field name='summary'/></form>";
+    let stepBroadcasts = true;
+    onRpc("/mail/data", () => expect.step("/mail/data"));
+    patchWithCleanup(BroadcastChannel.prototype, {
+        postMessage({ type, payload }) {
+            if (!stepBroadcasts) {
+                return;
+            }
+            if (type === "INSERT") {
+                const activityData = payload["mail.activity"]?.[0];
+                if (activityData?.summary) {
+                    expect.step(`${type} - ${activityData.summary}`);
+                }
+                return;
+            }
+            if (type === "DELETE") {
+                expect.step(`${type} - ${payload.id}`);
+                return;
+            }
+            expect.step(type);
+        },
+    });
+    const [firstActivityId] = pyEnv["mail.activity"].create([
+        {
+            can_write: true,
+            res_id: serverState.partnerId,
+            res_model: "res.partner",
+            summary: "Send an email to Marc",
+        },
+        {
+            can_write: true,
+            res_id: serverState.partnerId,
+            res_model: "res.partner",
+            summary: "Say hello to Bob",
+        },
+    ]);
+    await start();
+    await expect.waitForSteps(["INIT", "/mail/data"]); // INIT from rtc service
+    await openFormView("res.partner", serverState.partnerId);
+    // Ensure state updates are corectly sent.
+    await expect.waitForSteps([
+        "/mail/data",
+        "INSERT - Send an email to Marc",
+        "INSERT - Say hello to Bob",
+    ]);
+    await contains(".o-mail-Activity", { count: 2 });
+    await contains(".o-mail-Activity-info:has(:text(“Send an email to Marc”))");
+    await click(".o-mail-Activity-edit:eq(0)");
+    await insertText("[name='summary'] input", "Send an email to Jane", { replace: true });
+    await click("button:text(Save)");
+    // Every insert triggers a broadcast, what matter is that the last value is correctly sent.
+    await expect.waitForSteps([
+        "/mail/data",
+        "INSERT - Send an email to Marc",
+        "INSERT - Say hello to Bob",
+        "INSERT - Send an email to Jane",
+        "INSERT - Say hello to Bob",
+    ]);
+    await click(".o-mail-Activity:eq(0) button:text(Cancel)");
+    await expect.waitForSteps([
+        `DELETE - ${firstActivityId}`,
+        "/mail/data",
+        "INSERT - Say hello to Bob",
+        "INSERT - Say hello to Bob",
+    ]);
+    await contains(".o-mail-Activity", { count: 1 });
+    await contains(".o-mail-Activity-info:has(:text(“Say hello to Bob”))");
+    // Ensure state update are properly received.
+    stepBroadcasts = false;
+    const newActivityId = pyEnv["mail.activity"].create({
+        res_id: serverState.partnerId,
+        res_model: "res.partner",
+        summary: "Send another email",
+    });
+    const store = getService("mail.store");
+    store.activityBroadcastChannel.onmessage({
+        data: {
+            type: "INSERT",
+            payload: new mailDataHelpers.Store()
+                .add(
+                    pyEnv["res.partner"].browse(serverState.partnerId),
+                    makeKwArgs({ as_thread: true, request_list: ["activities"] })
+                )
+                .get_result(),
+        },
+    });
+    await contains(".o-mail-Activity-info:has(:text(“Send another email”))");
+    store.activityBroadcastChannel.onmessage({
+        data: { type: "DELETE", payload: { id: newActivityId } },
+    });
+    await contains(".o-mail-Activity-info:has(:text(“Send another email”))", { count: 0 });
+    onRpc("/mail/thread/messages", () => expect.step("/mail/thread/messages"));
+    store.activityBroadcastChannel.onmessage({
+        data: {
+            type: "RELOAD_CHATTER",
+            payload: { id: serverState.partnerId, model: "res.partner" },
+        },
+    });
+    await expect.waitForSteps(["/mail/thread/messages"]);
 });

@@ -2,7 +2,6 @@ import { makeContext } from "@web/core/context";
 import { _t } from "@web/core/l10n/translation";
 import { evaluateBooleanExpr, evaluateExpr } from "@web/core/py_js/py";
 import { clamp } from "@web/core/utils/numbers";
-import { exprToBoolean } from "@web/core/utils/strings";
 import { visitXML } from "@web/core/utils/xml";
 import { DEFAULT_INTERVAL, toGeneratorId } from "@web/search/utils/dates";
 
@@ -17,7 +16,7 @@ const DEFAULT_VIEWS_WITH_SEARCH_PANEL = ["kanban", "list"];
  * @param {string} context
  * @returns {string[]}
  */
-function getContextGroubBy(context) {
+function getContextGroupBy(context) {
     try {
         return makeContext([context]).group_by?.split(":") || [];
     } catch {
@@ -47,7 +46,6 @@ export class SearchArchParser {
         this.preSearchItems = [];
         this.searchPanelInfo = {
             className: "",
-            fold: false,
             viewTypes: DEFAULT_VIEWS_WITH_SEARCH_PANEL,
         };
         this.sections = [];
@@ -138,8 +136,8 @@ export class SearchArchParser {
             preField.fieldType = fieldType;
             if (fieldType !== "properties" && name in this.searchDefaults) {
                 preField.isDefault = true;
-                let value = this.searchDefaults[name];
-                value = Array.isArray(value) ? value[0] : value;
+                const val = this.searchDefaults[name];
+                const value = Array.isArray(val) ? val[0] : val;
                 let operator = preField.operator;
                 if (!operator) {
                     let type = fieldType;
@@ -165,14 +163,40 @@ export class SearchArchParser {
                     }
                     preField.defaultAutocompleteValue.label = option[1];
                 } else if (fieldType === "many2one") {
-                    this.labels.push((orm) => {
-                        return orm
+                    this.labels.push((orm) =>
+                        orm
                             .call(relation, "read", [value, ["display_name"]], { context })
                             .then((results) => {
+                                if (!results.length) {
+                                    console.error(
+                                        _t(
+                                            "The autocomplete value for %(field)s has not been found: the record with id %(id)s doesn't seem to exist",
+                                            { field: preField.fieldName, id: value }
+                                        )
+                                    );
+                                    preField.isDefault = false;
+                                    return;
+                                }
                                 preField.defaultAutocompleteValue.label =
                                     results[0]["display_name"];
-                            });
-                    });
+                            })
+                    );
+                } else if (
+                    ["many2many", "one2many"].includes(fieldType) &&
+                    Array.isArray(val) &&
+                    val.every((v) => Number.isInteger(v) && v > 0)
+                ) {
+                    preField.defaultAutocompleteValue.operator = "in";
+                    preField.defaultAutocompleteValue.value = val;
+                    this.labels.push((orm) =>
+                        orm
+                            .call(relation, "read", [val, ["display_name"]], { context })
+                            .then((results) => {
+                                preField.defaultAutocompleteValue.label = `${results
+                                    .map((r) => r["display_name"])
+                                    .join(" or ")}`;
+                            })
+                    );
                 }
             }
         } else {
@@ -192,7 +216,7 @@ export class SearchArchParser {
         const preSearchItem = { type: "filter" };
         if (node.hasAttribute("context")) {
             const context = node.getAttribute("context");
-            const [fieldName, defaultInterval] = getContextGroubBy(context);
+            const [fieldName, defaultInterval] = getContextGroupBy(context);
             const groupByField = this.fields[fieldName];
             if (groupByField) {
                 preSearchItem.type = "groupBy";
@@ -316,9 +340,6 @@ export class SearchArchParser {
         if (searchPanelNode.hasAttribute("class")) {
             this.searchPanelInfo.className = searchPanelNode.getAttribute("class");
         }
-        if (searchPanelNode.hasAttribute("fold")) {
-            this.searchPanelInfo.fold = exprToBoolean(searchPanelNode.getAttribute("fold"));
-        }
         if (searchPanelNode.hasAttribute("view_types")) {
             this.searchPanelInfo.viewTypes = searchPanelNode.getAttribute("view_types").split(",");
         }
@@ -355,6 +376,7 @@ export class SearchArchParser {
                 section.activeValueId = this.searchPanelDefaults[attrs.name];
                 section.icon = section.icon || "fa-folder";
                 section.hierarchize = evaluateBooleanExpr(attrs.hierarchize || "1");
+                section.depth = attrs.depth ? parseInt(attrs.depth) : 0;
                 section.values.set(false, {
                     childrenIds: [],
                     display_name: ALL.toString(),

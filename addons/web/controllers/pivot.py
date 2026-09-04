@@ -1,23 +1,24 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from collections import deque
 import io
 import json
+from collections import deque
 
 from werkzeug.datastructures import FileStorage
+from werkzeug.exceptions import UnprocessableEntity
 
 from odoo import http, _
 from odoo.http import content_disposition, request
 from odoo.tools import osutil
-from odoo.tools.misc import xlsxwriter
 
 
 class TableExporter(http.Controller):
 
     @http.route('/web/pivot/export_xlsx', type='http', auth="user", readonly=True)
     def export_xlsx(self, data, **kw):
+        import xlsxwriter  # noqa: PLC0415
         jdata = json.load(data) if isinstance(data, FileStorage) else json.loads(data)
+        if not jdata:
+            raise UnprocessableEntity(_('No data to export'))
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
         worksheet = workbook.add_worksheet(jdata['title'])
@@ -26,8 +27,7 @@ class TableExporter(http.Controller):
         header_plain = workbook.add_format({'pattern': 1, 'bg_color': '#AAAAAA'})
         bold = workbook.add_format({'bold': True})
 
-        measure_count = jdata['measure_count']
-        origin_count = jdata['origin_count']
+        measure_count = min(jdata['measure_count'], 100000)
 
         # Step 1: writing col group headers
         col_group_headers = jdata['col_group_headers']
@@ -41,23 +41,24 @@ class TableExporter(http.Controller):
             for header in header_row:
                 while (carry and carry[0]['x'] == x):
                     cell = carry.popleft()
-                    for j in range(measure_count * (2 * origin_count - 1)):
+                    for j in range(measure_count):
                         worksheet.write(y, x+j, '', header_plain)
                     if cell['height'] > 1:
                         carry.append({'x': x, 'height': cell['height'] - 1})
-                    x = x + measure_count * (2 * origin_count - 1)
-                for j in range(header['width']):
+                    x = x + measure_count
+                width = min(header['width'], 100000)
+                for j in range(width):
                     worksheet.write(y, x + j, header['title'] if j == 0 else '', header_plain)
                 if header['height'] > 1:
                     carry.append({'x': x, 'height': header['height'] - 1})
-                x = x + header['width']
+                x = x + width
             while (carry and carry[0]['x'] == x):
                 cell = carry.popleft()
-                for j in range(measure_count * (2 * origin_count - 1)):
+                for j in range(measure_count):
                     worksheet.write(y, x+j, '', header_plain)
                 if cell['height'] > 1:
                     carry.append({'x': x, 'height': cell['height'] - 1})
-                x = x + measure_count * (2 * origin_count - 1)
+                x = x + measure_count
             x, y = 1, y + 1
 
         # Step 2: writing measure headers
@@ -68,28 +69,15 @@ class TableExporter(http.Controller):
             for measure in measure_headers:
                 style = header_bold if measure['is_bold'] else header_plain
                 worksheet.write(y, x, measure['title'], style)
-                for i in range(1, 2 * origin_count - 1):
-                    worksheet.write(y, x+i, '', header_plain)
-                x = x + (2 * origin_count - 1)
+                x = x + 1
             x, y = 1, y + 1
             # set minimum width of cells to 16 which is around 88px
             worksheet.set_column(0, len(measure_headers), 16)
 
-        # Step 3: writing origin headers
-        origin_headers = jdata['origin_headers']
-
-        if origin_headers:
-            worksheet.write(y, 0, '', header_plain)
-            for origin in origin_headers:
-                style = header_bold if origin['is_bold'] else header_plain
-                worksheet.write(y, x, origin['title'], style)
-                x = x + 1
-            y = y + 1
-
         # Step 4: writing data
         x = 0
         for row in jdata['rows']:
-            worksheet.write(y, x, row['indent'] * '     ' + row['title'], header_plain)
+            worksheet.write(y, x, f"{row['indent'] * '     '}{row['title']}", header_plain)
             for cell in row['values']:
                 x = x + 1
                 if cell.get('is_bold', False):

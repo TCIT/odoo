@@ -1,25 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_buckaroo
-# 
+# * payment_buckaroo
+#
 # Translators:
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
-# 
+# Martin Trigaux, 2018
+# Mikko Salmela <salmemik@gmail.com>, 2018
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2018
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server saas~11.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-07 21:57+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"payment_buckaroo/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_buckaroo
 #. odoo-python
@@ -45,10 +48,16 @@ msgid "Code"
 msgstr "Koodi"
 
 #. module: payment_buckaroo
-#. odoo-python
-#: code:addons/payment_buckaroo/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "Viitettä %s vastaavaa tapahtumaa ei löytynyt."
+#: model:ir.model.fields,field_description:payment_buckaroo.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_buckaroo.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "Näyttönimi"
+
+#. module: payment_buckaroo
+#: model:ir.model.fields,field_description:payment_buckaroo.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_buckaroo.field_payment_transaction__id
+msgid "ID"
+msgstr "Tunnus"
 
 #. module: payment_buckaroo
 #: model:ir.model,name:payment_buckaroo.model_payment_provider
@@ -84,8 +93,8 @@ msgstr "Tämän maksupalveluntarjoajan tekninen koodi."
 #. module: payment_buckaroo
 #. odoo-python
 #: code:addons/payment_buckaroo/models/payment_transaction.py:0
-msgid "Unknown status code: %s"
-msgstr "Tuntematon tilakoodi: %s"
+msgid "Unknown status code: %s."
+msgstr "Tuntematon tilakoodi: %s."
 
 #. module: payment_buckaroo
 #: model:ir.model.fields,field_description:payment_buckaroo.field_payment_provider__buckaroo_website_key
@@ -97,3 +106,9 @@ msgstr "Verkkosivun avain"
 #: code:addons/payment_buckaroo/models/payment_transaction.py:0
 msgid "Your payment was refused (code %s). Please try again."
 msgstr "Maksusi hylättiin (koodi %s). Yritä uudelleen."
+
+#~ msgid "Payment Acquirer"
+#~ msgstr "Maksun vastaanottaja"
+
+#~ msgid "Provider"
+#~ msgstr "Palveluntarjoaja"

@@ -2,11 +2,11 @@
 
 from odoo import http
 from odoo.http import request
-from odoo.addons.mail.models.discuss.mail_guest import add_guest_to_context
+from odoo.addons.mail.tools.discuss import add_guest_to_context
 
 
 class LinkPreviewController(http.Controller):
-    @http.route("/mail/link_preview", methods=["POST"], type="json", auth="public")
+    @http.route("/mail/link_preview", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
     def mail_link_preview(self, message_id):
         if not request.env["mail.link.preview"]._is_link_preview_enabled():
@@ -21,13 +21,15 @@ class LinkPreviewController(http.Controller):
             message, request_url=request.httprequest.url_root
         )
 
-    @http.route("/mail/link_preview/hide", methods=["POST"], type="json", auth="public")
+    @http.route("/mail/link_preview/hide", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
-    def mail_link_preview_hide(self, link_preview_ids):
+    def mail_link_preview_hide(self, message_link_preview_ids):
         guest = request.env["mail.guest"]._get_guest_from_context()
-        link_preview_sudo = guest.env["mail.link.preview"].sudo().search([("id", "in", link_preview_ids)])
-        if not link_preview_sudo:
-            return
-        if not link_preview_sudo.message_id.is_current_user_or_guest_author and not guest.env.user._is_admin():
+        # sudo: access check is done below using message_id
+        link_preview_sudo = guest.env["mail.message.link.preview"].sudo().search([("id", "in", message_link_preview_ids)])
+        if not guest.env.user._is_admin() and any(
+            not link_preview.message_id.is_current_user_or_guest_author
+            for link_preview in link_preview_sudo
+        ):
             return
         link_preview_sudo._hide_and_notify()

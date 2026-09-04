@@ -4,7 +4,9 @@ from . import test_access_rights
 from . import test_burndown_chart
 from . import test_project_base
 from . import test_project_config
+from . import test_project_embedded_action_settings
 from . import test_project_flow
+from . import test_project_mail_features
 from . import test_project_milestone
 from . import test_project_profitability
 from . import test_project_recurrence
@@ -15,7 +17,8 @@ from . import test_project_stage_multicompany
 from . import test_project_subtasks
 from . import test_project_tags_filter
 from . import test_project_task_type
-from . import test_project_thread_controller
+from . import test_project_template
+from . import test_project_template_ui
 from . import test_project_ui
 from . import test_project_update_access_rights
 from . import test_project_update_flow
@@ -25,9 +28,12 @@ from . import test_multicompany
 from . import test_personal_stages
 from . import test_task_dependencies
 from . import test_task_follow
+from . import test_task_templates
+from . import test_task_templates_ui
 from . import test_task_tracking
 from . import test_project_report
 from . import test_project_task_quick_create
 from . import test_task_state
 from . import test_project_task_mail_tracking_duration
 from . import test_task_link_preview_name
+from . import test_import_files

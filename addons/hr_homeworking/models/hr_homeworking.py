@@ -1,12 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, tools
 
 DAYS = ['monday_location_id', 'tuesday_location_id', 'wednesday_location_id', 'thursday_location_id', 'friday_location_id', 'saturday_location_id', 'sunday_location_id']
 
 
 class HrEmployeeLocation(models.Model):
-    _name = "hr.employee.location"
+    _name = 'hr.employee.location'
     _description = "Employee Location"
 
     work_location_id = fields.Many2one('hr.work.location', required=True, string="Location")
@@ -17,11 +17,12 @@ class HrEmployeeLocation(models.Model):
     date = fields.Date(string="Date")
     day_week_string = fields.Char(compute="_compute_day_week_string")
 
-    _sql_constraints = [
-        ('uniq_exceptional_per_day', 'unique(employee_id, date)', 'Only one default work location and one exceptional work location per day per employee.'),
-    ]
+    _uniq_exceptional_per_day = models.Constraint(
+        'unique(employee_id, date)',
+        'Only one default work location and one exceptional work location per day per employee.',
+    )
 
     @api.depends('date')
     def _compute_day_week_string(self):
         for record in self:
-            record.day_week_string = record.date.strftime("%A")
+            record.day_week_string = tools.format_date(record.env, record.date, date_format='EEEE')

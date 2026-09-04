@@ -21,3 +21,14 @@ class PosConfig(models.Model):
         payment_methods = self._get_self_ordering_payment_methods_data(self.self_order_online_payment_method_id)
         res['pos_payment_methods'] += payment_methods
         return res
+
+    def has_valid_self_payment_method(self):
+        res = super().has_valid_self_payment_method()
+        if self.self_ordering_mode == 'mobile':
+            return res or bool(self.self_order_online_payment_method_id)
+        return res or any(pm.is_online_payment for pm in self.payment_method_ids)
+
+    @api.model
+    def _load_pos_self_data_fields(self, pos_config_id):
+        fields = super()._load_pos_self_data_fields(pos_config_id)
+        return fields + ['self_order_online_payment_method_id']

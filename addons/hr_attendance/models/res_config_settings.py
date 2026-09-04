@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
@@ -7,8 +6,10 @@ from odoo import api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    # TODO: Remove in master
     overtime_company_threshold = fields.Integer(
         string="Tolerance Time In Favor Of Company", readonly=False)
+    # TODO: Remove in master
     overtime_employee_threshold = fields.Integer(
         string="Tolerance Time In Favor Of Employee", readonly=False)
     hr_attendance_display_overtime = fields.Boolean(related='company_id.hr_attendance_display_overtime', readonly=False)
@@ -22,6 +23,7 @@ class ResConfigSettings(models.TransientModel):
     auto_check_out = fields.Boolean(related="company_id.auto_check_out", readonly=False)
     auto_check_out_tolerance = fields.Float(related="company_id.auto_check_out_tolerance", readonly=False)
     absence_management = fields.Boolean(related="company_id.absence_management", readonly=False)
+    attendance_device_tracking = fields.Boolean(related="company_id.attendance_device_tracking", readonly=False)
 
     @api.model
     def get_values(self):
@@ -47,5 +49,5 @@ class ResConfigSettings(models.TransientModel):
             company.write({field: self[field] for field in fields_to_check})
 
     def regenerate_kiosk_key(self):
-        if self.env.user.has_group("hr_attendance.group_hr_attendance_manager"):
+        if self.env.user.has_group("hr_attendance.group_hr_attendance_user"):
             self.company_id._regenerate_attendance_kiosk_key()

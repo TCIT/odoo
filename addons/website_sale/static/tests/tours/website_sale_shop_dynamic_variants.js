@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import * as tourUtils from "@website_sale/js/tours/tour_utils";
 
@@ -9,12 +7,13 @@ registry.category("web_tour.tours").add('tour_shop_dynamic_variants', {
     steps: () => [
     {
         content: "select Dynamic Product",
-        trigger: ".oe_product_cart a:contains(/^Dynamic Product$/)",
+        trigger: ".oe_product_cart a:text(Dynamic Product)",
         run: "click",
+        expectUnloadPage: true,
     },
     {
         content: "click on the second variant",
-        trigger: 'input[data-attribute_name="Dynamic Attribute"][data-value_name="Dynamic Value 2"]',
+        trigger: 'input[data-attribute-name="Dynamic Attribute"][data-value-name="Dynamic Value 2"]',
         run: "click",
     },
     {
@@ -29,9 +28,9 @@ registry.category("web_tour.tours").add('tour_shop_dynamic_variants', {
         trigger: '#add_to_cart',
         run: "click",
     },
-        tourUtils.goToCart(),
-    {
-        content: "check the variant is in the cart",
-        trigger: 'div>a>h6:contains(Dynamic Product (Dynamic Value 2))',
-    },
+    tourUtils.goToCart(),
+    ...tourUtils.assertCartContains({
+        productName: 'Dynamic Product',
+        combinationName: 'Dynamic Value 2',
+    }),
 ]});

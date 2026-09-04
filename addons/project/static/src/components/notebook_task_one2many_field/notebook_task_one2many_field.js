@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { registry } from "@web/core/registry";
 import { X2ManyField, x2ManyField } from '@web/views/fields/x2many/x2many_field';
 
@@ -10,6 +8,14 @@ export class NotebookTaskOne2ManyField extends X2ManyField {
         ...X2ManyField.components,
         ListRenderer: NotebookTaskListRenderer,
     };
+
+    get rendererProps() {
+        const rendererProps = super.rendererProps;
+        if (this.props.viewMode === "kanban") {
+            rendererProps.openRecord = this.switchToForm.bind(this);
+        }
+        return rendererProps;
+    }
 }
 
 export const notebookTaskOne2ManyField = {

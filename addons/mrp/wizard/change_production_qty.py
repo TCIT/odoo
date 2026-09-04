@@ -14,13 +14,13 @@ class ChangeProductionQty(models.TransientModel):
         required=True, ondelete='cascade')
     product_qty = fields.Float(
         'Quantity To Produce',
-        digits='Product Unit of Measure', required=True)
+        digits='Product Unit', required=True)
 
     @api.model
     def default_get(self, fields):
         res = super(ChangeProductionQty, self).default_get(fields)
-        if 'mo_id' in fields and not res.get('mo_id') and self._context.get('active_model') == 'mrp.production' and self._context.get('active_id'):
-            res['mo_id'] = self._context['active_id']
+        if 'mo_id' in fields and not res.get('mo_id') and self.env.context.get('active_model') == 'mrp.production' and self.env.context.get('active_id'):
+            res['mo_id'] = self.env.context['active_id']
         if 'product_qty' in fields and not res.get('product_qty') and res.get('mo_id'):
             res['product_qty'] = self.env['mrp.production'].browse(res['mo_id']).product_qty
         return res
@@ -52,10 +52,10 @@ class ChangeProductionQty(models.TransientModel):
 
     @api.model
     def _need_quantity_propagation(self, move, qty):
-        return move.move_dest_ids and not float_is_zero(qty, precision_rounding=move.product_uom.rounding)
+        return move.move_dest_ids and not move.product_uom.is_zero(qty)
 
     def change_prod_qty(self):
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        precision = self.env['decimal.precision'].precision_get('Product Unit')
         for wizard in self:
             production = wizard.mo_id
             old_production_qty = production.product_qty
@@ -76,8 +76,7 @@ class ChangeProductionQty(models.TransientModel):
             production._log_manufacture_exception(documents)
             self._update_finished_moves(production, new_production_qty, old_production_qty)
             production.write({'product_qty': new_production_qty})
-            if not float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding) and\
-               not production.workorder_ids:
+            if not production.product_uom_id.is_zero(production.qty_producing) and not production.workorder_ids:
                 production.qty_producing = new_production_qty
                 production._set_qty_producing()
 

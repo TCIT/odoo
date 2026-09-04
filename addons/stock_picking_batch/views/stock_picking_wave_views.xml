@@ -57,6 +57,7 @@
     <record id="action_picking_tree_wave" model="ir.actions.act_window">
         <field name="name">Wave Transfers</field>
         <field name="res_model">stock.picking.batch</field>
+        <field name="path">wave-transfers</field>
         <field name="view_mode">list,kanban,form</field>
         <field name="context">{'search_default_draft': True, 'search_default_in_progress': True}</field>
         <field name="view_ids" eval="[(5, 0, 0),
@@ -119,7 +120,7 @@
             </xpath>
             <xpath expr="//div[@name='picking_type_backorder_count']" class="row" position="after">
                 <div class="row">
-                    <a class="col-8 offset-4 text-truncate" name="%(stock_picking_batch.action_picking_tree_wave)d" type="action">
+                    <a class="col-8 offset-4 text-truncate" name="action_wave" type="object">
                         <div t-if="record.count_picking_wave.raw_value > 0"  class="row">
                             <span class="col-6">Waves</span>
                             <field name="count_picking_wave" class="col-2 text-end"/>

@@ -1,9 +1,8 @@
-/** @odoo-module */
-
 import * as spreadsheet from "@odoo/o-spreadsheet";
 
 import { GlobalFiltersUIPlugin } from "./plugins/global_filters_ui_plugin";
 import { GlobalFiltersCorePlugin } from "./plugins/global_filters_core_plugin";
+import { GlobalFiltersCoreViewPlugin } from "./plugins/global_filters_core_view_plugin";
 const { inverseCommandRegistry } = spreadsheet.registries;
 
 function identity(cmd) {
@@ -21,39 +20,34 @@ invalidateEvaluationCommands.add("ADD_GLOBAL_FILTER");
 invalidateEvaluationCommands.add("EDIT_GLOBAL_FILTER");
 invalidateEvaluationCommands.add("REMOVE_GLOBAL_FILTER");
 invalidateEvaluationCommands.add("SET_GLOBAL_FILTER_VALUE");
-invalidateEvaluationCommands.add("CLEAR_GLOBAL_FILTER_VALUE");
 
 readonlyAllowedCommands.add("SET_GLOBAL_FILTER_VALUE");
 readonlyAllowedCommands.add("SET_MANY_GLOBAL_FILTER_VALUE");
-readonlyAllowedCommands.add("CLEAR_GLOBAL_FILTER_VALUE");
 readonlyAllowedCommands.add("UPDATE_OBJECT_DOMAINS");
+readonlyAllowedCommands.add("LOG_DATASOURCE_EXPORT");
+
+readonlyAllowedCommands.add("UPDATE_CHART_GRANULARITY");
 
 inverseCommandRegistry
     .add("EDIT_GLOBAL_FILTER", identity)
-    .add("ADD_GLOBAL_FILTER", (cmd) => {
-        return [
-            {
-                type: "REMOVE_GLOBAL_FILTER",
-                id: cmd.filter.id,
-            },
-        ];
-    })
-    .add("REMOVE_GLOBAL_FILTER", (cmd) => {
-        return [
-            {
-                type: "ADD_GLOBAL_FILTER",
-                filter: {},
-            },
-        ];
-    })
-    .add("MOVE_GLOBAL_FILTER", (cmd) => {
-        return [
-            {
-                type: "MOVE_GLOBAL_FILTER",
-                id: cmd.id,
-                delta: cmd.delta * -1,
-            },
-        ];
-    });
+    .add("ADD_GLOBAL_FILTER", (cmd) => [
+        {
+            type: "REMOVE_GLOBAL_FILTER",
+            id: cmd.filter.id,
+        },
+    ])
+    .add("REMOVE_GLOBAL_FILTER", (cmd) => [
+        {
+            type: "ADD_GLOBAL_FILTER",
+            filter: {},
+        },
+    ])
+    .add("MOVE_GLOBAL_FILTER", (cmd) => [
+        {
+            type: "MOVE_GLOBAL_FILTER",
+            id: cmd.id,
+            delta: cmd.delta * -1,
+        },
+    ]);
 
-export { GlobalFiltersCorePlugin, GlobalFiltersUIPlugin };
+export { GlobalFiltersCorePlugin, GlobalFiltersCoreViewPlugin, GlobalFiltersUIPlugin };

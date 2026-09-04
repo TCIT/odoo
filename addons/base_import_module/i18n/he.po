@@ -1,38 +1,48 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* base_import_module
-# 
+# * base_import_module
+#
 # Translators:
-# Lilach Gilliam <lilach.gilliam@gmail.com>, 2024
-# ExcaliberX <excaliberx@gmail.com>, 2024
-# Leandro Noijovich <eliel.sorcerer@gmail.com>, 2024
-# Martin Trigaux, 2024
-# דודי מלכה <Dudimalka6@gmail.com>, 2024
-# Yihya Hugirat <hugirat@gmail.com>, 2024
-# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2024
-# 
+# דודי מלכה <Dudimalka6@gmail.com>, 2022
+# Yihya Hugirat <hugirat@gmail.com>, 2022
+# Lilach Gilliam <lilach.gilliam@gmail.com>, 2022
+# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# or balmas <or@laylinetech.com>, 2026.
+# Yoram Lavi <yoram@digitale.co.il>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~12.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-19 15:46+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: ZVI BLONDER <ZVIBLONDER@gmail.com>, 2024\n"
-"Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-07 13:33+0000\n"
+"Last-Translator: or balmas <or@laylinetech.com>\n"
+"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-19/"
+"base_import_module/he/>\n"
+"Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: he\n"
-"Plural-Forms: nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;\n"
+"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
+"n % 10 == 0) ? 2 : 3));\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_import_module
 #. odoo-python
 #: code:addons/base_import_module/models/ir_module.py:0
 msgid ""
 "\n"
-"You may need the Enterprise version to install the data module. Please visit https://www.odoo.com/pricing-plan for more information.\n"
-"If you need Website themes, it can be downloaded from https://github.com/odoo/design-themes.\n"
+"You may need the Enterprise version to install the data module. Please visit "
+"https://www.odoo.com/pricing-plan for more information.\n"
+"If you need Website themes, it can be downloaded from https://github.com/"
+"odoo/design-themes.\n"
 msgstr ""
+"\n"
+"ייתכן שתזדקק לגרסת ה-Enterprise כדי להתקין את מודול הנתונים. בקר בכתובת "
+"https://www.odoo.com/pricing-plan לקבלת מידע נוסף.\n"
+"אם אתה זקוק לעיצובי אתר (Themes), ניתן להוריד אותם מ-https://github.com/odoo/"
+"design-themes.\n"
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.module_form_apps_inherit
@@ -88,6 +98,10 @@ msgstr "נוצר ב-"
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__display_name
+#: model:ir.model.fields,field_description:base_import_module.field_base_module_uninstall__display_name
+#: model:ir.model.fields,field_description:base_import_module.field_ir_http__display_name
+#: model:ir.model.fields,field_description:base_import_module.field_ir_module_module__display_name
+#: model:ir.model.fields,field_description:base_import_module.field_ir_ui_view__display_name
 msgid "Display Name"
 msgstr "שם לתצוגה"
 
@@ -114,12 +128,20 @@ msgstr "כפה init"
 
 #. module: base_import_module
 #: model:ir.model.fields,help:base_import_module.field_base_import_module__force
-msgid ""
-"Force init mode even if installed. (will update `noupdate='1'` records)"
+msgid "Force init mode even if installed. (will update `noupdate='1'` records)"
 msgstr "כפה מצב init גם אם מותקן. (יעדכן רשומות 'noupdate =' 1 ')"
 
 #. module: base_import_module
+#: model:ir.model,name:base_import_module.model_ir_http
+msgid "HTTP Routing"
+msgstr "ניתוב HTTP"
+
+#. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__id
+#: model:ir.model.fields,field_description:base_import_module.field_base_module_uninstall__id
+#: model:ir.model.fields,field_description:base_import_module.field_ir_http__id
+#: model:ir.model.fields,field_description:base_import_module.field_ir_module_module__id
+#: model:ir.model.fields,field_description:base_import_module.field_ir_ui_view__id
 msgid "ID"
 msgstr "מזהה"
 
@@ -159,12 +181,12 @@ msgstr "להתקין"
 #. odoo-python
 #: code:addons/base_import_module/models/ir_module.py:0
 msgid "Install an Industry"
-msgstr ""
+msgstr "התקן תחום תעשייה"
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
 msgid "Install the application"
-msgstr ""
+msgstr "התקן את היישום"
 
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__write_uid
@@ -202,7 +224,7 @@ msgstr "מודול בקובץ .ZIP"
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_ir_module_module__module_type
 msgid "Module Type"
-msgstr ""
+msgstr "סוג מודול"
 
 #. module: base_import_module
 #: model:ir.model,name:base_import_module.model_base_module_uninstall
@@ -217,7 +239,7 @@ msgstr "קובץ מודול (zip.)"
 #. module: base_import_module
 #: model:ir.model.fields,field_description:base_import_module.field_base_import_module__modules_dependencies
 msgid "Modules Dependencies"
-msgstr ""
+msgstr "תלויות בין מודולים"
 
 #. module: base_import_module
 #. odoo-python
@@ -226,14 +248,22 @@ msgid "No file sent."
 msgstr "לא נשלח קובץ."
 
 #. module: base_import_module
+#. odoo-python
+#: code:addons/base_import_module/models/ir_module.py:0
+msgid "No manifest found in '%(modules)s'. Can't import the zip file."
+msgstr ""
+
+#. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.view_base_module_import
-msgid "Note: you can only import data modules (.xml files and static assets)"
-msgstr "הערה: ניתן לייבא רק מודולי נתונים (קובצי .xml ונכסים סטטיים)"
+msgid ""
+"Note: you can only import data modules (.xml files, i18n files and static "
+"assets)"
+msgstr ""
 
 #. module: base_import_module
 #: model:ir.model.fields.selection,name:base_import_module.selection__ir_module_module__module_type__official
 msgid "Official Apps"
-msgstr ""
+msgstr "יישומים רשמיים"
 
 #. module: base_import_module
 #. odoo-python
@@ -268,8 +298,16 @@ msgstr "התאמות של סטודיו מחייבות יישום סטודיו ש
 #. odoo-python
 #: code:addons/base_import_module/models/ir_module.py:0
 msgid ""
-"The installation of the data module would fail as the following dependencies"
-" can't be found in the addons-path:\n"
+"The assets path in the manifest of imported module '%(module_name)s' cannot "
+"contain glob wildcards (e.g., *, **)."
+msgstr ""
+
+#. module: base_import_module
+#. odoo-python
+#: code:addons/base_import_module/models/ir_module.py:0
+msgid ""
+"The installation of the data module would fail as the following dependencies "
+"can't be found in the addons-path:\n"
 msgstr ""
 
 #. module: base_import_module
@@ -289,7 +327,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_import_module/models/ir_module.py:0
 msgid "Unknown module dependencies:"
-msgstr ""
+msgstr "תלויות לא ידועות בין מודולים:"
 
 #. module: base_import_module
 #: model_terms:ir.ui.view,arch_db:base_import_module.module_form_apps_inherit
@@ -311,3 +349,34 @@ msgstr "בוצע"
 #: model:ir.model.fields.selection,name:base_import_module.selection__base_import_module__state__init
 msgid "init"
 msgstr "init"
+
+#~ msgid "Import App"
+#~ msgstr "ייבא יישום"
+
+#~ msgid "Import module"
+#~ msgstr "ייבא מודול"
+
+#~ msgid "Last Modified on"
+#~ msgstr "שינוי אחרון ב"
+
+#~ msgid ""
+#~ "Note: you can only import data modules (.xml files and static assets)"
+#~ msgstr "הערה: ניתן לייבא רק מודולי נתונים (קובצי .xml ונכסים סטטיים)"
+
+#~ msgid "Open Modules"
+#~ msgstr "פתח מודולים"
+
+#~ msgid "Select module package to import (.zip file):"
+#~ msgstr "בחר חבילת מודול לייבוא (קובץ zip):"
+
+#~ msgid "Studio customizations require Studio"
+#~ msgstr "ההתאמות של סטודיו דורשות סטודיו"
+
+#~ msgid ""
+#~ "Unmet module dependencies: \n"
+#~ "\n"
+#~ " - %s"
+#~ msgstr ""
+#~ "תלות מודול לא מסופקת: \n"
+#~ "\n"
+#~ " - %s"

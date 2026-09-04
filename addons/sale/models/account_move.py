@@ -1,20 +1,14 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo import api, fields, models, _
-from odoo.tools import groupby
+from odoo import _, api, fields, models
+from odoo.tools import groupby, OrderedSet
 
 
 class AccountMove(models.Model):
     _name = 'account.move'
     _inherit = ['account.move', 'utm.mixin']
 
-    @api.model
-    def _get_invoice_default_sale_team(self):
-        return self.env['crm.team']._get_default_team_id()
-
     team_id = fields.Many2one(
-        'crm.team', string='Sales Team', default=_get_invoice_default_sale_team,
+        'crm.team', string='Sales Team',
         compute='_compute_team_id', store=True, readonly=False,
         ondelete="set null", tracking=True,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
@@ -23,7 +17,11 @@ class AccountMove(models.Model):
     campaign_id = fields.Many2one(ondelete='set null')
     medium_id = fields.Many2one(ondelete='set null')
     source_id = fields.Many2one(ondelete='set null')
-    sale_order_count = fields.Integer(compute="_compute_origin_so_count", string='Sale Order Count')
+    sale_order_count = fields.Integer(compute="_compute_origin_so_count", string='Sale Order Count', compute_sudo=True)
+    sale_warning_text = fields.Text(
+        "Sale Warning",
+        help="Internal warning for the partner or the products as set by the user.",
+        compute="_compute_sale_warning_text")
 
     def unlink(self):
         downpayment_lines = self.mapped('line_ids.sale_line_ids').filtered(lambda line: line.is_downpayment and line.invoice_lines <= self.mapped('line_ids'))
@@ -50,6 +48,26 @@ class AccountMove(models.Model):
         for move in self:
             move.sale_order_count = len(move.line_ids.sale_line_ids.order_id)
 
+    @api.depends('partner_id.name', 'partner_id.sale_warn_msg', 'invoice_line_ids.product_id.sale_line_warn_msg', 'invoice_line_ids.product_id.display_name')
+    def _compute_sale_warning_text(self):
+        if not self.env.user.has_group('sale.group_warning_sale'):
+            self.sale_warning_text = ''
+            return
+        for move in self:
+            if move.move_type != 'out_invoice':
+                move.sale_warning_text = ''
+                continue
+            warnings = OrderedSet()
+            if partner_msg := move.partner_id.sale_warn_msg:
+                warnings.add((move.partner_id.name or move.partner_id.display_name) + ' - ' + partner_msg)
+            if partner_parent_msg := move.partner_id.parent_id.sale_warn_msg:
+                parent = move.partner_id.parent_id
+                warnings.add((parent.name or parent.display_name) + ' - ' + partner_parent_msg)
+            for product in move.invoice_line_ids.product_id:
+                if product_msg := product.sale_line_warn_msg:
+                    warnings.add(product.display_name + ' - ' + product_msg)
+            move.sale_warning_text = '\n'.join(warnings)
+
     def _reverse_moves(self, default_values_list=None, cancel=False):
         # OVERRIDE
         if not default_values_list:
@@ -74,7 +92,7 @@ class AccountMove(models.Model):
         real_invoices = set(other_so_lines.invoice_lines.move_id)
         for so_dpl in downpayment_lines:
             so_dpl.price_unit = so_dpl._get_downpayment_line_price_unit(real_invoices)
-            so_dpl.tax_id = so_dpl.invoice_lines.tax_ids
+            so_dpl.tax_ids = so_dpl.invoice_lines.tax_ids
 
         return res
 
@@ -89,8 +107,13 @@ class AccountMove(models.Model):
     def button_cancel(self):
         res = super().button_cancel()
 
-        self.line_ids.filtered('is_downpayment').sale_line_ids.filtered(
-            lambda sol: not sol.display_type)._compute_name()
+        dp_lines = self.line_ids.sale_line_ids.filtered(lambda l: l.is_downpayment and not l.display_type)
+        dp_lines._compute_name()
+        downpayment_lines = dp_lines.filtered(lambda sol: not sol.order_id.locked)
+        other_so_lines = downpayment_lines.order_id.order_line - downpayment_lines
+        real_invoices = set(other_so_lines.invoice_lines.move_id)
+        for so_dpl in downpayment_lines:
+            so_dpl.price_unit = so_dpl._get_downpayment_line_price_unit(real_invoices)
 
         return res
 
@@ -101,7 +124,9 @@ class AccountMove(models.Model):
         posted = super()._post(soft)
 
         for invoice in posted.filtered(lambda move: move.is_invoice()):
-            payments = invoice.mapped('transaction_ids.payment_id').filtered(lambda x: x.state == 'in_process')
+            payments = invoice.mapped("transaction_ids.payment_id").filtered(
+                lambda x: x.state in ("in_process", "paid")
+            )
             move_lines = payments.move_id.line_ids.filtered(lambda line: line.account_type in ('asset_receivable', 'liability_payable') and not line.reconciled)
             for line in move_lines:
                 invoice.js_assign_outstanding_line(line.id)
@@ -156,7 +181,9 @@ class AccountMove(models.Model):
         """
         order_amount = 0
         for invoice in self:
-            prices = sum(invoice.line_ids.filtered(lambda x: order in x.sale_line_ids.order_id).mapped('price_total'))
+            prices = sum(invoice.line_ids.filtered(
+                lambda x: x.display_type not in ('line_note', 'line_section') and order in x.sale_line_ids.order_id
+            ).mapped('price_total'))
             order_amount += invoice.currency_id._convert(
                 prices * -invoice.direction_sign,
                 order.currency_id,
@@ -184,20 +211,3 @@ class AccountMove(models.Model):
             )
             exclude_amount += order_amount_company
         return exclude_amount
-
-    # todo need to remove both the field and compute method in master as this field is neither used in python nor in XML
-    @api.depends('line_ids.sale_line_ids.order_id', 'currency_id', 'tax_totals', 'date')
-    def _compute_partner_credit(self):
-        super()._compute_partner_credit()
-        for move in self.filtered(lambda m: m.is_invoice(include_receipts=True)):
-            sale_orders = move.line_ids.sale_line_ids.order_id
-            amount_total_currency = move.tax_totals['total_amount_currency']
-            amount_to_invoice_currency = sum(
-                sale_order.currency_id._convert(
-                    sale_order.amount_to_invoice,
-                    move.company_currency_id,
-                    move.company_id,
-                    move.date
-                ) for sale_order in sale_orders
-            )
-            move.partner_credit += max(amount_total_currency - amount_to_invoice_currency, 0.0)

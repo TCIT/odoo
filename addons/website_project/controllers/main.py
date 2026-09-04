@@ -9,8 +9,8 @@ from odoo.tools import html2plaintext
 
 
 class WebsiteForm(form.WebsiteForm):
-    def insert_record(self, request, model, values, custom, meta=None):
-        model_name = model.sudo().model
+    def insert_record(self, request, model_sudo, values, custom, meta=None):
+        model_name = model_sudo.model
         if model_name == 'project.task':
             visitor_sudo = request.env['website.visitor']._get_visitor_from_request()
             visitor_partner = visitor_sudo.partner_id
@@ -19,15 +19,17 @@ class WebsiteForm(form.WebsiteForm):
             # When a task is created from the web editor, if the key 'user_ids' is not present, the user_ids is filled with the odoo bot. We set it to False to ensure it is not.
             values.setdefault('user_ids', False)
 
-        res = super().insert_record(request, model, values, custom, meta=meta)
+        res = super().insert_record(request, model_sudo, values, custom, meta=meta)
         if model_name != 'project.task':
             return res
         task = request.env['project.task'].sudo().browse(res)
         custom = custom.replace('email_from', _('Email'))
         custom_label = nl2br_enclose(_("Other Information"), 'h4')  # Title for custom fields
-        default_field = model.website_form_default_field_id
+        default_field = model_sudo.website_form_default_field_id
         default_field_data = values.get(default_field.name, '')
-        default_field_content = nl2br_enclose(default_field.name.capitalize(), 'h4') + nl2br_enclose(html2plaintext(default_field_data), 'p')
+        default_field_content = nl2br_enclose(html2plaintext(default_field_data), 'p')
+        if default_field.name and default_field.name != 'description':
+            default_field_content = nl2br_enclose(default_field.name.capitalize(), 'h4') + default_field_content
         custom_content = (default_field_content if default_field_data else '') \
                         + (custom_label + custom if custom else '') \
                         + (self._meta_label + meta if meta else '')
@@ -42,25 +44,26 @@ class WebsiteForm(form.WebsiteForm):
             )
         return res
 
-    def extract_data(self, model, values):
-        data = super().extract_data(model, values)
-        if model.sudo().model == 'project.task' and values.get('email_from'):
-            partners_list = request.env['mail.thread'].sudo()._mail_find_partner_from_emails([values['email_from']])
-            partner = partners_list[0] if partners_list else self.env['res.partner']
-            data['record']['partner_id'] = partner.id
+    def extract_data(self, model_sudo, values):
+        data = super().extract_data(model_sudo, values)
+        if model_sudo.model == 'project.task' and values.get('email_from'):
+            partner = request.env['mail.thread'].sudo()._partner_find_from_emails_single([values['email_from']], no_create=True)
             data['record']['email_from'] = values['email_from']
             if partner:
-                if not partner.phone and values.get('partner_phone'):
-                    data['record']['partner_phone'] = values['partner_phone']
-                if not partner.name:
-                    data['record']['partner_name'] = values['partner_name']
-                if not partner.company_name and values.get('partner_company_name'):
-                    data['record']['partner_company_name'] = values['partner_company_name']
+                data['record']['partner_id'] = partner.id
+                custom = [
+                   (field, data['record'].pop(field))
+                   for field in ['partner_name', 'partner_phone', 'partner_company_name']
+                   if data['record'].get(field)
+                ]
+                data['custom'] += "\n" + "\n".join(["%s : %s" % c for c in custom])
             else:
+                data['record']['partner_id'] = False
                 data['record']['email_cc'] = values['email_from']
                 if values.get('partner_phone'):
                     data['record']['partner_phone'] = values['partner_phone']
-                data['record']['partner_name'] = values['partner_name']
+                if values.get('partner_name'):
+                    data['record']['partner_name'] = values['partner_name']
                 if values.get('partner_company_name'):
                     data['record']['partner_company_name'] = values['partner_company_name']
         return data

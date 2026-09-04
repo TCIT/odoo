@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import * as tourUtils from "@website_sale/js/tours/tour_utils";
 
@@ -9,8 +7,9 @@ registry.category("web_tour.tours").add('tour_shop_multi_checkbox', {
     steps: () => [
     {
         content: "select Product",
-        trigger: ".oe_product_cart a:contains(/^Product Multi$/)",
+        trigger: ".oe_product_cart a:text(Product Multi)",
         run: "click",
+        expectUnloadPage: true,
     },
     {
         content: "check price",
@@ -18,32 +17,16 @@ registry.category("web_tour.tours").add('tour_shop_multi_checkbox', {
     },
     {
         content: 'click on the first option to select it',
-        trigger: 'input[data-attribute_name="Options"][data-value_name="Option 1"]',
+        trigger: 'input[data-attribute-name="Options"][data-value-name="Option 1"]',
         run: "click",
     },
     {
-        content: 'click on the third option to select it',
-        trigger: 'input[data-attribute_name="Options"][data-value_name="Option 3"]',
-        run: "click",
-    },
-    {
-        content: 'check combination is not possible',
-        trigger: '.js_main_product.css_not_available .css_not_available_msg:contains("This combination does not exist.")',
-        timeout: 30000,
-        run: "click",
-    },
-    {
-        content: "check add to cart not possible",
-        trigger: '#add_to_cart.disabled',
-    },
-    {
-        content: 'click on the third option to unselect it',
-        trigger: 'input[data-attribute_name="Options"][data-value_name="Option 3"]',
-        run: "click",
+        content: "check third option is not available (but clickable)",
+        trigger: 'input[data-value-name="Option 3"].css_not_available:not([disabled])',
     },
     {
         content: 'click on the second option to select it',
-        trigger: 'input[data-attribute_name="Options"][data-value_name="Option 2"]',
+        trigger: 'input[data-attribute-name="Options"][data-value-name="Option 2"]',
         run: "click",
     },
     {
@@ -67,8 +50,9 @@ registry.category("web_tour.tours").add('tour_shop_multi_checkbox_single_value',
     steps: () => [
     {
         content: "select Product",
-        trigger: '.oe_product_cart a:contains(/^Burger$/)',
+        trigger: '.oe_product_cart a:text(Burger)',
         run: "click",
+        expectUnloadPage: true,
     },
     {
         content: "check price",
@@ -76,7 +60,7 @@ registry.category("web_tour.tours").add('tour_shop_multi_checkbox_single_value',
     },
     {
         content: 'click on the first option to select it',
-        trigger: 'input[data-attribute_name="Toppings"][data-value_name="cheese"]',
+        trigger: 'input[data-attribute-name="Toppings"][data-value-name="cheese"]',
         run: "click",
     },
     {

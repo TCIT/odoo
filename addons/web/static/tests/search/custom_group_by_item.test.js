@@ -1,6 +1,7 @@
 import { expect, test } from "@odoo/hoot";
-import { queryAllTexts } from "@odoo/hoot-dom";
+import { press, queryAllTexts } from "@odoo/hoot-dom";
 import {
+    contains,
     defineModels,
     fields,
     getFacetTexts,
@@ -21,10 +22,6 @@ class Foo extends models.Model {
     date = fields.Date();
     float = fields.Float({ groupable: false });
     foo = fields.Char();
-
-    _views = {
-        search: `<search/>`,
-    };
 }
 
 class Partner extends models.Model {}
@@ -39,7 +36,7 @@ test(`simple rendering`, async () => {
     });
 
     await toggleSearchBarMenu();
-    expect(`.o_group_by_menu option[disabled]`).toHaveText(`Add Custom Group`);
+    expect(`.o_group_by_menu option[disabled]`).toHaveText(`Custom Group`);
     expect(queryAllTexts`.o_add_custom_group_menu option:not([disabled])`).toEqual([
         "Birthday",
         "Created on",
@@ -50,7 +47,7 @@ test(`simple rendering`, async () => {
     ]);
 });
 
-test(`the ID field should not be proposed in "Add Custom Group" menu`, async () => {
+test(`the ID field should not be proposed in "Custom Group" menu`, async () => {
     await mountWithSearch(SearchBar, {
         resModel: "foo",
         searchMenuTypes: ["groupBy"],
@@ -65,7 +62,7 @@ test(`the ID field should not be proposed in "Add Custom Group" menu`, async () 
     expect(queryAllTexts`.o_add_custom_group_menu option:not([disabled])`).toEqual(["Foo"]);
 });
 
-test(`stored many2many should be proposed in "Add Custom Group" menu`, async () => {
+test(`stored many2many should be proposed in "Custom Group" menu`, async () => {
     await mountWithSearch(SearchBar, {
         resModel: "foo",
         searchMenuTypes: ["groupBy"],
@@ -95,7 +92,7 @@ test(`stored many2many should be proposed in "Add Custom Group" menu`, async () 
     ]);
 });
 
-test(`add a date field in "Add Custom Group" activate a groupby with global default option "month"`, async () => {
+test(`add a date field in "Custom Group" activate a groupby with global default option "month"`, async () => {
     const component = await mountWithSearch(SearchBar, {
         resModel: "foo",
         searchMenuTypes: ["groupBy"],
@@ -114,7 +111,7 @@ test(`add a date field in "Add Custom Group" activate a groupby with global defa
 
     await toggleSearchBarMenu();
     expect(component.env.searchModel.groupBy).toEqual([]);
-    expect(`.o_add_custom_group_menu`).toHaveCount(1); // Add Custom Group
+    expect(`.o_add_custom_group_menu`).toHaveCount(1); // Custom Group
 
     await selectGroup("date");
     expect(component.env.searchModel.groupBy).toEqual(["date:month"]);
@@ -142,14 +139,14 @@ test(`click on add custom group toggle group selector`, async () => {
     });
 
     await toggleSearchBarMenu();
-    expect(`.o_add_custom_group_menu option[disabled]`).toHaveText("Add Custom Group");
+    expect(`.o_add_custom_group_menu option[disabled]`).toHaveText("Custom Group");
 
     // Single select node with a single option
     expect(`.o_add_custom_group_menu option:not([disabled])`).toHaveCount(1);
     expect(`.o_add_custom_group_menu option:not([disabled])`).toHaveText("Super Date");
 });
 
-test(`select a field name in Add Custom Group menu properly trigger the corresponding field`, async () => {
+test(`select a field name in Custom Group menu properly trigger the corresponding field`, async () => {
     await mountWithSearch(SearchBar, {
         resModel: "foo",
         searchMenuTypes: ["groupBy"],
@@ -169,4 +166,56 @@ test(`select a field name in Add Custom Group menu properly trigger the correspo
     expect(`.o_group_by_menu .o_menu_item`).toHaveCount(2);
     expect(`.o_add_custom_group_menu`).toHaveCount(1);
     expect(getFacetTexts()).toEqual(["Candlelight"]);
+});
+
+test(`keyboard navigation on custom group by item`, async () => {
+    await mountWithSearch(SearchBar, {
+        resModel: "foo",
+        searchMenuTypes: ["groupBy"],
+        searchViewId: false,
+        searchViewArch: `
+            <search>
+                <filter string="Foo" name="group_by_foo" context="{'group_by': 'foo'}"/>
+            </search>
+        `,
+        searchViewFields: {
+            foo: { string: "Foo", type: "char", store: true, sortable: true, groupable: true },
+            date: { string: "Date", type: "date", store: true, sortable: true, groupable: true },
+        },
+    });
+
+    await toggleSearchBarMenu();
+    await press("arrowup");
+    expect(".o_add_custom_group_menu").toHaveClass("focus", {
+        message: "arrowup with no currently focused item always jumps to the last navigable item",
+    });
+});
+
+test.tags("desktop");
+test(`hover on custom group by item`, async () => {
+    await mountWithSearch(SearchBar, {
+        resModel: "foo",
+        searchMenuTypes: ["groupBy"],
+        searchViewId: false,
+        searchViewArch: `
+            <search>
+                <filter string="Foo" name="group_by_foo" context="{'group_by': 'foo'}"/>
+            </search>
+        `,
+        searchViewFields: {
+            foo: { string: "Foo", type: "char", store: true, sortable: true, groupable: true },
+            date: { string: "Date", type: "date", store: true, sortable: true, groupable: true },
+        },
+    });
+
+    await toggleSearchBarMenu();
+    await contains(".o_group_by_menu .o_menu_item:first").hover();
+    expect(".o_group_by_menu .focus").toHaveCount(1);
+    expect(".o_add_custom_group_menu").not.toHaveClass("focus");
+
+    await contains(".o_add_custom_group_menu").hover();
+    expect(".o_add_custom_group_menu").toHaveClass("focus");
+    expect(".o_group_by_menu .focus").toHaveCount(1, {
+        message: "only one item should be focused at a time",
+    });
 });

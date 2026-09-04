@@ -3,7 +3,7 @@
 from odoo import api, fields, models, _
 
 from odoo.exceptions import ValidationError, UserError
-from odoo.osv.expression import AND
+from odoo.fields import Domain
 
 
 class LunchOrder(models.Model):
@@ -61,6 +61,8 @@ class LunchOrder(models.Model):
     display_reorder_button = fields.Boolean(compute='_compute_display_reorder_button')
     display_add_button = fields.Boolean(compute='_compute_display_add_button')
 
+    _user_product_date = models.Index("(user_id, product_id, date)")
+
     @api.depends('product_id')
     def _compute_product_images(self):
         for line in self:
@@ -87,7 +89,7 @@ class LunchOrder(models.Model):
             if user_new_orders:
                 user_new_orders = user_new_orders.filtered(lambda lunch_order: lunch_order.date == order.date)
                 price = sum(order.price for order in user_new_orders)
-            wallet_amount = self.env['lunch.cashmove'].get_wallet_balance(order.user_id, False) - price
+            wallet_amount = self.env['lunch.cashmove'].get_wallet_balance(order.user_id) - price
             order.display_add_button = wallet_amount >= order.price
 
     @api.depends_context('show_reorder_button')
@@ -112,10 +114,6 @@ class LunchOrder(models.Model):
                 order.order_deadline_passed = order.supplier_id.order_deadline_passed
             else:
                 order.order_deadline_passed = False
-
-    def init(self):
-        self._cr.execute("""CREATE INDEX IF NOT EXISTS lunch_order_user_product_date ON %s (user_id, product_id, date)"""
-            % self._table)
 
     def _get_topping_ids(self, field, values):
         return list(self._fields[field].convert_to_cache(values, self))
@@ -165,8 +163,9 @@ class LunchOrder(models.Model):
             lines = self._find_matching_lines({
                 **vals,
                 'toppings': self._extract_toppings(vals),
+                'state': 'new',
             })
-            if lines.filtered(lambda l: l.state == 'new'):
+            if lines:
                 # YTI FIXME This will update multiple lines in the case there are multiple
                 # matching lines which should not happen through the interface
                 lines.update_quantity(1)
@@ -175,14 +174,15 @@ class LunchOrder(models.Model):
                 orders |= super().create(vals)
         return orders
 
-    def write(self, values):
+    def write(self, vals):
+        values = vals
         change_topping = 'topping_ids_1' in values or 'topping_ids_2' in values or 'topping_ids_3' in values
         merge_needed = 'note' in values or change_topping or 'state' in values
         default_location_id = self.env.user.last_lunch_location_id and self.env.user.last_lunch_location_id.id or False
 
         if merge_needed:
             lines_to_deactivate = self.env['lunch.order']
-            for line in self:
+            for line in self.filtered(lambda line: line.state not in ['sent', 'confirmed']):
                 # Only write on topping_ids_1 because they all share the same table
                 # and we don't want to remove all the records
                 # _extract_toppings will pop topping_ids_1, topping_ids_2 and topping_ids_3 from values
@@ -199,7 +199,7 @@ class LunchOrder(models.Model):
                     'toppings': toppings,
                     'lunch_location_id': values.get('lunch_location_id', default_location_id),
                     'state': values.get('state'),
-                })
+                }) - line
                 if matching_lines:
                     lines_to_deactivate |= line
                     matching_lines.update_quantity(line.quantity)
@@ -218,7 +218,7 @@ class LunchOrder(models.Model):
             ('lunch_location_id', '=', values.get('lunch_location_id', default_location_id)),
         ]
         if values.get('state'):
-            domain = AND([domain, [('state', '=', values['state'])]])
+            domain = Domain.AND([domain, [('state', '=', values['state'])]])
         toppings = values.get('toppings', [])
         return self.search(domain).filtered(lambda line: (line.topping_ids_1 | line.topping_ids_2 | line.topping_ids_3).ids == toppings)
 
@@ -254,7 +254,7 @@ class LunchOrder(models.Model):
         self.env.flush_all()
         for line in self:
             if self.env['lunch.cashmove'].get_wallet_balance(line.user_id) < 0:
-                raise ValidationError(_('Your wallet does not contain enough money to order that. To add some money to your wallet, please contact your lunch manager.'))
+                raise ValidationError(_('Oh no! You don’t have enough money in your wallet to order your selected lunch! Contact your lunch manager to add some money to your wallet.'))
 
     def action_order(self):
         for order in self:

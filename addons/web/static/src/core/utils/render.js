@@ -1,6 +1,6 @@
 import { App, blockDom, Component, markup } from "@odoo/owl";
 import { getTemplate } from "@web/core/templates";
-import { _t } from "@web/core/l10n/translation";
+import { appTranslateFn } from "@web/core/l10n/translation";
 
 export function renderToElement(template, context = {}) {
     const el = render(template, context).firstElementChild;
@@ -41,7 +41,7 @@ Object.defineProperty(renderToString, "app", {
                 name: "renderToString",
                 getTemplate,
                 translatableAttributes: ["data-tooltip"],
-                translateFn: _t,
+                translateFn: appTranslateFn,
             });
         }
         return app;
@@ -63,7 +63,7 @@ function render(template, context = {}) {
  *
  * @param {string} template
  * @param {Object} context
- * @returns string: the html of the template, as a markup string
+ * @returns {ReturnType<markup>} the html of the template, as a markup string
  */
 export function renderToMarkup(template, context = {}) {
     return markup(renderToString(template, context));

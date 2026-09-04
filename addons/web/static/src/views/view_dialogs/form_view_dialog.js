@@ -3,7 +3,7 @@ import { useChildRef, useService } from "@web/core/utils/hooks";
 import { CallbackRecorder } from "@web/search/action_hook";
 import { View } from "@web/views/view";
 
-import { Component, onMounted } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 
 export class FormViewDialog extends Component {
     static template = "web.FormViewDialog";
@@ -13,12 +13,11 @@ export class FormViewDialog extends Component {
         resModel: String,
 
         context: { type: Object, optional: true },
+        expandedFormRef: { type: String, optional: true },
         nextRecordsContext: { type: Object, optional: true },
-        mode: {
-            optional: true,
-            validate: (m) => ["edit", "readonly"].includes(m),
-        },
+        readonly: { type: Boolean, optional: true },
         onRecordSaved: { type: Function, optional: true },
+        onRecordSave: { type: Function, optional: true },
         onRecordDiscarded: { type: Function, optional: true },
         removeRecord: { type: Function, optional: true },
         resId: { type: [Number, Boolean], optional: true },
@@ -26,6 +25,7 @@ export class FormViewDialog extends Component {
         viewId: { type: [Number, Boolean], optional: true },
         preventCreate: { type: Boolean, optional: true },
         preventEdit: { type: Boolean, optional: true },
+        canExpand: { type: Boolean, optional: true },
         isToMany: { type: Boolean, optional: true },
         size: Dialog.props.size,
     };
@@ -33,6 +33,7 @@ export class FormViewDialog extends Component {
         onRecordSaved: () => {},
         preventCreate: false,
         preventEdit: false,
+        canExpand: true,
         isToMany: false,
     };
 
@@ -49,31 +50,36 @@ export class FormViewDialog extends Component {
 
         this.currentResId = this.props.resId;
 
+        if (this.props.canExpand) {
+            this.onExpandCallback = this.onExpand.bind(this);
+        }
+
         this.viewProps = {
             type: "form",
             buttonTemplate,
 
             context: this.props.context || {},
             display: { controlPanel: false },
-            mode: this.props.mode || "edit",
+            readonly: this.props.readonly,
             resId: this.props.resId || false,
             resModel: this.props.resModel,
             viewId: this.props.viewId || false,
             preventCreate: this.props.preventCreate,
             preventEdit: this.props.preventEdit,
             discardRecord: this.discardRecord.bind(this),
-            saveRecord: async (record, { saveAndNew }) => {
-                const saved = await record.save({ reload: false });
-                if (saved) {
-                    this.currentResId = record.resId;
-                    await this.props.onRecordSaved(record);
-                    if (saveAndNew) {
-                        this.currentResId = false;
-                        const context = this.props.nextRecordsContext || this.props.context || {};
-                        await record.model.load({ resId: false, context });
-                    } else {
-                        this.props.close();
+            saveRecord: async (record, params) => {
+                let saved;
+                if (this.props.onRecordSave) {
+                    saved = await this.props.onRecordSave(record);
+                } else {
+                    saved = await record.save({ reload: false });
+                    if (saved) {
+                        this.currentResId = record.resId;
+                        await this.props.onRecordSaved(record);
                     }
+                }
+                if (saved) {
+                    await this.onRecordSaved(record, params);
                 }
                 return saved;
             },
@@ -86,17 +92,21 @@ export class FormViewDialog extends Component {
                 this.props.close();
             };
         }
+    }
 
-        onMounted(() => {
-            if (this.modalRef.el.querySelector(".modal-footer").childElementCount > 1) {
-                const defaultButton = this.modalRef.el.querySelector(
-                    ".modal-footer button.o-default-button"
-                );
-                if (defaultButton) {
-                    defaultButton.classList.add("d-none");
-                }
-            }
-        });
+    /**
+     * overridable method defining what to do on save
+     * @param {*} record, record that was saved
+     * @param {*} params, additional parameters passed to "save"
+     */
+    async onRecordSaved(record, params) {
+        if (params?.saveAndNew) {
+            this.currentResId = false;
+            const context = this.props.nextRecordsContext || this.props.context || {};
+            await record.model.load({ resId: false, context });
+        } else {
+            this.props.close();
+        }
     }
 
     async discardRecord() {
@@ -115,6 +125,10 @@ export class FormViewDialog extends Component {
                 res_model: this.props.resModel,
                 res_id: this.currentResId,
                 views: [[false, "form"]],
+                context: {
+                    ...this.props.context,
+                    form_view_ref: this.props.expandedFormRef,
+                },
             });
         }
     }

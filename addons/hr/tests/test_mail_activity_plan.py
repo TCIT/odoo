@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from freezegun import freeze_time
 
-from odoo import Command
+from odoo import fields, Command
 from odoo.addons.mail.tests.common import mail_new_test_user
-from odoo.addons.mail.tests.test_mail_activity import ActivityScheduleCase
+from odoo.addons.mail.tests.common_activity import ActivityScheduleCase
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged, users
 
@@ -115,6 +116,21 @@ class ActivityScheduleHRCase(ActivityScheduleCase):
         cls.employee_coach.parent_id = cls.employee_manager
         cls.employee_dep_b.coach_id = cls.employee_coach
 
+        cls.employee_3 = cls.employee_coach
+        cls.employee_4 = cls.employee_manager
+        cls.employee_4.coach_id = cls.employee_coach
+        for employee, date_start in ((cls.employee_1, '2023-08-01'),
+                                     (cls.employee_2, '2023-09-01'),
+                                     (cls.employee_3, '2023-12-01'),
+                                     (cls.employee_4, '2024-01-01')):
+            employee.version_id.write({
+                'contract_date_end': fields.Date.from_string('2025-12-31'),
+                'contract_date_start': fields.Date.from_string(date_start),
+                'date_version': fields.Date.from_string(date_start),
+                'name': 'Contract',
+                'wage': 1,
+            })
+
 
 @tagged('mail_activity', 'mail_activity_plan')
 class TestActivitySchedule(ActivityScheduleHRCase):
@@ -193,10 +209,16 @@ class TestActivitySchedule(ActivityScheduleHRCase):
             # Happy case
             form = self._instantiate_activity_schedule_wizard(employees)
             form.plan_id = self.plan_onboarding
-            self.assertEqual(form.plan_summary,
-                             "<ul>Manager <ul><li>To-Do: Plan training</li>"
-                             "</ul>Coach <ul><li>To-Do: Training</li>"
-                             "</ul>Employee <ul><li>To-Do: Send feedback to the manager</li></ul></ul>")
+            expected_summary_lines = [
+                ('Plan training', self.user_manager.id if len(employees) == 1 else False),
+                ('Training', self.user_coach.id if len(employees) == 1 else False),
+                ('Send feedback to the manager', employees.user_id.id if len(employees) == 1 else False),
+            ]
+            for summary_line, (expected_description, expected_responsible_id) in zip(
+                form.plan_schedule_line_ids._records, expected_summary_lines, strict=True
+            ):
+                self.assertEqual(summary_line['line_description'], expected_description)
+                self.assertEqual(summary_line['responsible_user_id'], expected_responsible_id)
             self.assertFalse(form.has_error)
             wizard = form.save()
             wizard.action_schedule_plan()
@@ -225,15 +247,42 @@ class TestActivitySchedule(ActivityScheduleHRCase):
             self.employee_manager.user_id = False
             form = self._instantiate_activity_schedule_wizard(employees)
             form.plan_id = self.plan_onboarding
-            self.assertTrue(form.has_error)
-            n_error = form.error.count('<li>')
-            self.assertEqual(n_error, 2 * len(employees))
-            self.assertIn(f"The user of {self.employee_1.name}'s coach is not set.", form.error)
-            self.assertIn(f'The manager of {self.employee_1.name} should be linked to a user.', form.error)
+            self.assertTrue(form.has_warning)
+            n_warning = form.warning.count('<li>')
+            self.assertEqual(n_warning, 2 * len(employees))
+            self.assertIn(f"The user of {self.employee_1.name}'s coach is not set.", form.warning)
+            self.assertIn(f'The manager of {self.employee_1.name} should be linked to a user.', form.warning)
             if len(employees) > 1:
-                self.assertIn(f"The user of {self.employee_2.name}'s coach is not set.", form.error)
-                self.assertIn(f'The manager of {self.employee_2.name} should be linked to a user.', form.error)
-            with self.assertRaises(ValidationError):
-                form.save()
+                self.assertIn(f"The user of {self.employee_2.name}'s coach is not set.", form.warning)
+                self.assertIn(f'The manager of {self.employee_2.name} should be linked to a user.', form.warning)
+            # should save without error, with coach
+            form.save()
             self.employee_coach.user_id = self.user_coach
             self.employee_manager.user_id = self.user_manager
+
+    @freeze_time('2023-08-31')
+    @users('admin')
+    def test_default_due_date(self):
+        for employees, plan_date in (
+                (self.employee_1, '2023-09-30'),
+                (self.employee_2, '2023-09-30'),
+                (self.employee_3, '2023-12-01'),
+                (self.employee_4, '2024-01-01'),
+                (self.employee_1 + self.employee_2 + self.employee_3, '2023-09-30'),
+                (self.employee_2 + self.employee_3, '2023-09-30'),
+                (self.employee_1 + self.employee_3, '2023-09-30'),
+                (self.employee_3 + self.employee_4, '2023-12-01'),
+                (self.employee_4 + self.employee_3, '2023-12-01'),
+        ):
+            with self._instantiate_activity_schedule_wizard(employees) as form:
+                form.plan_id = self.plan_onboarding
+                self.assertEqual(form.plan_date, fields.Date.from_string(plan_date))
+
+        # not applicable on other models
+        customers = self.env['res.partner'].create([
+            {'name': 'Customer1'},
+            {'name': 'Customer2'},
+        ])
+        with self._instantiate_activity_schedule_wizard(customers) as form:
+            form.plan_id = self.plan_party
+            self.assertEqual(form.plan_date, fields.Date.from_string('2023-08-31'))

@@ -1,6 +1,7 @@
 import { makeContext } from "@web/core/context";
 import { _t } from "@web/core/l10n/translation";
 import { Pager } from "@web/core/pager/pager";
+import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { getFieldDomain } from "@web/model/relational_model/utils";
@@ -12,10 +13,13 @@ import {
     useX2ManyCrud,
 } from "@web/views/fields/relational_utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { KanbanCompiler } from "@web/views/kanban/kanban_compiler";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { computeViewClassName } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
+import { symmetricalDifference } from "@web/core/utils/arrays";
+import { x2ManyCommands } from "@web/core/orm_service";
 
 import { Component } from "@odoo/owl";
 
@@ -49,17 +53,9 @@ export class X2ManyField extends Component {
             : ["o_field_x2many"];
         this.className = computeViewClassName(this.props.viewMode, this.archInfo.xmlDoc, classes);
 
-        const { activeActions, creates } = this.archInfo;
+        const { activeActions, controls } = this.archInfo;
         if (this.props.viewMode === "kanban") {
-            this.creates = creates.length
-                ? creates
-                : [
-                      {
-                          type: "create",
-                          string: this.props.addLabel || _t("Add"),
-                          class: "o-kanban-button-new",
-                      },
-                  ];
+            this.controls = controls || [];
         }
         const subViewActiveActions = activeActions;
         this.activeActions = useActiveActions({
@@ -69,12 +65,10 @@ export class X2ManyField extends Component {
             }),
             fieldType: this.isMany2Many ? "many2many" : "one2many",
             subViewActiveActions,
-            getEvalParams: (props) => {
-                return {
-                    evalContext: props.record.evalContext,
-                    readonly: props.readonly,
-                };
-            },
+            getEvalParams: (props) => ({
+                evalContext: props.record.evalContext,
+                readonly: props.readonly,
+            }),
         });
 
         this.addInLine = useAddInlineRecord({
@@ -94,6 +88,7 @@ export class X2ManyField extends Component {
             const activeElement = document.activeElement;
             openRecord({
                 ...params,
+                controls: this.controls,
                 onClose: () => {
                     if (activeElement) {
                         activeElement.focus();
@@ -123,6 +118,7 @@ export class X2ManyField extends Component {
             return selectCreate(p);
         };
         this.action = useService("action");
+        this.notificationService = useService("notification");
     }
 
     get activeField() {
@@ -135,8 +131,11 @@ export class X2ManyField extends Component {
     }
 
     get displayControlPanelButtons() {
+        return this.props.viewMode === "kanban" && this.canCreate && this.controls.length > 0;
+    }
+
+    get canCreate() {
         return (
-            this.props.viewMode === "kanban" &&
             ("link" in this.activeActions ? this.activeActions.link : this.activeActions.create) &&
             !this.props.readonly
         );
@@ -191,12 +190,13 @@ export class X2ManyField extends Component {
             archInfo,
             list: this.list,
             openRecord: this.openRecord.bind(this),
+            readonly: this.props.readonly || !this.activeActions.write,
         };
 
         if (this.props.viewMode === "kanban") {
             const recordsDraggable = !this.props.readonly && archInfo.recordsDraggable;
             props.archInfo = { ...archInfo, recordsDraggable };
-            props.readonly = this.props.readonly;
+            props.Compiler = KanbanCompiler;
             // TODO: apply same logic in the list case
             props.deleteRecord = (record) => {
                 if (this.isMany2Many) {
@@ -204,6 +204,10 @@ export class X2ManyField extends Component {
                 }
                 return this.list.delete(record);
             };
+            if (this.canCreate && this.controls.length === 0) {
+                props.addLabel = this.props.addLabel || _t("Add %s", this.field.string);
+                props.onAdd = this.onAdd.bind(this);
+            }
             return props;
         }
 
@@ -223,19 +227,62 @@ export class X2ManyField extends Component {
         return props;
     }
 
-    async switchToForm(record) {
-        await this.props.record.save();
+    evalInvisible(invisible) {
+        return evaluateBooleanExpr(invisible, this.list.evalContext);
+    }
+
+    async switchToForm(record, options) {
+        let resId = null;
+        if (record.isNew) {
+            // In the case of a new record, you don't have access to the id from the start, to get it we need to:
+            // - Finds the record's index using its _virtualId.
+            // - Saves the record and compares resIds before and after to detect new records.
+            // - If the record was created, it determines its final resId by matching the index.
+            // - Opens the form view for the correct record.
+            const createCommands = this.list._commands.filter(
+                ([command]) => command === x2ManyCommands.CREATE
+            );
+            const newRecordIndex = createCommands.findIndex(
+                ([_command, virtualId]) => virtualId === record._virtualId
+            );
+            const previousResIds = this.list.resIds;
+            const saved = await this.props.record.save();
+            if (!saved) {
+                return;
+            }
+            const newResIds = symmetricalDifference(this.list.resIds, previousResIds);
+            if (newResIds.length !== createCommands.length) {
+                return this.notificationService.add(_t("Please save your changes first"), {
+                    type: "danger",
+                });
+            }
+            newResIds.sort((x, y) => x - y);
+            resId = newResIds[newRecordIndex];
+        } else {
+            const saved = await this.props.record.save();
+            if (!saved) {
+                return;
+            }
+            resId = record.resId;
+        }
+
         this.action.doAction(
             {
                 type: "ir.actions.act_window",
                 views: [[false, "form"]],
-                res_id: record.resId,
+                res_id: resId,
                 res_model: this.list.resModel,
+                context: this.getFormActionContext(),
             },
             {
                 props: { resIds: this.list.resIds },
+                newWindow: options.newWindow,
             }
         );
+    }
+
+    getFormActionContext() {
+        return this.props.context;
     }
 
     async onAdd({ context, editable } = {}) {
@@ -267,7 +314,7 @@ export class X2ManyField extends Component {
             return this._openRecord({
                 record,
                 context: this.props.context,
-                mode: this.props.readonly ? "readonly" : "edit",
+                readonly: this.props.readonly,
             });
         }
     }

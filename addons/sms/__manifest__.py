@@ -4,7 +4,7 @@
 {
     'name': 'SMS gateway',
     'version': '3.0',
-    'category': 'Hidden/Tools',
+    'category': 'Sales/Sales',
     'summary': 'SMS Text Messaging',
     'description': """
 This module gives a framework for SMS text messaging
@@ -26,7 +26,6 @@ The service is provided by the In App Purchase Odoo platform.
         'wizard/sms_account_sender_views.xml',
         'wizard/sms_composer_views.xml',
         'wizard/sms_template_preview_views.xml',
-        'wizard/sms_resend_views.xml',
         'wizard/sms_template_reset_views.xml',
         'views/ir_actions_server_views.xml',
         'views/mail_notification_views.xml',
@@ -52,5 +51,6 @@ The service is provided by the In App Purchase Odoo platform.
             'sms/static/tests/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

@@ -1,3 +1,4 @@
+import { delay } from "@web/core/utils/concurrency";
 import { registry } from "@web/core/registry";
 
 /**
@@ -16,6 +17,7 @@ registry.category("web_tour.tours").add("course_member", {
         {
             trigger: 'a:contains("Basics of Gardening - Test")',
             run: "click",
+            expectUnloadPage: true,
         },
         // Chatter is lazy loading. Wait for it.
         {
@@ -33,6 +35,7 @@ registry.category("web_tour.tours").add("course_member", {
         {
             trigger: 'a:contains("Join this Course")',
             run: "click",
+            expectUnloadPage: true,
         },
         {
             // check membership
@@ -41,6 +44,7 @@ registry.category("web_tour.tours").add("course_member", {
         {
             trigger: 'a:contains("Gardening: The Know-How")',
             run: "click",
+            expectUnloadPage: true,
         },
         // eLearning: follow course by cliking on first lesson and going to fullscreen player
         {
@@ -135,6 +139,7 @@ registry.category("web_tour.tours").add("course_member", {
         {
             trigger: 'a:contains("End course")',
             run: "click",
+            expectUnloadPage: true,
         },
         // eLearning: ending course redirect to /slides, course is completed now
         {
@@ -145,6 +150,7 @@ registry.category("web_tour.tours").add("course_member", {
         {
             trigger: 'a:contains("Basics of Gardening")',
             run: "click",
+            expectUnloadPage: true,
         },
         {
             trigger: 'button[data-bs-target="#ratingpopupcomposer"]:contains("Add Review")',
@@ -162,9 +168,17 @@ registry.category("web_tour.tours").add("course_member", {
             trigger: ".modal.modal_shown button:contains(review)",
             run: "click",
         },
+        {
+            content: "Wait the first review is closed before send the second",
+            trigger: "body:not(:has(.modal:visible))",
+        },
         // eLearning: edit the review
         {
             trigger: 'button[data-bs-target="#ratingpopupcomposer"]:contains("Edit Review")',
+            run: "click",
+        },
+        {
+            trigger: ".modal.modal_shown .modal-body i.fa.fa-star-o:eq(1)",
             run: "click",
         },
         {
@@ -173,11 +187,18 @@ registry.category("web_tour.tours").add("course_member", {
         },
         {
             trigger: ".modal.modal_shown button:contains(review)",
-            run: "click",
+            async run(helpers) {
+                await delay(500);
+                await helpers.click();
+            },
         },
         {
             trigger: 'a[id="review-tab"]',
             run: "click",
+        },
+        {
+            trigger:
+                "#chatterRoot:shadow .o-mail-Message:contains('This is a great course. I highly recommend it!')",
         },
     ],
 });

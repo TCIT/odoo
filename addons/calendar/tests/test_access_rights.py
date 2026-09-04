@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime, timedelta
 
 from odoo.tests.common import TransactionCase, new_test_user
+from odoo.tests import Form
 from odoo.exceptions import AccessError
 from odoo.tools import mute_logger
 
@@ -103,26 +103,24 @@ class TestAccessRights(TransactionCase):
 
     def test_read_group_public(self):
         event = self.create_event(self.john)
-        data = self.env['calendar.event'].with_user(self.raoul).read_group([('id', '=', event.id)], fields=['start'], groupby='start')
+        data = self.env['calendar.event'].with_user(self.raoul)._read_group([('id', '=', event.id)], groupby=['start:month'])
         self.assertTrue(data, "It should be able to read group")
-        data = self.env['calendar.event'].with_user(self.raoul).read_group([('id', '=', event.id)], fields=['name'],
-                                                                           groupby='name')
+        data = self.env['calendar.event'].with_user(self.raoul)._read_group([('id', '=', event.id)], groupby=['name'])
         self.assertTrue(data, "It should be able to read group")
 
     def test_read_group_private(self):
         event = self.create_event(self.john, privacy='private')
-        result = self.env['calendar.event'].with_user(self.raoul).read_group([('id', '=', event.id)], fields=['name'], groupby='name')
+        result = self.env['calendar.event'].with_user(self.raoul)._read_group([('id', '=', event.id)], groupby=['name'])
         self.assertFalse(result, "Private events should not be fetched")
-
 
     def test_read_group_agg(self):
         event = self.create_event(self.john)
-        data = self.env['calendar.event'].with_user(self.raoul).read_group([('id', '=', event.id)], fields=['start'], groupby='start:week')
+        data = self.env['calendar.event'].with_user(self.raoul)._read_group([('id', '=', event.id)], groupby=['start:week'])
         self.assertTrue(data, "It should be able to read group")
 
     def test_read_group_list(self):
         event = self.create_event(self.john)
-        data = self.env['calendar.event'].with_user(self.raoul).read_group([('id', '=', event.id)], fields=['start'], groupby=['start'])
+        data = self.env['calendar.event'].with_user(self.raoul)._read_group([('id', '=', event.id)], groupby=['start:month'])
         self.assertTrue(data, "It should be able to read group")
 
     def test_private_attendee(self):
@@ -171,10 +169,10 @@ class TestAccessRights(TransactionCase):
         confidential_event = self.create_event(self.george, privacy='confidential')
 
         # With another user who is not an event attendee, try accessing the events.
-        query_default_event = self.env['calendar.event'].with_user(self.raoul).read_group([('id', '=', default_event.id)], fields=['name'], groupby='name')
-        query_public_event = self.env['calendar.event'].with_user(self.raoul).read_group([('id', '=', public_event.id)], fields=['name'], groupby='name')
-        query_private_event = self.env['calendar.event'].with_user(self.raoul).read_group([('id', '=', private_event.id)], fields=['name'], groupby='name')
-        query_confidential_event = self.env['calendar.event'].with_user(self.raoul).read_group([('id', '=', confidential_event.id)], fields=['name'], groupby='name')
+        query_default_event = self.env['calendar.event'].with_user(self.raoul)._read_group([('id', '=', default_event.id)], groupby=['name'])
+        query_public_event = self.env['calendar.event'].with_user(self.raoul)._read_group([('id', '=', public_event.id)], groupby=['name'])
+        query_private_event = self.env['calendar.event'].with_user(self.raoul)._read_group([('id', '=', private_event.id)], groupby=['name'])
+        query_confidential_event = self.env['calendar.event'].with_user(self.raoul)._read_group([('id', '=', confidential_event.id)], groupby=['name'])
 
         # Ensure that each event is accessible or not according to its privacy.
         self.assertFalse(query_default_event, "Event must be inaccessible because the user has default privacy as 'private'.")
@@ -234,7 +232,16 @@ class TestAccessRights(TransactionCase):
             self.assertEqual(hidden_information, value, "The field '%s' information must be hidden, even for uninvited admins." % field)
 
         # For the public event, ensure that the same fields can be read by the admin.
-        for (field, value) in [('name', 'pub'), ('location', 'loc_2'), ('description', "<p>pub</p>")]:
+        for (field, value) in [
+            ('name', 'pub'),
+            ('location', 'loc_2'),
+            ('description', '<div>pub<br>'
+                '<strong>Organized by</strong><br>'
+                'john (base.group_user)<br><a href="mailto:j.j@example.com">j.j@example.com</a><br><br>'
+                '<strong>Contact Details</strong><br>'
+                'george (base.group_user)<br><a href="mailto:g.g@example.com">g.g@example.com</a></div>',
+            ),
+        ]:
             field_information = self.read_event(self.admin_user, john_public_evt, field)
             self.assertEqual(str(field_information), value, "The field '%s' information must be readable by the admin." % field)
 
@@ -307,8 +314,6 @@ class TestAccessRights(TransactionCase):
         default privacy from the 'res.users' related field without throwing any error.
         Updates from others users are blocked during write (except for Default User Template from admins).
         """
-        default_user = self.env.ref('base.default_user', raise_if_not_found=False)
-
         for privacy in ['public', 'private', 'confidential']:
             # Update normal user and administrator 'calendar_default_privacy' simulating their own update.
             self.john.with_user(self.john).write({'calendar_default_privacy': privacy})
@@ -316,11 +321,10 @@ class TestAccessRights(TransactionCase):
             self.assertEqual(self.john.calendar_default_privacy, privacy, 'Normal user must be able to update its calendar default privacy.')
             self.assertEqual(self.admin_system_user.calendar_default_privacy, privacy, 'Admin must be able to update its calendar default privacy.')
 
-            # Update the Default User Template's 'calendar_default_privacy' as an administrator.
-            default_user.with_user(self.admin_system_user).write({'calendar_default_privacy': privacy})
-            self.assertEqual(default_user.calendar_default_privacy, privacy, 'Admin must be able to update the Default User Template calendar privacy.')
+            # Update the Default 'calendar.default_privacy' as an administrator.
+            self.env['ir.config_parameter'].sudo().set_param("calendar.default_privacy", privacy)
 
-            # All calendar default privacy updates (except for Default user Template) must be blocked during write.
+            # All calendar default privacy updates must be blocked during write.
             with self.assertRaises(AccessError):
                 self.john.with_user(self.admin_system_user).write({'calendar_default_privacy': privacy})
             with self.assertRaises(AccessError):
@@ -337,3 +341,34 @@ class TestAccessRights(TransactionCase):
             admin_user_private_evt.with_user(self.raoul)._check_private_event_conditions(),
             "Privacy check must be True since the new event is private (following John's calendar default privacy)."
         )
+
+    def test_recurring_event_with_alarms_for_non_admin(self):
+        """
+        Test that non-admin user can modify recurring events with alarms
+        without triggering access errors when accessing ir.cron.trigger records.
+        """
+
+        alarm = self.env['calendar.alarm'].create({
+            'name': '15 minutes before',
+            'alarm_type': 'email',
+            'duration': 15,
+            'interval': 'minutes',
+        })
+
+        with Form(self.env['calendar.event'].with_user(self.john)) as event_form:
+            event_form.name = 'yearly Team Meeting'
+            event_form.start = datetime(2024, 1, 15, 9, 0)
+            event_form.stop = datetime(2024, 1, 15, 10, 0)
+            event_form.recurrency = True
+            event_form.rrule_type_ui = 'yearly'
+            event_form.count = 3
+            event_form.alarm_ids.add(alarm)
+            event_form.partner_ids.add(self.john.partner_id)
+            recurring_event = event_form.save()
+
+        self.assertTrue(recurring_event.recurrence_id, "Recurrence should be created")
+
+        with Form(recurring_event.with_user(self.john)) as form:
+            form.partner_ids.add(self.raoul.partner_id)
+
+        self.assertIn(self.raoul.partner_id.id, recurring_event.partner_ids.ids, "Partner should be added as attendee")

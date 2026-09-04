@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+from collections import defaultdict
 
 from odoo import api, fields, models
 from odoo.addons.rating.models import rating_data
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools.float_utils import float_compare, float_round
 
 
@@ -11,7 +12,7 @@ class RatingMixin(models.AbstractModel):
     """This mixin adds rating statistics to mail.thread that already support ratings."""
     _name = 'rating.mixin'
     _description = "Rating Mixin"
-    _inherit = 'mail.thread'
+    _inherit = ['mail.thread']
 
     rating_last_value = fields.Float('Rating Last Value', groups='base.group_user', compute='_compute_rating_last_value', compute_sudo=True, store=True, aggregator="avg")
     rating_last_feedback = fields.Text('Rating Last Feedback', groups='base.group_user', related='rating_ids.feedback')
@@ -50,7 +51,7 @@ class RatingMixin(models.AbstractModel):
     @api.depends('rating_ids.res_id', 'rating_ids.rating')
     def _compute_rating_stats(self):
         """ Compute avg and count in one query, as thoses fields will be used together most of the time. """
-        domain = expression.AND([self._rating_domain(), [('rating', '>=', rating_data.RATING_LIMIT_MIN)]])
+        domain = self._rating_domain() & Domain('rating', '>=', rating_data.RATING_LIMIT_MIN)
         read_group_res = self.env['rating.rating']._read_group(domain, ['res_id'], aggregates=['__count', 'rating:avg'])  # force average on rating column
         mapping = {res_id: {'rating_count': count, 'rating_avg': rating_avg} for res_id, count, rating_avg in read_group_res}
         for record in self:
@@ -58,15 +59,16 @@ class RatingMixin(models.AbstractModel):
             record.rating_avg = mapping.get(record.id, {}).get('rating_avg', 0)
 
     def _search_rating_avg(self, operator, value):
-        if operator not in rating_data.OPERATOR_MAPPING:
-            raise NotImplementedError('This operator %s is not supported in this search method.' % operator)
+        op = rating_data.OPERATOR_MAPPING.get(operator)
+        if not op:
+            return NotImplemented
         rating_read_group = self.env['rating.rating'].sudo()._read_group(
             [('res_model', '=', self._name), ('consumed', '=', True), ('rating', '>=', rating_data.RATING_LIMIT_MIN)],
             ['res_id'], ['rating:avg'])
         res_ids = [
             res_id
             for res_id, rating_avg in rating_read_group
-            if rating_data.OPERATOR_MAPPING[operator](float_compare(rating_avg, value, 2), 0)
+            if op(float_compare(rating_avg, value, 2), 0)
         ]
         return [('id', 'in', res_ids)]
 
@@ -79,7 +81,7 @@ class RatingMixin(models.AbstractModel):
     def _compute_rating_satisfaction(self):
         """ Compute the rating satisfaction percentage, this is done separately from rating_count and rating_avg
             since the query is different, to avoid computing if it is not necessary"""
-        domain = expression.AND([self._rating_domain(), [('rating', '>=', rating_data.RATING_LIMIT_MIN)]])
+        domain = self._rating_domain() & Domain('rating', '>=', rating_data.RATING_LIMIT_MIN)
         # See `_compute_rating_percentage_satisfaction` above
         read_group_res = self.env['rating.rating']._read_group(domain, ['res_id', 'rating'], aggregates=['__count'])
         default_grades = {'great': 0, 'okay': 0, 'bad': 0}
@@ -94,16 +96,16 @@ class RatingMixin(models.AbstractModel):
             grade_count = sum(grade_repartition.values())
             record.rating_percentage_satisfaction = grade_repartition['great'] * 100 / grade_count if grade_count else -1
 
-    def write(self, values):
+    def write(self, vals):
         """ If the rated ressource name is modified, we should update the rating res_name too.
             If the rated ressource parent is changed we should update the parent_res_id too"""
-        result = super(RatingMixin, self).write(values)
-        for record in self:
-            if record._rec_name in values:  # set the res_name of ratings to be recomputed
+        result = super().write(vals)
+        for record in self.sudo():  # ratings may be inaccessible
+            if record._rec_name in vals:  # set the res_name of ratings to be recomputed
                 res_name_field = self.env['rating.rating']._fields['res_name']
                 self.env.add_to_compute(res_name_field, record.rating_ids)
-            if record._rating_get_parent_field_name() in values:
-                record.rating_ids.sudo().write({'parent_res_id': record[record._rating_get_parent_field_name()].id})
+            if record._rating_get_parent_field_name() in vals:
+                record.rating_ids.write({'parent_res_id': record[record._rating_get_parent_field_name()].id})
 
         return result
 
@@ -115,7 +117,7 @@ class RatingMixin(models.AbstractModel):
         """ Returns a normalized domain on rating.rating to select the records to
             include in count, avg, ... computation of current model.
         """
-        return ['&', '&', ('res_model', '=', self._name), ('res_id', 'in', self.ids), ('consumed', '=', True)]
+        return Domain([('res_model', '=', self._name), ('res_id', 'in', self.ids), ('consumed', '=', True)])
 
     def _rating_get_repartition(self, add_stats=False, domain=None):
         """ get the repatition of rating grade for the given res_ids.
@@ -129,9 +131,9 @@ class RatingMixin(models.AbstractModel):
                 otherwise, key is the value of the information (string) : either stat name (avg, total, ...) or 'repartition'
                 containing the same dict if add_stats was False.
         """
-        base_domain = expression.AND([self._rating_domain(), [('rating', '>=', 1)]])
+        base_domain = self._rating_domain() & Domain('rating', '>=', 1)
         if domain:
-            base_domain += domain
+            base_domain &= Domain(domain)
         rg_data = self.env['rating.rating']._read_group(base_domain, ['rating'], ['__count'])
         # init dict with all possible rate value, except 0 (no value for the rating)
         values = dict.fromkeys(range(1, 6), 0)
@@ -149,12 +151,19 @@ class RatingMixin(models.AbstractModel):
         return values
 
     def rating_get_grades(self, domain=None):
-        """ get the repatition of rating grade for the given res_ids.
-            :param domain : optional domain of the rating to include/exclude in grades computation
-            :return dictionnary where the key is the grade (great, okay, bad), and the value, the number of object (res_model, res_id) having the grade
-                    the grade are compute as    0-30% : Bad
-                                                31-69%: Okay
-                                                70-100%: Great
+        """ Get the repartitions of rating grade for the given res_ids.
+        :param domain: Optional domain of the rating to include/exclude
+            in the grades computation.
+        :returns: A dictionary where the key is the rating and the value
+            is the count of unique ``(res_model, res_id)`` pairs whose
+            grades are associated with that rating.
+
+            The rates are:
+
+            * ``"great"``, graded between 70 and 100
+            * ``"okay"``, graded between 31 and 69
+            * ``"bad"``, graded between 0 and 30
+        :rtype: dict[typing.Literal["great", "okay", "bad"], int]
         """
         data = self._rating_get_repartition(domain=domain)
         res = dict.fromkeys(['great', 'okay', 'bad'], 0)
@@ -164,12 +173,14 @@ class RatingMixin(models.AbstractModel):
         return res
 
     def rating_get_stats(self, domain=None):
-        """ get the statistics of the rating repatition
-            :param domain : optional domain of the rating to include/exclude in statistic computation
-            :return dictionnary where
-                - key is the name of the information (stat name)
-                - value is statistic value : 'percent' contains the repartition in percentage, 'avg' is the average rate
-                  and 'total' is the number of rating
+        """Get the statistics of the rating repartitions
+
+        :param domain : optional domain of the rating to include/exclude in statistic computation
+        :returns: A dictionnary where:
+
+            - key is the name of the information (stat name)
+            - value is statistic value : 'percent' contains the repartition in percentage, 'avg' is the average rate
+              and 'total' is the number of rating
         """
         data = self._rating_get_repartition(domain=domain, add_stats=True)
         result = {
@@ -180,3 +191,46 @@ class RatingMixin(models.AbstractModel):
         for rate in data['repartition']:
             result['percent'][rate] = (data['repartition'][rate] * 100) / data['total'] if data['total'] > 0 else 0
         return result
+
+    def _rating_get_stats_per_record(self, domain=None):
+        """
+        Computes rating statistics for each record individually.
+
+        :param domain: Optional domain to apply on the ratings.
+        :return: A dictionary mapping each record ID to its statistics dictionary.
+        :rtype: dict
+        """
+        base_domain = self._rating_domain() & Domain("rating", ">=", 1)
+        if domain:
+            base_domain &= Domain(domain)
+        rg_data = self.env["rating.rating"]._read_group(
+            base_domain,
+            groupby=["res_id", "rating"],
+            aggregates=["__count"],
+        )
+        stats_per_record = defaultdict(
+            lambda: {"total": 0, "weighted_sum": 0.0, "counts": defaultdict(int), "percent": {}}
+        )
+        for res_id, rating, count in rg_data:
+            stats = stats_per_record[res_id]
+            stats["total"] += count
+            stats["weighted_sum"] += rating * count
+            stats["counts"][int(rating)] = count
+        for stats in stats_per_record.values():
+            total = stats["total"]
+            if total > 0:
+                stats["avg"] = stats["weighted_sum"] / total
+                stats["percent"] = {
+                    rate: (stats["counts"].get(rate, 0) * 100) / total for rate in range(1, 6)
+                }
+            else:
+                stats["avg"] = 0
+                stats["percent"] = dict.fromkeys(range(1, 6), 0.0)
+            del stats["weighted_sum"]
+            del stats["counts"]
+        return stats_per_record
+
+    @api.model
+    def _allow_publish_rating_stats(self):
+        """Override to allow the rating stats to be demonstrated."""
+        return False

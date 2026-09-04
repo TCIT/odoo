@@ -7,11 +7,11 @@ from odoo.http import request
 class PaymentDemoController(http.Controller):
     _simulation_url = '/payment/demo/simulate_payment'
 
-    @http.route(_simulation_url, type='json', auth='public')
+    @http.route(_simulation_url, type='jsonrpc', auth='public')
     def demo_simulate_payment(self, **data):
         """ Simulate the response of a payment request.
 
-        :param dict data: The simulated notification data.
+        :param dict data: The simulated payment data.
         :return: None
         """
-        request.env['payment.transaction'].sudo()._handle_notification_data('demo', data)
+        request.env['payment.transaction'].sudo()._process('demo', data)

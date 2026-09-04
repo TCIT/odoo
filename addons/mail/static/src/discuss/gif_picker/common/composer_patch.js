@@ -1,7 +1,7 @@
 import { Composer } from "@mail/core/common/composer";
 import { markEventHandled } from "@web/core/utils/misc";
 
-import { useRef, useState } from "@odoo/owl";
+import { markup, useRef } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
@@ -11,7 +11,7 @@ const composerPatch = {
     setup() {
         this.gifButton = useRef("gif-button");
         super.setup();
-        this.ui = useState(useService("ui"));
+        this.ui = useService("ui");
     },
     get pickerSettings() {
         const setting = super.pickerSettings;
@@ -25,7 +25,7 @@ const composerPatch = {
     },
     get hasGifPicker() {
         return (
-            (this.store.hasGifPickerFeature || this.store.self.isAdmin) &&
+            (this.store.hasGifPickerFeature || this.store.self.main_user_id?.is_admin) &&
             !this.env.inChatter &&
             !this.props.composer.message
         );
@@ -37,9 +37,12 @@ const composerPatch = {
         markEventHandled(ev, "Composer.onClickAddGif");
     },
     async sendGifMessage(gif) {
-        await this._sendMessage(gif.url, {
-            parentId: this.props.messageToReplyTo?.message?.id,
-        });
+        const gifUrl = gif.media_formats.tinygif.url;
+        const href = encodeURI(gifUrl);
+        await this._sendMessage(
+            markup`<a href="${href}" target="_blank" rel="noreferrer noopener">${gifUrl}</a>`,
+            { parentId: this.props.composer.replyToMessage?.id }
+        );
     },
 };
 patch(Composer.prototype, composerPatch);

@@ -5,7 +5,7 @@
     'countries': ['at'],
     'version': '3.2.1',
     'author': 'WT-IO-IT GmbH, Wolfgang Taferner (https://www.wt-io-it.at)',
-    'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations.html',
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations.html',
     'category': 'Accounting/Localizations/Account Charts',
     'summary': 'Austrian Standardized Charts & Tax',
     'description': """
@@ -23,13 +23,13 @@ Austrian charts of accounts (Einheitskontenrahmen 2010).
     """,
     'depends': [
         'account',
+        'account_edi_ubl_cii',
         'base_iban',
         'base_vat',
         'l10n_din5008',
     ],
     'auto_install': ['account'],
     'data': [
-        'data/res.country.state.csv',
         'data/account_account_tag.xml',
         'data/account.account.tag.csv',
         'data/account_tax_report_data.xml',

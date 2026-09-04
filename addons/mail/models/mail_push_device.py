@@ -25,7 +25,10 @@ class MailPushDevice(models.Model):
                              "- auth: The auth value should be treated as a secret and not shared outside of Odoo"))
     expiration_time = fields.Datetime(string='Expiration Token Date')
 
-    _sql_constraints = [('endpoint_unique', 'unique(endpoint)', 'The endpoint must be unique !')]
+    _endpoint_unique = models.Constraint(
+        'unique(endpoint)',
+        'The endpoint must be unique !',
+    )
 
     @api.model
     def get_web_push_vapid_public_key(self):
@@ -54,7 +57,7 @@ class MailPushDevice(models.Model):
         search_endpoint = kw.get('previousEndpoint', endpoint)
         mail_push_device = self.sudo().search([('endpoint', '=', search_endpoint)])
         if mail_push_device:
-            if mail_push_device.partner_id is not self.env.user.partner_id:
+            if mail_push_device.partner_id != self.env.user.partner_id:
                 mail_push_device.write({
                     'endpoint': endpoint,
                     'expiration_time': kw.get('expirationTime'),

@@ -1,17 +1,28 @@
 import { Wysiwyg } from "@html_editor/wysiwyg";
-import { expect, getFixture } from "@odoo/hoot";
+import { destroy, expect, getFixture } from "@odoo/hoot";
 import { queryOne } from "@odoo/hoot-dom";
-import { Component, xml } from "@odoo/owl";
+import { Component, markup, onWillDestroy, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { getContent, getSelection, setContent } from "./selection";
-import { animationFrame } from "@odoo/hoot-mock";
+import { Deferred, animationFrame, tick } from "@odoo/hoot-mock";
 import { dispatchCleanForSave } from "./dispatch";
 import { fixInvalidHTML } from "@html_editor/utils/sanitize";
+import { toExplicitString } from "@web/../lib/hoot/hoot_utils";
+import { EmbeddedComponentPlugin } from "@html_editor/others/embedded_component_plugin";
 
 export const Direction = {
     BACKWARD: "BACKWARD",
     FORWARD: "FORWARD",
 };
+
+const defaultTestConfig = {
+    debouncePowerbuttons: false,
+    debounceHints: false,
+};
+
+// A generic base64 image for testing
+export const base64Img =
+    "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
 
 class TestEditor extends Component {
     static template = xml`
@@ -20,7 +31,7 @@ class TestEditor extends Component {
         </t>
         <Wysiwyg t-props="wysiwygProps" />`;
     static components = { Wysiwyg };
-    static props = ["wysiwygProps", "content", "styleContent?", "onMounted?"];
+    static props = ["wysiwygProps", "content", "styleContent?", "onMounted?", "onWillDestroy?"];
 
     setup() {
         const props = this.props;
@@ -54,6 +65,15 @@ class TestEditor extends Component {
             };
             oldOnLoad.call(this, editor);
         };
+        if (this.props.onWillDestroy) {
+            onWillDestroy(this.props.onWillDestroy);
+        }
+        if (this.wysiwygProps.config.Plugins?.includes(EmbeddedComponentPlugin)) {
+            this.wysiwygProps.config.embeddedComponentInfo = {
+                app: this.__owl__.app,
+                env: this.env,
+            };
+        }
     }
 }
 
@@ -68,7 +88,8 @@ class TestEditor extends Component {
  */
 
 /**
- *@typedef { import("@html_editor/plugin").Plugin } Plugin
+ * @typedef { import("@html_editor/plugin").Plugin } Plugin
+ * @typedef { import("@html_editor/plugin").Editor } Editor
  */
 
 /**
@@ -78,7 +99,10 @@ class TestEditor extends Component {
  */
 export async function setupEditor(content, options = {}) {
     const wysiwygProps = Object.assign({}, options.props);
-    wysiwygProps.config = options.config || {};
+    wysiwygProps.config = {
+        ...defaultTestConfig,
+        ...(options.config || {}),
+    };
     const attachedEditor = new Promise((resolve) => {
         wysiwygProps.onLoad = (editor) => {
             const oldAttachTo = editor.attachTo;
@@ -89,12 +113,15 @@ export async function setupEditor(content, options = {}) {
         };
     });
     const styleContent = options.styleContent || "";
-    await mountWithCleanup(TestEditor, {
+    const editorComponent = await mountWithCleanup(TestEditor, {
         props: {
-            content,
+            // TODO: Move the markup call up the chain and call markup at source.
+            // markup: Not the correct place to call markup as content can be anything but would be okay for the tests.
+            content: markup(content),
             wysiwygProps,
             styleContent,
             onMounted: options.onMounted,
+            onWillDestroy: options.onWillDestroy,
         },
         env: options.env,
     });
@@ -102,11 +129,7 @@ export async function setupEditor(content, options = {}) {
     // awaiting for mountWithCleanup is not enough when mounted in an iframe,
     // @see Wysiwyg.onMounted
     const editor = await attachedEditor;
-    const plugins = new Map(
-        editor.plugins.map((plugin) => {
-            return [plugin.constructor.id, plugin];
-        })
-    );
+    const plugins = new Map(editor.plugins.map((plugin) => [plugin.constructor.id, plugin]));
     if (plugins.get("embeddedComponents")) {
         // await an extra animation frame for embedded components mounting
         // TODO @phoenix: would be more accurate to register mounting
@@ -120,6 +143,7 @@ export async function setupEditor(content, options = {}) {
         el: editor.editable,
         editor,
         plugins,
+        editorComponent,
     };
 }
 
@@ -130,7 +154,7 @@ export async function setupEditor(content, options = {}) {
  * @property { (editor: Editor) => any } [stepFunction]
  * @property { string } [contentAfter]
  * @property { string } [contentAfterEdit]
- * @property { (content: string, expected: string, phase: string) => void } [compareFunction]
+ * @property { (content: string, expected: string, phase: string, editor: Editor) => Promise<void> } [compareFunction]
  */
 
 /**
@@ -149,11 +173,16 @@ export async function testEditor(config) {
     if (!compareFunction) {
         compareFunction = (content, expected, phase) => {
             expect(content).toBe(expected, {
-                message: `(testEditor) ${phase} is strictly equal to %actual%"`,
+                message: `(testEditor) ${phase} should be strictly equal to ${toExplicitString(
+                    expected
+                )}`,
             });
         };
     }
-    const { el, editor } = await setupEditor(contentBefore, config);
+    delete config.props?.mobile;
+    const willBeDestroyed = new Deferred();
+    config.onWillDestroy = () => willBeDestroyed.resolve();
+    const { el, editor, editorComponent } = await setupEditor(contentBefore, config);
     // The stageSelection should have been triggered by the click on
     // the editable. As we set the selection programmatically, we dispatch the
     // selection here for the commands that relies on it.
@@ -163,12 +192,20 @@ export async function testEditor(config) {
     editor.shared.history.stageSelection();
 
     if (config.props?.iframe) {
-        expect("iframe").toHaveCount(1);
+        expect(".o-wysiwyg iframe").toHaveCount(1);
     }
+
+    // Wait for selectionchange handlers to react before any actual testing.
+    await tick();
 
     if (contentBeforeEdit) {
         // we should do something before (sanitize)
-        compareFunction(getContent(el), contentBeforeEdit, "Editor content, before edit");
+        await compareFunction(
+            getContent(el, config.options),
+            contentBeforeEdit,
+            "Editor content, before edit",
+            editor
+        );
     }
 
     if (stepFunction) {
@@ -176,14 +213,29 @@ export async function testEditor(config) {
     }
 
     if (contentAfterEdit) {
-        compareFunction(getContent(el), contentAfterEdit, "Editor content, after edit");
+        await compareFunction(
+            getContent(el, config.options),
+            contentAfterEdit,
+            "Editor content, after edit",
+            editor
+        );
     }
     if (contentAfter) {
-        const content = editor.getContent();
+        // Test the saved value, with added cursor markers for convenience of testing.
+        const content = editor.getContent(); // Saved value.
         dispatchCleanForSave(editor, { root: el, preserveSelection: true });
-        compareFunction(getContent(el), contentAfter, "Editor content, after clean");
-        compareFunction(content, el.innerHTML, "Value from editor.getContent()");
+        const innerHTML = el.innerHTML; // Cleaned value without cursors.
+        await compareFunction(
+            getContent(el, config.options),
+            contentAfter,
+            "Editor content, after clean",
+            editor
+        );
+        // Test that the saved value matches the cleaned value tested above.
+        await compareFunction(content, innerHTML, "Value from editor.getContent()", editor);
     }
+    destroy(editorComponent);
+    await willBeDestroyed;
 }
 /**
  * @todo: remove this?

@@ -2,10 +2,14 @@
 <odoo>
     <data noupdate="1">
         <record id="base.user_demo" model="res.users">
-            <field name="groups_id" eval="[
+            <field name="group_ids" eval="[
                 (3, ref('sales_team.group_sale_manager')),
                 (3, ref('sales_team.group_sale_salesman_all_leads')),
                 (4, ref('sales_team.group_sale_salesman'))]"/>
+        </record>
+
+        <record id="base.default_user_group" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('sales_team.group_sale_manager'))]"/>
         </record>
 
         <record model="crm.team" id="team_sales_department">

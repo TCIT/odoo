@@ -101,26 +101,42 @@ class TestEmbeddedActionsBase(TransactionCaseWithUserDemo):
                          not be returned in the read method")
 
     def test_groups_on_embedded_action(self):
-        arbitrary_group = self.env['res.groups'].create({
+        # Create user groups with implied permissions
+        nested_arbitrary_group = self.env['res.groups'].create({
             'name': 'arbitrary_group',
             'implied_ids': [(6, 0, [self.ref('base.group_user')])],
         })
-        embedded_action_custo = self.env['ir.embedded.actions'].create({
-            'name': 'EmbeddedActionCusto',
-            'parent_res_model': 'res.partner',
-            'parent_action_id': self.parent_action.id,
-            'action_id': self.action_2.id,
-            'groups_ids': [(6, 0, [arbitrary_group.id])]
+        arbitrary_group = self.env['res.groups'].create({
+            'name': 'arbitrary_group',
+            'implied_ids': [(6, 0, [nested_arbitrary_group.id])],
         })
+        embedded_action1, embedded_action2 = self.env['ir.embedded.actions'].create([
+            {
+                'name': 'EmbeddedActionCusto',
+                'parent_res_model': 'res.partner',
+                'parent_action_id': self.parent_action.id,
+                'action_id': self.action_2.id,
+                'groups_ids': [(6, 0, [nested_arbitrary_group.id])],
+            },
+            {
+                'name': 'EmbeddedActionCusto2',
+                'parent_res_model': 'res.partner',
+                'parent_action_id': self.parent_action.id,
+                'action_id': self.action_2.id,
+                'groups_ids': [(6, 0, [arbitrary_group.id])],
+            }
+        ])
         res = self.get_embedded_actions_ids(self.parent_action)
         self.assertEqual(len(res), 2, "There should be 2 embedded records linked to the parent action")
         self.assertTrue(self.embedded_action_1.id in res and self.embedded_action_2.id in res, "The correct embedded actions\
                         should be in embedded_actions")
-        self.env.user.write({'groups_id': [(4, arbitrary_group.id)]})
+        self.env.user.write({'group_ids': [(4, arbitrary_group.id)]})
         res = self.get_embedded_actions_ids(self.parent_action)
-        self.assertEqual(len(res), 3, "There should be 3 embedded records linked to the parent action")
-        self.assertTrue(self.embedded_action_1.id in res and self.embedded_action_2.id in res and embedded_action_custo.id in res, "The correct embedded actions\
-                        should be in embedded_actions")
+        self.assertEqual(len(res), 4, "There should be 4 embedded records linked to the parent action")
+        self.assertTrue(
+            self.embedded_action_1.id in res and self.embedded_action_2.id in res and embedded_action1.id in res and embedded_action2.id in res,
+            "The correct embedded actions should be in embedded_actions",
+        )
 
     def test_create_embedded_action_with_action_and_python_method(self):
         embedded_action1, embedded_action2 = self.env['ir.embedded.actions'].create([
@@ -143,3 +159,35 @@ class TestEmbeddedActionsBase(TransactionCaseWithUserDemo):
         self.assertFalse(embedded_action1.action_id)
         self.assertEqual(embedded_action2.action_id, self.env['ir.actions.actions'].browse(self.action_2.id))
         self.assertFalse(embedded_action2.python_method)
+
+    def test_embedded_action_display_name_delegates_to_linked_action(self):
+        """Embedded action display_name must delegate to linked action display_name."""
+        server_action = self.env['ir.actions.server'].create({
+            'name': 'Create Activity',
+            'model_id': self.env['ir.model']._get_id('res.partner'),
+            'code': 'result = {}',
+            'state': 'code',
+        })
+        embedded_action = self.env['ir.embedded.actions'].create({
+            'name': 'Stored Embedded Name',
+            'parent_res_model': 'res.partner',
+            'parent_action_id': self.parent_action.id,
+            'action_id': server_action.id,
+        })
+        linked_action = embedded_action.action_id
+
+        # display_name delegates to the linked action, ignoring the stored name
+        self.assertEqual(embedded_action.name, 'Stored Embedded Name')
+        self.assertEqual(embedded_action.display_name, linked_action.display_name)
+
+        # display_name stays in sync when the linked action is renamed
+        linked_action.name = 'Updated Action Name'
+        self.assertEqual(embedded_action.display_name, linked_action.display_name)
+
+        # display_name uses the linked action's translation in any active language
+        self.env['res.lang']._activate_lang('fr_FR')
+        linked_action.with_context(lang='fr_FR').name = 'Créer une activité'
+        self.assertEqual(
+            embedded_action.with_context(lang='fr_FR').display_name,
+            linked_action.with_context(lang='fr_FR').display_name,
+        )

@@ -38,7 +38,7 @@
                     <separator/>
                     <filter name="filter_date" date="date"/>
                     <field name="journal_id" domain="[('type', 'in', ('bank', 'cash', 'credit'))]" />
-                    <group expand="0" string="Group By">
+                    <group>
                         <filter string="Journal" name="journal" context="{'group_by': 'journal_id'}"/>
                         <filter string="Date" name="date" context="{'group_by': 'date'}"/>
                     </group>
@@ -71,7 +71,7 @@
         <record id="action_credit_statement_tree" model="ir.actions.act_window">
             <field name="name">Credit Statements</field>
             <field name="res_model">account.bank.statement</field>
-            <field name="view_mode">list,pivot,graph</field>
+            <field name="view_mode">list,pivot,graph,form</field>
             <field name="domain">[('journal_id.type', '=', 'credit')]</field>
             <field name="context">{'journal_type': 'credit'}</field>
             <field name="search_view_id" ref="view_bank_statement_search"/>
@@ -124,7 +124,7 @@
             <field name="name">Cash Registers</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">account.bank.statement</field>
-            <field name="view_mode">list,pivot,graph</field>
+            <field name="view_mode">list,pivot,graph,form</field>
             <field name="view_id" ref="view_bank_statement_tree"/>
             <field name="search_view_id" ref="view_bank_statement_search"/>
             <field name="domain">[('journal_id.type', '=', 'cash')]</field>

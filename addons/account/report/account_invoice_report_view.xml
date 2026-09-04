@@ -44,6 +44,7 @@
                 <field name="price_subtotal_currency" optional="show" sum="Total"/>
                 <field name="price_subtotal" optional="show" sum="Total"/>
                 <field name="price_total" optional="show" sum="Total"/>
+                <field name="price_total_currency" optional="show" sum="Total"/>
                 <field name="price_margin" optional="hide"/>
                 <field name="inventory_value" optional="hide" sum="Total"/>
                 <field name="state" optional="hide"/>
@@ -58,35 +59,35 @@
         <field name="name">By Salespersons</field>
         <field name="model_id">account.invoice.report</field>
         <field name="domain">[]</field>
-        <field name="user_id" eval="False"/>
+        <field name="user_ids" eval="False"/>
         <field name="context">{'group_by': ['invoice_date:month', 'invoice_user_id']}</field>
     </record>
     <record id="filter_invoice_product" model="ir.filters">
         <field name="name">By Product</field>
         <field name="model_id">account.invoice.report</field>
         <field name="domain">[]</field>
-        <field name="user_id" eval="False"/>
+        <field name="user_ids" eval="False"/>
         <field name="context">{'group_by': ['invoice_date:month', 'product_id'], 'set_visible':True, 'residual_invisible':True}</field>
     </record>
     <record id="filter_invoice_product_category" model="ir.filters">
         <field name="name">By Product Category</field>
         <field name="model_id">account.invoice.report</field>
         <field name="domain">[]</field>
-        <field name="user_id" eval="False"/>
+        <field name="user_ids" eval="False"/>
         <field name="context">{'group_by': ['invoice_date:month', 'product_categ_id'], 'residual_invisible':True}</field>
     </record>
     <record id="filter_invoice_refund" model="ir.filters">
         <field name="name">By Credit Note</field>
         <field name="model_id">account.invoice.report</field>
         <field name="domain">[('move_type', '=', 'out_refund')]</field>
-        <field name="user_id" eval="False"/>
+        <field name="user_ids" eval="False"/>
         <field name="context">{'group_by': ['invoice_date:month', 'invoice_user_id']}</field>
     </record>
     <record id="filter_invoice_country" model="ir.filters">
         <field name="name">By Country</field>
         <field name="model_id">account.invoice.report</field>
         <field name="domain">[]</field>
-        <field name="user_id" eval="False"/>
+        <field name="user_ids" eval="False"/>
         <field name="context">{'group_by': ['invoice_date:month', 'country_id']}</field>
     </record>
 
@@ -114,7 +115,7 @@
                 <field name="invoice_user_id" />
                 <field name="product_id" />
                 <field name="product_categ_id" filter_domain="[('product_categ_id', 'child_of', self)]"/>
-                <group expand="1" string="Group By">
+                <group>
                     <filter string="Salesperson" name='user' context="{'group_by':'invoice_user_id'}"/>
                     <filter string="Partner" name="partner_id" context="{'group_by':'partner_id','residual_visible':True}"/>
                     <filter string="Product Category" name="category_product" context="{'group_by':'product_categ_id','residual_invisible':True}"/>
@@ -132,8 +133,9 @@
     </record>
 
     <record id="action_account_invoice_report_all_supp" model="ir.actions.act_window">
-        <field name="name">Invoices Analysis</field>
+        <field name="name">Bills Analysis</field>
         <field name="res_model">account.invoice.report</field>
+        <field name="path">vendor-bills-analysis</field>
         <field name="view_mode">graph,pivot</field>
         <field name="context">{'search_default_current':1, 'search_default_supplier': 1, 'group_by':['invoice_date:month']}</field>
         <field name="search_view_id" ref="view_account_invoice_report_search"/>
@@ -142,6 +144,7 @@
     <record id="action_account_invoice_report_all" model="ir.actions.act_window">
         <field name="name">Invoices Analysis</field>
         <field name="res_model">account.invoice.report</field>
+        <field name="path">customer-invoices-analysis</field>
         <field name="view_mode">graph,pivot</field>
         <field name="context">{'search_default_current':1, 'search_default_customer': 1, 'group_by':['invoice_date:month']}</field>
         <field name="search_view_id" ref="view_account_invoice_report_search"/>

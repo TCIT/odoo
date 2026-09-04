@@ -83,7 +83,7 @@
         <field name="arch" type="xml">
             <field name="status_in_payment" position="before">
                 <field name="l10n_it_edi_transaction" optional="hide"/>
-                <field name="l10n_it_edi_attachment_id" optional="hide"/>
+                <field name="l10n_it_edi_attachment_name" optional="hide"/>
                 <field name="l10n_it_edi_state" optional="hide"/>
             </field>
         </field>
@@ -96,7 +96,7 @@
         <field name="arch" type="xml">
             <xpath expr="//search/field[@name='journal_id']" position="after">
                 <field name="l10n_it_edi_transaction" groups="base.group_no_one"/>
-                <field name="l10n_it_edi_attachment_id" groups="base.group_no_one"/>
+                <field name="l10n_it_edi_attachment_name" groups="base.group_no_one"/>
                 <field name="l10n_it_edi_state" groups="base.group_no_one"/>
             </xpath>
         </field>
@@ -112,13 +112,12 @@
                 <xpath expr="//header" position="inside">
                     <button name="action_l10n_it_edi_send"
                             type="object"
-                            string="Send Tax Integration"
-                            invisible="state != 'posted' or not l10n_it_edi_is_self_invoice or is_move_sent or country_code != 'IT'"
+                            string="Send to SDI"
+                            invisible="state != 'posted' or not l10n_it_edi_is_self_invoice or is_move_sent or country_code != 'IT' or l10n_it_edi_state in ('rejected', 'rejected_by_pa_partner')"
                             data-hotkey="y"/>
                 </xpath>
                 <xpath expr="//sheet" position="before">
                     <field name="l10n_it_edi_is_self_invoice" invisible="1"/>
-                    <field name="l10n_it_edi_attachment_id" invisible="1"/>
                     <div class="alert alert-warning" role="alert"
                         invisible="not l10n_it_edi_header 
                                    or state == 'draft'
@@ -134,8 +133,13 @@
                         string="Check Sending"
                         class="oe_highlight"
                         data-hotkey="shift+K"
-                        invisible="l10n_it_edi_state not in ('being_sent', 'processing', 'forward_attempt')"
+                        invisible="l10n_it_edi_state not in ('being_sent', 'processing', 'forward_attempt', 'forwarded')
+                                   or (l10n_it_edi_state == 'forwarded' and not l10n_it_partner_is_public_administration)"
                     />
+                </xpath>
+                <xpath expr="//button[@name='action_invoice_sent']" position="inside">
+                    <!-- Make it clear in the button text when we are not in production (e.g., 'Send (Demo)') -->
+                    <field name="l10n_it_edi_button_label" widget="char"/>
                 </xpath>
                 <xpath expr="//page[@name='other_info']" position="after">
                     <page string="Electronic Invoicing"
@@ -143,10 +147,13 @@
                         invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund') or country_code != 'IT'">
                         <group>
                             <group>
+                                <field name="l10n_it_edi_attachment_name" invisible="1"/>
                                 <field name="l10n_it_edi_transaction" groups="base.group_no_one" readonly="1"/>
-                                <field name="l10n_it_edi_attachment_id" groups="base.group_no_one" readonly="1"/>
+                                <field name="l10n_it_edi_attachment_file" widget="binary" filename="l10n_it_edi_attachment_name" groups="base.group_no_one" readonly="1"/>
                                 <field name="l10n_it_stamp_duty" readonly="state != 'draft'"/>
                                 <field name="l10n_it_ddt_id" readonly="state != 'draft'" invisible="move_type not in ('out_invoice', 'out_refund')"/>
+                                <field name="l10n_it_document_type" string="Document Type"/>
+                                <field name="l10n_it_payment_method" string="Payment Method"/>
                             </group>
                             <field name="l10n_it_partner_pa" invisible="1"/>
                             <group invisible="not l10n_it_partner_pa">

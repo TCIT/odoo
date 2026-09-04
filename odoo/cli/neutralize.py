@@ -1,10 +1,10 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 import optparse
 import sys
-from pathlib import Path
 
-import odoo
+import odoo.modules.neutralize
+import odoo.sql_db
+import odoo.tools.config
 
 from . import Command
 
@@ -16,17 +16,20 @@ class Neutralize(Command):
 
     def run(self, args):
         parser = odoo.tools.config.parser
-        parser.prog = f'{Path(sys.argv[0]).name} {self.name}'
+        parser.prog = self.prog
         group = optparse.OptionGroup(parser, "Neutralize", "Neutralize the database specified by the `-d` argument.")
         group.add_option("--stdout", action="store_true", dest="to_stdout",
                          help="Output the neutralization SQL instead of applying it")
         parser.add_option_group(group)
         opt = odoo.tools.config.parse_config(args, setup_logging=True)
 
-        dbname = odoo.tools.config['db_name']
-        if not dbname:
+        dbnames = odoo.tools.config['db_name']
+        if not dbnames:
             _logger.error('Neutralize command needs a database name. Use "-d" argument')
             sys.exit(1)
+        if len(dbnames) > 1:
+            sys.exit("-d/--database/db_name has multiple database, please provide a single one")
+        dbname = dbnames[0]
 
         if not opt.to_stdout:
             _logger.info("Starting %s database neutralization", dbname)

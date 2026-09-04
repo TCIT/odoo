@@ -21,7 +21,6 @@ class MailTestTLead(models.Model):
     customer_name = fields.Char()
     partner_id = fields.Many2one('res.partner', tracking=2)
     lang_code = fields.Char()
-    mobile = fields.Char()
     phone = fields.Char()
 
     def _creation_message(self):
@@ -32,25 +31,12 @@ class MailTestTLead(models.Model):
         email_normalized_to_values = super()._get_customer_information()
 
         for lead in self:
-            email_key = lead.email_normalized or lead.email
+            email_key = lead.email_normalized or lead.email_from
             values = email_normalized_to_values.setdefault(email_key, {})
             values['lang'] = values.get('lang') or lead.lang_code
             values['name'] = values.get('name') or lead.customer_name or parse_contact_from_email(lead.email_from)[0] or lead.email_from
-            values['mobile'] = values.get('mobile') or lead.mobile
             values['phone'] = values.get('phone') or lead.phone
         return email_normalized_to_values
-
-    def _message_get_suggested_recipients(self):
-        recipients = super()._message_get_suggested_recipients()
-        # check if that language is correctly installed (and active) before using it
-        lang_code = self.env['res.lang']._get_data(code=self.lang_code).code or None
-        if self.partner_id:
-            self._message_add_suggested_recipient(
-                recipients, partner=self.partner_id, lang=lang_code, reason=_('Customer'))
-        elif self.email_from:
-            self._message_add_suggested_recipient(
-                recipients, email=self.email_from, lang=lang_code, reason=_('Customer Email'))
-        return recipients
 
     def _message_post_after_hook(self, message, msg_vals):
         if self.email_from and not self.partner_id:

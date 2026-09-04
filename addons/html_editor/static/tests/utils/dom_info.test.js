@@ -1,4 +1,6 @@
 import {
+    areSimilarElements,
+    getDeepestEditablePosition,
     getDeepestPosition,
     isEmptyBlock,
     isShrunkBlock,
@@ -9,6 +11,8 @@ import {
 } from "@html_editor/utils/dom_info";
 import { describe, expect, test } from "@odoo/hoot";
 import { insertTestHtml } from "../_helpers/editor";
+import { isBlock } from "../../src/utils/blocks";
+import { unformat } from "../_helpers/format";
 
 const base64Img =
     "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
@@ -98,7 +102,7 @@ describe("previousLeaf", () => {
         const ij = p2.childNodes[1].firstChild;
         const result = previousLeaf(ij, editable);
         expect(result).toBe(whitespace);
-        expect(whitespace.nodeType === Node.TEXT_NODE).toBe(true);
+        expect(whitespace.nodeType).toBe(Node.TEXT_NODE);
         expect(whitespace.textContent).toBe(`
                         `);
         expect(isVisibleTextNode(whitespace)).toBe(false);
@@ -191,7 +195,7 @@ describe("nextLeaf", () => {
         const whitespace = div.childNodes[1].childNodes[4];
         const result = nextLeaf(kl, editable);
         expect(result).toBe(whitespace);
-        expect(whitespace.nodeType === Node.TEXT_NODE).toBe(true);
+        expect(whitespace.nodeType).toBe(Node.TEXT_NODE);
         expect(whitespace.textContent).toBe(`
                 `);
         expect(isVisibleTextNode(whitespace)).toBe(false);
@@ -289,6 +293,31 @@ describe("isVisible", () => {
 
             expect(result).toBe(true);
         });
+
+        test("should identify a space between feff and text as visible", () => {
+            const [p] = insertTestHtml("<p>\ufeff</p>");
+            const space = document.createTextNode(" ");
+            p.appendChild(space);
+            p.appendChild(document.createTextNode("a"));
+            const result = isVisibleTextNode(space);
+            expect(result).toBe(true);
+        });
+    });
+    describe("elements", () => {
+        test("should identify a table containing only zero-width spaces as visible", () => {
+            const [table] = insertTestHtml(
+                unformat(`
+                    <table class="o_table">
+                        <tbody>
+                            <tr><td><p><font>\u200b</font></p></td><td><p><font>\u200b</font></p></td></tr>
+                            <tr><td><p><font>\u200b</font></p></td><td><p><font>\u200b</font></p></td></tr>
+                        </tbody>
+                    </table>
+                `)
+            );
+            const result = isVisible(table);
+            expect(result).toBe(true);
+        });
     });
 });
 
@@ -365,6 +394,172 @@ describe("getDeepestPosition", () => {
     });
 });
 
+describe("getDeepestEditablePosition", () => {
+    test("should get deepest editable position on the paragraph itself", () => {
+        const [p] = insertTestHtml(`<p><span contenteditable="false"><span>test</span></span></p>`);
+
+        expect(getDeepestEditablePosition(p, 0)).toEqual([p, 0]);
+        expect(getDeepestEditablePosition(p, 1)).toEqual([p, 1]);
+    });
+
+    test("should get deepest editable position before or after a non-editable sibling", () => {
+        const [p] = insertTestHtml(
+            `<p>abc<span contenteditable="false"><span>test</span></span>def</p>`
+        );
+
+        const abc = p.firstChild;
+        const def = p.lastChild;
+
+        expect(getDeepestEditablePosition(p, 0)).toEqual([abc, 0]);
+        expect(getDeepestEditablePosition(p, 1)).toEqual([abc, 3]);
+        expect(getDeepestEditablePosition(p, 2)).toEqual([def, 0]);
+        expect(getDeepestEditablePosition(p, 3)).toEqual([def, 3]);
+    });
+
+    test("should get deepest editable position inside nested formatting on both sides of a non-editable", () => {
+        const [p] = insertTestHtml(
+            unformat(`
+                <p>
+                    <strong><i>abc</i></strong>
+                    <span contenteditable="false"><span>test</span></span>
+                    <u><em>def</em></u>
+                </p>
+            `)
+        );
+
+        const abc = p.querySelector("strong i").firstChild;
+        const def = p.querySelector("u em").firstChild;
+
+        expect(getDeepestEditablePosition(p, 0)).toEqual([abc, 0]);
+        expect(getDeepestEditablePosition(p, 1)).toEqual([abc, 3]);
+        expect(getDeepestEditablePosition(p, 2)).toEqual([def, 0]);
+        expect(getDeepestEditablePosition(p, 3)).toEqual([def, 3]);
+    });
+
+    test("should get deepest editable position when previous editable sibling ends with non-editable leaf", () => {
+        const [p] = insertTestHtml(
+            unformat(`
+                <p>
+                    <strong contenteditable="true">
+                        <span contenteditable="false">A</span>
+                    </strong>
+                    <span contenteditable="false">B</span>
+                </p>
+            `)
+        );
+
+        const strong = p.firstChild;
+        expect(getDeepestEditablePosition(p, 1)).toEqual([strong, 1]);
+    });
+
+    test("should get deepest editable position when non-editable content following text", () => {
+        const [p] = insertTestHtml(
+            unformat(`
+                <p>
+                    abc
+                    <span contenteditable="false">B</span>
+                </p>
+            `)
+        );
+
+        const abc = p.firstChild;
+        expect(getDeepestEditablePosition(p, 1)).toEqual([abc, 3]);
+    });
+
+    test("should get deepest editable position inside an editable descendant wrapped by non-editable ancestors", () => {
+        const [p] = insertTestHtml(
+            unformat(`
+                <p>
+                    <span contenteditable="false"><strong><u contenteditable="true">test</u></strong></span>
+                    <span contenteditable="false">test</span>
+                </p>
+            `)
+        );
+
+        const test = p.querySelector("u").firstChild;
+        expect(getDeepestEditablePosition(p, 0)).toEqual([test, 0]);
+        expect(getDeepestEditablePosition(p, 1)).toEqual([test, 4]);
+        expect(getDeepestEditablePosition(p, 2)).toEqual([p, 2]);
+    });
+
+    test("should get deepest editable position on the paragraph when non-editable descendants contain only text nodes", () => {
+        const [p] = insertTestHtml(
+            unformat(`
+                <p>
+                    <span contenteditable="false">test</span>
+                    <span contenteditable="false">test</span>
+                </p>
+            `)
+        );
+
+        expect(getDeepestEditablePosition(p, 0)).toEqual([p, 0]);
+        expect(getDeepestEditablePosition(p, 1)).toEqual([p, 1]);
+        expect(getDeepestEditablePosition(p, 2)).toEqual([p, 2]);
+    });
+
+    test("should get deepest editable position on the paragraph when non-editable descendants contain elements", () => {
+        const [p] = insertTestHtml(
+            unformat(`
+                <p>
+                    <span contenteditable="false"><strong>test</strong></span>
+                    <span contenteditable="false">test</span>
+                </p>
+            `)
+        );
+
+        expect(getDeepestEditablePosition(p, 0)).toEqual([p, 0]);
+        expect(getDeepestEditablePosition(p, 1)).toEqual([p, 1]);
+        expect(getDeepestEditablePosition(p, 2)).toEqual([p, 2]);
+    });
+
+    test("should get deepest editable position on the paragraph when previous sibling is empty and non-editable", () => {
+        const [p] = insertTestHtml(
+            unformat(`
+                <p>
+                    <span contenteditable="false"></span>
+                    <span contenteditable="false">test</span>
+                </p>
+            `)
+        );
+
+        expect(getDeepestEditablePosition(p, 1)).toEqual([p, 1]);
+    });
+
+    test("should get deepest editable position around a shallow inline ancestor containing a non-editable child", () => {
+        const [p] = insertTestHtml(
+            unformat(`
+                <p>
+                    <i>
+                        <span contenteditable="false">test</span>
+                    </i>
+                </p>
+            `)
+        );
+
+        const italic = p.firstChild;
+        expect(getDeepestEditablePosition(p, 0)).toEqual([italic, 0]);
+        expect(getDeepestEditablePosition(p, 1)).toEqual([italic, 1]);
+    });
+
+    test("should get deepest editable position around a deep inline ancestor containing a non-editable descendant", () => {
+        const [p] = insertTestHtml(
+            unformat(`
+                <p>
+                    <i>
+                        <u>
+                            <span contenteditable="false">test</span>
+                        </u>
+                    </i>
+                </p>
+            `)
+        );
+
+        const underline = p.querySelector("u");
+        expect(getDeepestEditablePosition(p, 0)).toEqual([underline, 0]);
+        expect(getDeepestEditablePosition(p, 1)).toEqual([underline, 1]);
+    });
+});
+
 describe("isEmptyBlock", () => {
     test("should identify empty p element", () => {
         const [p] = insertTestHtml("<p></p>");
@@ -420,9 +615,15 @@ describe("isEmptyBlock", () => {
 
     test("should return false for a p containing media element", () => {
         const [p] = insertTestHtml(
-            '<p><a href="#" title="document" data-mimetype="application/pdf" class="o_image" contenteditable="false"></a></p>'
+            '<p><span class="o_file_box" contenteditable="false"><a href="#" title="document" data-mimetype="application/pdf"></a></span></p>'
         );
         const result = isEmptyBlock(p);
+        expect(result).toBe(false);
+    });
+
+    test("should identify a div contains button without text content as non-empty", () => {
+        const [div] = insertTestHtml("<div><button></button></div>");
+        const result = isEmptyBlock(div);
         expect(result).toBe(false);
     });
 });
@@ -431,6 +632,62 @@ describe("isShrunkBlock", () => {
     test("should not consider a HR as a shrunk block", () => {
         const [hr] = insertTestHtml("<hr>");
         const result = isShrunkBlock(hr);
+        expect(result).toBe(false);
+    });
+    test("should not consider a block containing a canvas as a shrunk block", () => {
+        const [canvas] = insertTestHtml("<canvas></canvas>");
+        const result = isShrunkBlock(canvas);
+        expect(result).toBe(false);
+    });
+});
+
+describe("areSimilarElements", () => {
+    test("should consider elements with same classes and styles in different orders as similar", () => {
+        const [span1, span2] = insertTestHtml(
+            "<span class='first second' style='color: red; color2: blue'>hello</span><span class='second first' style='color2: blue; color: red'>world</span>"
+        );
+        const result = areSimilarElements(span1, span2);
+        expect(result).toBe(true);
+    });
+    test("return false when the number of styles are different", () => {
+        const [span1, span2] = insertTestHtml(
+            "<span class='first second' style='color: red; color2: blue'>hello</span><span class='second first' style='color2: blue;'>world</span>"
+        );
+        const result = areSimilarElements(span1, span2);
+        expect(result).toBe(false);
+    });
+    test("return false when the number of classes are different", () => {
+        const [span1, span2] = insertTestHtml(
+            "<span class='first' style='color: red; color2: blue'>hello</span><span class='second first' style='color2: blue;'>world</span>"
+        );
+        const result = areSimilarElements(span1, span2);
+        expect(result).toBe(false);
+    });
+    test("return false when classes are different", () => {
+        const [span1, span2] = insertTestHtml(
+            "<span class='first' style='color: red; color2: blue'>hello</span><span class='second' style='color2: blue;'>world</span>"
+        );
+        const result = areSimilarElements(span1, span2);
+        expect(result).toBe(false);
+    });
+    test("return false when styles are different", () => {
+        const [span1, span2] = insertTestHtml(
+            "<span class='first second' style='color2: blue'>hello</span><span class='second first' style='color2: blue; color: red'>world</span>"
+        );
+        const result = areSimilarElements(span1, span2);
+        expect(result).toBe(false);
+    });
+});
+
+describe("isBlock on display none elements", () => {
+    test("t element should not be block", () => {
+        const [t] = insertTestHtml(`<t style="display: none"></t>`);
+        const result = isBlock(t);
+        expect(result).toBe(false);
+    });
+    test("span element should not be block", () => {
+        const [span] = insertTestHtml(`<span style="display: none"></span>`);
+        const result = isBlock(span);
         expect(result).toBe(false);
     });
 });

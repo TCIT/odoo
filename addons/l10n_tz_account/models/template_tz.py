@@ -12,8 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'code_digits': '4',
             'property_account_receivable_id': 'tz_190',
             'property_account_payable_id': 'tz_311',
-            'property_account_expense_categ_id': 'tz_510',
-            'property_account_income_categ_id': 'tz_400',
         }
 
     @template('tz', 'res.company')
@@ -31,5 +29,17 @@ class AccountChartTemplate(models.AbstractModel):
                 'deferred_expense_account_id': 'tz_342',
                 'account_sale_tax_id': 'VAT_S_TAXABLE_18',
                 'account_purchase_tax_id': 'VAT_P_TAXABLE_18',
+                'expense_account_id': 'tz_510',
+                'income_account_id': 'tz_400',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'tz_172',
+            },
+        }
+
+    @template('tz', 'account.account')
+    def _get_tz_account_account(self):
+        return {
+            'tz_172': {
+                'account_stock_variation_id': 'tz_521',
             },
         }

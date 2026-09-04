@@ -1,17 +1,26 @@
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
+import { x2ManyCommands } from "@web/core/orm_service";
 import { unique } from "@web/core/utils/arrays";
 import { DataPoint } from "./datapoint";
-import { Record } from "./record";
-import { resequence } from "./utils";
+import { Operation } from "./operation";
+import { Record as RelationalRecord } from "./record";
+import { getFieldsSpec, resequence } from "./utils";
+
+/**
+ * @typedef {import("./record").Record} RelationalRecord
+ */
 
 const DEFAULT_HANDLE_FIELD = "sequence";
 
+/**
+ * @abstract
+ */
 export class DynamicList extends DataPoint {
     /**
-     * @param {import("./relational_model").Config} config
+     * @type {DataPoint["setup"]}
      */
-    setup(config) {
+    setup() {
         super.setup(...arguments);
         this.handleField = Object.keys(this.activeFields).find(
             (fieldName) => this.activeFields[fieldName].isHandle
@@ -93,6 +102,7 @@ export class DynamicList extends DataPoint {
         }
         const canProceed = await this.leaveEditMode();
         if (canProceed) {
+            record._checkValidity();
             this.model._updateConfig(record.config, { mode: "edit" }, { reload: false });
         }
         return canProceed;
@@ -132,8 +142,9 @@ export class DynamicList extends DataPoint {
                     this._removeRecords([editedRecord.id]);
                 }
             } else {
+                let isValid = true;
                 if (!this.model._urgentSave) {
-                    await editedRecord.checkValidity();
+                    isValid = await editedRecord.checkValidity();
                     editedRecord = this.editedRecord;
                     if (!editedRecord) {
                         return true;
@@ -141,7 +152,7 @@ export class DynamicList extends DataPoint {
                 }
                 if (editedRecord.isNew && !editedRecord.dirty) {
                     this._removeRecords([editedRecord.id]);
-                } else {
+                } else if (isValid || editedRecord.dirty) {
                     canProceed = await editedRecord.save();
                 }
             }
@@ -168,8 +179,8 @@ export class DynamicList extends DataPoint {
         return this.model.mutex.exec(() => this._load(offset, limit, orderBy, domain));
     }
 
-    async multiSave(record) {
-        return this.model.mutex.exec(() => this._multiSave(record));
+    async multiSave(record, changes) {
+        return this.model.mutex.exec(() => this._multiSave(record, changes));
     }
 
     selectDomain(value) {
@@ -180,7 +191,11 @@ export class DynamicList extends DataPoint {
         return this.model.mutex.exec(() => {
             let orderBy = [...this.orderBy];
             if (orderBy.length && orderBy[0].name === fieldName) {
-                orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
+                if (orderBy[0].asc) {
+                    orderBy[0] = { name: orderBy[0].name, asc: false };
+                } else {
+                    orderBy = [];
+                }
             } else {
                 orderBy = orderBy.filter((o) => o.name !== fieldName);
                 orderBy.unshift({
@@ -200,6 +215,21 @@ export class DynamicList extends DataPoint {
         return this.model.mutex.exec(() => this._toggleArchive(isSelected, false));
     }
 
+    toggleArchiveWithConfirmation(archive, dialogProps = {}) {
+        const isSelected = this.isDomainSelected || this.selection.length > 0;
+        if (archive) {
+            const defaultProps = {
+                body: _t("Are you sure that you want to archive all the selected records?"),
+                cancel: () => {},
+                confirm: () => this.archive(isSelected),
+                confirmLabel: _t("Archive"),
+            };
+            this.model.dialog.add(ConfirmationDialog, { ...defaultProps, ...dialogProps });
+        } else {
+            this.unarchive(isSelected);
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
@@ -212,15 +242,27 @@ export class DynamicList extends DataPoint {
             resIds = await this.getResIds(true);
         }
 
-        const duplicated = await this.model.orm.call(this.resModel, "copy", [resIds], {
-            context: this.context,
-        });
-        if (resIds.length > duplicated.length) {
-            this.model.notification.add(_t("Some records could not be duplicated"), {
-                title: _t("Warning"),
+        const copy = async (resIds) => {
+            const copiedRecords = await this.model.orm.call(this.resModel, "copy", [resIds], {
+                context: this.context,
             });
+
+            if (resIds.length > copiedRecords.length) {
+                this.model.notification.add(_t("Some records could not be duplicated"));
+            }
+            return this.model.load();
+        };
+
+        if (resIds.length > 1) {
+            this.model.dialog.add(ConfirmationDialog, {
+                body: _t("Are you sure that you want to duplicate all the selected records?"),
+                confirm: () => copy(resIds),
+                cancel: () => {},
+                confirmLabel: _t("Confirm"),
+            });
+        } else {
+            await copy(resIds);
         }
-        return this.model.load();
     }
 
     async _deleteRecords(records) {
@@ -246,7 +288,7 @@ export class DynamicList extends DataPoint {
                 "Only the first %(count)s records have been deleted (out of %(total)s selected)",
                 { count: resIds.length, total: this.count }
             );
-            this.model.notification.add(msg, { title: _t("Warning") });
+            this.model.notification.add(msg);
         }
         await this.model.load();
         return unlinked;
@@ -259,52 +301,136 @@ export class DynamicList extends DataPoint {
         }
     }
 
-    async _multiSave(record) {
-        const changes = record._getChanges();
-        if (!Object.keys(changes).length || record === this._recordToDiscard) {
+    async _multiSave(editedRecord, changes) {
+        if (!Object.keys(changes).length || editedRecord === this._recordToDiscard) {
             return;
         }
-        const validSelection = this.selection.filter((record) => {
-            return Object.keys(changes).every((fieldName) => {
-                if (record._isReadonly(fieldName)) {
-                    return false;
-                } else if (record._isRequired(fieldName) && !changes[fieldName]) {
-                    return false;
-                }
-                return true;
-            });
-        });
-        const canProceed = await this.model.hooks.onWillSaveMulti(record, changes, validSelection);
+        let canProceed = await this.model.hooks.onWillSaveMulti(editedRecord, changes);
         if (canProceed === false) {
             return false;
         }
-        if (validSelection.length === 0) {
-            this.model.dialog.add(AlertDialog, {
-                body: _t("No valid record to save"),
-                confirm: () => this.leaveEditMode({ discard: true }),
-                dismiss: () => this.leaveEditMode({ discard: true }),
-            });
-            return false;
-        } else {
-            const resIds = unique(validSelection.map((r) => r.resId));
-            const context = this.context;
-            try {
-                await this.model.orm.write(this.resModel, resIds, changes, { context });
-            } catch (e) {
-                record._discard();
-                this.model._updateConfig(record.config, { mode: "readonly" }, { reload: false });
-                throw e;
+
+        const selectedRecords = this.selection; // costly getter => compute it once
+
+        // special treatment for x2manys: apply commands on all selected record's static lists
+        const proms = [];
+        for (const fieldName in changes) {
+            if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
+                const list = editedRecord.data[fieldName];
+                const commands = list._getCommands();
+                if ("display_name" in list.activeFields) {
+                    // add display_name to LINK commands to prevent a web_read by selected record
+                    for (const command of commands) {
+                        if (command[0] === x2ManyCommands.LINK) {
+                            const relRecord = list._cache[command[1]];
+                            command[2] = { display_name: relRecord.data.display_name };
+                        }
+                    }
+                }
+                for (const record of selectedRecords) {
+                    if (record !== editedRecord) {
+                        proms.push(record.data[fieldName]._applyCommands(commands));
+                    }
+                }
             }
-            const records = await this.model._loadRecords({ ...this.config, resIds });
-            for (const record of validSelection) {
-                const serverValues = records.find((r) => r.id === record.resId);
-                record._applyValues(serverValues);
-                this.model._updateSimilarRecords(record, serverValues);
-            }
-            record._discard();
-            this.model._updateConfig(record.config, { mode: "readonly" }, { reload: false });
         }
-        this.model.hooks.onSavedMulti(validSelection);
+        await Promise.all(proms);
+        // apply changes on all selected records (for x2manys, the change is the static list itself)
+        selectedRecords.forEach((record) => {
+            const _changes = Object.assign({}, changes);
+            for (const fieldName in _changes) {
+                if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
+                    _changes[fieldName] = record.data[fieldName];
+                }
+            }
+            record._applyChanges(_changes);
+        });
+
+        // determine valid and invalid records
+        const validRecords = [];
+        const invalidRecords = [];
+        for (const record of selectedRecords) {
+            const isEditedRecord = record === editedRecord;
+            if (
+                Object.keys(changes).every((fieldName) => !record._isReadonly(fieldName)) &&
+                record._checkValidity({ silent: !isEditedRecord })
+            ) {
+                validRecords.push(record);
+            } else {
+                invalidRecords.push(record);
+            }
+        }
+        const discardInvalidRecords = () => invalidRecords.forEach((record) => record._discard());
+
+        if (validRecords.length === 0) {
+            editedRecord._displayInvalidFieldNotification();
+            discardInvalidRecords();
+            return false;
+        }
+
+        // generate the save callback with the values to save (must be done before discarding
+        // invalid records, in case the editedRecord is itself invalid)
+        const resIds = unique(validRecords.map((r) => r.resId));
+        const kwargs = {
+            context: this.context,
+            specification: getFieldsSpec(editedRecord.activeFields, editedRecord.fields),
+        };
+        let save;
+        if (Object.values(changes).some((v) => v instanceof Operation)) {
+            // "changes" contains a Field Operation => we must call the web_save_multi method to
+            // save each record individually
+            const changesById = {};
+            for (const record of validRecords) {
+                changesById[record.resId] = changesById[record.resId] || record._getChanges();
+            }
+            const valsList = resIds.map((resId) => changesById[resId]);
+            save = () => this.model.orm.webSaveMulti(this.resModel, resIds, valsList, kwargs);
+        } else {
+            const vals = editedRecord._getChanges();
+            save = () => this.model.orm.webSave(this.resModel, resIds, vals, kwargs);
+        }
+
+        const _changes = Object.assign(changes);
+        for (const fieldName in changes) {
+            if (this.fields[fieldName].type === "many2many") {
+                const list = changes[fieldName];
+                _changes[fieldName] = {
+                    add: list._commands
+                        .filter((command) => command[0] === x2ManyCommands.LINK)
+                        .map((command) => list._cache[command[1]]),
+                    remove: list._commands
+                        .filter((command) => command[0] === x2ManyCommands.UNLINK)
+                        .map((command) => list._cache[command[1]]),
+                };
+            }
+        }
+        discardInvalidRecords();
+
+        // ask confirmation
+        canProceed = await this.model.hooks.onAskMultiSaveConfirmation(_changes, validRecords);
+        if (canProceed === false) {
+            selectedRecords.forEach((record) => record._discard());
+            this.leaveEditMode({ discard: true });
+            return false;
+        }
+
+        // save changes
+        let records = [];
+        try {
+            records = await save();
+        } catch (e) {
+            selectedRecords.forEach((record) => record._discard());
+            this.model._updateConfig(editedRecord.config, { mode: "readonly" }, { reload: false });
+            throw e;
+        }
+        const serverValuesById = Object.fromEntries(records.map((record) => [record.id, record]));
+        for (const record of validRecords) {
+            const serverValues = serverValuesById[record.resId];
+            record._setData(serverValues);
+            this.model._updateSimilarRecords(record, serverValues);
+        }
+        this.model._updateConfig(editedRecord.config, { mode: "readonly" }, { reload: false });
+        this.model.hooks.onSavedMulti(validRecords);
         return true;
     }
 
@@ -328,14 +454,12 @@ export class DynamicList extends DataPoint {
             getSequence,
             getResId,
         });
-        if (resequencedRecords) {
-            for (const dpData of resequencedRecords) {
-                const dp = originalList.find((d) => getResId(d) === dpData.id);
-                if (dp instanceof Record) {
-                    dp._applyValues(dpData);
-                } else {
-                    dp[handleField] = dpData[handleField];
-                }
+        for (const dpData of resequencedRecords) {
+            const dp = originalList.find((d) => getResId(d) === dpData.id);
+            if (dp instanceof RelationalRecord) {
+                dp._applyValues(dpData);
+            } else {
+                dp[handleField] = dpData[handleField];
             }
         }
     }
@@ -361,7 +485,7 @@ export class DynamicList extends DataPoint {
                     firstRecords: this.count,
                 }
             );
-            this.model.notification.add(msg, { title: _t("Warning") });
+            this.model.notification.add(msg);
         }
         const reload = () => this.model.load();
         if (action && Object.keys(action).length) {

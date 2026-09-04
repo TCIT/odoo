@@ -82,10 +82,11 @@ class IrModel(models.Model):
             res = super(IrModel, self).write(vals)
             self.env.flush_all()
             # setup models; this reloads custom models in registry
-            self.pool.setup_models(self._cr)
+            model_names = self.mapped('model')
+            self.pool._setup_models__(self.env.cr, model_names)
             # update database schema of models
-            models = self.pool.descendants(self.mapped('model'), '_inherits')
-            self.pool.init_models(self._cr, models, dict(self._context, update_custom_fields=True))
+            model_names = self.pool.descendants(model_names, '_inherits')
+            self.pool.init_models(self.env.cr, model_names, dict(self.env.context, update_custom_fields=True))
         else:
             res = super(IrModel, self).write(vals)
         return res
@@ -98,23 +99,23 @@ class IrModel(models.Model):
         return vals
 
     @api.model
-    def _instanciate(self, model_data):
-        model_class = super(IrModel, self)._instanciate(model_data)
-        if model_data.get('is_mail_blacklist') and model_class._name != 'mail.thread.blacklist':
-            parents = model_class._inherit or []
+    def _instanciate_attrs(self, model_data):
+        attrs = super()._instanciate_attrs(model_data)
+        if model_data.get('is_mail_blacklist') and attrs['_name'] != 'mail.thread.blacklist':
+            parents = attrs.get('_inherit') or []
             parents = [parents] if isinstance(parents, str) else parents
-            model_class._inherit = parents + ['mail.thread.blacklist']
-            if model_class._custom:
-                model_class._primary_email = 'x_email'
-        elif model_data.get('is_mail_thread') and model_class._name != 'mail.thread':
-            parents = model_class._inherit or []
+            attrs['_inherit'] = parents + ['mail.thread.blacklist']
+            if attrs['_custom']:
+                attrs['_primary_email'] = 'x_email'
+        elif model_data.get('is_mail_thread') and attrs['_name'] != 'mail.thread':
+            parents = attrs.get('_inherit') or []
             parents = [parents] if isinstance(parents, str) else parents
-            model_class._inherit = parents + ['mail.thread']
-        if model_data.get('is_mail_activity') and model_class._name != 'mail.activity.mixin':
-            parents = model_class._inherit or []
+            attrs['_inherit'] = parents + ['mail.thread']
+        if model_data.get('is_mail_activity') and attrs['_name'] != 'mail.activity.mixin':
+            parents = attrs.get('_inherit') or []
             parents = [parents] if isinstance(parents, str) else parents
-            model_class._inherit = parents + ['mail.activity.mixin']
-        return model_class
+            attrs['_inherit'] = parents + ['mail.activity.mixin']
+        return attrs
 
     def _get_definitions(self, model_names):
         model_definitions = super()._get_definitions(model_names)

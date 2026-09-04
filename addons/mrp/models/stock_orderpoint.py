@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, api, fields, models
-from odoo.tools.float_utils import float_is_zero
-from odoo.osv.expression import AND
-from dateutil.relativedelta import relativedelta
+from collections import defaultdict
 from datetime import datetime, time
+
+from odoo import _, api, fields, models
+from odoo.fields import Domain
 
 
 class StockWarehouseOrderpoint(models.Model):
@@ -14,14 +13,26 @@ class StockWarehouseOrderpoint(models.Model):
     show_bom = fields.Boolean('Show BoM column', compute='_compute_show_bom')
     bom_id = fields.Many2one(
         'mrp.bom', string='Bill of Materials', check_company=True,
-        domain="[('type', '=', 'normal'), '&', '|', ('company_id', '=', company_id), ('company_id', '=', False), '|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_tmpl_id)]")
-    manufacturing_visibility_days = fields.Float(default=0.0, help="Visibility Days applied on the manufacturing routes.")
+        domain="[('type', '=', 'normal'), '&', '|', ('company_id', '=', company_id), ('company_id', '=', False), '|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_tmpl_id)]",
+        inverse='_inverse_bom_id',
+    )
+    bom_id_placeholder = fields.Char(compute='_compute_bom_id_placeholder')
+    effective_bom_id = fields.Many2one(
+        'mrp.bom', string='Effective Bill of Materials', search='_search_effective_bom_id', compute='_compute_effective_bom_id',
+        store=False, help='Either the Bill of Materials set directly or the one computed to be used by this replenishment'
+    )
+
+    def _inverse_route_id(self):
+        for orderpoint in self:
+            if not orderpoint.route_id:
+                orderpoint.bom_id = False
+        super()._inverse_route_id()
 
     def _get_replenishment_order_notification(self):
         self.ensure_one()
-        domain = [('orderpoint_id', 'in', self.ids)]
+        domain = Domain('orderpoint_id', 'in', self.ids)
         if self.env.context.get('written_after'):
-            domain = AND([domain, [('write_date', '>=', self.env.context.get('written_after'))]])
+            domain &= Domain('write_date', '>=', self.env.context.get('written_after'))
         production = self.env['mrp.production'].search(domain, limit=1)
         if production:
             return {
@@ -40,27 +51,85 @@ class StockWarehouseOrderpoint(models.Model):
             }
         return super()._get_replenishment_order_notification()
 
-    @api.depends('route_id')
+    @api.depends('bom_id', 'product_id.bom_ids.produce_delay')
+    def _compute_deadline_date(self):
+        """ Extend to add more depends values """
+        super()._compute_deadline_date()
+
+    def _get_lead_days_values(self):
+        values = super()._get_lead_days_values()
+        if self.bom_id:
+            values['bom'] = self.bom_id
+        return values
+
+    @api.depends('bom_id', 'bom_id.product_uom_id', 'product_id.bom_ids', 'product_id.bom_ids.product_uom_id')
+    def _compute_qty_to_order_computed(self):
+        """ Extend to add more depends values """
+        super()._compute_qty_to_order_computed()
+
+    def _get_matching_boms(self):
+        matching_boms = defaultdict(lambda: self.env['mrp.bom'])
+        orderpoints_by_company = defaultdict(lambda: self.env['stock.warehouse.orderpoint'])
+        for orderpoint in self.filtered('product_id'):
+            orderpoints_by_company[orderpoint.company_id.id] |= orderpoint
+
+        for company_id, orderpoints in orderpoints_by_company.items():
+            orderpoints_without_bom = orderpoints.filtered(lambda orderpoint: not orderpoint.bom_id)
+            boms = self.env['mrp.bom']._bom_find(
+                orderpoints_without_bom.product_id,
+                bom_type='normal',
+                company_id=company_id,
+            ) if orderpoints_without_bom else {}
+            for orderpoint in orderpoints:
+                matching_boms[orderpoint.id] = orderpoint.bom_id or boms[orderpoint.product_id]
+        return matching_boms
+
+    def _compute_allowed_replenishment_uom_ids(self):
+        super()._compute_allowed_replenishment_uom_ids()
+        manufacture_orderpoints = self.filtered(lambda orderpoint: 'manufacture' in orderpoint.rule_ids.mapped('action'))
+        matching_boms = manufacture_orderpoints._get_matching_boms()
+        for orderpoint in manufacture_orderpoints:
+            bom = matching_boms[orderpoint.id]
+            if bom:
+                orderpoint.allowed_replenishment_uom_ids += bom.product_uom_id
+
+    def _compute_show_supply_warning(self):
+        for orderpoint in self:
+            if 'manufacture' in orderpoint.rule_ids.mapped('action') and not orderpoint.show_supply_warning:
+                orderpoint.show_supply_warning = not orderpoint.product_id.bom_ids
+                continue
+            super(StockWarehouseOrderpoint, orderpoint)._compute_show_supply_warning()
+
+    @api.depends('effective_route_id')
     def _compute_show_bom(self):
         manufacture_route = []
         for res in self.env['stock.rule'].search_read([('action', '=', 'manufacture')], ['route_id']):
             manufacture_route.append(res['route_id'][0])
         for orderpoint in self:
-            orderpoint.show_bom = orderpoint.route_id.id in manufacture_route
+            orderpoint.show_bom = orderpoint.effective_route_id.id in manufacture_route
 
-    def _compute_visibility_days(self):
-        res = super()._compute_visibility_days()
+    def _inverse_bom_id(self):
         for orderpoint in self:
-            if 'manufacture' in orderpoint.rule_ids.mapped('action'):
-                orderpoint.visibility_days = orderpoint.manufacturing_visibility_days
-        return res
+            if not orderpoint.route_id and orderpoint.bom_id:
+                orderpoint.route_id = self.env['stock.rule'].search([('action', '=', 'manufacture')])[0].route_id
 
-    def _set_visibility_days(self):
-        res = super()._set_visibility_days()
+    @api.depends('effective_route_id', 'bom_id', 'rule_ids', 'product_id.bom_ids')
+    def _compute_bom_id_placeholder(self):
         for orderpoint in self:
-            if 'manufacture' in orderpoint.rule_ids.mapped('action'):
-                orderpoint.manufacturing_visibility_days = orderpoint.visibility_days
-        return res
+            default_bom = orderpoint._get_default_bom()
+            orderpoint.bom_id_placeholder = default_bom.display_name if default_bom else ''
+
+    @api.depends('effective_route_id', 'bom_id', 'rule_ids', 'product_id.bom_ids')
+    def _compute_effective_bom_id(self):
+        for orderpoint in self:
+            orderpoint.effective_bom_id = orderpoint.bom_id if orderpoint.bom_id else orderpoint._get_default_bom()
+
+    def _search_effective_bom_id(self, operator, value):
+        boms = self.env['mrp.bom'].search([('id', operator, value)])
+        orderpoints = self.env['stock.warehouse.orderpoint'].search([]).filtered(
+            lambda orderpoint: orderpoint.effective_bom_id in boms
+        )
+        return [('id', 'in', orderpoints.ids)]
 
     def _compute_days_to_order(self):
         res = super()._compute_days_to_order()
@@ -71,9 +140,35 @@ class StockWarehouseOrderpoint(models.Model):
         orderpoints_with_bom = self.filtered(lambda orderpoint: orderpoint.product_id.variant_bom_ids or orderpoint.product_id.bom_ids)
         for orderpoint in orderpoints_with_bom:
             if 'manufacture' in orderpoint.rule_ids.mapped('action'):
-                boms = (orderpoint.product_id.variant_bom_ids or orderpoint.product_id.bom_ids)
+                boms = orderpoint.bom_id or orderpoint.product_id.variant_bom_ids or orderpoint.product_id.bom_ids
                 orderpoint.days_to_order = boms and boms[0].days_to_prepare_mo or 0
         return res
+
+    def _get_default_route(self):
+        route_ids = self.env['stock.rule'].search([
+            ('action', '=', 'manufacture')
+        ]).route_id
+        route_id = self.rule_ids.route_id & route_ids
+        if self.product_id.bom_ids and route_id:
+            return route_id[0]
+        return super()._get_default_route()
+
+    def _get_default_bom(self):
+        self.ensure_one()
+        if self.show_bom:
+            return self._get_default_rule()._get_matching_bom(
+                self.product_id, self.company_id, {}
+            )
+        else:
+            return self.env['mrp.bom']
+
+    def _get_replenishment_multiple_alternative(self, qty_to_order):
+        self.ensure_one()
+        routes = self.effective_route_id or self.product_id.route_ids
+        if not any(r.action == 'manufacture' for r in routes.rule_ids):
+            return super()._get_replenishment_multiple_alternative(qty_to_order)
+        bom = self.bom_id or self.env['mrp.bom']._bom_find(self.product_id, picking_type=False, bom_type='normal', company_id=self.company_id.id)[self.product_id]
+        return bom.product_uom_id
 
     def _quantity_in_progress(self):
         bom_kits = self.env['mrp.bom']._bom_find(self.product_id, bom_type='phantom')
@@ -91,7 +186,7 @@ class StockWarehouseOrderpoint(models.Model):
             ratios_total = []
             for bom_line, bom_line_data in bom_sub_lines:
                 component = bom_line.product_id
-                if not component.is_storable or float_is_zero(bom_line_data['qty'], precision_rounding=bom_line.product_uom_id.rounding):
+                if not component.is_storable or bom_line.product_uom_id.is_zero(bom_line_data['qty']):
                     continue
                 uom_qty_per_kit = bom_line_data['qty'] / bom_line_data['original_qty']
                 qty_per_kit = bom_line.product_uom_id._compute_quantity(uom_qty_per_kit, bom_line.product_id.uom_id, raise_if_failure=False)
@@ -133,37 +228,14 @@ class StockWarehouseOrderpoint(models.Model):
         ])
         for prod in in_progress_productions:
             date_start, date_finished, orderpoint = prod.date_start, prod.date_finished, prod.orderpoint_id
-            lead_days_date = datetime.combine(orderpoint.lead_days_date, time.max)
-            if date_start <= lead_days_date < date_finished:
+            lead_horizon_date = datetime.combine(orderpoint.lead_horizon_date, time.max)
+            if date_start <= lead_horizon_date < date_finished:
                 res[orderpoint.id] += prod.product_uom_id._compute_quantity(
                         prod.product_qty, orderpoint.product_uom, round=False)
         return res
 
-    def _get_qty_multiple_to_order(self):
-        """ Calculates the minimum quantity that can be ordered according to the qty and UoM of the BoM
-        """
-        self.ensure_one()
-        qty_multiple_to_order = super()._get_qty_multiple_to_order()
-        if 'manufacture' in self.rule_ids.mapped('action'):
-            bom = self.env['mrp.bom']._bom_find(self.product_id, bom_type='normal')[self.product_id]
-            return bom.product_uom_id._compute_quantity(bom.product_qty, self.product_uom)
-        return qty_multiple_to_order
-
-    def _set_default_route_id(self):
-        route_ids = self.env['stock.rule'].search([
-            ('action', '=', 'manufacture')
-        ]).route_id
-        for orderpoint in self:
-            if not orderpoint.product_id.bom_ids:
-                continue
-            route_id = orderpoint.rule_ids.route_id & route_ids
-            if not route_id:
-                continue
-            orderpoint.route_id = route_id[0].id
-        return super()._set_default_route_id()
-
-    def _prepare_procurement_values(self, date=False, group=False):
-        values = super()._prepare_procurement_values(date=date, group=group)
+    def _prepare_procurement_values(self, date=False):
+        values = super()._prepare_procurement_values(date=date)
         values['bom_id'] = self.bom_id
         return values
 

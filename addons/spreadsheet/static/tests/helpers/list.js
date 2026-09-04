@@ -16,9 +16,15 @@ import { createModelWithDataSource } from "@spreadsheet/../tests/helpers/model";
  * @param {number} [params.linesNumber]
  * @param {[number, number]} [params.position]
  * @param {string} [params.sheetId]
+ * @param {{name: string, asc: boolean}[]} [params.orderBy]
  */
 export function insertListInSpreadsheet(model, params) {
-    const { definition, columns } = generateListDefinition(params.model, params.columns);
+    const { definition, columns } = generateListDefinition(
+        params.model,
+        params.columns,
+        params.actionXmlId,
+        params.orderBy
+    );
     const [col, row] = params.position || [0, 0];
 
     model.dispatch("INSERT_ODOO_LIST", {
@@ -41,14 +47,18 @@ export function insertListInSpreadsheet(model, params) {
  * @param {function} [params.mockRPC]
  * @param {number} [params.linesNumber]
  * @param {[number, number]} [params.position]
+ * @param {object} [params.skipWaitForDataLoaded]
  * @param {string} [params.sheetId]
+ * @param {object} [params.modelConfig]
+ * @param {{name: string, asc: boolean}[]} [params.orderBy]
  *
  * @returns { Promise<{ model: OdooSpreadsheetModel, env: Object }>}
  */
 export async function createSpreadsheetWithList(params = {}) {
-    const model = await createModelWithDataSource({
+    const { model, env } = await createModelWithDataSource({
         mockRPC: params.mockRPC,
         serverData: params.serverData,
+        modelConfig: params.modelConfig,
     });
 
     insertListInSpreadsheet(model, {
@@ -57,10 +67,11 @@ export async function createSpreadsheetWithList(params = {}) {
         linesNumber: params.linesNumber,
         position: params.position,
         sheetId: params.sheetId,
+        orderBy: params.orderBy,
     });
 
-    const env = model.config.custom.env;
-    env.model = model;
-    await waitForDataLoaded(model);
+    if (!params.skipWaitForDataLoaded) {
+        await waitForDataLoaded(model);
+    }
     return { model, env };
 }

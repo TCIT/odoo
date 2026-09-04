@@ -9,7 +9,7 @@
         </t>
         <t t-if="o.dest_address_id">
             <t t-set="information_block">
-                <strong>Shipping address</strong>
+                <strong class="d-block mt-3">Shipping address</strong>
                 <div t-if="o.dest_address_id">
                     <div t-field="o.dest_address_id"
                         t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}' name="purchase_shipping_address"/>
@@ -23,7 +23,7 @@
             <div class="mt-4">
                 <t t-set="layout_document_title">
                     <t t-if="o.state in ['draft', 'sent', 'to approve']">Request for Quotation #<span t-field="o.name"/></t>
-                    <t t-if="o.state in ['purchase', 'done']">Purchase Order #<span t-field="o.name"/></t>
+                    <t t-if="o.state == 'purchase'">Purchase Order #<span t-field="o.name"/></t>
                     <t t-if="o.state == 'cancel'">Cancelled Purchase Order #<span t-field="o.name"/></t>
                 </t>
             </div>
@@ -37,7 +37,7 @@
                     <strong>Your Order Reference</strong>
                     <div t-field="o.partner_ref"/>
                 </div>
-                <div t-if="o.state in ['purchase','done'] and o.date_approve" class="col-3 bm-2">
+                <div t-if="o.state == 'purchase' and o.date_approve" class="col-3 bm-2">
                     <strong>Order Date:</strong>
                     <p t-field="o.date_approve" t-options="{'date_only': 'true'}" class="m-0"/>
                 </div>
@@ -52,7 +52,7 @@
             </div>
 
             <table class="o_has_total_table table o_main_table table-borderless">
-                <thead>
+                <thead style="display: table-row-group">
                     <tr>
                         <th name="th_description" class="text-start"><strong>Description</strong></th>
                         <th name="th_quantity" class="text-end"><strong>Qty</strong></th>
@@ -66,19 +66,21 @@
                 </thead>
                 <tbody>
                     <t t-set="current_subtotal" t-value="0"/>
-                    <t t-foreach="o.order_line" t-as="line">
+                    <t t-set="filtered_lines" t-value="o.order_line.filtered(lambda l: l.display_type or l.product_qty != 0)"/>
+                    <t t-foreach="filtered_lines" t-as="line">
                         <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal"/>
 
-                        <tr t-att-class="'fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
+                        <tr t-att-class="'fw-bolder o_line_section' if line.display_type == 'line_section' else 'fw-bold o_line_subsection' if line.display_type == 'line_subsection' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
                             <t t-if="not line.display_type">
                                 <td id="product" class="text-start">
                                     <span t-field="line.name"/>
                                 </td>
                                 <td class="text-end">
                                     <span t-field="line.product_qty"/>
-                                    <span t-field="line.product_uom.name" groups="uom.group_uom"/>
-                                    <span t-if="line.product_packaging_id">
-                                        (<span t-field="line.product_packaging_qty" t-options='{"widget": "integer"}'/> <span t-field="line.product_packaging_id"/>)
+                                    <span t-field="line.product_uom_id.name" groups="uom.group_uom"/>
+                                    <span t-if="line.product_uom_id != line.product_id.uom_id" class="text-muted small">
+                                        <br/>
+                                        <span t-field="line.product_uom_qty" t-options="{'widget': 'float', 'decimal_precision': 'Product Unit'}"/> <span t-field="line.product_id.uom_id"/>
                                     </span>
                                 </td>
                                 <td class="text-end">
@@ -88,14 +90,14 @@
                                     <span class="text-align-bottom"><span t-field="line.discount"/>%</span>
                                 </td>
                                 <td class="text-end">
-                                    <span t-out="', '.join([(tax.invoice_label or tax.name) for tax in line.taxes_id])"/>
+                                    <span t-out="', '.join(tax.tax_label for tax in line.tax_ids if tax.tax_label)"/>
                                 </td>
                                 <td class="text-end">
                                     <span t-field="line.price_subtotal"
                                         t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                                 </td>
                             </t>
-                            <t t-if="line.display_type == 'line_section'">
+                            <t t-if="line.display_type in ('line_section', 'line_subsection')">
                                 <td colspan="99" id="section">
                                     <span t-field="line.name"/>
                                 </td>
@@ -108,7 +110,7 @@
                                 </td>
                             </t>
                         </tr>
-                        <t t-if="current_section and (line_last or o.order_line[line_index+1].display_type == 'line_section')">
+                        <t t-if="current_section and (line_last or filtered_lines[line_index+1].display_type in ('line_section', 'line_subsection'))">
                             <tr class="is-subtotal text-end">
                                 <td colspan="99" id="subtotal">
                                     <strong class="mr16">Subtotal</strong>
@@ -134,7 +136,7 @@
                 </div>
             </div>
 
-            <p t-field="o.notes" class="mt-4"/>
+            <p t-field="o.note" class="mt-4"/>
             <div class="oe_structure"/>
 
             <strong>Payment Terms: </strong>
@@ -142,7 +144,7 @@
 
             <t t-set="base_address" t-value="o.env['ir.config_parameter'].sudo().get_param('web.base.url')"/>
             <t t-set="portal_url" t-value="base_address + '/my/purchase/' + str(o.id) + '#portal_connect_software_modal'"/>
-            <div t-if="any(u._is_portal() for u in o.partner_id.user_ids)" class="text-center">
+            <div t-if="any(u._is_portal() for u in o.partner_id.user_ids) and o._get_edi_builders()" class="text-center">
                 <a t-att-href="portal_url">Connect your software</a> with <t t-out="o.company_id.name"/> to create quotes automatically.
             </div>
         </div>

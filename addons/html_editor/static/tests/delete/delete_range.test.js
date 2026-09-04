@@ -156,6 +156,13 @@ describe("deleteRange method", () => {
                 contentAfter: "<div><p>abc[]def</p></div>",
             });
         });
+        test("should remove contenteditable=false element if fully selected", async () => {
+            await testEditor({
+                contentBefore: `<p>a[bc</p><div contenteditable="false">def</div><p>gh]i</p>`,
+                stepFunction: deleteSelection,
+                contentAfter: `<p>a[]i</p>`,
+            });
+        });
     });
     describe("Block + inline", () => {
         test("should merge paragraph with inline content after it", async () => {
@@ -245,7 +252,8 @@ describe("deleteRange method", () => {
                 `[<table><tbody>
                     <tr><td><br></td><td><br></td></tr>
                     <tr><td>]<br></td><td><br></td></tr>
-                </tbody></table>`
+                </tbody></table>
+                <p data-selection-placeholder=""><br></p>`
             );
             expect(getContent(el)).toBe(contentAfter);
         });
@@ -254,7 +262,7 @@ describe("deleteRange method", () => {
         test("should not fill a HR with BR", async () => {
             const { editor, el } = await setupEditor("<hr><p>abc[</p><p>]def</p>");
             deleteRange(editor);
-            const hr = el.firstElementChild;
+            const hr = el.querySelector("hr");
             expect(hr.childNodes.length).toBe(0);
         });
     });
@@ -263,7 +271,8 @@ describe("deleteRange method", () => {
             await testEditor({
                 contentBefore: `[<div class="container o_text_columns"><div class="row"><div class="col-4"><p>a</p></div><div class="col-4"><p>b</p></div><div class="col-4"><p>c</p></div></div></div>]`,
                 stepFunction: deleteRange,
-                contentAfter: `[]<p><br></p>`,
+                // TODO: should an empty editable be allowed without allowInlineAtRoot?
+                contentAfter: `[]`,
             });
         });
         test("should delete columns when all selected along with text from an outer node", async () => {
@@ -334,6 +343,13 @@ describe("deleteSelection", () => {
                 contentAfter: `<p>a[]</p><div class="oe_unremovable"><br></div><p>i</p>`,
             });
         });
+        test("should not remove nor clear content of unremovable contenteditable=false node", async () => {
+            await testEditor({
+                contentBefore: `<p>a[bc</p><div class="oe_unremovable" contenteditable="false">def</div><p>gh]i</p>`,
+                stepFunction: deleteSelection,
+                contentAfter: `<p>a[]</p><div class="oe_unremovable" contenteditable="false">def</div><p>i</p>`,
+            });
+        });
         test("should move the unremovable up the tree", async () => {
             await testEditor({
                 contentBefore: `<p>a[bc</p><div><div class="oe_unremovable">def</div></div><p>gh]i</p>`,
@@ -398,29 +414,30 @@ describe("deleteSelection", () => {
             test("should not remove bootstrap columns, but clear its content", async () => {
                 await testEditor({
                     contentBefore: unformat(
-                        `<div class="container o_text_columns">
+                        `<div class="container o_text_columns o-contenteditable-false">
                             <div class="row">
-                                <div class="col-6">a[bc</div>
-                                <div class="col-6">def</div>
+                                <div class="col-6 o-contenteditable-true">a[bc</div>
+                                <div class="col-6 o-contenteditable-true">def</div>
                             </div>
                         </div>
                         <p>gh]i</p>`
                     ),
                     stepFunction: deleteSelection,
                     contentAfterEdit: unformat(
-                        `<div class="container o_text_columns">
+                        `<p data-selection-placeholder=""><br></p>
+                        <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
                             <div class="row">
-                                <div class="col-6">a[]</div>
-                                <div class="col-6"><br></div>
+                                <div class="col-6 o-contenteditable-true" contenteditable="true">a[]</div>
+                                <div class="col-6 o-contenteditable-true" contenteditable="true"><p o-we-hint-text="Empty column" class="o-we-hint"><br></p></div>
                             </div>
                         </div>
                         <p>i</p>`
                     ),
                     contentAfter: unformat(
-                        `<div class="container o_text_columns">
+                        `<div class="container o_text_columns o-contenteditable-false">
                             <div class="row">
-                                <div class="col-6">a[]</div>
-                                <div class="col-6"><br></div>
+                                <div class="col-6 o-contenteditable-true">a[]</div>
+                                <div class="col-6 o-contenteditable-true"><p><br></p></div>
                             </div>
                         </div>
                         <p>i</p>`
@@ -431,10 +448,10 @@ describe("deleteSelection", () => {
                 await testEditor({
                     contentBefore: unformat(
                         `<p>x[yz</p>
-                        <div class="container o_text_columns">
+                        <div class="container o_text_columns o-contenteditable-false">
                             <div class="row">
-                                <div class="col-6">abc</div>
-                                <div class="col-6">def</div>
+                                <div class="col-6 o-contenteditable-true">abc</div>
+                                <div class="col-6 o-contenteditable-true">def</div>
                             </div>
                         </div>
                         <p>gh]i</p>`
@@ -463,7 +480,7 @@ describe("deleteSelection", () => {
                     contentAfter: unformat(
                         `<table><tbody>
                             <tr>
-                                <td>[]<br></td> <td><br></td> <td>c</td> 
+                                <td><p>[]<br></p></td> <td><p><br></p></td> <td>c</td>
                             </tr>
                             <tr>
                                 <td>d</td> <td>e</td> <td>f</td> 

@@ -1,9 +1,11 @@
-import * as Order from "@point_of_sale/../tests/tours/utils/generic_components/order_widget_util";
-import * as ProductScreen from "@point_of_sale/../tests/tours/utils/product_screen_util";
-import * as TextInputPopup from "@point_of_sale/../tests/tours/utils/text_input_popup_util";
-import * as PaymentScreen from "@point_of_sale/../tests/tours/utils/payment_screen_util";
-import * as ReceiptScreen from "@point_of_sale/../tests/tours/utils/receipt_screen_util";
-import * as Dialog from "@point_of_sale/../tests/tours/utils/dialog_util";
+import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_util";
+import * as ProductScreen from "@point_of_sale/../tests/pos/tours/utils/product_screen_util";
+import * as TextInputPopup from "@point_of_sale/../tests/generic_helpers/text_input_popup_util";
+import * as PaymentScreen from "@point_of_sale/../tests/pos/tours/utils/payment_screen_util";
+import * as ReceiptScreen from "@point_of_sale/../tests/pos/tours/utils/receipt_screen_util";
+import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
+import { negate } from "@point_of_sale/../tests/generic_helpers/utils";
+import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 
 export function selectRewardLine(rewardName) {
     return [
@@ -73,7 +75,7 @@ export function isRewardButtonHighlighted(isHighlighted, closeModal = true) {
         {
             trigger: isHighlighted
                 ? '.control-buttons button.highlight:contains("Reward")'
-                : '.control-buttons button:contains("Reward"):not(:has(.highlight))',
+                : '.control-buttons button.disabled:contains("Reward")',
         },
     ];
     if (closeModal) {
@@ -89,7 +91,7 @@ export function eWalletButtonState({ highlighted, text = "eWallet", click = fals
     const step = {
         trigger: highlighted
             ? `.control-buttons button.highlight:contains("${text}")`
-            : `.control-buttons button:contains("${text}"):not(:has(.highlight))`,
+            : `.control-buttons button.disabled:contains("${text}")`,
     };
     if (click) {
         step.run = "click";
@@ -111,11 +113,28 @@ export function customerIs(name) {
         },
     ];
 }
+export function isPointsDisplayed(isDisplayed) {
+    return [
+        {
+            trigger: isDisplayed
+                ? ".loyalty-points-title"
+                : "body:not(:has(.loyalty-points-title))",
+        },
+    ];
+}
 export function pointsAwardedAre(points_str) {
     return [
         {
             content: "loyalty points awarded " + points_str,
             trigger: '.loyalty-points-won:contains("' + points_str + '")',
+        },
+    ];
+}
+export function pointsTotalIs(points_str) {
+    return [
+        {
+            content: "loyalty points awarded " + points_str,
+            trigger: '.loyalty-points-totaltext-end:contains("' + points_str + '")',
         },
     ];
 }
@@ -140,8 +159,40 @@ export function checkAddedLoyaltyPoints(points) {
     ];
 }
 
-export function createManualGiftCard(code, amount) {
-    return [
+export function useExistingLoyaltyCard(code, valid = true) {
+    const steps = [
+        {
+            trigger: `a:contains("Sell physical gift card?")`,
+            run: "click",
+        },
+        {
+            content: `Input code '${code}'`,
+            trigger: `input[id="code"]`,
+            run: `edit ${code}`,
+        },
+        {
+            content: "Not loading",
+            trigger: negate(".gift-card-loading"),
+        },
+    ];
+
+    if (!valid) {
+        steps.push(Dialog.confirm("Ok"));
+        steps.push(Dialog.cancel());
+        steps.push({
+            trigger: `a:contains("Sell physical gift card?")`,
+            run: () => {},
+        });
+    } else {
+        steps.push(...Chrome.waitRequest());
+        steps.push(Dialog.confirm());
+    }
+
+    return steps;
+}
+
+export function createManualGiftCard(code, amount, date = false) {
+    const steps = [
         {
             trigger: `a:contains("Sell physical gift card?")`,
             run: "click",
@@ -156,8 +207,26 @@ export function createManualGiftCard(code, amount) {
             trigger: `input[id="amount"]`,
             run: `edit ${amount}`,
         },
+    ];
+    if (date !== false) {
+        steps.push({
+            content: `Input date '${date}'`,
+            trigger: `.modal input.o_datetime_input.cursor-pointer.form-control.form-control-lg`,
+            run: `edit ${date}`,
+        });
+    }
+    steps.push({
+        trigger: `.btn-primary:contains("Add Balance")`,
+        run: "click",
+    });
+    return steps;
+}
+
+export function clickGiftCardProgram(name) {
+    return [
         {
-            trigger: `.btn-primary:contains("Add Balance")`,
+            content: `Click gift card program '${name}'`,
+            trigger: `button.selection-item:has(span:contains("${name}"))`,
             run: "click",
         },
     ];
@@ -180,4 +249,19 @@ export function checkPartnerPoints(name, points) {
             trigger: `.partner-list .partner-line:contains(${name}) .partner-line-balance:contains(${points} Loyalty Point(s))`,
         },
     ];
+}
+
+export function isMoreControlButtonActive(active) {
+    return {
+        content: "More control button is " + (active ? "active" : "not active"),
+        trigger: active
+            ? ".control-buttons .more-btn.active"
+            : ".control-buttons:not(:has(.more-btn.active))",
+    };
+}
+export function isLoyaltyPointsAvailable() {
+    return {
+        content: "Loyalty Points are visible on the receipt",
+        trigger: ".pos-receipt .loyalty",
+    };
 }

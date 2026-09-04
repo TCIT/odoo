@@ -1,5 +1,5 @@
 import { click, contains, start, startServer } from "@mail/../tests/mail_test_helpers";
-import { mountView } from "@web/../tests/web_test_helpers";
+import { mountView, onRpc } from "@web/../tests/web_test_helpers";
 import { describe, expect, test } from "@odoo/hoot";
 import { queryAttribute } from "@odoo/hoot-dom";
 import { defineHrSkillModels } from "@hr_skills/../tests/hr_skills_test_helpers";
@@ -27,6 +27,21 @@ test("many2one_avatar_employee widget in kanban view with skills on avatar card"
     });
     pyEnv["m2o.avatar.employee"].create([{ employee_id: pierreEid }]);
     await start();
+
+    onRpc("hr.employee", "get_avatar_card_data", (params) => {
+        const resourceIdArray = params.args[0];
+        const resourceId = resourceIdArray[0];
+        const resources = pyEnv['hr.employee.public'].read([resourceId]);
+        const result = resources.map(resource => ({
+            name: resource.name,
+            role_ids: resource.role_ids,
+            email:resource.email,
+            phone: resource.phone,
+            user_id: resource.user_id,
+            employee_skill_ids: resource.employee_skill_ids
+        }));
+        return result;
+    });
     await mountView({
         type: "kanban",
         resModel: "m2o.avatar.employee",
@@ -43,7 +58,7 @@ test("many2one_avatar_employee widget in kanban view with skills on avatar card"
     expect(
         queryAttribute(".o_kanban_record .o_field_many2one_avatar_employee img", "data-src")
     ).toBe(`/web/image/hr.employee/${pierreEid}/avatar_128`);
-    await click(".o_kanban_record .o_m2o_avatar");
+    await click(".o_kanban_record .o_m2o_avatar > img");
     await contains(".o_avatar_card");
     await contains(".o_avatar_card .o_employee_skills_tags > .o_tag", { count: 2 });
 });

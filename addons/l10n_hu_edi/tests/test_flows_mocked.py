@@ -1,13 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import tools
+from odoo import tools, Command
 from odoo.tests.common import tagged
 from odoo.exceptions import UserError
 from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
 from odoo.addons.l10n_hu_edi.tests.common import L10nHuEdiTestCommon
 
 import requests
-from unittest import mock
 from freezegun import freeze_time
 import contextlib
 
@@ -200,50 +199,119 @@ class L10nHuEdiTestFlowsMocked(L10nHuEdiTestCommon, TestAccountMoveSendCommon):
                 send_and_print.action_send_and_print()
                 self.assertRecordValues(new_invoice, [{'l10n_hu_edi_state': 'confirmed', 'l10n_hu_invoice_chain_index': 2}])
 
-    # === Helpers === #
+    def test_invoice_line_currency_rate_from_sale(self):
+        if self.env['ir.module.module']._get('sale_stock').state == 'installed':
+            self.env.user.group_ids += self.env.ref('sales_team.group_sale_salesman')
+            currency = self.setup_other_currency('HRK', rates=[
+                ('2016-01-01', 3.0),
+                ('2017-01-01', 2.0),
+            ])
+            pricelist = self.env['product.pricelist'].create({
+                'name': 'Foreign pricelist',
+                'currency_id': currency.id,
+            })
 
-    @contextlib.contextmanager
-    def patch_post(self, responses=None):
-        """ Patch requests.Session in l10n_hu_edi.connection.
+            sale_order = self.env['sale.order'].create({
+                'partner_id': self.partner_company.id,
+                'partner_invoice_id': self.partner_company.id,
+                'pricelist_id': pricelist.id,
+                'order_line': [Command.create({
+                    'product_id': self.product.id,
+                    'product_uom_qty': 1,
+                    'price_unit': 600,
+                })],
+                'currency_id': currency.id,
+                'date_order': '2017-01-01',
+            })
+            sale_order.action_confirm()
 
-        :param responses: If specified, a dict {service: response} that gives, for any service,
-                          bytes that should be served as response data, or an Exception that should be raised.
-                          Otherwise, will use the default responses stored under
-                          mocked_requests/{service}_response.xml
-        """
-        test_case = self
+            delivery = sale_order.picking_ids
+            delivery.button_validate()
+            delivery.date_done = '2016-01-01'
 
-        class MockedSession:
-            def post(self, url, data, headers, timeout=None):
-                prod_url = 'https://api.onlineszamla.nav.gov.hu/invoiceService/v3'
-                demo_url = 'https://api-test.onlineszamla.nav.gov.hu/invoiceService/v3'
-                mocked_requests = ['manageInvoice', 'queryTaxpayer', 'tokenExchange', 'queryTransactionStatus', 'queryTransactionList', 'manageAnnulment']
+            invoice = sale_order._create_invoices()
+            self.assertRecordValues(invoice.line_ids, [
+                {'amount_currency': -600.00,   'balance': -200.00},
+                {'amount_currency': -162.00,   'balance': -54.00},
+                {'amount_currency': 762.00,    'balance': 254.00},
+            ])
 
-                base_url, __, service = url.rpartition('/')
-                if base_url not in (prod_url, demo_url) or service not in mocked_requests:
-                    test_case.fail(f'Invalid POST url: {url}')
+    def test_case_1_invoice_payment_storno(self):
+        inv = self.create_invoice_simple(amount=1000)
+        inv.action_post()
+        operation = inv._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'CREATE')
+        self.register_payment(inv, 1000)
+        self.create_reversal(inv, is_modify=True)
+        operation = inv.reversal_move_ids._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'STORNO')
 
-                with tools.file_open(f'l10n_hu_edi/tests/mocked_requests/{service}_request.xml', 'rb') as expected_request_file:
-                    test_case.assertXmlTreeEqual(
-                        test_case.get_xml_tree_from_string(data),
-                        test_case.get_xml_tree_from_string(expected_request_file.read()),
-                    )
+    def test_case_2_modify_then_storno(self):
+        inv = self.create_invoice_simple(amount=1000)
+        inv.action_post()
+        operation = inv._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'CREATE')
+        mod1 = self.create_reversal(inv, amount=100)
+        mod1.action_post()
+        operation = mod1._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'MODIFY')
+        storno = self.create_reversal(inv, amount=900)
+        storno.action_post()
+        operation = storno._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'STORNO')
 
-                mock_response = mock.Mock(spec=requests.Response)
-                mock_response.status_code = 200
-                mock_response.headers = ''
+    def test_case_3_multiple_modifications_then_storno(self):
+        inv = self.create_invoice_simple(amount=1000)
+        inv.action_post()
+        operation = inv._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'CREATE')
+        mod1 = self.create_reversal(inv, amount=100)
+        mod1.action_post()
+        operation = mod1._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'MODIFY')
+        mod2 = self.create_reversal(inv, amount=100)
+        mod2.action_post()
+        operation = mod2._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'MODIFY')
+        storno = self.create_reversal(inv, amount=800)
+        storno.action_post()
+        operation = storno._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'STORNO')
 
-                if responses and service in responses:
-                    if isinstance(responses[service], Exception):
-                        raise responses[service]
-                    mock_response.text = responses[service]
-                else:
-                    with tools.file_open(f'l10n_hu_edi/tests/mocked_requests/{service}_response.xml', 'r') as response_file:
-                        mock_response.text = response_file.read()
-                return mock_response
+    def test_case_4_modification_payment_then_storno(self):
+        inv = self.create_invoice_simple(amount=1000)
+        inv.action_post()
+        operation = inv._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'CREATE')
+        mod1 = self.create_reversal(inv, amount=100)
+        mod1.action_post()
+        operation = mod1._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'MODIFY')
+        self.register_payment(inv, 900)
+        self.create_reversal(inv, is_modify=True)
+        mod2 = inv.reversal_move_ids
+        mod2.button_draft()
+        mod2.invoice_line_ids[0].write({
+            'price_unit': 900,
+        })
+        mod2.action_post()
+        # Reconcile the outstanding payment line from mod1 with the invoice
+        inv.js_assign_outstanding_line(mod1.line_ids.filtered(lambda l: l.debit == 0).id)
+        operation = mod2._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'STORNO')
 
-            def close(self):
-                pass
-
-        with mock.patch('odoo.addons.l10n_hu_edi.models.l10n_hu_edi_connection.requests.Session', side_effect=MockedSession, autospec=True):
-            yield
+    def test_case_5_debit_note_then_storno(self):
+        inv = self.create_invoice_simple(amount=1000)
+        inv.action_post()
+        operation = inv._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'CREATE')
+        dn = self.create_debit_note(inv, amount=100)
+        dn.action_post()
+        operation = dn._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'MODIFY')
+        storno = self.create_reversal(inv, amount=1100)
+        storno.action_post()
+        # Reconcile the outstanding payment line from dn with the storno
+        storno.js_assign_outstanding_line(dn.line_ids.filtered(lambda l: l.credit == 0).id)
+        operation = storno._l10n_hu_edi_get_operation_type()
+        self.assertEqual(operation, 'STORNO')

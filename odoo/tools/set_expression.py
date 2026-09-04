@@ -20,11 +20,12 @@ class SetDefinitions:
         """ Initialize the object with ``definitions``, a dict which maps each
         set id to a dict with optional keys ``"ref"`` (value is the set's name),
         ``"supersets"`` (value is a collection of set ids), and ``"disjoints"``
-        (value is a collection of set ids).
+        (value is a collection of set ids). `"ref"` can be replaced by `"refs"`
+        if you need to set multiple aliases.
 
         Here is an example of set definitions, with natural numbers (N), integer
-        numbers (Z), rational numbers (Q), real numbers (R), imaginary numbers
-        (I) and complex numbers (C)::
+        numbers (Z), rational numbers (Q), irrational numbers (R\\Q), real
+        numbers (R), imaginary numbers (I) and complex numbers (C)::
 
             {
                 1: {"ref": "N", "supersets": [2]},
@@ -33,16 +34,39 @@ class SetDefinitions:
                 4: {"ref": "R", "supersets": [6]},
                 5: {"ref": "I", "supersets": [6], "disjoints": [4]},
                 6: {"ref": "C"},
+                7: {"ref": "R\\Q", "supersets": [4]},
             }
+            Representation:
+            ┌──────────────────────────────────────────┐
+            │ C  ┌──────────────────────────┐          │
+            │    │ R  ┌───────────────────┐ │ ┌──────┐ |   "C"
+            │    │    │ Q  ┌────────────┐ │ │ │ I    | |   "I" implied "C"
+            │    │    │    │ Z  ┌─────┐ │ │ │ │      | |   "R" implied "C"
+            │    │    │    │    │ N   │ │ │ │ │      │ │   "Q" implied "R"
+            │    │    │    │    └─────┘ │ │ │ │      │ │   "R\\Q" implied "R"
+            │    │    │    └────────────┘ │ │ │      │ │   "Z" implied "Q"
+            │    │    └───────────────────┘ │ │      │ │   "N" implied "Z"
+            │    │      ┌───────────────┐   │ │      │ │
+            │    │      │ R\\Q          │   │ │      │ │
+            │    │      └───────────────┘   │ └──────┘ │
+            │    └──────────────────────────┘          │
+            └──────────────────────────────────────────┘
         """
         self.__leaves: dict[int | str, Leaf] = {}
 
         for leaf_id, info in definitions.items():
-            ref = info['ref']
+            ref = (
+                info.get('ref')
+                or next(iter(info.get('refs', ())), None)
+                or str(leaf_id)
+            )
             assert ref != '*', "The set reference '*' is reserved for the universal set."
             leaf = Leaf(leaf_id, ref)
             self.__leaves[leaf_id] = leaf
             self.__leaves[ref] = leaf
+            for ref in info.get('refs', ()):
+                assert ref != '*', "The set reference '*' is reserved for the universal set."
+                self.__leaves[ref] = leaf
 
         # compute transitive closure of subsets and supersets
         subsets = {leaf.id: leaf.subsets for leaf in self.__leaves.values()}
@@ -136,6 +160,47 @@ class SetDefinitions:
         if not raise_if_not_found and ref not in self.__leaves:
             return Leaf(UnknownId(ref), ref)
         return self.__leaves[ref]
+
+    def get_superset_ids(self, ids: Iterable[int]) -> list[int]:
+        """ Returns the supersets matching the provided list of ids.
+
+        Following example defined in this set definitions constructor::
+        The supersets of "Q" (id 3) is "R" and "C" with ids [4, 6]
+        """
+        return sorted({
+            sup_id
+            for id_ in ids
+            if id_ in self.__leaves
+            for sup_id in self.__leaves[id_].supersets
+            if sup_id != id_
+        })
+
+    def get_subset_ids(self, ids: Iterable[int]) -> list[int]:
+        """ Returns the subsets matching the provided list of ids.
+
+        Following example defined in this set definitions constructor::
+        The subsets of "Q" (id 3) is "Z" and "N" with ids [1, 2]
+        """
+        return sorted({
+            sub_id
+            for id_ in ids
+            if id_ in self.__leaves
+            for sub_id in self.__leaves[id_].subsets
+            if sub_id != id_
+        })
+
+    def get_disjoint_ids(self, ids: Iterable[int]) -> list[int]:
+        """ Returns the disjoints set matching the provided list of ids.
+
+        Following example defined in this set definitions constructor::
+        The disjoint set of "Q" (id 3) is "R\\Q" and "I" with ids [7, 5]
+        """
+        return sorted({
+            disjoint_id
+            for id_ in ids
+            if id_ in self.__leaves
+            for disjoint_id in self.__leaves[id_].disjoints
+        })
 
 
 class SetExpression(ABC):

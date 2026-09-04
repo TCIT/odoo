@@ -19,9 +19,9 @@ class TestReInvoice(TestStockCommon):
             'reinvoiced_sale_order_id': cls.sale_order.id,
         })
         cls.picking_out = cls.PickingObj.create({
-            'picking_type_id': cls.picking_type_out,
-            'location_id': cls.stock_location,
-            'location_dest_id': cls.customer_location,
+            'picking_type_id': cls.picking_type_out.id,
+            'location_id': cls.stock_location.id,
+            'location_dest_id': cls.customer_location.id,
             'project_id': cls.project.id,
         })
         cls.picking_out.picking_type_id.analytic_costs = True
@@ -41,11 +41,10 @@ class TestReInvoice(TestStockCommon):
 
     def test_picking_reinvoicing(self):
         move_values = {
-            'name': 'Move',
             'product_uom': self.uom_unit.id,
             'picking_id': self.picking_out.id,
-            'location_id': self.stock_location,
-            'location_dest_id': self.customer_location,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
         }
         self.MoveObj.create([
             {
@@ -59,8 +58,8 @@ class TestReInvoice(TestStockCommon):
                 'product_uom_qty': 5,
             },
         ])
-        self.picking_out.action_confirm()
-        self.picking_out.button_validate()
+        self.picking_out.with_user(self.user_stock_user).action_confirm()
+        self.picking_out.with_user(self.user_stock_user).button_validate()
 
         self.assertEqual(len(self.sale_order.order_line), 2, 'There should be 2 lines on the SO')
         new_sale_order_line1 = self.sale_order.order_line.filtered(lambda sol: sol.product_id == self.reinvoicable_product_at_cost)

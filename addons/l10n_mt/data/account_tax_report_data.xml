@@ -4,7 +4,7 @@
         <field name="name">Tax Report</field>
         <field name="root_report_id" ref="account.generic_tax_report"/>
         <field name="country_id" ref="base.mt"/>
-        <field name="filter_fiscal_position" eval="True"/>
+        <field name="allow_foreign_vat" eval="True"/>
         <field name="availability_condition">country</field>
         <field name="column_ids">
             <record id="tax_report_tax_base" model="account.report.column">
@@ -28,7 +28,7 @@
                             <record id="tax_report_line_I_1_tag_column1" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">I.1_base</field>
+                                <field name="formula">-I.1_base</field>
                             </record>
                         </field>
                     </record>
@@ -39,7 +39,7 @@
                             <record id="tax_report_line_I_2_tag_column1" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">I.2_base</field>
+                                <field name="formula">-I.2_base</field>
                             </record>
                         </field>
                     </record>
@@ -190,12 +190,12 @@
                             <record id="tax_report_line_III_1_tag_column1" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">III.1_base</field>
+                                <field name="formula">-III.1_base</field>
                             </record>
                             <record id="tax_report_line_III_1_tag_column2" model="account.report.expression">
                                 <field name="label">tax_amount</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">III.1_tax</field>
+                                <field name="formula">-III.1_tax</field>
                             </record>
                         </field>
                     </record>
@@ -206,12 +206,12 @@
                             <record id="tax_report_line_III_2_tag_column1" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">III.2_base</field>
+                                <field name="formula">-III.2_base</field>
                             </record>
                             <record id="tax_report_line_III_2_tag_column2" model="account.report.expression">
                                 <field name="label">tax_amount</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">III.2_tax</field>
+                                <field name="formula">-III.2_tax</field>
                             </record>
                         </field>
                     </record>
@@ -222,12 +222,12 @@
                             <record id="tax_report_line_III_3_tag_column1" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">III.3_base</field>
+                                <field name="formula">-III.3_base</field>
                             </record>
                             <record id="tax_report_line_III_3_tag_column2" model="account.report.expression">
                                 <field name="label">tax_amount</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">III.3_tax</field>
+                                <field name="formula">-III.3_tax</field>
                             </record>
                         </field>
                     </record>
@@ -238,7 +238,7 @@
                             <record id="tax_report_line_III_4_tag_column1" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">III.4_base</field>
+                                <field name="formula">-III.4_base</field>
                             </record>
                         </field>
                     </record>
@@ -249,7 +249,7 @@
                             <record id="tax_report_line_III_5_tag_column1" model="account.report.expression">
                                 <field name="label">tax_base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">III.5_base</field>
+                                <field name="formula">-III.5_base</field>
                             </record>
                         </field>
                     </record>

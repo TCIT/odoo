@@ -1,9 +1,12 @@
 import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour("website_media_iframe_video", {
+registerWebsitePreviewTour(
+    "website_media_iframe_video",
+    {
         url: "/",
         edition: true,
-    }, () => [
+    },
+    () => [
         ...insertSnippet({
             id: "s_text_image",
             name: "Text - Image",
@@ -11,12 +14,13 @@ registerWebsitePreviewTour("website_media_iframe_video", {
         }),
         {
             content: "Select the image",
-            trigger: ":iframe #wrap .s_text_image img",
+            trigger:
+                ":iframe #wrap .s_text_image img, :iframe #wrap .s_text_image img:not(:visible)",
             run: "click",
         },
         {
             content: "Open image link options",
-            trigger: "[data-name='media_link_opt']",
+            trigger: "[data-action-id='setLink']",
             run: "click",
         },
         {
@@ -26,13 +30,52 @@ registerWebsitePreviewTour("website_media_iframe_video", {
         },
         {
             content: "Click on replace media",
-            trigger: "[data-replace-media='true']",
+            trigger: "[data-action-id='replaceMedia']",
             run: "click",
         },
         {
             content: "Click on video button",
             trigger: "a:contains('Videos')",
             run: "click",
+        },
+        {
+            content: "Enter text in video link input to enable add button",
+            trigger: "#o_video_text",
+            run: "edit https://youtu.be/nbso3NVz3p8",
+        },
+        {
+            content: "Wait for add button to be enabled",
+            trigger: ".modal-footer button:contains('Add'):not([disabled])",
+            run: () => {},
+        },
+        {
+            content: "Remove video link",
+            trigger: "#o_video_text",
+            run() {
+                const inputEl = this.anchor;
+                inputEl.value = "";
+                inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+            },
+        },
+        {
+            content: "Video input field should not be in valid state",
+            trigger: "#o_video_text:not(.is-valid)",
+            run: () => {},
+        },
+        {
+            content: "Check that the preview is not shown",
+            trigger: ".media_iframe_video:not(:has(iframe))",
+            run: () => {},
+        },
+        {
+            content: "Check that the add button is disabled in footer",
+            trigger: ".modal-footer",
+            run: function () {
+                const addButtonEl = this.anchor.querySelector(".btn.btn-primary");
+                if (!addButtonEl.disabled) {
+                    console.error("Add button is not disabled.");
+                }
+            },
         },
         {
             content: "Enter video link",
@@ -46,6 +89,25 @@ registerWebsitePreviewTour("website_media_iframe_video", {
         {
             content: "Click on 'add' button",
             trigger: ".modal-footer button:contains('Add')",
+            run: "click",
+        },
+        {
+            content: "Click on replace media",
+            trigger: "[data-action-id='replaceMedia']",
+            run: "click",
+        },
+        {
+            content: "Check that video url has protocol",
+            trigger: "#o_video_text",
+            run() {
+                if (!this.anchor.value.startsWith("https")) {
+                    console.error("Video Url is missing protocol");
+                }
+            },
+        },
+        {
+            content: "Close the dialog",
+            trigger: "button.btn-close",
             run: "click",
         },
         {

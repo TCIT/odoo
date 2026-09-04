@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 
 class MailPluginController(http.Controller):
 
-    @http.route('/mail_client_extension/modules/get', type="json", auth="outlook", csrf=False, cors="*")
+    @http.route('/mail_client_extension/modules/get', type="jsonrpc", auth="outlook", csrf=False, cors="*")
     def modules_get(self, **kwargs):
         """
             deprecated as of saas-14.3, not needed for newer versions of the mail plugin but necessary
@@ -27,7 +27,7 @@ class MailPluginController(http.Controller):
         return {'modules': ['contacts', 'crm']}
 
     @http.route('/mail_plugin/partner/enrich_and_create_company',
-                type="json", auth="outlook", cors="*")
+                type="jsonrpc", auth="outlook", cors="*")
     def res_partner_enrich_and_create_company(self, partner_id):
         """
         Route used when the user clicks on the create and enrich partner button
@@ -50,14 +50,14 @@ class MailPluginController(http.Controller):
         company, enrichment_info = self._create_company_from_iap(normalized_email)
 
         if company:
-            partner.write({'parent_id': company})
+            partner.write({'parent_id': company.id})
 
         return {
             'enrichment_info': enrichment_info,
             'company': self._get_company_data(company),
         }
 
-    @http.route('/mail_plugin/partner/enrich_and_update_company', type='json', auth='outlook', cors='*')
+    @http.route('/mail_plugin/partner/enrich_and_update_company', type='jsonrpc', auth='outlook', cors='*')
     def res_partner_enrich_and_update_company(self, partner_id):
         """
         Enriches an existing company using IAP
@@ -130,7 +130,7 @@ class MailPluginController(http.Controller):
         }
 
     @http.route(['/mail_client_extension/partner/get', '/mail_plugin/partner/get']
-        , type="json", auth="outlook", cors="*")
+        , type="jsonrpc", auth="outlook", cors="*")
     def res_partner_get(self, email=None, name=None, partner_id=None, **kwargs):
         """
         returns a partner given it's id or an email and a name.
@@ -192,7 +192,7 @@ class MailPluginController(http.Controller):
 
         return response
 
-    @http.route('/mail_plugin/partner/search', type="json", auth="outlook", cors="*")
+    @http.route('/mail_plugin/partner/search', type="jsonrpc", auth="outlook", cors="*")
     def res_partners_search(self, search_term, limit=30, **kwargs):
         """
         Used for the plugin search contact functionality where the user types a string query in order to search for
@@ -220,7 +220,7 @@ class MailPluginController(http.Controller):
         return {"partners": partners}
 
     @http.route(['/mail_client_extension/partner/create', '/mail_plugin/partner/create'],
-                type="json", auth="outlook", cors="*")
+                type="jsonrpc", auth="outlook", cors="*")
     def res_partner_create(self, email, name, company):
         """
         params email: email of the new partner
@@ -247,7 +247,7 @@ class MailPluginController(http.Controller):
         response = {'id': partner.id}
         return response
 
-    @http.route('/mail_plugin/log_mail_content', type="json", auth="outlook", cors="*")
+    @http.route('/mail_plugin/log_mail_content', type="jsonrpc", auth="outlook", cors="*")
     def log_mail_content(self, model, res_id, message, attachments=None):
         """Log the email on the given record.
 
@@ -269,7 +269,7 @@ class MailPluginController(http.Controller):
         request.env[model].browse(res_id).message_post(body=Markup(message), attachments=attachments)
         return True
 
-    @http.route('/mail_plugin/get_translations', type="json", auth="outlook", cors="*")
+    @http.route('/mail_plugin/get_translations', type="jsonrpc", auth="outlook", cors="*")
     def get_translations(self):
         return self._prepare_translations()
 
@@ -318,7 +318,7 @@ class MailPluginController(http.Controller):
         except AccessError:
             return {'id': company.id, 'name': _('No Access')}
 
-        fields_list = ['id', 'name', 'phone', 'mobile', 'email', 'website']
+        fields_list = ['id', 'name', 'phone', 'email', 'website']
 
         company_values = dict((fname, company[fname]) for fname in fields_list)
         company_values['address'] = {'street': company.street,
@@ -356,7 +356,7 @@ class MailPluginController(http.Controller):
                 if response.ok:
                     new_company_info['image_1920'] = base64.b64encode(response.content)
             except Exception as e:
-                _logger.warning('Download of image for new company %s failed, error %s', new_company_info.name, e)
+                _logger.warning('Download of image for new company %s failed, error %s', new_company_info['name'], e)
 
         if iap_data.get('country_code'):
             country = request.env['res.country'].search([('code', '=', iap_data['country_code'].upper())])
@@ -387,7 +387,7 @@ class MailPluginController(http.Controller):
 
     def _get_partner_data(self, partner):
 
-        fields_list = ['id', 'name', 'email', 'phone', 'mobile', 'is_company']
+        fields_list = ['id', 'name', 'email', 'phone', 'is_company']
 
         partner_values = dict((fname, partner[fname]) for fname in fields_list)
         partner_values['image'] = partner.image_128
@@ -454,8 +454,8 @@ class MailPluginController(http.Controller):
         return ['mail_plugin']
 
     def _prepare_translations(self):
-        lang = request.env['res.users'].browse(request.uid).lang
-        translations_per_module = request.env["ir.http"].get_translations_for_webclient(
+        lang = request.env['res.users'].browse(request.env.uid).lang
+        translations_per_module = request.env["ir.http"]._get_translations_for_webclient(
             self._translation_modules_whitelist(), lang)[0]
         translations_dict = {}
         for module in self._translation_modules_whitelist():

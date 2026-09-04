@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, fields, models
-from odoo.osv.expression import AND
+from odoo.fields import Domain
 
 from odoo.addons.payment_custom import const
 
@@ -9,11 +9,10 @@ from odoo.addons.payment_custom import const
 class PaymentProvider(models.Model):
     _inherit = 'payment.provider'
 
-    _sql_constraints = [(
-        'custom_providers_setup',
+    _custom_providers_setup = models.Constraint(
         "CHECK(custom_mode IS NULL OR (code = 'custom' AND custom_mode IS NOT NULL))",
-        "Only custom providers should have a custom mode."
-    )]
+        'Only custom providers should have a custom mode.',
+    )
 
     code = fields.Selection(
         selection_add=[('custom', "Custom")], ondelete={'custom': 'set default'}
@@ -26,11 +25,22 @@ class PaymentProvider(models.Model):
     qr_code = fields.Boolean(
         string="Enable QR Codes", help="Enable the use of QR-codes when paying by wire transfer.")
 
+    # === CRUD METHODS ===#
+
     @api.model_create_multi
-    def create(self, values_list):
-        providers = super().create(values_list)
+    def create(self, vals_list):
+        providers = super().create(vals_list)
         providers.filtered(lambda p: p.custom_mode == 'wire_transfer').pending_msg = None
         return providers
+
+    def _get_default_payment_method_codes(self):
+        """ Override of `payment` to return the default payment method codes. """
+        self.ensure_one()
+        if self.code != 'custom' or self.custom_mode != 'wire_transfer':
+            return super()._get_default_payment_method_codes()
+        return const.DEFAULT_PAYMENT_METHOD_CODES
+
+    # === ACTION METHODS ===#
 
     def action_recompute_pending_msg(self):
         """ Recompute the pending message to include the existing bank accounts. """
@@ -51,11 +61,13 @@ class PaymentProvider(models.Model):
                     f'<p><br></p>' \
                     f'</div>'
 
+    # === SETUP METHODS === #
+
     @api.model
-    def _get_removal_domain(self, provider_code, custom_mode='', **kwargs):
-        res = super()._get_removal_domain(provider_code, custom_mode=custom_mode, **kwargs)
+    def _get_provider_domain(self, provider_code, *, custom_mode='', **kwargs):
+        res = super()._get_provider_domain(provider_code, custom_mode=custom_mode, **kwargs)
         if provider_code == 'custom' and custom_mode:
-            return AND([res, [('custom_mode', '=', custom_mode)]])
+            return Domain.AND([res, [('custom_mode', '=', custom_mode)]])
         return res
 
     @api.model
@@ -71,10 +83,3 @@ class PaymentProvider(models.Model):
         )
         if transfer_providers_without_msg:
             transfer_providers_without_msg.action_recompute_pending_msg()
-
-    def _get_default_payment_method_codes(self):
-        """ Override of `payment` to return the default payment method codes. """
-        default_codes = super()._get_default_payment_method_codes()
-        if self.code != 'custom' or self.custom_mode != 'wire_transfer':
-            return default_codes
-        return const.DEFAULT_PAYMENT_METHOD_CODES

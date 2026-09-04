@@ -5,7 +5,7 @@ from odoo import fields, models
 from odoo.tools import groupby
 
 
-class IrModelField(models.Model):
+class IrModelFields(models.Model):
     _inherit = 'ir.model.fields'
 
     tracking = fields.Integer(
@@ -17,7 +17,7 @@ class IrModelField(models.Model):
         """ Tracking value can be either a boolean enabling tracking mechanism
         on field, either an integer giving the sequence. Default sequence is
         set to 100. """
-        vals = super(IrModelField, self)._reflect_field_params(field, model_id)
+        vals = super()._reflect_field_params(field, model_id)
         tracking = getattr(field, 'tracking', None)
         if tracking is True:
             tracking = 100
@@ -27,7 +27,7 @@ class IrModelField(models.Model):
         return vals
 
     def _instanciate_attrs(self, field_data):
-        attrs = super(IrModelField, self)._instanciate_attrs(field_data)
+        attrs = super()._instanciate_attrs(field_data)
         if attrs and field_data.get('tracking'):
             attrs['tracking'] = field_data['tracking']
         return attrs
@@ -45,6 +45,9 @@ class IrModelField(models.Model):
             )
             field_to_trackings = groupby(tracking_values, lambda track: track.field_id)
             for field, trackings in field_to_trackings:
+                if field.model_id.model not in self.env:
+                    # Model is already deleted
+                    continue
                 self.env['mail.tracking.value'].concat(*trackings).write({
                     'field_info': {
                         'desc': field.field_description,

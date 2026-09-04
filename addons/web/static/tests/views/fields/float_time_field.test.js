@@ -98,8 +98,7 @@ test("FloatTimeField with invalid value", async () => {
 
     await contains(".o_field_float_time[name=qux] input").edit("blabla");
     await clickSave();
-    expect(".o_notification_title").toHaveText("Invalid fields:");
-    expect(".o_notification_content").toHaveInnerHTML("<ul><li>Qux</li></ul>");
+    expect(".o_notification_content").toHaveText("Missing required fields");
     expect(".o_notification_bar").toHaveClass("bg-danger");
     expect(".o_field_float_time[name=qux]").toHaveClass("o_field_invalid");
 
@@ -109,27 +108,13 @@ test("FloatTimeField with invalid value", async () => {
     });
 });
 
-test("float_time field with placeholder", async () => {
-    await mountView({
-        type: "form",
-        resModel: "partner",
-        arch: `
-            <form>
-                <field name="qux" widget="float_time" placeholder="Placeholder"/>
-            </form>`,
-    });
-
-    await contains(".o_field_widget[name='qux'] input").clear();
-    expect(".o_field_widget[name='qux'] input").toHaveAttribute("placeholder", "Placeholder");
-});
-
 test("float_time field does not have an inputmode attribute", async () => {
     await mountView({
         type: "form",
         resModel: "partner",
         arch: `
             <form>
-                <field name="qux" widget="float_time" placeholder="Placeholder"/>
+                <field name="qux" widget="float_time"/>
             </form>`,
     });
 

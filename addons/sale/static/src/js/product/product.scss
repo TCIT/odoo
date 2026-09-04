@@ -6,6 +6,10 @@
     > :not(caption) > *:last-child > * {
         border-bottom: 0;
     }
+
+    &:where(:not(.o_sale_product_configurator_table_optional)) {
+        margin-bottom: $spacer !important;
+    }
 }
 
 .o_sale_product_configurator_img {
@@ -17,18 +21,28 @@
     }
 }
 
-.o_sale_product_configurator_qty {
-    width: 64px;
-
-    @include media-breakpoint-up(md) {
+@include media-breakpoint-up(md) {
+    .o_sale_product_configurator_qty,
+    .o_sale_product_configurator_price {
         width: 160px;
     }
 }
 
-.o_sale_product_configurator_price {
-    width: 100px;
+.product_name_description {
+    max-width: 8rem;
+}
 
-    @include media-breakpoint-up(md) {
-        width: 160px;
+@include media-breakpoint-down(lg) {
+    .impossible_combination_alert {
+        margin-left: -3rem;
+        margin-right: -9rem;
     }
+}
+
+.o_sale_product_configurator_uom_choice.active label {
+    $-btn-secondary-design: map-get($o-btns-bs-override, "secondary");
+
+    background-color: map-get($-btn-secondary-design, active-background);
+    border-color: map-get($-btn-secondary-design, active-border);
+    color: map-get($-btn-secondary-design, active-color);
 }

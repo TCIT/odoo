@@ -1,12 +1,12 @@
-import { _t } from '@web/core/l10n/translation';
-import { Dialog } from '@web/core/dialog/dialog';
+import { Component, onMounted, onWillUnmount, useState, useSubEnv } from '@odoo/owl';
 import { formatCurrency } from '@web/core/currency';
+import { Dialog } from '@web/core/dialog/dialog';
+import { _t } from '@web/core/l10n/translation';
 import { rpc } from '@web/core/network/rpc';
 import { useService } from '@web/core/utils/hooks';
-import { Component, useState, useSubEnv } from '@odoo/owl';
-import { ProductCard } from '../product_card/product_card';
 import { ProductCombo } from '../models/product_combo';
 import { ProductTemplateAttributeLine } from '../models/product_template_attribute_line';
+import { ProductCard } from '../product_card/product_card';
 import {
     ProductConfiguratorDialog
 } from '../product_configurator_dialog/product_configurator_dialog';
@@ -32,16 +32,12 @@ export class ComboConfiguratorDialog extends Component {
             optional: true,
             shape: {
                 showQuantity : { type: Boolean, optional: true },
+                showPrice : { type: Boolean, optional: true },
             },
         },
         save: Function,
         discard: Function,
         close: Function,
-    };
-    static defaultProps = {
-        options: {
-            showQuantity: true,
-        },
     };
 
     setup() {
@@ -59,6 +55,12 @@ export class ComboConfiguratorDialog extends Component {
         this._initSelectedComboItems();
         this.getPriceUrl = '/sale/combo_configurator/get_price';
         useSubEnv({ currency: { id: this.props.currency_id } });
+
+        this.unconfigurableCombos = this.props.combos.filter(combo => !combo.isConfigurable);
+        this.configurableCombos = this.props.combos.filter(combo => combo.isConfigurable);
+
+        onMounted(() => this.env.bus.trigger("FORM-CONTROLLER:FORM-IN-DIALOG:ADD"));
+        onWillUnmount(() => this.env.bus.trigger("FORM-CONTROLLER:FORM-IN-DIALOG:REMOVE"));
     }
 
     /**
@@ -83,7 +85,13 @@ export class ComboConfiguratorDialog extends Component {
                 currencyId: this.props.currency_id,
                 soDate: this.props.date,
                 edit: true, // Hide the optional products, if any.
-                options: { canChangeVariant: false, showQuantity: false, showPrice: false },
+                options: {
+                    canChangeVariant: false,
+                    showQuantity: false,
+                    showPrice: false,
+                    showPackaging: false,
+                },
+                size: "md",
                 save: async configuredProduct => {
                     const selectedComboItem = comboItem.deepCopy();
                     selectedComboItem.product.ptals = configuredProduct.attribute_lines.map(

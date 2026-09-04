@@ -31,7 +31,8 @@
                         <field name="company_id"
                                groups="base.group_multi_company"
                                options="{'no_create': True}"
-                               class="oe_inline"/>
+                               class="oe_inline"
+                               placeholder="Visible to all"/>
                     </group>
                     <group string="History" groups="base.group_no_one" invisible="not create_date">
                         <label for="create_uid" string="Creation"/>
@@ -72,7 +73,7 @@
                                 t-value="new RegExp('(image|video|application/pdf|text)').test(record.mimetype.value) &amp;&amp; record.type.raw_value === 'binary'"/>
                             <div t-attf-class="o_kanban_image_wrapper #{(webimage or binaryPreviewable) ? 'o_kanban_previewer' : ''}">
                                 <div t-if="record.type.raw_value == 'url'" class="fa fa-link fa-3x text-muted" aria-label="Image is a link"/>
-                                <img t-elif="webimage" t-attf-src="/web/image/#{record.ir_attachment_id.raw_value}" width="100" height="100" alt="Document" class="o_attachment_image"/>
+                                <img t-elif="webimage" t-attf-src="/web/image/#{record.ir_attachment_id.raw_value}/100x100" width="100" height="100" alt="Document" class="o_attachment_image"/>
                                 <div t-else="" class="o_image o_image_thumbnail" t-att-data-mimetype="record.mimetype.value"/>
                             </div>
                         </aside>

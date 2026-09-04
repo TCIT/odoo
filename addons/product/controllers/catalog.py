@@ -5,7 +5,7 @@ from odoo.http import request, route, Controller
 
 class ProductCatalogController(Controller):
 
-    @route('/product/catalog/order_lines_info', auth='user', type='json')
+    @route('/product/catalog/order_lines_info', auth='user', type='jsonrpc', readonly=True)
     def product_catalog_get_order_lines_info(self, res_model, order_id, product_ids, **kwargs):
         """ Returns products information to be shown in the catalog.
 
@@ -20,6 +20,8 @@ class ProductCatalogController(Controller):
                     'productId': int
                     'quantity': float (optional)
                     'price': float
+                    'uomDisplayName': string
+                    'code': string (optional)
                     'readOnly': bool (optional)
                 }
             }
@@ -29,7 +31,7 @@ class ProductCatalogController(Controller):
             product_ids, **kwargs,
         )
 
-    @route('/product/catalog/update_order_line_info', auth='user', type='json')
+    @route('/product/catalog/update_order_line_info', auth='user', type='jsonrpc')
     def product_catalog_update_order_line_info(self, res_model, order_id, product_id, quantity=0, **kwargs):
         """ Update order line information on a given order for a given product.
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime
@@ -7,8 +6,8 @@ import logging
 import pytz
 
 from odoo import api, fields, models
-from odoo.osv import expression
-from odoo.tools import SQL
+from odoo.fields import Domain
+from odoo.tools import partition, SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -49,7 +48,7 @@ class MailActivityMixin(models.AbstractModel):
 
     activity_ids = fields.One2many(
         'mail.activity', 'res_id', 'Activities',
-        auto_join=True,
+        bypass_search_access=True,
         groups="base.group_user",)
     activity_state = fields.Selection([
         ('overdue', 'Overdue'),
@@ -134,14 +133,12 @@ class MailActivityMixin(models.AbstractModel):
 
     def _search_activity_state(self, operator, value):
         all_states = {'overdue', 'today', 'planned', False}
-        if operator == '=':
-            search_states = {value}
-        elif operator == '!=':
-            search_states = all_states - {value}
-        elif operator == 'in':
+        if operator == 'in':
             search_states = set(value)
         elif operator == 'not in':
             search_states = all_states - set(value)
+        else:
+            return NotImplemented
 
         reverse_search = False
         if False in search_states:
@@ -194,25 +191,45 @@ class MailActivityMixin(models.AbstractModel):
     @api.depends('activity_ids.date_deadline')
     def _compute_activity_date_deadline(self):
         for record in self:
-            record.activity_date_deadline = fields.first(record.activity_ids).date_deadline
+            activities = record.activity_ids
+            record.activity_date_deadline = next(iter(activities), activities).date_deadline
 
     def _search_activity_date_deadline(self, operator, operand):
-        if operator == '=' and not operand:
-            return [('activity_ids', '=', False)]
-        return [('activity_ids.date_deadline', operator, operand)]
+        if operator == 'in' and False in operand:
+            return Domain('activity_ids', '=', False) | Domain(self._search_activity_date_deadline('in', operand - {False}))
+        if operator in Domain.NEGATIVE_OPERATORS:
+            return NotImplemented
+        return Domain('activity_ids.date_deadline', operator, operand)
 
     @api.model
     def _search_activity_user_id(self, operator, operand):
-        if isinstance(operand, bool) and ((operator == '=' and not operand) or (operator == '!=' and operand)):
-            return [('activity_ids', '=', False)]
-        return [('activity_ids', 'any', [('active', 'in', [True, False]), ('user_id', operator, operand)])]
+        # field supports comparison with any boolean
+        domain = Domain.FALSE
+        if operator in Domain.NEGATIVE_OPERATORS:
+            return NotImplemented
+        if operator == 'in':
+            bools, values = partition(lambda v: isinstance(v, bool), operand)
+            if bools:
+                if True in bools:
+                    domain |= Domain('activity_ids', '!=', False)
+                if False in bools:
+                    domain |= Domain('activity_ids', '=', False)
+                if not values:
+                    return domain
+                operand = values
+        # basic case
+        return domain | Domain('activity_ids', 'any', [('active', 'in', [True, False]), ('user_id', operator, operand)])
 
     @api.model
     def _search_activity_type_id(self, operator, operand):
+        if operator in Domain.NEGATIVE_OPERATORS:
+            return NotImplemented
         return [('activity_ids.activity_type_id', operator, operand)]
 
     @api.model
     def _search_activity_summary(self, operator, operand):
+        if operator in Domain.NEGATIVE_OPERATORS:
+            return NotImplemented
         return [('activity_ids.summary', operator, operand)]
 
     @api.depends('activity_ids.date_deadline', 'activity_ids.user_id')
@@ -226,34 +243,24 @@ class MailActivityMixin(models.AbstractModel):
             ), False)
 
     def _search_my_activity_date_deadline(self, operator, operand):
-        activity_ids = self.env['mail.activity']._search([
+        if operator in Domain.NEGATIVE_OPERATORS:
+            return NotImplemented
+        return [('activity_ids', 'any', [
+            ('active', '=', True),  # never overdue if "done"
             ('date_deadline', operator, operand),
             ('res_model', '=', self._name),
             ('user_id', '=', self.env.user.id)
-        ])
-        return [('activity_ids', 'in', activity_ids)]
+        ])]
 
-    def write(self, vals):
-        # Delete activities of archived record.
-        if 'active' in vals and vals['active'] is False:
-            self.env['mail.activity'].sudo().search(
-                [('res_model', '=', self._name), ('res_id', 'in', self.ids)]
-            ).unlink()
-        return super(MailActivityMixin, self).write(vals)
-
-    def unlink(self):
-        """ Override unlink to delete records activities through (res_model, res_id). """
-        record_ids = self.ids
-        result = super(MailActivityMixin, self).unlink()
-        self.env['mail.activity'].sudo().search(
-            [('res_model', '=', self._name), ('res_id', 'in', record_ids)]
-        ).unlink()
-        return result
-
-    def _read_group_groupby(self, groupby_spec, query):
+    def _read_group_groupby(self, alias, groupby_spec, query):
         if groupby_spec != 'activity_state':
-            return super()._read_group_groupby(groupby_spec, query)
-        self.check_field_access_rights('read', ['activity_state'])
+            return super()._read_group_groupby(alias, groupby_spec, query)
+        self._check_field_access(self._fields['activity_state'], 'read')
+
+        # if already grouped by activity_state, do not add the join again
+        alias = query.make_alias(self._table, 'last_activity_state')
+        if alias in query._joins:
+            return SQL.identifier(alias, 'activity_state')
 
         self.env['mail.activity'].flush_model(['res_model', 'res_id', 'user_id', 'date_deadline'])
         self.env['res.users'].flush_model(['partner_id'])
@@ -284,18 +291,23 @@ class MailActivityMixin(models.AbstractModel):
 
         return SQL.identifier(alias, 'activity_state')
 
-    def toggle_active(self):
-        """ Before archiving the record we should also remove its ongoing
-        activities. Otherwise they stay in the systray and concerning archived
-        records it makes no sense. """
-        record_to_deactivate = self.filtered(lambda rec: rec[rec._active_name])
-        if record_to_deactivate:
-            # use a sudo to bypass every access rights; all activities should be removed
-            self.env['mail.activity'].sudo().search([
-                ('res_model', '=', self._name),
-                ('res_id', 'in', record_to_deactivate.ids)
-            ]).unlink()
-        return super(MailActivityMixin, self).toggle_active()
+    # Reschedules next my activity to Today
+    def action_reschedule_my_next_today(self):
+        self.ensure_one()
+        my_next_activity = self.activity_ids.filtered(lambda activity: activity.user_id == self.env.user)[:1]
+        my_next_activity.action_reschedule_today()
+
+    # Reschedules next my activity to Tomorrow
+    def action_reschedule_my_next_tomorrow(self):
+        self.ensure_one()
+        my_next_activity = self.activity_ids.filtered(lambda activity: activity.user_id == self.env.user)[:1]
+        my_next_activity.action_reschedule_tomorrow()
+
+    # Reschedules next my activity to Next Monday
+    def action_reschedule_my_next_nextweek(self):
+        self.ensure_one()
+        my_next_activity = self.activity_ids.filtered(lambda activity: activity.user_id == self.env.user)[:1]
+        my_next_activity.action_reschedule_nextweek()
 
     def activity_send_mail(self, template_id):
         """ Automatically send an email based on the given mail.template, given
@@ -309,7 +321,7 @@ class MailActivityMixin(models.AbstractModel):
         )
         return True
 
-    def activity_search(self, act_type_xmlids='', user_id=None, additional_domain=None):
+    def activity_search(self, act_type_xmlids='', user_id=None, additional_domain=None, only_automated=True):
         """ Search automated activities on current record set, given a list of activity
         types xml IDs. It is useful when dealing with specific types involved in automatic
         activities management.
@@ -317,6 +329,7 @@ class MailActivityMixin(models.AbstractModel):
         :param act_type_xmlids: list of activity types xml IDs
         :param user_id: if set, restrict to activities of that user_id;
         :param additional_domain: if set, filter on that domain;
+        :param only_automated: if unset, search for all activities, not only automated ones;
         """
         if self.env.context.get('mail_activity_automation_skip'):
             return self.env['mail.activity']
@@ -326,18 +339,18 @@ class MailActivityMixin(models.AbstractModel):
         if not any(activity_types_ids):
             return self.env['mail.activity']
 
-        domain = [
-            '&', '&', '&',
+        domain = Domain([
             ('res_model', '=', self._name),
             ('res_id', 'in', self.ids),
-            ('automated', '=', True),
             ('activity_type_id', 'in', activity_types_ids)
-        ]
+        ])
 
+        if only_automated:
+            domain &= Domain('automated', '=', True)
         if user_id:
-            domain = expression.AND([domain, [('user_id', '=', user_id)]])
+            domain &= Domain('user_id', '=', user_id)
         if additional_domain:
-            domain = expression.AND([domain, additional_domain])
+            domain &= Domain(additional_domain)
 
         return self.env['mail.activity'].search(domain)
 
@@ -363,13 +376,19 @@ class MailActivityMixin(models.AbstractModel):
             _logger.warning("Scheduled deadline should be a date (got %s)", date_deadline)
         if act_type_xmlid:
             activity_type_id = self.env['ir.model.data']._xmlid_to_res_id(act_type_xmlid, raise_if_not_found=False)
-            if activity_type_id:
-                activity_type = self.env['mail.activity.type'].browse(activity_type_id)
-            else:
-                activity_type = self._default_activity_type()
         else:
             activity_type_id = act_values.get('activity_type_id', False)
-            activity_type = self.env['mail.activity.type'].browse(activity_type_id) if activity_type_id else self.env['mail.activity.type']
+        activity_type = self.env['mail.activity.type'].browse(activity_type_id)
+        invalid_model = activity_type.res_model and activity_type.res_model != self._name
+        if not activity_type or invalid_model:
+            if invalid_model:
+                _logger.warning(
+                    'Invalid activity type model %s used on %s (tried with xml id %s)',
+                    activity_type.res_model, self._name, act_type_xmlid or '',
+                )
+            # TODO master: reset invalid model to default type, keep it for stable as not harmful
+            if not activity_type:
+                activity_type = self._default_activity_type()
 
         model_id = self.env['ir.model']._get(self._name).id
         create_vals_list = []
@@ -384,8 +403,8 @@ class MailActivityMixin(models.AbstractModel):
                 'res_id': record.id,
             }
             create_vals.update(act_values)
-            if not create_vals.get('user_id'):
-                create_vals['user_id'] = activity_type.default_user_id.id or self.env.uid
+            if not create_vals.get('user_id') and activity_type.default_user_id:
+                create_vals['user_id'] = activity_type.default_user_id.id
             create_vals_list.append(create_vals)
         return self.env['mail.activity'].create(create_vals_list)
 
@@ -411,7 +430,7 @@ class MailActivityMixin(models.AbstractModel):
             activities += record.activity_schedule(act_type_xmlid=act_type_xmlid, date_deadline=date_deadline, summary=summary, note=note, **act_values)
         return activities
 
-    def activity_reschedule(self, act_type_xmlids, user_id=None, date_deadline=None, new_user_id=None):
+    def activity_reschedule(self, act_type_xmlids, user_id=None, date_deadline=None, new_user_id=None, only_automated=True):
         """ Reschedule some automated activities. Activities to reschedule are
         selected based on type xml ids and optionally by user. Purpose is to be
         able to
@@ -427,7 +446,7 @@ class MailActivityMixin(models.AbstractModel):
         activity_types_ids = [act_type_id for act_type_id in activity_types_ids if act_type_id]
         if not any(activity_types_ids):
             return False
-        activities = self.activity_search(act_type_xmlids, user_id=user_id)
+        activities = self.activity_search(act_type_xmlids, user_id=user_id, only_automated=only_automated)
         if activities:
             write_vals = {}
             if date_deadline:
@@ -437,7 +456,7 @@ class MailActivityMixin(models.AbstractModel):
             activities.write(write_vals)
         return activities
 
-    def activity_feedback(self, act_type_xmlids, user_id=None, feedback=None, attachment_ids=None):
+    def activity_feedback(self, act_type_xmlids, user_id=None, feedback=None, attachment_ids=None, only_automated=True):
         """ Set activities as done, limiting to some activity types and
         optionally to a given user. """
         if self.env.context.get('mail_activity_automation_skip'):
@@ -448,14 +467,14 @@ class MailActivityMixin(models.AbstractModel):
         activity_types_ids = [act_type_id for act_type_id in activity_types_ids if act_type_id]
         if not any(activity_types_ids):
             return False
-        activities = self.activity_search(act_type_xmlids, user_id=user_id)
+        activities = self.activity_search(act_type_xmlids, user_id=user_id, only_automated=only_automated)
         if activities:
             activities.action_feedback(feedback=feedback, attachment_ids=attachment_ids)
         return True
 
-    def activity_unlink(self, act_type_xmlids, user_id=None):
+    def activity_unlink(self, act_type_xmlids, user_id=None, only_automated=True):
         """ Unlink activities, limiting to some activity types and optionally
-        to a given user. """
+       to a given user. """
         if self.env.context.get('mail_activity_automation_skip'):
             return False
 
@@ -464,5 +483,5 @@ class MailActivityMixin(models.AbstractModel):
         activity_types_ids = [act_type_id for act_type_id in activity_types_ids if act_type_id]
         if not any(activity_types_ids):
             return False
-        self.activity_search(act_type_xmlids, user_id=user_id).unlink()
+        self.activity_search(act_type_xmlids, user_id=user_id, only_automated=only_automated).unlink()
         return True

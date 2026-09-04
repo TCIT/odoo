@@ -56,7 +56,7 @@
         <record id="res_partner_bank_rule" model="ir.rule">
             <field name="name">Partner bank company rule</field>
             <field name="model_id" ref="model_res_partner_bank"/>
-            <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+            <field name="domain_force">['|', ('company_id', 'parent_of', company_ids), ('company_id', '=', False)]</field>
         </record>
 
         <record id="res_currency_rate_rule" model="ir.rule">
@@ -84,27 +84,20 @@
         </record>
 
         <record id="ir_filters_employee_rule" model="ir.rule">
-            <field name="name">ir.filters.owner</field>
+            <field name="name">ir.filter: owner or global</field>
             <field name="model_id" ref="model_ir_filters"/>
-            <field name="domain_force">[('user_id','in',[False,user.id])]</field>
+            <field name="domain_force">[('user_ids','in',[False,user.id])]</field>
             <field name="groups" eval="[Command.link(ref('base.group_user'))]"/>
-            <field name="perm_unlink" eval="False"/>
-        </record>
-
-        <record id="ir_filters_delete_own_rule" model="ir.rule">
-            <field name="name">ir.filters.own.rule.delete</field>
-            <field name="model_id" ref="model_ir_filters"/>
-            <field name="domain_force">[('user_id', '=', user.id)]</field>
-            <field name="groups" eval="[Command.link(ref('base.group_user'))]"/>
-            <field name="perm_read" eval="False"/>
-            <field name="perm_write" eval="False"/>
-            <field name="perm_create" eval="False"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
         </record>
 
         <record id="ir_filters_portal_public_rule" model="ir.rule">
             <field name="name">ir.filter: portal/public</field>
             <field name="model_id" ref="model_ir_filters"/>
-            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="domain_force">[('user_ids', 'in', user.ids)]</field>
             <field name="groups" eval="[Command.link(ref('base.group_portal')), Command.link(ref('base.group_public'))]"/>
         </record>
 
@@ -150,6 +143,13 @@
             <field name="model_id" ref="model_res_users"/>
             <field eval="True" name="global"/>
             <field name="domain_force">['|', ('share', '=', False), ('company_ids', 'in', company_ids)]</field>
+        </record>
+
+        <record id="res_users_rule_portal" model="ir.rule">
+            <field name="name">portal user access</field>
+            <field name="model_id" ref="model_res_users"/>
+            <field name="groups" eval="[Command.set([ref('base.group_portal')])]"/>
+            <field name="domain_force">[('commercial_partner_id', '=', user.commercial_partner_id.id)]</field>
         </record>
 
         <record id="change_password_own_rule" model="ir.rule">
@@ -253,5 +253,11 @@
             <field name="groups" eval="[Command.link(ref('base.group_system'))]"/>
         </record>
 
+        <record id="properties_base_definition_rule_admin" model="ir.rule">
+            <field name="name">properties.base.definition: system all access</field>
+            <field name="model_id" ref="base.model_properties_base_definition"/>
+            <field name="groups" eval="[Command.link(ref('base.group_system'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
     </data>
 </odoo>

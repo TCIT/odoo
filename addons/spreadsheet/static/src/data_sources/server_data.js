@@ -1,4 +1,3 @@
-/** @odoo-module */
 // @ts-check
 
 import { EvaluationError } from "@odoo/o-spreadsheet";
@@ -99,8 +98,6 @@ export class ServerData {
         this.startLoadingCallback = whenDataStartLoading ?? (() => {});
         /** @type {Record<string, unknown>}*/
         this.cache = {};
-        /** @type {Record<string, Promise<unknown>>}*/
-        this.asyncCache = {};
         this.batchEndpoints = {};
     }
 
@@ -156,21 +153,6 @@ export class ServerData {
     }
 
     /**
-     * Returns the request result if cached or the associated promise
-     * @param {string} resModel
-     * @param {string} method
-     * @param  {unknown[]} [args]
-     * @returns {Promise<any>}
-     */
-    async fetch(resModel, method, args) {
-        const request = new Request(resModel, method, args);
-        if (!(request.key in this.asyncCache)) {
-            this.asyncCache[request.key] = this.orm.call(resModel, method, args);
-        }
-        return this.asyncCache[request.key];
-    }
-
-    /**
      * @private
      * @param {Request} request
      * @returns {void}
@@ -187,7 +169,11 @@ export class ServerData {
      */
     _getOrThrowCachedResponse(request) {
         const data = this.cache[request.key];
-        if (data instanceof Error || isLoadingError({ value: data })) {
+        if (
+            data instanceof Error ||
+            data instanceof EvaluationError ||
+            isLoadingError({ value: data })
+        ) {
             throw data;
         }
         return data;

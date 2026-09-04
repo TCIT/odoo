@@ -9,9 +9,11 @@ class StockScrap(models.Model):
 
     production_id = fields.Many2one(
         'mrp.production', 'Manufacturing Order',
+        index='btree_not_null',
         check_company=True)
     workorder_id = fields.Many2one(
         'mrp.workorder', 'Work Order',
+        index='btree_not_null',
         check_company=True) # Not to restrict or prefer quants, but informative
     product_is_kit = fields.Boolean(related='product_id.is_kits')
     product_template = fields.Many2one(related='product_id.product_tmpl_id')
@@ -64,12 +66,20 @@ class StockScrap(models.Model):
             else:
                 return super()._onchange_serial_number()
 
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        if self.product_is_kit:
+            self.bom_id = self.env['mrp.bom']._bom_find(self.product_id, company_id=self.company_id.id, bom_type='phantom')[self.product_id]
+        else:
+            self.bom_id = False
+
     @api.depends('move_ids', 'move_ids.move_line_ids.quantity', 'product_id')
     def _compute_scrap_qty(self):
         self.scrap_qty = 1
         for scrap in self:
             if not scrap.bom_id:
-                return super(StockScrap, scrap)._compute_scrap_qty()
+                super(StockScrap, scrap)._compute_scrap_qty()
+                continue
             if scrap.move_ids:
                 filters = {
                     'incoming_moves': lambda m: True,
@@ -80,15 +90,23 @@ class StockScrap(models.Model):
     def _should_check_available_qty(self):
         return super()._should_check_available_qty() or self.product_is_kit
 
+    def _create_scrap_move(self):
+        move = super()._create_scrap_move()
+        if self.product_id.is_kits:
+            move = move.with_context(is_scrap=True).action_explode()
+        return move
+
     def do_replenish(self, values=False):
         self.ensure_one()
         values = values or {}
-        if self.production_id and self.production_id.procurement_group_id:
+        if self.production_id and self.production_id.production_group_id:
             values.update({
-                'group_id': self.production_id.procurement_group_id,
-                'move_dest_ids': self.production_id.procurement_group_id.stock_move_ids.filtered(
-                    lambda m: m.location_id == self.location_id
-                              and m.product_id == self.product_id
-                              and m.state not in ('assigned', 'done', 'cancel'))
+                'production_group_id': self.production_id.production_group_id.id,
             })
         super().do_replenish(values)
+
+    def do_scrap(self):
+        for scrap in self:
+            if scrap.production_id and scrap.lot_id:
+                scrap.production_id.move_raw_ids.move_line_ids.filtered(lambda ml: ml.lot_id == scrap.lot_id).picked = False
+        return super().do_scrap()

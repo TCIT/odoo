@@ -1,29 +1,32 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from ast import literal_eval
+from collections import defaultdict
+from lxml import html
 
-from odoo import models, fields, api, SUPERUSER_ID
+from odoo import SUPERUSER_ID, api, fields, models
+from odoo.exceptions import ValidationError
+from odoo.fields import Domain
 from odoo.http import request
-from odoo.osv import expression
 
 
-class website_form_config(models.Model):
+class Website(models.Model):
     _inherit = 'website'
 
     def _website_form_last_record(self):
-        if request and request.session.form_builder_model_model:
-            return request.env[request.session.form_builder_model_model].browse(request.session.form_builder_id)
+        if request and request.session.get('form_builder_model_model'):
+            return request.env[request.session['form_builder_model_model']].browse(request.session['form_builder_id'])
         return False
 
 
-class website_form_model(models.Model):
+class IrModel(models.Model):
     _name = 'ir.model'
     _description = 'Models'
-    _inherit = 'ir.model'
+    _inherit = ['ir.model']
 
     website_form_access = fields.Boolean('Allowed to use in forms', help='Enable the form builder feature for this model.')
     website_form_default_field_id = fields.Many2one('ir.model.fields', 'Field for custom form data', domain="[('model', '=', model), ('ttype', '=', 'text')]", help="Specify the field which will contain meta and custom form fields datas.")
-    website_form_label = fields.Char("Label for form action", help="Form action label. Ex: crm.lead could be 'Send an e-mail' and project.issue could be 'Create an Issue'.")
+    website_form_label = fields.Char("Label for form action", help="Form action label. Ex: crm.lead could be 'Send an e-mail' and project.issue could be 'Create an Issue'.", translate=True)
     website_form_key = fields.Char(help='Used in FormBuilder Registry')
 
     def _get_form_writable_fields(self, property_origins=None):
@@ -54,7 +57,7 @@ class website_form_model(models.Model):
         model = self.env[model_name]
         fields_get = model.fields_get()
 
-        for key, val in model._inherits.items():
+        for val in model._inherits.values():
             fields_get.pop(val, None)
 
         # Unrequire fields with default values
@@ -110,7 +113,7 @@ class website_form_model(models.Model):
                             if 'domain' in property_definition and isinstance(property_definition['domain'], str):
                                 property_definition['domain'] = literal_eval(property_definition['domain'])
                                 try:
-                                    property_definition['domain'] = expression.normalize_domain(property_definition['domain'])
+                                    property_definition['domain'] = list(Domain(property_definition['domain']))
                                 except Exception:
                                     # Ignore non-fully defined properties
                                     continue
@@ -128,24 +131,70 @@ class website_form_model(models.Model):
         )
 
 
-class website_form_model_fields(models.Model):
+class IrModelFields(models.Model):
     """ fields configuration for form builder """
-    _name = 'ir.model.fields'
     _description = 'Fields'
     _inherit = 'ir.model.fields'
 
     def init(self):
         # set all existing unset website_form_blacklisted fields to ``true``
         #  (so that we can use it as a whitelist rather than a blacklist)
-        self._cr.execute('UPDATE ir_model_fields'
+        self.env.cr.execute('UPDATE ir_model_fields'
                          ' SET website_form_blacklisted=true'
                          ' WHERE website_form_blacklisted IS NULL')
         # add an SQL-level default value on website_form_blacklisted to that
         # pure-SQL ir.model.field creations (e.g. in _reflect) generate
         # the right default value for a whitelist (aka fields should be
         # blacklisted by default)
-        self._cr.execute('ALTER TABLE ir_model_fields '
+        self.env.cr.execute('ALTER TABLE ir_model_fields '
                          ' ALTER COLUMN website_form_blacklisted SET DEFAULT true')
+
+    @api.ondelete(at_uninstall=False)
+    def _check_if_used_in_website_form(self):
+        """Prevent field deletion if used in a website form."""
+        if not self:
+            return
+
+        fields_by_model = defaultdict(list)
+        for field in self:
+            fields_by_model[field.model].append(field.name)
+
+        def _form_domain(field_name):
+            return Domain.OR([
+                [(field_name, 'ilike', f'data-model_name="{model}"')]
+                for model in fields_by_model
+            ])
+
+        def _check(source_html, display_name):
+            arch_parsed = html.fromstring(source_html)
+            for model, fnames in fields_by_model.items():
+                for fname in fnames:
+                    xpath = f'//form[@data-model_name="{model}"]//*[@name="{fname}"]'
+                    if arch_parsed.xpath(xpath):
+                        raise ValidationError(self.env._(
+                            "The field '%(field)s' cannot be deleted because it is referenced in a website view.\n"
+                            "Model: %(model)s\n"
+                            "View: %(view)s",
+                            field=fname,
+                            model=model,
+                            view=display_name,
+                        ))
+
+        # Scan `ir.ui.view.arch_db` (always first in `_get_html_fields`) plus
+        # stored HTML columns where a `<form>` can still exist in the database:
+        # - sanitization disabled (`sanitize=False`, e.g. blog.post.content);
+        # - forms allowed (`sanitize_form=False`, e.g. product.template.website_description);
+        # - `sanitize_overridable=True`: users in `base.group_sanitize_override`
+        #   bypass `html_sanitize`, so `<form>` may be stored even when
+        #   `sanitize` and `sanitize_form` are True (e.g. event.sponsor.website_description).
+        # Other HTML fields strip `<form>` on every write and need not be scanned.
+        for model_name, field_name in self.env['website']._get_html_fields():
+            field = self.env[model_name]._fields[field_name]
+            if field.type == 'html' and field.sanitize and field.sanitize_form and not field.sanitize_overridable:
+                continue
+            records = self.env[model_name].sudo().with_context(active_test=False).search(_form_domain(field_name))
+            for record in records:
+                _check(record[field_name], record.display_name)
 
     @api.model
     def formbuilder_whitelist(self, model, fields):

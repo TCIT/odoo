@@ -16,6 +16,7 @@
     <record id="badge_list_action" model="ir.actions.act_window">
         <field name="name">Badges</field>
         <field name="res_model">gamification.badge</field>
+        <field name="path">badges</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="gamification_badge_view_search"/>
         <field name="help" type="html">
@@ -66,7 +67,7 @@
                         <field name="description" nolabel="1" placeholder="Badge Description" colspan="2"/>
                     </group>
                     <group string="Granting">
-                        <div class="oe_grey" colspan="2">
+                        <div class="opacity-50" colspan="2">
                             Security rules to define who is allowed to manually grant badges. Not enforced for administrator.
                         </div>
                         <group>
@@ -79,10 +80,10 @@
                             <label for="stat_my_monthly_sending"/>
                             <div>
                                 <field name="stat_my_monthly_sending" invisible="rule_auth == 'nobody'" />
-                                <div invisible="remaining_sending == -1" class="oe_grey">
+                                <div invisible="remaining_sending == -1" class="opacity-50">
                                     You can still grant <field name="remaining_sending" class="oe_inline"/> badges this month
                                 </div>
-                                <div invisible="remaining_sending != -1" class="oe_grey">
+                                <div invisible="remaining_sending != -1" class="opacity-50">
                                     No monthly sending limit
                                 </div>
                             </div>

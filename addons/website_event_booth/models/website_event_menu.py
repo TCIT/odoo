@@ -4,7 +4,7 @@
 from odoo import fields, models
 
 
-class EventMenu(models.Model):
+class WebsiteEventMenu(models.Model):
     _inherit = "website.event.menu"
 
     menu_type = fields.Selection(

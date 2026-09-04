@@ -17,7 +17,7 @@ import { toStringExpression, BUTTON_CLICK_PARAMS } from "./utils";
 
 import { xml } from "@odoo/owl";
 
-const BUTTON_STRING_PROPS = ["string", "size", "title", "icon", "id"];
+const BUTTON_STRING_PROPS = ["string", "size", "title", "icon", "id", "disabled"];
 const INTERP_REGEXP = /(\{\{|#\{)(.*?)(\}{1,2})/g;
 
 /**
@@ -250,7 +250,7 @@ export class ViewCompiler {
     compile(key, params = {}) {
         const root = this.templates[key].cloneNode(true);
         const child = this.compileNode(root, params);
-        const newRoot = createElement("t", [child]);
+        const newRoot = createElement("t", child ? [child] : []);
         newRoot.setAttribute("t-translation", "off");
         return newRoot;
     }
@@ -268,6 +268,9 @@ export class ViewCompiler {
             return createTextNode(node.nodeValue);
         }
 
+        if (node.hasAttribute("t-translation")) {
+            node.removeAttribute("t-translation");
+        }
         this.validateNode(node);
         let invisible;
         if (evalInvisible) {
@@ -374,10 +377,7 @@ export class ViewCompiler {
         field.setAttribute("name", `'${fieldName}'`);
         field.setAttribute("record", recordExpr);
         field.setAttribute("fieldInfo", `__comp__.props.archInfo.fieldNodes['${fieldId}']`);
-        field.setAttribute(
-            "readonly",
-            `__comp__.props.archInfo.activeActions?.edit === false and !${recordExpr}.isNew`
-        );
+        field.setAttribute("readonly", `__comp__.props.readonly`);
 
         if (el.hasAttribute("widget")) {
             field.setAttribute("type", `'${el.getAttribute("widget")}'`);

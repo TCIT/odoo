@@ -5,6 +5,28 @@ import { getKwArgs, makeKwArgs, models } from "@web/../tests/web_test_helpers";
 export class MailCannedResponse extends models.ServerModel {
     _name = "mail.canned.response";
 
+    _views = {
+        list: `
+            <list>
+                <field name="source" widget="shortcut"/>
+            </list>
+        `,
+        form: `
+            <form>
+                <field name="source" widget="shortcut"/>
+            </form>
+        `,
+        kanban: `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="source" widget="shortcut"/>
+                    </t>
+                </templates>
+            </kanban>
+        `,
+    };
+
     create() {
         const cannedReponseIds = super.create(...arguments);
         this._broadcast(cannedReponseIds);
@@ -42,12 +64,7 @@ export class MailCannedResponse extends models.ServerModel {
         }
     }
 
-    _to_store(ids, store, fields) {
-        const kwargs = getKwArgs(arguments, "ids", "store", "fields");
-        fields = kwargs.fields;
-        if (!fields) {
-            fields = ["source", "substitution"];
-        }
-        store.add(this._name, this._read_format(ids, fields, false));
+    get _to_store_defaults() {
+        return ["source", "substitution"];
     }
 }

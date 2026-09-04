@@ -11,8 +11,6 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'property_account_receivable_id': 'uy_code_11300',
             'property_account_payable_id': 'uy_code_21100',
-            'property_account_income_categ_id': 'uy_code_4102',
-            'property_account_expense_categ_id': 'uy_code_5100',
             'code_digits': '6',
             'name': _('Uruguayan Generic Chart of Accounts'),
         }
@@ -34,6 +32,10 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'vat4',
                 'deferred_expense_account_id': 'uy_code_11407',
                 'deferred_revenue_account_id': 'uy_code_21321',
+                'income_account_id': 'uy_code_4102',
+                'expense_account_id': 'uy_code_5100',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'uy_code_11704',
             },
         }
 
@@ -41,23 +43,31 @@ class AccountChartTemplate(models.AbstractModel):
     def _get_uy_account_journal(self):
         return {
             'sale': {
-                "name": _("Customer Invoices"),
+                "name": _("Sales"),
                 "code": "0001",
                 "l10n_latam_use_documents": True,
                 "refund_sequence": False,
             },
             'purchase': {
-                "name": _("Vendor Bills"),
+                "name": _("Purchases"),
                 "code": "0002",
                 "l10n_latam_use_documents": True,
                 "refund_sequence": False,
             },
         }
 
-    def _load(self, template_code, company, install_demo):
+    def _load(self, template_code, company, install_demo, force_create=True):
         """ Set companies rut as the company identification type  after install the chart of account,
         this one is the uruguayan vat """
-        res = super()._load(template_code, company, install_demo)
+        res = super()._load(template_code, company, install_demo, force_create)
         if template_code == 'uy':
             company.partner_id.l10n_latam_identification_type_id = self.env.ref('l10n_uy.it_rut')
         return res
+
+    @template('uy', 'account.account')
+    def _get_uy_account_account(self):
+        return {
+            'uy_code_11704': {
+                'account_stock_variation_id': 'uy_code_5401',
+            },
+        }

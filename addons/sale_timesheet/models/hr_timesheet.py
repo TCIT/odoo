@@ -3,8 +3,7 @@
 from odoo.exceptions import UserError, ValidationError
 
 from odoo import api, fields, models, _
-from odoo.osv import expression
-from odoo.tools import format_list
+from odoo.fields import Domain
 from odoo.tools.misc import unquote
 
 TIMESHEET_INVOICE_TYPES = [
@@ -19,15 +18,15 @@ TIMESHEET_INVOICE_TYPES = [
     ('other_costs', 'Other costs'),
 ]
 
+
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
     def _domain_so_line(self):
-        domain = expression.AND([
+        domain = Domain.AND([
             self.env['sale.order.line']._sellable_lines_domain(),
             self.env['sale.order.line']._domain_sale_line_service(),
             [
-                ('qty_delivered_method', 'in', ['analytic', 'timesheet']),
                 ('order_partner_id.commercial_partner_id', '=', unquote('commercial_partner_id')),
             ],
         ])
@@ -38,7 +37,7 @@ class AccountAnalyticLine(models.Model):
     commercial_partner_id = fields.Many2one('res.partner', compute="_compute_commercial_partner")
     timesheet_invoice_id = fields.Many2one('account.move', string="Invoice", readonly=True, copy=False, help="Invoice created from the timesheet", index='btree_not_null')
     so_line = fields.Many2one(compute="_compute_so_line", store=True, readonly=False,
-        domain=_domain_so_line,
+        domain=_domain_so_line, falsy_value_label="Non-billable",
         help="Sales order item to which the time spent will be added in order to be invoiced to your customer. Remove the sales order item for the timesheet entry to be non-billable.")
     # we needed to store it only in order to be able to groupby in the portal
     order_id = fields.Many2one(related='so_line.order_id', store=True, readonly=True, index=True)
@@ -49,7 +48,7 @@ class AccountAnalyticLine(models.Model):
     @api.depends('project_id.partner_id.commercial_partner_id', 'task_id.partner_id.commercial_partner_id')
     def _compute_commercial_partner(self):
         for timesheet in self:
-            timesheet.commercial_partner_id = timesheet.task_id.partner_id.commercial_partner_id or timesheet.project_id.partner_id.commercial_partner_id
+            timesheet.commercial_partner_id = timesheet.task_id.sudo().partner_id.commercial_partner_id or timesheet.project_id.sudo().partner_id.commercial_partner_id
 
     @api.depends('so_line.product_id', 'project_id.billing_type', 'amount')
     def _compute_timesheet_invoice_type(self):
@@ -95,7 +94,7 @@ class AccountAnalyticLine(models.Model):
 
     def _is_not_billed(self):
         self.ensure_one()
-        return not self.timesheet_invoice_id or self.timesheet_invoice_id.state == 'cancel'
+        return not self.timesheet_invoice_id or (self.timesheet_invoice_id.state == 'cancel' and self.timesheet_invoice_id.payment_state != 'invoicing_legacy')
 
     def _check_timesheet_can_be_billed(self):
         return self.so_line in self.project_id.mapped('sale_line_employee_ids.sale_line_id') | self.task_id.sale_line_id | self.project_id.sale_line_id
@@ -103,9 +102,17 @@ class AccountAnalyticLine(models.Model):
     def _check_can_write(self, values):
         # prevent to update invoiced timesheets if one line is of type delivery
         if self.sudo().filtered(lambda aal: aal.so_line.product_id.invoice_policy == "delivery") and self.filtered(lambda t: t.timesheet_invoice_id and t.timesheet_invoice_id.state != 'cancel'):
-            if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'project_id', 'task_id', 'so_line', 'amount', 'date']):
+            if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'project_id', 'task_id', 'so_line', 'date']):
                 raise UserError(_('You cannot modify timesheets that are already invoiced.'))
         return super()._check_can_write(values)
+
+    def write(self, vals):
+        project = self.env['project.project'].sudo().browse(vals.get('project_id'))
+
+        if project and not project.allow_billable:
+            vals['is_so_line_edited'] = False
+
+        return super().write(vals)
 
     def _timesheet_determine_sale_line(self):
         """ Deduce the SO line associated to the timesheet line:
@@ -142,7 +149,7 @@ class AccountAnalyticLine(models.Model):
             thus there is no meaning of showing invoice with ordered quantity.
         """
         domain = super()._timesheet_get_portal_domain()
-        return expression.AND([domain, [('timesheet_invoice_type', 'in', ['billable_time', 'non_billable', 'billable_fixed', 'billable_manual', 'billable_milestones'])]])
+        return Domain.AND([domain, [('timesheet_invoice_type', 'in', ['billable_time', 'non_billable', 'billable_fixed', 'billable_manual', 'billable_milestones'])]])
 
     @api.model
     def _timesheet_get_sale_domain(self, order_lines_ids, invoice_ids):
@@ -173,7 +180,16 @@ class AccountAnalyticLine(models.Model):
 
     def _get_employee_mapping_entry(self):
         self.ensure_one()
-        return self.env['project.sale.line.employee.map'].search([('project_id', '=', self.project_id.id), ('employee_id', '=', self.employee_id.id or self.env.user.employee_id.id)])
+        if len(self.env.companies) == 1 or self.employee_id:
+            return self.env['project.sale.line.employee.map'].search([
+                ('project_id', '=', self.project_id.id),
+                ('employee_id', '=', self.employee_id.id or self.env.user.employee_id.id)
+            ], limit=1)
+        employees = self.env['project.sale.line.employee.map'].search([
+            ('project_id', '=', self.project_id.id),
+            ('employee_id', 'in', self.env.user.employee_ids.ids),
+            ])
+        return employees.filtered(lambda e: e.employee_id.company_id.id == self.env.company.id)[:1] or employees.filtered(lambda e: e.employee_id.company_id.id in self.env.companies.ids)[:1]
 
     def _hourly_cost(self):
         if self.project_id.pricing_type == 'employee_rate':
@@ -206,7 +222,7 @@ class AccountAnalyticLine(models.Model):
 
     def _timesheet_convert_sol_uom(self, sol, to_unit):
         to_uom = self.env.ref(to_unit)
-        return round(sol.product_uom._compute_quantity(sol.product_uom_qty, to_uom, raise_if_failure=False), 2)
+        return round(sol.product_uom_id._compute_quantity(sol.product_uom_qty, to_uom, raise_if_failure=False), 2)
 
     def _is_updatable_timesheet(self):
         return super()._is_updatable_timesheet and self._is_not_billed()
@@ -219,7 +235,10 @@ class AccountAnalyticLine(models.Model):
         company = self.env['res.company'].browse(vals.get('company_id'))
         accounts = self.env['account.analytic.account'].browse([
             int(account_id) for account_id in next(iter(distribution)).split(',')
-        ])
+        ]).exists()
+
+        if not accounts:
+            return super()._timesheet_preprocess_get_accounts(vals)
 
         plan_column_names = {account.root_plan_id._column_name() for account in accounts}
         mandatory_plans = [plan for plan in self._get_mandatory_plans(company, business_domain='timesheet') if plan['column_name'] != 'account_id']
@@ -227,7 +246,7 @@ class AccountAnalyticLine(models.Model):
         if missing_plan_names:
             raise ValidationError(_(
                 "'%(missing_plan_names)s' analytic plan(s) required on the analytic distribution of the sale order item '%(so_line_name)s' linked to the timesheet.",
-                missing_plan_names=format_list(self.env, missing_plan_names),
+                missing_plan_names=missing_plan_names,
                 so_line_name=so_line.name,
             ))
 

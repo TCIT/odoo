@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, api, Command, fields, models
-from odoo.osv import expression
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.fields import Command, Domain
 
 
 class StockPickingType(models.Model):
@@ -44,11 +43,15 @@ class StockPickingType(models.Model):
             record.count_picking_batch = count.get((record.id, False), 0)
 
     def action_batch(self):
-        action = self.env['ir.actions.act_window']._for_xml_id("stock_picking_batch.stock_picking_batch_action")
+        action = self._get_action('stock_picking_batch.stock_picking_batch_action')
         if self.env.context.get("view_mode"):
             del action["mobile_view_mode"]
             del action["views"]
             action["view_mode"] = self.env.context["view_mode"]
+        return action
+
+    def action_wave(self):
+        action = self._get_action('stock_picking_batch.action_picking_tree_wave')
         return action
 
     @api.model
@@ -222,6 +225,7 @@ class StockPicking(models.Model):
                 return new_batch
 
         # If nothing was found after those two steps, then create a batch with the current picking alone
+        new_batch_data['user_id'] = self.user_id.id
         new_batch = self.env['stock.picking.batch'].sudo().create(new_batch_data)
         if self.picking_type_id.batch_auto_confirm:
             new_batch.action_confirm()
@@ -252,15 +256,15 @@ class StockPicking(models.Model):
             ('batch_id', '=', False),
         ]
         if self.picking_type_id.batch_group_by_partner:
-            domain = expression.AND([domain, [('partner_id', '=', self.partner_id.id)]])
+            domain.append(('partner_id', '=', self.partner_id.id))
         if self.picking_type_id.batch_group_by_destination:
-            domain = expression.AND([domain, [('partner_id.country_id', '=', self.partner_id.country_id.id)]])
+            domain.append(('partner_id.country_id', '=', self.partner_id.country_id.id))
         if self.picking_type_id.batch_group_by_src_loc:
-            domain = expression.AND([domain, [('location_id', '=', self.location_id.id)]])
+            domain.append(('location_id', '=', self.location_id.id))
         if self.picking_type_id.batch_group_by_dest_loc:
-            domain = expression.AND([domain, [('location_dest_id', '=', self.location_dest_id.id)]])
+            domain.append(('location_dest_id', '=', self.location_dest_id.id))
 
-        return domain
+        return Domain(domain)
 
     def _get_possible_batches_domain(self):
         self.ensure_one()
@@ -271,15 +275,17 @@ class StockPicking(models.Model):
             ('is_wave', '=', False)
         ]
         if self.picking_type_id.batch_group_by_partner:
-            domain = expression.AND([domain, [('picking_ids.partner_id', '=', self.partner_id.id)]])
+            domain.append(('picking_ids.partner_id', '=', self.partner_id.id))
         if self.picking_type_id.batch_group_by_destination:
-            domain = expression.AND([domain, [('picking_ids.partner_id.country_id', '=', self.partner_id.country_id.id)]])
+            domain.append(('picking_ids.partner_id.country_id', '=', self.partner_id.country_id.id))
         if self.picking_type_id.batch_group_by_src_loc:
-            domain = expression.AND([domain, [('picking_ids.location_id', '=', self.location_id.id)]])
+            domain.append(('picking_ids.location_id', '=', self.location_id.id))
         if self.picking_type_id.batch_group_by_dest_loc:
-            domain = expression.AND([domain, [('picking_ids.location_dest_id', '=', self.location_dest_id.id)]])
+            domain.append(('picking_ids.location_dest_id', '=', self.location_dest_id.id))
+        if self.env.context.get('batches_to_validate'):
+            domain.append(('id', 'not in', self.env.context.get('batches_to_validate')))
 
-        return domain
+        return Domain(domain)
 
     def _get_auto_batch_description(self):
         """ Get the description of the automatically created batch based on the grouped pickings and grouping criteria """
@@ -295,10 +301,12 @@ class StockPicking(models.Model):
             description_items.append(self.location_dest_id.display_name)
         return ', '.join(description_items)
 
-    def _package_move_lines(self, batch_pack=False, move_lines_to_pack=False):
-        if batch_pack:
-            return super(StockPicking, self.batch_id.picking_ids if self.batch_id else self)._package_move_lines(batch_pack, move_lines_to_pack)
-        return super()._package_move_lines(batch_pack, move_lines_to_pack)
+    def _is_single_transfer(self):
+        return super()._is_single_transfer() or len(self.batch_id) == 1
+
+    def _add_to_wave_post_picking_split_hook(self):
+        # Hook meant to be overriden
+        pass
 
     def assign_batch_user(self, user_id):
         pickings = self.filtered(lambda p: p.user_id.id != user_id)

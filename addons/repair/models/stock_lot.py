@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class StockLot(models.Model):
@@ -45,7 +46,7 @@ class StockLot(models.Model):
             'domain': [('lot_id', '=', self.id)],
             'context': {
                 'default_product_id': self.product_id.id,
-                'default_lot_id': self.id,
+                'default_repair_lot_id': self.id,
                 'default_company_id': self.company_id.id or self.env.company.id,
             },
         })
@@ -70,3 +71,11 @@ class StockLot(models.Model):
                 'view_mode': 'list,form'
             })
         return action
+
+    def _check_create(self):
+        active_repair_id = self.env.context.get('active_repair_id')
+        if active_repair_id:
+            active_repair = self.env['repair.order'].browse(active_repair_id)
+            if active_repair and not active_repair.picking_type_id.use_create_lots:
+                raise UserError(_('You are not allowed to create a lot or serial number with this operation type. To change this, go on the operation type and tick the box "Create New Lots/Serial Numbers".'))
+        return super()._check_create()

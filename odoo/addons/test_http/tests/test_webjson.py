@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import html
+from http import HTTPStatus
 from base64 import b64encode
+from urllib.parse import parse_qs, urlsplit
 
 from datetime import date
 
@@ -20,13 +22,13 @@ CSRF_USER_HEADERS = {
 }
 
 
-def read_group_list(model, domain=None, groupby=(), fields=('__count',)):
-    result = model.web_read_group(domain or [], groupby=groupby, fields=fields, lazy=False)
+def read_group_list(model, domain=None, groupby=(), aggregates=('__count',)):
+    result = model.web_read_group(domain or [], groupby=groupby, aggregates=aggregates)
     # transform result:
     # - tuple into list
-    # - pop '__domain'
+    # - pop '__extra_domain'
     for group in result['groups']:
-        del group['__domain']
+        del group['__extra_domain']
         for k, v in group.items():
             if isinstance(v, tuple):
                 group[k] = list(v)
@@ -42,7 +44,7 @@ class TestHttpWebJson_1(TestHttpBase):
         # enable explicitely and make sure demo has permissions
         cls.env['ir.config_parameter'].set_param('web.json.enabled', True)
         cls.user_demo.write({
-            'groups_id': [Command.link(cls.env.ref('base.group_allow_export').id)],
+            'group_ids': [Command.link(cls.env.ref('base.group_allow_export').id)],
         })
 
         cls.milky_way = cls.env.ref('test_http.milky_way')
@@ -83,7 +85,7 @@ class TestHttpWebJson_1(TestHttpBase):
             self.skipTest("crm is not installed")
 
         self.authenticate_demo()
-        self.user_demo.groups_id += self.env.ref('sales_team.group_sale_salesman')
+        self.user_demo.group_ids += self.env.ref('sales_team.group_sale_salesman')
         self.url_open_json('/crm')
 
         self.env['ir.model.access'].search([
@@ -105,7 +107,7 @@ class TestHttpWebJson_1(TestHttpBase):
 
         # remove export permssion
         group_export = self.env.ref('base.group_allow_export')
-        self.user_demo.write({'groups_id': [Command.unlink(group_export.id)]})
+        self.user_demo.write({'group_ids': [Command.unlink(group_export.id)]})
 
         # check that demo has no access to /json
         with self.assertLogs('odoo.http', 'WARNING') as capture:
@@ -262,12 +264,13 @@ class TestHttpWebJson_1(TestHttpBase):
             env['test_http.stargate']
                 .web_search_read(domain, {'name': {}, 'sgc_designation': {}})
         )
-        # we should find one redirect with the domain in the URL
-        [hist] = res.history
-        self.assertEqual(hist.status_code, 307)
-        str_domain = str(domain).replace(' ', '+')
-        self.assertIn("limit=80", res.url)
-        self.assertIn(f"domain={str_domain}", res.url)
+        self.assertEqual(len(res.history), 1, "should had been redirected")
+        self.assertEqual(res.history[0].status_code, HTTPStatus.TEMPORARY_REDIRECT)
+        self.assertEqual(parse_qs(urlsplit(res.url).query), {
+            'domain': ["[('name', 'ilike', 'earth')]"],
+            'offset': ['0'],
+            'limit': ['80'],
+        })
 
     def test_webjson_pivot(self):
         env = self.authenticate_demo()
@@ -275,7 +278,7 @@ class TestHttpWebJson_1(TestHttpBase):
         self.assertEqual(
             res.json(),
             read_group_list(
-                env['test_http.stargate'], [], ['galaxy_id', 'has_galaxy_crystal'], ['availability']),
+                env['test_http.stargate'], [], ['galaxy_id', 'has_galaxy_crystal'], ['availability:avg']),
         )
 
         res = self.url_open_json('/test_http.stargate?view_type=pivot&groupby=has_galaxy_crystal&fields=availability:min')
@@ -307,7 +310,7 @@ class TestHttpWebJson_1(TestHttpBase):
 
     def test_webjson_activity(self):
         env = self.authenticate_demo()
-        env['test_http.stargate'].search([], limit=1).activity_schedule(summary='test')
+        env['test_http.stargate'].search([], limit=1).activity_schedule(summary='test', user_id=self.user_demo.id)
         res = self.url_open_json('/test_http.stargate?view_type=activity')
         # check that we have at least the following fields
         expected_fields = ["activity_ids", "activity_summary", "activity_user_id", "galaxy_id"]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models
@@ -6,7 +5,7 @@ from odoo import fields, models
 from odoo.addons.microsoft_calendar.models.microsoft_sync import microsoft_calendar_token
 
 
-class ResetMicrosoftAccount(models.TransientModel):
+class MicrosoftCalendarAccountReset(models.TransientModel):
     _name = 'microsoft.calendar.account.reset'
     _description = 'Microsoft Calendar Account Reset'
 

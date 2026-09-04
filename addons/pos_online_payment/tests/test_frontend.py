@@ -1,25 +1,26 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import uuid
 from unittest.mock import patch
 
-from odoo import Command, fields
+from odoo import fields
+from odoo.fields import Command
 from odoo.tools import mute_logger
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.pos_online_payment.tests.online_payment_common import OnlinePaymentCommon
 from odoo.addons.account.models.account_payment_method import AccountPaymentMethod
-from odoo.osv.expression import AND
 from odoo.addons.point_of_sale.tests.common import archive_products
+from odoo.exceptions import UserError
 
 import odoo.tests
 
 
-@odoo.tests.tagged('post_install', '-at_install')
-class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
+@odoo.tests.tagged('post_install', '-at_install', 'is_tour')
+class TestUi(TestPointOfSaleHttpCommon, OnlinePaymentCommon):
 
     def _get_url(self):
-        return f"/pos/ui?config_id={self.pos_config.id}"
+        return f"/pos/ui/{self.pos_config.id}"
 
     def start_pos_tour(self, tour_name, login="pos_user", **kwargs):
         self.start_tour(self._get_url(), tour_name, login=login, **kwargs)
@@ -27,7 +28,7 @@ class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
+        cls.env.user.group_ids |= cls.env.ref('point_of_sale.group_pos_manager')
         # Code from addons/account_payment/tests/common.py:
         Method_get_payment_method_information = AccountPaymentMethod._get_payment_method_information
 
@@ -184,7 +185,6 @@ class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
             'uuid': order_uid,
             'name': order_pos_reference,
             'session_id': current_session.id,
-            'sequence_number': 1,
             'user_id': self.pos_user.id,
             'partner_id': False,
             'access_token': str(uuid.uuid4()),
@@ -210,7 +210,7 @@ class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
 
         create_result = self.env['pos.order'].with_user(self.pos_user).sync_from_ui([order_data])
         self.assertEqual(len(current_session.order_ids), 1)
-        order_id = next(result_order_data for result_order_data in create_result['pos.order'] if result_order_data['pos_reference'] == order_pos_reference)['id']
+        order_id = next(result_order_data for result_order_data in create_result['pos.order'] if result_order_data['uuid'] == order_uid)['id']
 
         order = self.env['pos.order'].search([('id', '=', order_id)])
         self.assertEqual(order.state, 'draft')
@@ -280,6 +280,186 @@ class TestUi(AccountTestInvoicingCommon, OnlinePaymentCommon):
     def test_errors_tour(self):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('OnlinePaymentErrorsTour', login="pos_op_user")
+
+    def test_customer_display_online_payment(self):
+        self.start_tour(f"/pos_customer_display/{self.main_pos_config.id}/{self.main_pos_config.access_token}?access_token={self.main_pos_config.access_token}",
+                        'CustomerDisplayTourOnlinePayment', login="pos_user")
+
+    def test_refuse_online_payment_without_accounting_payment(self):
+        """
+        Test that a an order can not be paid through an online payment method from the backend
+        when no accounting payment are set for this payment method. Ensure that it will raise
+        an error as soon as it is tried as it is not supported yet. Also ensures that we can still
+        close the session afterwards, as it is a side effect of not throwing the error.
+        """
+        self.main_pos_config.open_ui()
+        session = self.main_pos_config.current_session_id
+        try:
+            self.env["pos.order"].sync_from_ui([{
+                "amount_paid": 1180,
+                "amount_tax": 180,
+                "amount_return": 0,
+                "amount_total": 1180,
+                "lines": [
+                    Command.create({
+                        "price_unit": 1000.0,
+                        "product_id": self.letter_tray.id,
+                        "price_subtotal": 1000.0,
+                        "price_subtotal_incl": 1180.0,
+                        "qty": 1,
+                    }),
+                ],
+                "name": "Order 12345-123-1234",
+                "session_id": session.id,
+                "payment_ids": [
+                    Command.create({
+                        "amount": 1180,
+                        "name": fields.Datetime.now(),
+                        "payment_method_id": self.online_payment_method.id,
+                    }),
+                ],
+                "uuid": "12345-123-1234",
+            }])
+            self.fail("An error should be raised if no accounting payment has been set")
+        except UserError as e:
+            self.assertIn("Cannot create a POS online payment without an accounting payment", str(e))
+            # Make sure that we can close the session
+            session.order_ids.filtered(lambda o: o.state == 'draft').unlink()
+            session.action_pos_session_close()
+            self.assertEqual(session.state, 'closed')
+
+    def test_selected_customer_after_adding_payment_sync(self):
+        """ Test that the selected customer is kept after adding an online payment."""
+        self.pos_config.with_user(self.pos_admin).open_ui()
+        self.start_pos_tour('test_selected_customer_after_adding_payment_sync', login="pos_admin")
+        order = self.pos_config.current_session_id.order_ids.sorted(lambda o: o.id, reverse=True)[0]
+        self.assertEqual(order.partner_id.name, "A simple PoS man!", "The selected customer was not kept after adding an online payment.")
+        self.assertEqual(order.state, "draft", "The order should still be in draft state.")
+        self.assertEqual(len(order.payment_ids), 0, "There should be no payment line in the order.")
+
+    def test_payment_method_customer_required(self):
+        """
+        Test that the data sent to the pos contains the information needed to identify
+        which payment method requires a customer.
+        """
+        self.env['res.partner'].create({'name': 'A Test Partner'})
+        online_pm = self.pos_config.payment_method_ids.search([('is_online_payment', '=', True)], limit=1)
+        self.pos_config.with_user(self.pos_admin).open_ui()
+
+        def _get_customer_required_providers_code_patch(self):
+            return ['none']
+
+        with patch.object(self.env.registry.models['pos.payment.method'], "_get_customer_required_providers_code", _get_customer_required_providers_code_patch):
+            loaded_data = self.pos_config.current_session_id.load_data([])
+            config_online_pm_data = [record.get('_customer_required') for record in loaded_data['pos.payment.method'] if record['id'] == online_pm.id]
+            self.assertTrue(all(config_online_pm_data))
+            self.start_pos_tour('test_payment_method_customer_required')
+
+    def test_online_payment_with_cash_rounding_only_cash_method(self):
+        """ With cash rounding only for cash payment methods, the online payment
+            must settle the exact residual (total 15.28, cash 10.00 -> 5.28
+            online, not 5.30) and the order must then be considered paid.
+        """
+        rounding_method = self.env['account.cash.rounding'].create({
+            'name': 'Rounding 0.05 HALF-UP',
+            'rounding': 0.05,
+            'rounding_method': 'HALF-UP',
+            'strategy': 'add_invoice_line',
+            'profit_account_id': self.company.default_cash_difference_income_account_id.id,
+            'loss_account_id': self.company.default_cash_difference_expense_account_id.id,
+        })
+        self.pos_config.write({
+            'rounding_method': rounding_method.id,
+            'cash_rounding': True,
+            'only_round_cash_method': True,
+        })
+        product = self.env['product.product'].create({
+            'name': 'OP Cash Rounding Product',
+            'available_in_pos': True,
+            'list_price': 15.28,
+            'taxes_id': False,
+        })
+
+        self.pos_config.with_user(self.pos_user).open_ui()
+        current_session = self.pos_config.current_session_id
+        current_session.set_opening_control(0, None)
+
+        # Simulate a cashier saving a draft order with a cash payment of 10.00
+        order_uid = '00077-001-0001'
+        order_data = {
+            'uuid': order_uid,
+            'name': 'Order ' + order_uid,
+            'session_id': current_session.id,
+            'user_id': self.pos_user.id,
+            'partner_id': False,
+            'access_token': str(uuid.uuid4()),
+            'amount_paid': 10.0,
+            'amount_return': 0,
+            'state': 'draft',
+            'amount_tax': 0,
+            'amount_total': 15.28,
+            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'fiscal_position_id': False,
+            'lines': [[0, 0, {
+                'product_id': product.id,
+                'qty': 1,
+                'discount': 0,
+                'tax_ids': [],
+                'price_unit': 15.28,
+                'price_subtotal': 15.28,
+                'price_subtotal_incl': 15.28,
+                'pack_lot_ids': [],
+            }]],
+            'payment_ids': [[0, 0, {
+                'amount': 10.0,
+                'payment_method_id': self.cash_payment_method.id,
+            }]],
+        }
+        create_result = self.env['pos.order'].with_user(self.pos_user).sync_from_ui([order_data])
+        order_id = next(result_order_data for result_order_data in create_result['pos.order'] if result_order_data['uuid'] == order_uid)['id']
+        order = self.env['pos.order'].browse(order_id)
+        self.assertEqual(order.state, 'draft')
+        self.assertAlmostEqual(order.amount_paid, 10.0)
+
+        # The amount to pay online is the exact residual, not rounded
+        self.assertAlmostEqual(order.get_amount_unpaid(), 5.28)
+
+        # Simulate the cashier requesting an online payment for the residual
+        op_data = order.with_user(self.pos_user).get_and_set_online_payments_data(5.28)
+        self.assertEqual(op_data['id'], order.id)
+        self.assertTrue('paid_order' not in op_data)
+        self.assertTrue('deleted' not in op_data)
+        self.assertAlmostEqual(op_data['amount_unpaid'], 5.28)
+        self.assertAlmostEqual(order.next_online_payment_amount, 5.28)
+
+        # Simulate the customer paying the residual online
+        self._fake_online_payment(order.id, order.access_token, self.payment_provider.id)
+
+        self.assertEqual(order.state, 'paid')
+        self.assertAlmostEqual(order.amount_paid, 15.28)
+
+        # Simulate the cashier closing the session (to detect eventual accounting issues)
+        total_cash_payment = sum(current_session.order_ids.filtered(lambda o: o.state != 'cancel').payment_ids.filtered(lambda payment: payment.payment_method_id.type == 'cash').mapped('amount'))
+        current_session.post_closing_cash_details(total_cash_payment)
+        close_result = current_session.close_session_from_ui()
+        self.assertTrue(close_result['successful'])
+        self.assertEqual(current_session.state, 'closed', 'Session was not properly closed')
+        self.assertEqual(order.state, 'done')
+
+    def test_online_payment_amount_updated_after_order_modification(self):
+        self.pos_config.with_user(self.pos_admin).open_ui()
+        self.start_pos_tour('test_online_payment_amount_updated_after_order_modification', login="pos_admin")
+        order = self.pos_config.current_session_id.order_ids.sorted(lambda o: o.id, reverse=True)[0]
+        self.assertEqual(order.state, "draft", "The order should still be in draft state, awaiting the online payment.")
+        self.assertEqual(order.amount_total, 96.0, "The increased order total should be synced to the server.")
+
+    def test_restaurant_online_payment_flow(self):
+        self.pos_config.with_user(self.pos_admin).open_ui()
+        self.start_pos_tour('RestaurantOnlinePaymentTour', login="pos_admin")
+        order = self.pos_config.current_session_id.order_ids.sorted(lambda o: o.id, reverse=True)[0]
+        self.assertEqual(order.state, "paid", "The order should be paid.")
+        self.assertEqual(len(order.payment_ids), 1, "There should be one payment line in the order.")
+        self.assertEqual(order.payment_ids[0].payment_method_id.id, self.cash_payment_method.id, "The payment should be Cash.")
 
     @classmethod
     def tearDownClass(cls):

@@ -7,7 +7,7 @@
  * @param {(a: T[keyof T], b: T[keyof T]) => boolean} [comparisonFn]
  */
 export function shallowEqual(obj1, obj2, comparisonFn = (a, b) => a === b) {
-    if (!isObject(obj1) || !isObject(obj2)) {
+    if (obj1 !== Object(obj1) || obj2 !== Object(obj2)) {
         return obj1 === obj2;
     }
     const obj1Keys = Reflect.ownKeys(obj1);
@@ -39,10 +39,25 @@ export function deepCopy(object) {
 }
 
 /**
- * @param {unknown} object
+ * Returns whether the given value is an object, i.e. an instance of the `Object`
+ * class or of one of its direct subclass.
+ *
+ * Note: this may wrongly validate any object implementing a modified `toString`
+ * explicitly returning `"[object Object]"`.
+ *
+ * @param {unknown} value
+ * @returns {boolean}
+ * @example
+ *  // true
+ *  isObject({ a: 1 });
+ *  isObject(Object.create(null));
+ * @example
+ *  // false
+ *  isObject([1, 2, 3]);
+ *  isObject(new Map([["a", 1]]));
  */
-export function isObject(object) {
-    return !!object && (typeof object === "object" || typeof object === "function");
+export function isObject(value) {
+    return Object.prototype.toString.call(value) === "[object Object]";
 }
 
 /**
@@ -52,7 +67,7 @@ export function isObject(object) {
  * @template T
  * @template {keyof T} K
  * @param {T} object
- * @param {K[]} properties
+ * @param {...(K)} properties
  */
 export function omit(object, ...properties) {
     /** @type {Omit<T, K>} */
@@ -70,7 +85,7 @@ export function omit(object, ...properties) {
  * @template T
  * @template {keyof T} K
  * @param {T} object
- * @param {K[]} properties
+ * @param {...(K)} properties
  * @returns {Pick<T, K>}
  */
 export function pick(object, ...properties) {

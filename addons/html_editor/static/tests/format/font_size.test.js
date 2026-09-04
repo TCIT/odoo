@@ -1,8 +1,7 @@
 import { test, expect } from "@odoo/hoot";
 import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
-import { strong } from "../_helpers/tags";
-import { setFontSize } from "../_helpers/user_actions";
+import { setFontSize, setFontSizeClassName, tripleClick } from "../_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { animationFrame } from "@odoo/hoot-mock";
@@ -26,10 +25,14 @@ test("should change the font size the qweb tag", async () => {
     });
 });
 
+test.tags("desktop");
 test("should change the font size of a whole heading after a triple click", async () => {
     await testEditor({
-        contentBefore: "<h1>[ab</h1><p>]cd</p>",
-        stepFunction: setFontSize("36px"),
+        contentBefore: "<h1>ab</h1><p>cd</p>",
+        stepFunction: async (editor) => {
+            await tripleClick(editor.editable.querySelector("h1"));
+            setFontSize("36px")(editor);
+        },
         contentAfter: '<h1><span style="font-size: 36px;">[ab]</span></h1><p>cd</p>',
     });
 });
@@ -122,7 +125,7 @@ test("should not format non-editable text (setFontSize)", async () => {
 test("should add font size in selected table cells", async () => {
     await testEditor({
         contentBefore:
-            '<table><tbody><tr><td class="o_selected_td"><p>[<br></p></td><td class="o_selected_td"><p><br></p>]</td></tr><tr><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
+            '<table><tbody><tr><td class="o_selected_td"><p>[<br></p></td><td class="o_selected_td"><p>]<br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
         stepFunction: setFontSize("48px"),
         contentAfter:
             '<table><tbody><tr><td><p><span style="font-size: 48px;">[<br></span></p></td><td><p><span style="font-size: 48px;">]<br></span></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
@@ -174,11 +177,9 @@ test("should apply font size in unbreakable span without class", async () => {
 
 test("should add style to a span parent of an inline", async () => {
     await testEditor({
-        contentBefore: `<p>a<span style="background-color: black;">${strong(`[bc]`)}</span>d</p>`,
+        contentBefore: `<p>a<span style="background-color: black;"><strong>[bc]</strong></span>d</p>`,
         stepFunction: setFontSize("10px"),
-        contentAfter: `<p>a<span style="background-color: black; font-size: 10px;">${strong(
-            `[bc]`
-        )}</span>d</p>`,
+        contentAfter: `<p>a<span style="background-color: black; font-size: 10px;"><strong>[bc]</strong></span>d</p>`,
     });
 });
 
@@ -202,9 +203,16 @@ test("should add style to br except line-break br", async () => {
     const { editor, el } = await setupEditor("<p>[]abc<br><br></p>");
     await press(["ctrl", "a"]);
     execCommand(editor, "formatFontSize", { size: "36px" });
-    expect(getContent(el)).toBe(
-        `<p><span style="font-size: 36px;">[abc</span><br><span style="font-size: 36px;">]<br></span></p>`
-    );
+    expect(getContent(el)).toBe(`<p><span style="font-size: 36px;">[abc</span><br>]<br></p>`);
+});
+
+test("should update the font size currectly if already has one", async () => {
+    await testEditor({
+        contentBefore: '<h2 style="font-size: 14px;">[abcdefg]</h2>',
+        stepFunction: setFontSize("18px"),
+        contentAfter:
+            '<h2 style="font-size: 14px;"><span style="font-size: 18px;">[abcdefg]</span></h2>',
+    });
 });
 
 test("should add style to br except line-break br (2)", async () => {
@@ -212,6 +220,40 @@ test("should add style to br except line-break br (2)", async () => {
     await press(["ctrl", "a"]);
     execCommand(editor, "formatFontSize", { size: "36px" });
     expect(getContent(el)).toBe(
-        `<p><span style="font-size: 36px;">[abc</span><br><span style="font-size: 36px;"><br>]<br></span></p>`
+        `<p><span style="font-size: 36px;">[abc</span><br><span style="font-size: 36px;"><br></span>]<br></p>`
     );
+});
+
+test("should update the font class if the parent already has one", async () => {
+    await testEditor({
+        contentBefore: '<h2 class="h4-fs">[abcdefg]</h2>',
+        stepFunction: setFontSizeClassName("h3-fs"),
+        contentAfter: '<h2 class="h4-fs"><span class="h3-fs">[abcdefg]</span></h2>',
+    });
+});
+
+test("should apply font size on space", async () => {
+    await testEditor({
+        contentBefore: `<div><p>a[ ]b</p></div>`,
+        stepFunction: setFontSize("36px"),
+        contentAfter: `<div><p>a<span style="font-size: 36px;">[ ]</span>b</p></div>`,
+    });
+});
+
+test("should apply font size on non breaking space", async () => {
+    await testEditor({
+        contentBefore: `<div><p>a[&nbsp;]b</p></div>`,
+        stepFunction: setFontSize("36px"),
+        contentAfter: `<div><p>a<span style="font-size: 36px;">[&nbsp;]</span>b</p></div>`,
+    });
+});
+
+test("should format inside of content editable boundary (setFontSize)", async () => {
+    await testEditor({
+        contentBefore:
+            '<div contenteditable="false"><p>a<span contenteditable="true">[b]</span>c</p></div>',
+        stepFunction: setFontSize("36px"),
+        contentAfter:
+            '<div contenteditable="false"><p>a<span contenteditable="true"><span style="font-size: 36px;">[b]</span></span>c</p></div>',
+    });
 });

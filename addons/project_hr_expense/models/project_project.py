@@ -3,10 +3,10 @@
 import json
 
 from odoo import models
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
-class Project(models.Model):
+class ProjectProject(models.Model):
     _inherit = 'project.project'
 
     # ----------------------------
@@ -29,9 +29,9 @@ class Project(models.Model):
         return action
 
     def _get_add_purchase_items_domain(self):
-        return expression.AND([
+        return Domain.AND([
             super()._get_add_purchase_items_domain(),
-            [('expense_id', '=', False)],
+            Domain('expense_id', '=', False),
         ])
 
     def action_profitability_items(self, section_name, domain=None, res_id=False):
@@ -62,7 +62,7 @@ class Project(models.Model):
         # we need to make sure they are exclusive in the profitability report.
         move_line_ids = super()._get_already_included_profitability_invoice_line_ids()
         query = self.env['account.move.line'].sudo()._search([
-            ('move_id.expense_sheet_id', '!=', False),
+            ('expense_id', '!=', False),
             ('id', 'not in', move_line_ids),
         ])
         return move_line_ids + list(query)
@@ -74,7 +74,7 @@ class Project(models.Model):
 
         expenses_read_group = self.env['hr.expense']._read_group(
             [
-                ('sheet_id.state', 'in', ['post', 'done']),
+                ('state', 'in', ['posted', 'in_payment', 'paid']),
                 ('analytic_distribution', 'in', self.account_id.ids),
             ],
             groupby=['currency_id'],
@@ -106,7 +106,7 @@ class Project(models.Model):
         return expense_profitability_items
 
     def _get_profitability_aal_domain(self):
-        return expression.AND([
+        return Domain.AND([
             super()._get_profitability_aal_domain(),
             ['|', ('move_line_id', '=', False), ('move_line_id.expense_id', '=', False)],
         ])

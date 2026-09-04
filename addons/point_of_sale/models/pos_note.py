@@ -11,13 +11,17 @@ class PosNote(models.Model):
 
     name = fields.Char(required=True)
     sequence = fields.Integer('Sequence', default=1)
+    color = fields.Integer(string='Color')
 
-    _sql_constraints = [('name_unique', 'unique (name)', "A note with this name already exists")]
+    _name_unique = models.Constraint(
+        'unique (name)',
+        'A note with this name already exists',
+    )
 
     @api.model
-    def _load_pos_data_domain(self, data):
-        return [('id', 'in', data['pos.config']['data'][0]['note_ids'])] if data['pos.config']['data'][0]['note_ids'] else []
+    def _load_pos_data_domain(self, data, config):
+        return [('id', 'in', config.note_ids.ids)] if config.note_ids else []
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
-        return ['name']
+    def _load_pos_data_fields(self, config):
+        return ['name', 'color']

@@ -27,13 +27,11 @@ class TestDisableSnippetsAssets(TransactionCase):
 
     def test_homepage_outdated_and_mega_menu_up_to_date(self):
         self.Website._disable_unused_snippets_assets()
-        # Old snippet with scss and js
+        # Old snippet with scss
         s_website_form_000_scss = self._get_snippet_asset('s_website_form', '000', 'scss')
         s_website_form_001_scss = self._get_snippet_asset('s_website_form', '001', 'scss')
-        s_website_form_000_js = self._get_snippet_asset('s_website_form', '000', 'js')
         self.assertEqual(s_website_form_000_scss.active, True)
         self.assertEqual(s_website_form_001_scss.active, True)
-        self.assertEqual(s_website_form_000_js.active, True)
 
         # Old snippet with scss and scss variables
         s_masonry_block_000_scss = self._get_snippet_asset('s_masonry_block', '000', 'scss')
@@ -51,7 +49,7 @@ class TestDisableSnippetsAssets(TransactionCase):
 
         unwanted_snippets_assets_changes = set(self.initial_active_snippets_assets) - set(self._get_active_snippets_assets()) - set([s_image_gallery_000.path])
 
-        # The vaccuum should not have activated/deactivated any other snippet asset than the original ones
+        # The vacuum should not have activated/deactivated any other snippet asset than the original ones
         self.assertEqual(
             len(unwanted_snippets_assets_changes),
             0,
@@ -84,10 +82,8 @@ class TestDisableSnippetsAssets(TransactionCase):
 
         s_website_form_000_scss = self._get_snippet_asset('s_website_form', '000', 'scss')
         s_website_form_001_scss = self._get_snippet_asset('s_website_form', '001', 'scss')
-        s_website_form_000_js = self._get_snippet_asset('s_website_form', '000', 'js')
         self.assertEqual(s_website_form_000_scss.active, False)
         self.assertEqual(s_website_form_001_scss.active, True)
-        self.assertEqual(s_website_form_000_js.active, True)
 
         s_masonry_block_000_scss = self._get_snippet_asset('s_masonry_block', '000', 'scss')
         s_masonry_block_000_variables_scss = self._get_snippet_asset('s_masonry_block', '000_variables', 'scss')
@@ -109,8 +105,7 @@ class TestDisableSnippetsAssets(TransactionCase):
 
 HOMEPAGE_UP_TO_DATE = """
 <t name="Homepage" t-name="website.homepage1">
-  <t t-call="website.layout">
-    <t t-set="pageName" t-value="'homepage'"/>
+  <t t-call="website.layout" pageName.f="homepage">
     <div id="wrap" class="oe_structure oe_empty">
       <section class="s_website_form pt16 pb16 o_colored_level" data-vcss="001" data-snippet="s_website_form" data-name="Form">
         <div class="container">
@@ -132,8 +127,7 @@ HOMEPAGE_UP_TO_DATE = """
 
 HOMEPAGE_OUTDATED = """
 <t name="Homepage" t-name="website.homepage1">
-  <t t-call="website.layout">
-    <t t-set="pageName" t-value="'homepage'"/>
+  <t t-call="website.layout" pageName.f="homepage">
     <div id="wrap" class="oe_structure oe_empty">
       <form action="/website_form/" method="post" class="s_website_form container-fluid mt32 o_fake_not_editable" enctype="multipart/form-data" data-name="Form Builder" data-model_name="mail.mail" data-success_page="/contactus-thank-you" data-snippet="s_website_form">
         <div class="container">

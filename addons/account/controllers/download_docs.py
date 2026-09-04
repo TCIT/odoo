@@ -3,7 +3,10 @@
 import io
 import zipfile
 
+from itertools import chain
+
 from odoo import http, _
+from odoo.exceptions import UserError
 from odoo.http import request, content_disposition
 
 
@@ -50,14 +53,40 @@ class AccountDocumentDownloadController(http.Controller):
         invoices.line_ids.check_access('read')
         docs_data = []
         for invoice in invoices:
-            doc_data = invoice._get_invoice_legal_documents(filetype, allow_fallback=allow_fallback)
-            if doc_data:
+            if filetype == 'all' and (doc_data := invoice._get_invoice_legal_documents_all(allow_fallback=allow_fallback)):
+                docs_data += doc_data
+            elif doc_data := invoice._get_invoice_legal_documents(filetype, allow_fallback=allow_fallback):
+                if (errors := doc_data.get('errors')) and len(invoices) == 1:
+                    raise UserError(_("Error while creating XML:\n- %s", '\n- '.join(errors)))
                 docs_data.append(doc_data)
         if len(docs_data) == 1:
             doc_data = docs_data[0]
-            headers = _get_headers(**doc_data)
+            headers = _get_headers(doc_data['filename'], doc_data['filetype'], doc_data['content'])
             return request.make_response(doc_data['content'], headers)
-        elif len(docs_data) > 1:
+        if len(docs_data) > 1:
             zip_content = _build_zip_from_data(docs_data)
             headers = _get_headers(_('invoices') + '.zip', 'zip', zip_content)
+            return request.make_response(zip_content, headers)
+
+    @http.route('/account/download_move_attachments/<models("account.move"):moves>', type='http', auth='user')
+    def download_move_attachments(self, moves):
+
+        def rename_duplicates(docs):
+            seen = {}
+            for doc in docs:
+                name = doc["filename"]
+                if name not in seen:
+                    seen[name] = 0
+                else:
+                    seen[name] += 1
+                    base, *ext = name.rsplit('.', 1)
+                    new_name = f"{base} ({seen[name]})" + (f".{ext[0]}" if ext else "")
+                    doc["filename"] = new_name
+                    seen[new_name] = 0
+            return docs
+
+        if docs_data := list(chain.from_iterable(move._get_move_zip_export_docs() for move in moves)):
+            docs_data = rename_duplicates(docs_data)
+            zip_content = _build_zip_from_data(docs_data)
+            headers = _get_headers(request.env._("Invoices") + '.zip', 'zip', zip_content)
             return request.make_response(zip_content, headers)

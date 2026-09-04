@@ -1,11 +1,14 @@
-import { mailModels } from "@mail/../tests/mail_test_helpers";
-import { fields, getKwArgs } from "@web/../tests/web_test_helpers";
+import { hrModels } from "@hr/../tests/hr_test_helpers";
+import { fields } from "@web/../tests/web_test_helpers";
+import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
 
-export class ResPartner extends mailModels.ResPartner {
-    out_of_office_date_end = fields.Date();
+export class ResPartner extends hrModels.ResPartner {
+    leave_date_to = fields.Date({ related: false });
 
     compute_im_status(partner) {
-        if (partner.out_of_office_date_end) {
+        /** @type {import("mock_models").ResUsers} */
+        const ResUsers = this.env["res.users"];
+        if (partner.main_user_id && ResUsers.browse(partner.main_user_id).leave_date_to) {
             if (partner.im_status === "online") {
                 return "leave_online";
             } else if (partner.im_status === "away") {
@@ -18,25 +21,23 @@ export class ResPartner extends mailModels.ResPartner {
         }
     }
 
-    /**
-     * Overrides to add out of office to employees.
-     * @override
-     * @type {typeof mailModels.ResPartner["prototype"]["_to_store"]}
-     */
-    _to_store(ids, store, fields) {
-        const kwargs = getKwArgs(arguments, "ids", "store", "fields");
-        fields = kwargs.fields;
-        super._to_store(...arguments);
-        if (!fields) {
-            fields = ["out_of_office_date_end"];
-        }
-        for (const partner of this.browse(ids)) {
-            if (fields.includes("out_of_office_date_end")) {
-                store.add(this.browse(partner.id), {
-                    // Not a real field but ease the testing
-                    out_of_office_date_end: partner.out_of_office_date_end,
-                });
-            }
-        }
+    get _to_store_defaults() {
+        return [
+            ...super._to_store_defaults,
+            mailDataHelpers.Store.many("employee_ids", [
+                "active",
+                "company_id",
+                "leave_date_to",
+                "user_id",
+            ]),
+            mailDataHelpers.Store.one("main_user_id", [
+                mailDataHelpers.Store.many("employee_ids", [
+                    "active",
+                    "company_id",
+                    "leave_date_to",
+                    "user_id",
+                ]),
+            ]),
+        ];
     }
 }

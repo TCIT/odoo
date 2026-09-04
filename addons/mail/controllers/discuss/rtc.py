@@ -6,12 +6,11 @@ from werkzeug.exceptions import NotFound
 from odoo import http
 from odoo.http import request
 from odoo.tools import file_open
-from odoo.addons.mail.models.discuss.mail_guest import add_guest_to_context
-from odoo.addons.mail.tools.discuss import Store
+from odoo.addons.mail.tools.discuss import add_guest_to_context, Store
 
 
 class RtcController(http.Controller):
-    @http.route("/mail/rtc/session/notify_call_members", methods=["POST"], type="json", auth="public")
+    @http.route("/mail/rtc/session/notify_call_members", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
     def session_call_notify(self, peer_notifications):
         """Sends content to other session of the same channel, only works if the user is the user of that session.
@@ -37,7 +36,7 @@ class RtcController(http.Controller):
         for session_sudo, notifications in notifications_by_session.items():
             session_sudo._notify_peers(notifications)
 
-    @http.route("/mail/rtc/session/update_and_broadcast", methods=["POST"], type="json", auth="public")
+    @http.route("/mail/rtc/session/update_and_broadcast", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
     def session_update_and_broadcast(self, session_id, values):
         """Update a RTC session and broadcasts the changes to the members of its channel,
@@ -59,7 +58,7 @@ class RtcController(http.Controller):
         if session and session.partner_id == request.env.user.partner_id:
             session._update_and_broadcast(values)
 
-    @http.route("/mail/rtc/channel/join_call", methods=["POST"], type="json", auth="public")
+    @http.route("/mail/rtc/channel/join_call", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
     def channel_call_join(self, channel_id, check_rtc_session_ids=None, camera=False):
         """Joins the RTC call of a channel if the user is a member of that channel
@@ -76,19 +75,27 @@ class RtcController(http.Controller):
         member.sudo()._rtc_join_call(store, check_rtc_session_ids=check_rtc_session_ids, camera=camera)
         return store.get_result()
 
-    @http.route("/mail/rtc/channel/leave_call", methods=["POST"], type="json", auth="public")
+    @http.route("/mail/rtc/channel/leave_call", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
-    def channel_call_leave(self, channel_id):
+    def channel_call_leave(self, channel_id, session_id=None):
         """Disconnects the current user from a rtc call and clears any invitation sent to that user on this channel
         :param int channel_id: id of the channel from which to disconnect
+        :param int session_id: id of the leaving session
         """
         member = request.env["discuss.channel.member"].search([("channel_id", "=", channel_id), ("is_self", "=", True)])
         if not member:
             raise NotFound()
         # sudo: discuss.channel.rtc.session - member of current user can leave call
-        member.sudo()._rtc_leave_call()
+        member.sudo()._rtc_leave_call(session_id)
 
-    @http.route("/mail/rtc/channel/cancel_call_invitation", methods=["POST"], type="json", auth="public")
+    @http.route("/mail/rtc/channel/upgrade_connection", methods=["POST"], type="jsonrpc", auth="user")
+    def channel_upgrade(self, channel_id):
+        member = request.env["discuss.channel.member"].search([("channel_id", "=", channel_id), ("is_self", "=", True)])
+        if not member:
+            raise NotFound()
+        member.sudo()._join_sfu(force=True)
+
+    @http.route("/mail/rtc/channel/cancel_call_invitation", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
     def channel_call_cancel_invitation(self, channel_id, member_ids=None):
         """
@@ -101,21 +108,23 @@ class RtcController(http.Controller):
         # sudo: discuss.channel.rtc.session - can cancel invitations in accessible channel
         channel.sudo()._rtc_cancel_invitations(member_ids=member_ids)
 
-    @http.route("/mail/rtc/audio_worklet_processor", methods=["GET"], type="http", auth="public", readonly=True)
+    @http.route("/mail/rtc/audio_worklet_processor_v2", methods=["GET"], type="http", auth="public", readonly=True)
     def audio_worklet_processor(self):
         """Returns a JS file that declares a WorkletProcessor class in
         a WorkletGlobalScope, which means that it cannot be added to the
         bundles like other assets.
         """
+        with file_open("mail/static/src/worklets/audio_processor.js", "rb") as f:
+            data = f.read()
         return request.make_response(
-            file_open("mail/static/src/worklets/audio_processor.js", "rb").read(),
+            data,
             headers=[
                 ("Content-Type", "application/javascript"),
                 ("Cache-Control", f"max-age={http.STATIC_CACHE}"),
             ],
         )
 
-    @http.route("/discuss/channel/ping", methods=["POST"], type="json", auth="public")
+    @http.route("/discuss/channel/ping", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
     def channel_ping(self, channel_id, rtc_session_id=None, check_rtc_session_ids=None):
         member = request.env["discuss.channel.member"].search([("channel_id", "=", channel_id), ("is_self", "=", True)])
@@ -130,11 +139,10 @@ class RtcController(http.Controller):
             ]
             channel_member_sudo.channel_id.rtc_session_ids.filtered_domain(domain).write({})  # update write_date
         current_rtc_sessions, outdated_rtc_sessions = channel_member_sudo._rtc_sync_sessions(check_rtc_session_ids)
-        return (
-            Store(member.channel_id, {"rtcSessions": Store.many(current_rtc_sessions, "ADD")})
-            .add(
-                member.channel_id,
-                {"rtcSessions": Store.many(outdated_rtc_sessions, "DELETE", only_id=True)},
-            )
-            .get_result()
-        )
+        return Store().add(
+            member.channel_id,
+            [
+                {"rtc_session_ids": Store.Many(current_rtc_sessions, mode="ADD")},
+                {"rtc_session_ids": Store.Many(outdated_rtc_sessions, [], mode="DELETE")},
+            ],
+        ).get_result()

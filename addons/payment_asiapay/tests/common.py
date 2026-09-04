@@ -1,12 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo import Command
+from odoo.fields import Command
 
 from odoo.addons.payment.tests.common import PaymentCommon
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
-class AsiaPayCommon(AccountTestInvoicingCommon, PaymentCommon):
+class AsiaPayCommon(PaymentCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -21,10 +19,10 @@ class AsiaPayCommon(AccountTestInvoicingCommon, PaymentCommon):
 
         cls.provider = cls.asiapay
 
-        cls.redirect_notification_data = {
+        cls.redirect_payment_data = {
             'Ref': cls.reference,
         }
-        cls.webhook_notification_data = {
+        cls.webhook_payment_data = {
             'src': 'dummy',
             'prc': 'dummy',
             'successcode': '0',

@@ -16,7 +16,7 @@ class TestMailComposer(MailCommon):
     def setUpClass(cls):
         super(TestMailComposer, cls).setUpClass()
         cls.env['ir.config_parameter'].set_param('mail.restrict.template.rendering', True)
-        cls.user_employee.groups_id -= cls.env.ref('mail.group_mail_template_editor')
+        cls.user_employee.group_ids -= cls.env.ref('mail.group_mail_template_editor')
         cls.test_record = cls.env['res.partner'].with_context(cls._test_context).create({
             'name': 'Test',
         })
@@ -36,8 +36,9 @@ class TestMailComposer(MailCommon):
             'body_html': cls.body_html,
             'lang': '{{ object.lang }}',
             'model_id': cls.env['ir.model']._get_id('res.partner'),
-            'subject': 'MSO FTW',
             'name': 'Test template with mso conditionals',
+            'use_default_to': True,
+            'subject': 'MSO FTW',
         })
 
 @tagged('mail_composer')
@@ -49,7 +50,6 @@ class TestMailComposerForm(TestMailComposer):
         super(TestMailComposerForm, cls).setUpClass()
         cls.other_company = cls.env['res.company'].create({'name': 'Other Company'})
         cls.user_employee.write({
-            'groups_id': [(4, cls.env.ref('base.group_partner_manager').id)],
             'company_ids': [(4, cls.other_company.id)]
         })
         cls.partner_private, cls.partner_private_2, cls.partner_classic = cls.env['res.partner'].create([
@@ -160,6 +160,49 @@ class TestMailComposerForm(TestMailComposer):
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     @users('employee')
+    def test_composer_template_change_recipients_update(self):
+        """Check that recipients only change when coming or going to a template with specific recipients."""
+        self.mail_template.write({
+            'email_to': self.partner_private.email_formatted,
+            'partner_to': False,
+            'use_default_to': False,
+        })
+        specific_recipient_template = self.mail_template
+        specific_recipient_template_copy = specific_recipient_template.copy(default={
+            'email_to': False,
+            'partner_to': f'{self.partner_private_2.id}',
+        })
+        default_recipient_template = specific_recipient_template.copy(default={
+            'email_to': False, 'partner_to': False, 'use_default_to': True,
+        })
+        default_recipient_template_copy = default_recipient_template.copy()
+        test_record = self.test_record.with_env(self.env)
+        default_recipient = test_record
+        self.assertTrue(default_recipient, self.env.registry['res.partner'])
+
+        cases = [
+            (self.partner_classic, False, specific_recipient_template, self.partner_private, 'No template -> Specific recipients'),
+            (self.partner_classic, specific_recipient_template, specific_recipient_template_copy, self.partner_private_2, 'Specific recipients -> Specific recipients'),
+            (self.partner_classic, specific_recipient_template_copy, default_recipient_template, self.partner_classic, 'Specific recipients -> Default recipients'),
+            (None, default_recipient_template, default_recipient_template_copy, default_recipient, 'Default recipients -> Default recipients'),
+            (self.partner_classic, default_recipient_template, default_recipient_template_copy, self.partner_classic, 'Default recipients -> Default recipients'),
+            (self.partner_classic, default_recipient_template_copy, specific_recipient_template, self.partner_private, 'Default recipients -> Specific recipients'),
+            (None, specific_recipient_template, False, False, 'Specific recipients -> No template'),
+            (None, default_recipient_template, False, False, 'Default recipients -> No template'),
+        ]
+        for previous_partners, previous_template, new_template, expected_partners, case_name in cases:
+            with self.subTest(case=case_name):
+                composer_form = Form(self.env['mail.compose.message'].with_context({
+                    'default_model': test_record._name,
+                    'default_res_ids': test_record.ids,
+                    'default_template_id': previous_template and previous_template.id,
+                } | ({'default_partner_ids': previous_partners.ids} if previous_partners is not None else {})
+                ))
+                composer_form.template_id = new_template or self.env['mail.template']
+                self.assertEqual(sorted(composer_form.partner_ids.ids), sorted(expected_partners.ids if expected_partners else []))
+
+    @mute_logger('odoo.addons.mail.models.mail_mail')
+    @users('employee')
     def test_composer_template_recipients_private(self):
         """ Test usage of a private partner in composer, coming from template
         value """
@@ -167,6 +210,7 @@ class TestMailComposerForm(TestMailComposer):
         self.mail_template.write({
             'email_to': f'{self.partner_private_2.email_formatted}, {email_to_new}',
             'partner_to': f'{self.partner_private.id},{self.partner_classic.id}',
+            'use_default_to': False,
         })
         template = self.mail_template.with_env(self.env)
         partner_private = self.partner_private.with_env(self.env)
@@ -265,18 +309,33 @@ class TestMailComposerRendering(TestMailComposer):
 class TestMailComposerUI(MailCommon, HttpCase):
 
     def test_mail_composer_test_tour(self):
-        self.env['mail.template'].create({
-            'auto_delete': True,
-            'lang': '{{ object.lang }}',
-            'model_id': self.env['ir.model']._get_id('res.partner'),
-            'name': 'Test template',
-            'partner_to': '{{ object.id }}',
-        })
-        self.user_employee.write({
-            'groups_id': [(4, self.env.ref('base.group_partner_manager').id)],
-        })
+        template_data = [
+            {
+                'name': 'Test template',
+                'partner_to': '{{ object.id }}',
+            },
+            {
+                'name': 'Test template for admin',
+                'user_id': self.env.ref('base.user_admin').id,
+            },
+        ]
+        self.env['mail.template'].create([
+            {
+                **data,
+                'auto_delete': True,
+                'lang': '{{ object.lang }}',
+                'model_id': self.env['ir.model']._get_id('res.partner'),
+            }
+            for data in template_data
+        ])
         partner = self.env["res.partner"].create({"name": "Jane", "email": "jane@example.com"})
-        user = self.env["res.users"].create({"name": "Not A Demo User", "login": "nadu"})
+        user_partner = self.env["res.partner"].create({"name": "Not A Demo User", "email":  "NotADemoUser@mail.com"})
+        user = self.env["res.users"].create({
+            "name": "Not A Demo User",
+            "login": "nadu",
+            "partner_id": user_partner.id
+        })
+        partner.message_subscribe(partner_ids=[self.user_admin.partner_id.id])
         with self.mock_mail_app():
             self.start_tour(
                 f"/odoo/res.partner/{partner.id}",
@@ -315,3 +374,46 @@ class TestMailComposerUI(MailCommon, HttpCase):
 
         self.assertEqual(len(re.findall(signature_pattern, message_3.body)), 0)
         self.assertTrue(message_3.email_add_signature)
+
+    def test_mail_html_composer_test_tour(self):
+        template_data = [
+            {
+                'name': 'Test template',
+                'partner_to': '{{ object.id }}',
+            },
+            {
+                'name': 'Test template for admin',
+                'user_id': self.env.ref('base.user_admin').id,
+            },
+        ]
+        self.env['mail.template'].create([
+            {
+                **data,
+                'auto_delete': True,
+                'lang': '{{ object.lang }}',
+                'model_id': self.env['ir.model']._get_id('res.partner'),
+            }
+            for data in template_data
+        ])
+        partner = self.env["res.partner"].create({"name": "Jane", "email": "jane@example.com"})
+        partner.message_subscribe(partner_ids=[self.user_admin.partner_id.id])
+        with self.mock_mail_app():
+            self.start_tour(
+                f"/odoo/res.partner/{partner.id}",
+                "mail/static/tests/tours/mail_html_composer_test_tour.js",
+                login=self.user_employee.login,
+            )
+
+    def test_send_attachment_without_body(self):
+        self.start_tour("/odoo/discuss", "create_thread_for_attachment_without_body",login="admin")
+
+    def test_mail_composer_autosave_tour(self):
+        partner = self.env["res.partner"].create(
+            {"name": "Jane", "email": "jane@example.com"})
+        with self.mock_mail_app():
+            self.start_tour(
+                f"/odoo/res.partner/{partner.id}",
+                "mail/static/tests/tours/mail_composer_autosave_tour.js",
+                login=self.user_employee.login
+            )
+        self.assertEqual(partner.function, "Director")

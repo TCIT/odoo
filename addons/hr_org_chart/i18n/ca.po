@@ -1,56 +1,76 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_org_chart
-# 
+# * hr_org_chart
+#
 # Translators:
-# Quim - coopdevs <quim.rebull@coopdevs.org>, 2024
-# Óscar Fonseca <tecnico@pyming.com>, 2024
-# Martin Trigaux, 2024
-# Iván Infantes Castarnado, 2024
-# Manel Fernandez Ramirez <manelfera@outlook.com>, 2024
-# Carles Antoli <carlesantoli@hotmail.com>, 2024
-# marcescu, 2024
-# 
+# Harcogourmet, 2022
+# Quim - eccit <quim@eccit.com>, 2022
+# Martin Trigaux, 2022
+# marcescu, 2022
+# Manel Fernandez Ramirez <manelfera@outlook.com>, 2022
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: marcescu, 2024\n"
-"Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 19:38+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-19/"
+"hr_org_chart/ca/>\n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ca\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_org_chart
 #: model_terms:ir.ui.view,arch_db:hr_org_chart.hr_employee_view_form_inherit_org_chart
-msgid "<span class=\"o_stat_text\">Org Chart</span>"
+msgid ""
+"<i class=\"fa fa-share-alt fa-rotate-90 ms-1 mt-1\" role=\"img\" aria-"
+"label=\"Full Chart\"/>\n"
+"                        Full Chart"
+msgstr ""
+
+#. module: hr_org_chart
+#: model_terms:ir.ui.view,arch_db:hr_org_chart.hr_employee_public_view_form_inherit_org_chart
+msgid ""
+"<i class=\"fa fa-sitemap me-1 mt-1\"/>\n"
+"                                <span class=\"fw-bolder\">Zoom</span>"
+msgstr ""
+
+#. module: hr_org_chart
+#: model_terms:ir.ui.view,arch_db:hr_org_chart.hr_employee_public_view_form_inherit_org_chart
+msgid ""
+"<span class=\"text-uppercase fw-bolder\" style=\"font-size: "
+"13px\">Organization Chart</span>"
+msgstr ""
+
+#. module: hr_org_chart
+#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_public__child_all_count
+msgid "Child All Count"
+msgstr ""
+
+#. module: hr_org_chart
+#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_public__child_count
+msgid "Child Count"
 msgstr ""
 
 #. module: hr_org_chart
 #: model_terms:ir.actions.act_window,help:hr_org_chart.action_hr_employee_org_chart
-msgid "Add a new employee"
-msgstr "Afegiu un nou empleat"
-
-#. module: hr_org_chart
-#: model:ir.model,name:hr_org_chart.model_hr_employee_base
-msgid "Basic Employee"
-msgstr "Empleat bàsic"
-
-#. module: hr_org_chart
-#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee__department_color
-#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_base__department_color
-#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_public__department_color
-msgid "Department Color"
+#: model_terms:ir.actions.act_window,help:hr_org_chart.action_hr_employee_public_org_chart
+msgid "Create an employee."
 msgstr ""
 
 #. module: hr_org_chart
+#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee__department_color
+#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_public__department_color
+msgid "Department Color"
+msgstr "Color del departament"
+
+#. module: hr_org_chart
 #: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee__child_count
-#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_base__child_count
-#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_public__child_count
 msgid "Direct Subordinates Count"
 msgstr ""
 
@@ -67,6 +87,12 @@ msgid "Direct subordinates"
 msgstr "Subordinats directes"
 
 #. module: hr_org_chart
+#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee__display_name
+#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_public__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: hr_org_chart
 #: model:ir.model,name:hr_org_chart.model_hr_employee
 msgid "Employee"
 msgstr "Empleat"
@@ -77,24 +103,19 @@ msgid "Employees"
 msgstr "Empleats"
 
 #. module: hr_org_chart
-#. odoo-javascript
-#: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
-msgid "In order to get an organigram, set a manager and save the record."
+#: model_terms:ir.actions.act_window,help:hr_org_chart.action_hr_employee_org_chart
+#: model_terms:ir.actions.act_window,help:hr_org_chart.action_hr_employee_public_org_chart
+msgid "Find all the information on employees."
 msgstr ""
-"Per tal d'obtenir un organigrama, establir un gestor i salvar el registre."
 
 #. module: hr_org_chart
-#. odoo-javascript
-#: code:addons/hr_org_chart/static/src/views/hr_employee_hierarchy/hr_employee_hierarchy_controller.xml:0
-msgid ""
-"In the Organigram you will have a clear overview of the hierarchy of "
-"employees."
+#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee__id
+#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_public__id
+msgid "ID"
 msgstr ""
 
 #. module: hr_org_chart
 #: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee__child_all_count
-#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_base__child_all_count
-#: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee_public__child_all_count
 msgid "Indirect Subordinates Count"
 msgstr "Comptador de subordenades indirectes"
 
@@ -117,33 +138,13 @@ msgid "More managers"
 msgstr "Més gestors"
 
 #. module: hr_org_chart
-#. odoo-javascript
-#: code:addons/hr_org_chart/static/src/views/hr_employee_hierarchy/hr_employee_hierarchy_controller.xml:0
-msgid "No Data"
-msgstr ""
-
-#. module: hr_org_chart
-#. odoo-javascript
-#: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
-msgid "No hierarchy position."
-msgstr "Cap posició de jerarquia."
-
-#. module: hr_org_chart
-#. odoo-python
-#: code:addons/hr_org_chart/models/hr_org_chart_mixin.py:0
-msgid "Operation not supported"
-msgstr "Operació no admesa"
-
-#. module: hr_org_chart
 #: model:ir.actions.act_window,name:hr_org_chart.action_hr_employee_org_chart
-#: model:ir.ui.menu,name:hr_org_chart.menu_hr_employee_org_chart
+#: model:ir.actions.act_window,name:hr_org_chart.action_hr_employee_public_org_chart
 msgid "Org Chart"
 msgstr ""
 
 #. module: hr_org_chart
-#: model_terms:ir.ui.view,arch_db:hr_org_chart.hr_employee_public_view_form_inherit_org_chart
 #: model_terms:ir.ui.view,arch_db:hr_org_chart.hr_employee_view_form_inherit_org_chart
-#: model_terms:ir.ui.view,arch_db:hr_org_chart.res_users_view_form
 msgid "Organization Chart"
 msgstr "Diagrama d'organitzacions"
 
@@ -153,23 +154,16 @@ msgid "Public Employee"
 msgstr "Empleat públic"
 
 #. module: hr_org_chart
-#: model_terms:ir.actions.act_window,help:hr_org_chart.action_hr_employee_org_chart
-msgid ""
-"Quickly find all the information you need for your employees such as contact"
-" data, job position, availability, etc."
-msgstr ""
-
-#. module: hr_org_chart
-#. odoo-javascript
-#: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
-msgid "Redirect"
-msgstr "Redirigir"
-
-#. module: hr_org_chart
 #. odoo-javascript
 #: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
 msgid "See All"
 msgstr "Veure Tot"
+
+#. module: hr_org_chart
+#. odoo-javascript
+#: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
+msgid "Set a manager or reports to show in org chart."
+msgstr ""
 
 #. module: hr_org_chart
 #: model:ir.model.fields,field_description:hr_org_chart.field_hr_employee__subordinate_ids
@@ -186,17 +180,33 @@ msgstr "Equip"
 #. module: hr_org_chart
 #. odoo-javascript
 #: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
-msgid "This employee has no manager or subordinate."
-msgstr "Aquest empleat no té administrador ni subordinat."
-
-#. module: hr_org_chart
-#. odoo-javascript
-#: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
 msgid "Total"
 msgstr "Total"
 
 #. module: hr_org_chart
 #. odoo-javascript
+#: code:addons/hr_org_chart/static/src/fields/hr_org_chart.xml:0
+msgid "View employee"
+msgstr ""
+
+#. module: hr_org_chart
+#. odoo-javascript
 #: code:addons/hr_org_chart/static/src/views/hr_employee_hierarchy/hr_employee_hierarchy_card.xml:0
 msgid "people"
-msgstr ""
+msgstr "persones"
+
+#~ msgid "Basic Employee"
+#~ msgstr "Empleat bàsic"
+
+#~ msgid "In order to get an organigram, set a manager and save the record."
+#~ msgstr ""
+#~ "Per tal d'obtenir un organigrama, establir un gestor i salvar el registre."
+
+#~ msgid "No hierarchy position."
+#~ msgstr "Cap posició de jerarquia."
+
+#~ msgid "Redirect"
+#~ msgstr "Redirigir"
+
+#~ msgid "This employee has no manager or subordinate."
+#~ msgstr "Aquest empleat no té administrador ni subordinat."

@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
+from odoo.fields import Domain
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
 from odoo.tools.misc import get_lang
@@ -40,32 +40,32 @@ class SaleOrderLine(models.Model):
     # --------------------------
 
     @api.model_create_multi
-    def create(self, values):
-        lines = super(SaleOrderLine, self).create(values)
+    def create(self, vals_list):
+        lines = super().create(vals_list)
         # Do not generate purchase when expense SO line since the product is already delivered
         lines.filtered(
             lambda line: line.state == 'sale' and not line.is_expense
         )._purchase_service_generation()
         return lines
 
-    def write(self, values):
+    def write(self, vals):
         increased_lines = None
         decreased_lines = None
         increased_values = {}
         decreased_values = {}
-        if 'product_uom_qty' in values:
-            precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-            increased_lines = self.sudo().filtered(lambda r: r.product_id.with_company(r._purchase_service_get_company()).service_to_purchase and r.purchase_line_count and float_compare(r.product_uom_qty, values['product_uom_qty'], precision_digits=precision) == -1)
-            decreased_lines = self.sudo().filtered(lambda r: r.product_id.with_company(r._purchase_service_get_company()).service_to_purchase and r.purchase_line_count and float_compare(r.product_uom_qty, values['product_uom_qty'], precision_digits=precision) == 1)
+        if 'product_uom_qty' in vals:
+            precision = self.env['decimal.precision'].precision_get('Product Unit')
+            increased_lines = self.sudo().filtered(lambda r: r.product_id.with_company(r._purchase_service_get_company()).service_to_purchase and r.purchase_line_count and float_compare(r.product_uom_qty, vals['product_uom_qty'], precision_digits=precision) == -1)
+            decreased_lines = self.sudo().filtered(lambda r: r.product_id.with_company(r._purchase_service_get_company()).service_to_purchase and r.purchase_line_count and float_compare(r.product_uom_qty, vals['product_uom_qty'], precision_digits=precision) == 1)
             increased_values = {line.id: line.product_uom_qty for line in increased_lines}
             decreased_values = {line.id: line.product_uom_qty for line in decreased_lines}
 
-        result = super(SaleOrderLine, self).write(values)
+        result = super().write(vals)
 
         if increased_lines:
-            increased_lines._purchase_increase_ordered_qty(values['product_uom_qty'], increased_values)
+            increased_lines._purchase_increase_ordered_qty(vals['product_uom_qty'], increased_values)
         if decreased_lines:
-            decreased_lines._purchase_decrease_ordered_qty(values['product_uom_qty'], decreased_values)
+            decreased_lines._purchase_decrease_ordered_qty(vals['product_uom_qty'], decreased_values)
         return result
 
     # --------------------------
@@ -105,10 +105,10 @@ class SaleOrderLine(models.Model):
         for line in self:
             last_purchase_line = self.env['purchase.order.line'].search([('sale_line_id', '=', line.id)], order='create_date DESC', limit=1)
             if last_purchase_line.state in ['draft', 'sent', 'to approve']:  # update qty for draft PO lines
-                quantity = line.product_uom._compute_quantity(new_qty, last_purchase_line.product_uom)
+                quantity = line.product_uom_id._compute_quantity(new_qty, last_purchase_line.product_uom_id)
                 last_purchase_line.write({'product_qty': quantity})
-            elif last_purchase_line.state in ['purchase', 'done', 'cancel']:  # create new PO, by forcing the quantity as the difference from SO line
-                quantity = line.product_uom._compute_quantity(new_qty - origin_values.get(line.id, 0.0), last_purchase_line.product_uom)
+            elif last_purchase_line.state in ['purchase', 'cancel']:  # create new PO, by forcing the quantity as the difference from SO line
+                quantity = new_qty - origin_values.get(line.id, 0.0)
                 line._purchase_service_create(quantity=quantity)
 
     def _purchase_get_date_order(self, supplierinfo):
@@ -141,7 +141,7 @@ class SaleOrderLine(models.Model):
         }
 
     def _purchase_service_get_price_unit_and_taxes(self, supplierinfo, purchase_order):
-        supplier_taxes = self.product_id.supplier_taxes_id.filtered(lambda t: t.company_id == purchase_order.company_id)
+        supplier_taxes = self.product_id.supplier_taxes_id.filtered(lambda t: t.company_id in purchase_order.company_id.parent_ids)
         taxes = purchase_order.fiscal_position_id.map_tax(supplier_taxes)
         if supplierinfo:
             price_unit = self.env['account.tax'].sudo()._fix_tax_included_price_company(supplierinfo.price, supplier_taxes, taxes, purchase_order.company_id)
@@ -183,16 +183,18 @@ class SaleOrderLine(models.Model):
         if quantity:
             product_quantity = quantity
 
-        purchase_qty_uom = self.product_uom._compute_quantity(product_quantity, self.product_id.uom_po_id)
+        purchase_qty_uom = self.product_uom_id._compute_quantity(product_quantity, self.product_id.uom_id)
 
         # determine vendor (real supplier, sharing the same partner as the one from the PO, but with more accurate informations like validity, quantity, ...)
         # Note: one partner can have multiple supplier info for the same product
         supplierinfo = self.product_id._select_seller(
             partner_id=purchase_order.partner_id,
             quantity=purchase_qty_uom,
-            date=purchase_order.date_order and purchase_order.date_order.date(), # and purchase_order.date_order[:10],
-            uom_id=self.product_id.uom_po_id
+            date=purchase_order.date_order and purchase_order.date_order.date(),  # and purchase_order.date_order[:10],
+            uom_id=self.product_id.uom_id
         )
+        if supplierinfo and supplierinfo.product_uom_id != self.product_id.uom_id:
+            purchase_qty_uom = self.product_id.uom_id._compute_quantity(purchase_qty_uom, supplierinfo.product_uom_id)
 
         price_unit, taxes = self._purchase_service_get_price_unit_and_taxes(supplierinfo, purchase_order)
         name = self._purchase_service_get_product_name(supplierinfo, purchase_order, quantity)
@@ -205,10 +207,10 @@ class SaleOrderLine(models.Model):
             'name': name,
             'product_qty': purchase_qty_uom,
             'product_id': self.product_id.id,
-            'product_uom': self.product_id.uom_po_id.id,
+            'product_uom_id': supplierinfo.product_uom_id.id or self.product_id.uom_id.id,
             'price_unit': price_unit,
             'date_planned': purchase_order.date_order + relativedelta(days=int(supplierinfo.delay)),
-            'taxes_id': [(6, 0, taxes.ids)],
+            'tax_ids': [(6, 0, taxes.ids)],
             'order_id': purchase_order.id,
             'sale_line_id': self.id,
             'discount': supplierinfo.discount,
@@ -219,17 +221,27 @@ class SaleOrderLine(models.Model):
 
     def _purchase_service_match_supplier(self, warning=True):
         # determine vendor of the order (take the first matching company and product)
-        suppliers = self.product_id._select_seller(partner_id=self._retrieve_purchase_partner(), quantity=self.product_uom_qty, uom_id=self.product_uom)
+        suppliers = self.product_id._select_seller(partner_id=self._retrieve_purchase_partner(), quantity=self.product_uom_qty, uom_id=self.product_uom_id)
         if warning and not suppliers:
             raise UserError(_("There is no vendor associated to the product %s. Please define a vendor for this product.", self.product_id.display_name))
         return suppliers[0]
 
+    def _get_additional_domain_for_purchase_order_line(self):
+        return  [('sale_order_id', '=', self.order_id.id)]
+
     def _purchase_service_match_purchase_order(self, partner, company=False):
-        return self.env['purchase.order'].search([
-            ('partner_id', '=', partner.id),
-            ('state', '=', 'draft'),
-            ('company_id', '=', (company and company or self.env.company).id),
-        ], order='id desc')
+        return self.env['purchase.order.line'].search(
+            Domain.AND([
+                [
+                  ('partner_id', '=', partner.id),
+                  ('state', '=', 'draft'),
+                  ('company_id', '=', (company and company or self.env.company).id),
+                ],
+                self._get_additional_domain_for_purchase_order_line(),
+            ]),
+            order='order_id',
+            limit=1,
+        ).order_id
 
     def _create_purchase_order(self, supplierinfo):
         values = self._purchase_service_prepare_order_values(supplierinfo)

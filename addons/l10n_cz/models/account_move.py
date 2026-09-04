@@ -5,22 +5,20 @@ from odoo import models, fields, api
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    taxable_supply_date = fields.Date(default=fields.Date.today())
+    @api.depends('country_code')
+    def _compute_taxable_supply_date(self):
+        super()._compute_taxable_supply_date()
+        for move in self.filtered(lambda m: m.country_code == 'CZ' and not m.taxable_supply_date):
+            move.taxable_supply_date = fields.Date.context_today(move)
 
-    @api.depends('taxable_supply_date')
-    def _compute_date(self):
-        super()._compute_date()
-        for move in self:
-            if move.country_code == 'CZ' and move.taxable_supply_date and move.state == 'draft':
-                move.date = move.taxable_supply_date
+    @api.depends('country_code')
+    def _compute_show_taxable_supply_date(self):
+        super()._compute_show_taxable_supply_date()
+        for move in self.filtered(lambda m: m.country_code == 'CZ' and m.move_type != 'entry'):
+            move.show_taxable_supply_date = True
 
-    @api.depends('taxable_supply_date')
-    def _compute_invoice_currency_rate(self):
-        # In the Czech Republic, the currency rate should be based on the taxable supply date.
-        super()._compute_invoice_currency_rate()
+    def _get_accounting_date_source(self):
+        return (self.country_code == 'CZ' and self.taxable_supply_date) or super()._get_accounting_date_source()
 
     def _get_invoice_currency_rate_date(self):
-        self.ensure_one()
-        if self.country_code == 'CZ' and self.taxable_supply_date:
-            return self.taxable_supply_date
-        return super()._get_invoice_currency_rate_date()
+        return (self.country_code == 'CZ' and self.taxable_supply_date) or super()._get_invoice_currency_rate_date()

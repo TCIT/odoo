@@ -66,11 +66,15 @@ $spacers: (
 // variable to compute some of their colors too). The background color behind
 // the box will be forced by an Odoo CSS rule instead of relying on Bootstrap
 // CSS rule (the <body> background color CSS rule) which uses `$body-bg`.
-// TODO lots of variables are still using $body-bg directly, they should use
-// var(--body-bg) instead, as the new bootstrap version intended.
+// Note: lots of variables are using $body-bg directly, they should ideally use
+// var(--body-bg) instead, as the new bootstrap version intended, but it's not
+// really possible as we use those for computing other colors a lot.
 // grep: BOXED_BODY_BG_ODOO
 $body-bg: o-color('o-cc1-bg') !default;
 $body-color: o-color('o-cc1-text') or color-contrast($body-bg) !default;
+
+// Bootstrap's default value on hover on some components eg. dropdown-item.
+$body-tertiary-bg: mix(color-contrast($body-bg), $body-bg, 10%) !default;
 
 // Links
 //
@@ -257,6 +261,10 @@ $input-placeholder-color: mix($input-bg, $input-color) !default;
 $input-disabled-bg: mix($input-color, $input-bg, 10%) !default;
 
 $form-check-input-border: ($input-border-width or 1px) solid $input-border-color !default;
+// We limit the border radius for checkboxes to a maximum of 0.25rem
+// (BS5 default), to prevent checkboxes from appearing too rounded and
+// resembling radio buttons.
+$form-check-input-border-radius: if($input-border-radius != null, min($input-border-radius, .25rem), null) !default;
 // Note that using "input-disabled-bg" here might seems strange at first but it
 // is actually the most consistent found way at the moment:
 // - It does not depend on the "border-color", which is important as the
@@ -269,6 +277,9 @@ $form-check-input-border: ($input-border-width or 1px) solid $input-border-color
 //   a background color on its own is not enough to convey that meaning anyway
 //   (a disabled range should have its *active* part with a different color).
 $form-range-track-bg: $input-disabled-bg !default;
+
+// Dropdowns
+$dropdown-border-color: $border-color !default;
 
 // Breadcrumbs
 $breadcrumb-padding-y: .75rem !default;
@@ -344,20 +355,11 @@ $box-shadow-lg: 0px 12px 32px rgba($black, .175) !default;
 // Cards
 $card-border-color: $border-color !default;
 
-// Modals
-$modal-header-border-width: 0 !default;
-$modal-footer-border-width: 0 !default;
-
 // HR Separator
 $hr-border-color: $border-color !default;
 $hr-opacity: 1 !default;
 
 // Pagination
-
-// Arbitrary values to get a circle for 1 digit numbers
-$pagination-padding-y: 0.4ch !default;
-$pagination-padding-x: 1.2ch !default;
-
 $pagination-border-radius: $border-radius-pill !default;
 $pagination-margin-start: map-get($map: $spacers, $key: 1) !default;
 $pagination-border-color: transparent !default;
@@ -377,17 +379,21 @@ $pagination-disabled-color: rgba(color-contrast($pagination-bg), 0.5) !default;
 $pagination-disabled-border-color: transparent !default;
 $pagination-disabled-bg: $pagination-bg !default;
 
-$pagination-padding-y-sm: $pagination-padding-y !default;
-$pagination-padding-x-sm: $pagination-padding-x !default;
-$pagination-padding-y-lg: $pagination-padding-y !default;
-$pagination-padding-x-lg: $pagination-padding-x !default;
-
 $pagination-border-radius-lg: $pagination-border-radius !default;
 $pagination-border-radius-sm: $pagination-border-radius !default;
 
 // Carousel
 $carousel-control-width: 10% !default;
 
+// Offcanvas
+$offcanvas-horizontal-width: $o-offcanvas-horizontal-width !default;
+
 // TODO adapt in master: fix the text columns web_editor feature to use standard
 // Bootstrap paddings and margins. See FIXED_TEXT_COLUMNS.
 $--enable-no-overflow-of-text-columns: false !default;
+
+.carousel-instant {
+  .carousel-item {
+    transition-duration: 200ms !important;
+  }
+}

@@ -1,13 +1,19 @@
 .o_field_image {
-    background-color: var(--ImageField-background-color, transparent);
 
     > div {
         height: 100%;
         width: 100%;
+
+        > img {
+            background-color: var(--ImageField-background-color, transparent);
+        }
     }
 
     button {
         transition: opacity ease 400ms;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         width: 26px;
         height: 26px;
     }

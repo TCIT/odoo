@@ -11,8 +11,7 @@
     'data': [
         'security/hr_recruitment_skills_security.xml',
         'views/hr_applicant_views.xml',
-        'views/hr_candidate_views.xml',
-        'views/hr_candidate_skill_views.xml',
+        'views/hr_applicant_skill_views.xml',
         'views/hr_job_views.xml',
         'security/ir.model.access.csv',
     ],
@@ -26,5 +25,6 @@
     ],
     'installable': True,
     'auto_install': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

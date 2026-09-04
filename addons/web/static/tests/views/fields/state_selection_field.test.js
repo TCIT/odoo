@@ -24,7 +24,14 @@ class Partner extends models.Model {
     ];
 }
 
-defineModels([Partner]);
+class User extends models.Model {
+    _name = "res.users";
+    has_group() {
+        return true;
+    }
+}
+
+defineModels([Partner, User]);
 
 test("StateSelectionField in form view", async () => {
     await mountView({
@@ -123,6 +130,36 @@ test("StateSelectionField in form view", async () => {
     });
 });
 
+test("Check role attribute for dropdown items", async () => {
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="selection" widget="state_selection"/>
+                    </group>
+                </sheet>
+            </form>
+        `,
+        resId: 1,
+    });
+
+    // Open the dropdown
+    click(".o_field_widget.o_field_state_selection .o_status");
+    await animationFrame();
+
+    // Assert that the dropdown is open
+    expect(".o-dropdown--menu").toHaveCount(1, { message: "there should be a dropdown" });
+
+    // Assert that each dropdown item has role="checkbox"
+    expect(queryFirst(".o-dropdown--menu .dropdown-item")).toHaveAttribute(
+        "role",
+        "menuitemcheckbox"
+    );
+});
+
 test("StateSelectionField with readonly modifier", async () => {
     await mountView({
         type: "form",
@@ -132,10 +169,11 @@ test("StateSelectionField with readonly modifier", async () => {
     });
 
     expect(".o_field_state_selection").toHaveClass("o_readonly_modifier");
-    expect(".dropdown-menu").not.toBeVisible();
+    expect(".o_field_state_selection button").toHaveClass("o_disabled");
+    expect(".dropdown-menu:visible").not.toHaveCount();
     await click(".o_field_state_selection span.o_status");
     await animationFrame();
-    expect(".dropdown-menu").not.toBeVisible();
+    expect(".dropdown-menu:visible").not.toHaveCount();
 });
 
 test("StateSelectionField for form view with hide_label option", async () => {
@@ -265,29 +303,6 @@ test("StateSelectionField in editable list view", async () => {
     ).toHaveCount(1, { message: "should still have one green status" });
     expect(".o-dropdown--menu").toHaveCount(0, { message: "there should not be a dropdown" });
 
-    // Click on the status button to make the dropdown appear
-    await click(".o_state_selection_cell .o_field_state_selection span.o_status");
-    await animationFrame();
-    expect(".o-dropdown--menu").toHaveCount(1, { message: "there should be a dropdown" });
-    expect(".o-dropdown--menu .dropdown-item").toHaveCount(3, {
-        message: "there should be three options in the dropdown",
-    });
-
-    // Click on another row
-    const lastCell = queryAll("tbody td.o_state_selection_cell")[4];
-    await click(lastCell);
-    await animationFrame();
-    expect(".o-dropdown--menu").toHaveCount(0, {
-        message: "there should not be a dropdown anymore",
-    });
-    const firstCell = queryFirst("tbody td.o_state_selection_cell");
-    expect(firstCell.parentElement).not.toHaveClass("o_selected_row", {
-        message: "first row should not be in edit mode anymore",
-    });
-    expect(lastCell.parentElement).toHaveClass("o_selected_row", {
-        message: "last row should be in edit mode",
-    });
-
     // Click on the third status button to make the dropdown appear
     await click(".o_state_selection_cell .o_field_state_selection span.o_status:eq(2)");
     await animationFrame();
@@ -328,6 +343,43 @@ test("StateSelectionField in editable list view", async () => {
     expect(".o-dropdown--menu").toHaveCount(0, { message: "there should not be a dropdown" });
 });
 
+test.tags("desktop");
+test("StateSelectionField line stay in edit mode when StateSelectionField is opened", async () => {
+    await mountView({
+        type: "list",
+        resModel: "partner",
+        arch: /* xml */ `
+            <list editable="bottom">
+                <field name="foo"/>
+                <field name="selection" widget="state_selection"/>
+            </list>
+        `,
+    });
+
+    // Click on the status button to make the dropdown appear
+    await click(".o_state_selection_cell .o_field_state_selection span.o_status");
+    await animationFrame();
+    expect(".o-dropdown--menu").toHaveCount(1, { message: "there should be a dropdown" });
+    expect(".o-dropdown--menu .dropdown-item").toHaveCount(3, {
+        message: "there should be three options in the dropdown",
+    });
+
+    // Click on another row
+    const lastCell = queryAll("tbody td.o_state_selection_cell")[4];
+    await click(lastCell);
+    await animationFrame();
+    expect(".o-dropdown--menu").toHaveCount(0, {
+        message: "there should not be a dropdown anymore",
+    });
+    const firstCell = queryFirst("tbody td.o_state_selection_cell");
+    expect(firstCell.parentElement).not.toHaveClass("o_selected_row", {
+        message: "first row should not be in edit mode anymore",
+    });
+    expect(lastCell.parentElement).toHaveClass("o_selected_row", {
+        message: "last row should be in edit mode",
+    });
+});
+
 test('StateSelectionField edited by the smart actions "Set kanban state as <state name>"', async () => {
     await mountView({
         type: "form",
@@ -343,8 +395,8 @@ test('StateSelectionField edited by the smart actions "Set kanban state as <stat
     expect(".o_status_red").toHaveCount(1);
     await press(["control", "k"]);
     await animationFrame();
-    expect(`.o_command:contains("Set kanban state as Normal\nALT + D")`).toHaveCount(1);
-    const doneItem = `.o_command:contains("Set kanban state as Done\nALT + G")`;
+    expect(`.o_command:contains("Set kanban state as Normal ALT + D")`).toHaveCount(1);
+    const doneItem = `.o_command:contains("Set kanban state as Done ALT + G")`;
     expect(doneItem).toHaveCount(1);
 
     await click(doneItem);
@@ -353,9 +405,9 @@ test('StateSelectionField edited by the smart actions "Set kanban state as <stat
 
     await press(["control", "k"]);
     await animationFrame();
-    expect(`.o_command:contains("Set kanban state as Normal\nALT + D")`).toHaveCount(1);
-    expect(`.o_command:contains("Set kanban state as Blocked\nALT + F")`).toHaveCount(1);
-    expect(`.o_command:contains("Set kanban state as Done\nALT + G")`).toHaveCount(0);
+    expect(`.o_command:contains("Set kanban state as Normal ALT + D")`).toHaveCount(1);
+    expect(`.o_command:contains("Set kanban state as Blocked ALT + F")`).toHaveCount(1);
+    expect(`.o_command:contains("Set kanban state as Done ALT + G")`).toHaveCount(0);
 });
 
 test("StateSelectionField uses legend_* fields", async () => {
@@ -513,7 +565,8 @@ test("StateSelectionField - hotkey handling when there are more than 3 options a
     await press(["control", "k"]);
     await animationFrame();
 
-    expect(".o_command#o_command_2").toHaveText("Set kanban state as Done\nALT + G", {
+    expect(".o_command#o_command_2").toHaveText("Set kanban state as Done ALT + G", {
+        inline: true,
         message: "hotkey and command are present",
     });
     expect(".o_command#o_command_4").toHaveText("Set kanban state as Martine", {

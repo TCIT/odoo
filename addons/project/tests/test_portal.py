@@ -86,7 +86,7 @@ class TestPortalProject(TestProjectPortalCommon, HttpCase):
 
     def test_search_validates_results(self):
         project_manager = self.env['res.users'].search([
-            ('groups_id', 'in', [self.env.ref('project.group_project_manager').id])
+            ('group_ids', 'in', [self.env.ref('project.group_project_manager').id])
         ],limit=1)
         self.authenticate(project_manager.login, project_manager.login)
         self.project_1 = self.env['project.project'].create({'name': 'Portal Search Project 1'})
@@ -117,3 +117,40 @@ class TestPortalProject(TestProjectPortalCommon, HttpCase):
         response = self.url_open(url)
         self.assertIn(self.task_1.name, response.text)
         self.assertNotIn(self.task_2.name, response.text)
+
+    def test_task_templates_visibility_portal(self):
+        """
+        Verify that a portal user can see regular tasks but not task templates or their subtasks.
+        """
+        self.authenticate(self.user_portal.login, self.user_portal.login)
+        portal_project = self.env['project.project'].create({'name': 'Portal Project'})
+        portal_project.message_subscribe(partner_ids=[self.user_portal.partner_id.id])
+        task, task_template = self.env['project.task'].create([
+            {
+                'name': 'Visible Task',
+                'project_id': portal_project.id,
+            },
+            {
+                'name': 'Invisible Template Task',
+                'project_id': portal_project.id,
+                'is_template': True,
+                'child_ids': [
+                    Command.create({'name': 'Sub Task of Template Task 1'}),
+                    Command.create({'name': 'Sub Task of Template Task 2'}),
+                ]
+            }
+        ])
+
+        # Check the portal my tasks page
+        my_tasks_response = self.url_open('/my/tasks')
+        self.assertIn(task.name, my_tasks_response.text)
+        self.assertNotIn(task_template.name, my_tasks_response.text)
+        self.assertNotIn(task_template.child_ids[0].name, my_tasks_response.text)
+        self.assertNotIn(task_template.child_ids[1].name, my_tasks_response.text)
+
+        # Check the tasks page for the specific project
+        project_tasks_response = self.url_open('/my/projects/%s' % (portal_project.id))
+        self.assertIn(task.name, project_tasks_response.text)
+        self.assertNotIn(task_template.name, project_tasks_response.text)
+        self.assertNotIn(task_template.child_ids[0].name, project_tasks_response.text)
+        self.assertNotIn(task_template.child_ids[1].name, project_tasks_response.text)

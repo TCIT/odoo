@@ -3,7 +3,7 @@
     'name': 'New Zealand - Accounting',
     'icon': '/account/static/description/l10n.png',
     'countries': ['nz'],
-    'version': '1.1',
+    'version': '1.2',
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 New Zealand Accounting Module
@@ -16,7 +16,7 @@ Also:
     - sets up New Zealand taxes.
     """,
     'author': 'Odoo S.A., Richard deMeester - Willow IT',
-    'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations.html',
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations.html',
     'depends': [
         'account',
     ],

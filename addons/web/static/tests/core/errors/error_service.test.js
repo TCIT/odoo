@@ -16,6 +16,7 @@ import {
     RPCErrorDialog,
     standardErrorDialogProps,
 } from "@web/core/errors/error_dialogs";
+import { formatTraceback } from "@web/core/errors/error_utils";
 import { UncaughtPromiseError } from "@web/core/errors/error_service";
 import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
@@ -23,6 +24,12 @@ import { omit } from "@web/core/utils/objects";
 
 const errorDialogRegistry = registry.category("error_dialogs");
 const errorHandlerRegistry = registry.category("error_handlers");
+
+test("format traceback of an Error-like object without a stack", () => {
+    expect(formatTraceback(new DOMException("This is a DOM exception"))).toBe(
+        "DOMException: This is a DOM exception"
+    );
+});
 
 test("can handle rejected promise errors with a string as reason", async () => {
     expect.assertions(2);
@@ -48,7 +55,6 @@ test("handle RPC_ERROR of type='server' and no associated dialog class", async (
     error.message = "Some strange error occured";
     error.data = { debug: "somewhere" };
     error.subType = "strange_error";
-    error.id = 12;
     error.model = "some model";
 
     mockService("dialog", {
@@ -64,7 +70,6 @@ test("handle RPC_ERROR of type='server' and no associated dialog class", async (
                 subType: "strange_error",
                 message: "Some strange error occured",
                 exceptionName: null,
-                id: 12,
                 model: "some model",
             });
             expect(props.traceback).toMatch(/RPC_ERROR/);
@@ -88,7 +93,6 @@ test("handle custom RPC_ERROR of type='server' and associated custom dialog clas
     const error = new RPCError();
     error.code = 701;
     error.message = "Some strange error occured";
-    error.id = 12;
     error.model = "some model";
     const errorData = {
         context: { exception_class: "strange_error" },
@@ -107,7 +111,6 @@ test("handle custom RPC_ERROR of type='server' and associated custom dialog clas
                 subType: null,
                 message: "Some strange error occured",
                 exceptionName: null,
-                id: 12,
                 model: "some model",
             });
             expect(props.traceback).toMatch(/RPC_ERROR/);
@@ -142,7 +145,6 @@ test("handle normal RPC_ERROR of type='server' and associated custom dialog clas
     };
     error.exceptionName = "normal_error";
     error.data = errorData;
-    error.id = 12;
     error.model = "some model";
     mockService("dialog", {
         add(dialogClass, props) {
@@ -155,7 +157,6 @@ test("handle normal RPC_ERROR of type='server' and associated custom dialog clas
                 subType: null,
                 message: "A normal error occured",
                 exceptionName: "normal_error",
-                id: 12,
                 model: "some model",
             });
             expect(props.traceback).toMatch(/RPC_ERROR/);
@@ -366,7 +367,7 @@ test("show dialog for errors in third-party scripts in debug mode", async () => 
     class TestError extends Error {}
     const error = new TestError();
     error.name = "Script error.";
-    serverState.debug = true;
+    serverState.debug = "1";
 
     mockService("dialog", {
         add(_dialogClass, props) {

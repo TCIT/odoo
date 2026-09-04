@@ -2,6 +2,7 @@
 from odoo.addons.account.models.chart_template import template
 from odoo import models
 
+
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
@@ -12,7 +13,7 @@ class AccountChartTemplate(models.AbstractModel):
             self.env.company.id: {
                 'external_report_layout_id': 'l10n_din5008.external_layout_din5008',
                 'paperformat_id': 'l10n_din5008.paperformat_euro_din',
-                'check_account_audit_trail': True,
+                'restrictive_audit_trail': True,
             }
         }
 

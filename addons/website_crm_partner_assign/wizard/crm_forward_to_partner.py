@@ -89,7 +89,7 @@ class CrmLeadForwardToPartner(models.TransientModel):
             in_portal = False
             if portal_group:
                 for contact in (partner.child_ids or partner).filtered(lambda contact: contact.user_ids):
-                    in_portal = portal_group.id in [g.id for g in contact.user_ids[0].groups_id]
+                    in_portal = portal_group.id in [g.id for g in contact.user_ids[0].all_group_ids]
 
             local_context['partner_id'] = partner_leads['partner']
             local_context['partner_leads'] = partner_leads['leads']
@@ -100,6 +100,7 @@ class CrmLeadForwardToPartner(models.TransientModel):
                 leads |= lead_data['lead_id']
             values = {'partner_assigned_id': partner_id, 'user_id': partner_leads['partner'].user_id.id}
             leads.with_context(mail_auto_subscribe_no_notify=1).write(values)
+            # TDE FIXME: check for assigned in suggested recipients (master-)
             self.env['crm.lead'].message_subscribe([partner_id])
         return True
 

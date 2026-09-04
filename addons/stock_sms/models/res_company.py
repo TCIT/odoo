@@ -4,7 +4,7 @@
 from odoo import fields, models
 
 
-class Company(models.Model):
+class ResCompany(models.Model):
     _inherit = "res.company"
 
     def _default_confirmation_sms_picking_template(self):
@@ -13,7 +13,6 @@ class Company(models.Model):
         except ValueError:
             return False
 
-    stock_move_sms_validation = fields.Boolean("SMS Confirmation", default=True)
     stock_sms_confirmation_template_id = fields.Many2one(
         'sms.template', string="SMS Template",
         domain="[('model', '=', 'stock.picking')]",

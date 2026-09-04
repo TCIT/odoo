@@ -4,6 +4,8 @@ import { user } from "@web/core/user";
 import { Mutex } from "@web/core/utils/concurrency";
 import { debounce } from "@web/core/utils/timing";
 import { PeerToPeer, RequestError } from "./PeerToPeer";
+import { ancestors } from "@html_editor/utils/dom_traversal";
+import { childNodeIndex } from "@html_editor/utils/position";
 
 /**
  * @typedef {Object} CollaborationSelection
@@ -45,6 +47,7 @@ export class CollaborationOdooPlugin extends Plugin {
     static id = "collaborationOdoo";
     static dependencies = ["baseContainer", "history", "collaboration", "selection"];
     static shared = ["getPeerMetadata"];
+    /** @type {import("plugins").EditorResources} */
     resources = {
         selectionchange_handlers: debounce(() => {
             this.ptp?.notifyAllPeers(
@@ -237,16 +240,15 @@ export class CollaborationOdooPlugin extends Plugin {
         return new PeerToPeer({
             peerConnectionConfig: { iceServers: this.iceServers },
             currentPeerId: this.config.collaboration.peerId,
-            broadcastAll: (rpcData) => {
-                return rpcMutex.exec(async () => {
-                    return rpc("/html_editor/bus_broadcast", {
+            broadcastAll: (rpcData) =>
+                rpcMutex.exec(async () =>
+                    rpc("/html_editor/bus_broadcast", {
                         model_name: modelName,
                         field_name: fieldName,
                         res_id: resId,
                         bus_data: rpcData,
-                    });
-                });
-            },
+                    })
+                ),
             onRequest: {
                 get_peer_metadata: this.getMetadata.bind(this),
                 get_missing_steps: (params) =>
@@ -615,12 +617,12 @@ export class CollaborationOdooPlugin extends Plugin {
         collaborationResetId = this.lastCollaborationResetId;
         this.startCollaborationTime = new Date().getTime();
         await Promise.all(
-            this.getPtpPeers().map((peer) => {
+            this.getPtpPeers().map((peer) =>
                 // Reset from the fastest peer. The first peer to reset will set
                 // this.historySyncAtLeastOnce to true canceling the other peers
                 // resets.
-                return this.resetFromPeer(peer.id, collaborationResetId);
-            })
+                this.resetFromPeer(peer.id, collaborationResetId)
+            )
         );
         return true;
     }
@@ -631,7 +633,7 @@ export class CollaborationOdooPlugin extends Plugin {
         // different history, we should not apply it.
         this.historyShareId = Math.floor(Math.random() * Math.pow(2, 52)).toString();
 
-        const lastStepId = content && this.getLastHistoryStepId(content);
+        const lastStepId = content && content.match(/data-last-history-steps="([\d,]+)"/)?.[1];
         if (lastStepId) {
             this.dependencies.collaboration.setInitialBranchStepId(lastStepId);
         }
@@ -726,11 +728,26 @@ export class CollaborationOdooPlugin extends Plugin {
         if (this.historySyncAtLeastOnce) {
             return;
         }
+        const selection = this.dependencies.selection.getEditableSelection();
+        let anchorNodeIndexPath = this._getNodeIndexPath(selection.anchorNode);
+        let anchorOffset = selection.anchorOffset;
+        if (selection.anchorNode === this.editable) {
+            anchorNodeIndexPath = this._getNodeIndexPath(this.editable.firstChild);
+            anchorOffset = 0;
+        }
         const applied = this.applySnapshot(snapshot);
         if (!applied) {
             return;
         }
-        this.dependencies.selection.setCursorStart(this.editable.firstChild);
+        const anchorNode = this._getNodeFromIndexPath(anchorNodeIndexPath);
+        if (
+            this.dependencies.selection.isSelectionInEditable({ anchorNode, focusNode: anchorNode })
+        ) {
+            this.dependencies.selection.setSelection({
+                anchorNode,
+                anchorOffset,
+            });
+        }
         this.historySyncFinished = true;
         // In case there are steps received in the meantime, process them.
         if (this.historyStepsBuffer.length) {
@@ -789,6 +806,30 @@ export class CollaborationOdooPlugin extends Plugin {
         if (firstChild) {
             firstChild.setAttribute("data-last-history-steps", historyIds);
         }
+    }
+
+    /**
+     * Generates the path to a node as an array of indices, relative to a given ancestor.
+     *
+     * @param {Node} node - The node to trace the path for.
+     * @returns {number[]} The path as an array of child indices.
+     */
+    _getNodeIndexPath(node) {
+        return [node, ...ancestors(node, this.editable)].map((ancestor) =>
+            childNodeIndex(ancestor)
+        );
+    }
+    /**
+     * Finds a node in the DOM based on a path of child indices.
+     *
+     * @param {number[]} indexPath - The path as an array of child indices.
+     * @returns {Node|undefined} The node at the specified path, or null if not found.
+     */
+    _getNodeFromIndexPath(indexPath) {
+        return indexPath.reduceRight(
+            (node, index) => node?.childNodes?.[index],
+            this.editable.parentElement
+        );
     }
 }
 

@@ -5,19 +5,16 @@ from odoo.exceptions import UserError
 
 
 class ProductAttribute(models.Model):
-    _name = "product.attribute"
+    _name = 'product.attribute'
     _description = "Product Attribute"
     # if you change this _order, keep it in sync with the method
     # `_sort_key_attribute_value` in `product.template`
     _order = 'sequence, id'
 
-    _sql_constraints = [
-        (
-            'check_multi_checkbox_no_variant',
-            "CHECK(display_type != 'multi' OR create_variant = 'no_variant')",
-            "Multi-checkbox display type is not compatible with the creation of variants"
-        ),
-    ]
+    _check_multi_checkbox_no_variant = models.Constraint(
+        "CHECK(display_type != 'multi' OR create_variant = 'no_variant')",
+        'Multi-checkbox display type is not compatible with the creation of variants',
+    )
 
     name = fields.Char(string="Attribute", required=True, translate=True)
     active = fields.Boolean(
@@ -44,6 +41,7 @@ class ProductAttribute(models.Model):
             ('select', 'Select'),
             ('color', 'Color'),
             ('multi', 'Multi-checkbox'),
+            ('image', 'Image'),
         ],
         default='radio',
         required=True,
@@ -86,8 +84,16 @@ class ProductAttribute(models.Model):
 
     @api.depends('attribute_line_ids.active', 'attribute_line_ids.product_tmpl_id')
     def _compute_products(self):
+        templates_by_attribute = {
+            attribute.id: templates
+            for attribute, templates in self.env['product.template.attribute.line']._read_group(
+                domain=[('attribute_id', 'in', self.ids)],
+                groupby=['attribute_id'],
+                aggregates=['product_tmpl_id:recordset']
+            )
+        }
         for pa in self:
-            pa.with_context(active_test=False).product_tmpl_ids = pa.attribute_line_ids.product_tmpl_id
+            pa.with_context(active_test=False).product_tmpl_ids = templates_by_attribute.get(pa.id, False)
 
     # === ONCHANGE METHODS === #
 
@@ -145,6 +151,7 @@ class ProductAttribute(models.Model):
                 ))
         return super().action_archive()
 
+    @api.readonly
     def action_open_product_template_attribute_lines(self):
         self.ensure_one()
         return {

@@ -3,7 +3,6 @@
 from lxml import etree
 
 from odoo import fields, models, _
-from odoo.tools import format_list
 
 HIERARCHY_VALID_ATTRIBUTES = {
     '__validate__',                     # ir.ui.view implementation detail
@@ -20,7 +19,8 @@ HIERARCHY_VALID_ATTRIBUTES = {
     'default_order'
 }
 
-class View(models.Model):
+
+class IrUiView(models.Model):
     _inherit = 'ir.ui.view'
 
     type = fields.Selection(selection_add=[('hierarchy', "Hierarchy")])
@@ -48,8 +48,8 @@ class View(models.Model):
         if remaining:
             msg = _(
                 "Invalid attributes (%(invalid_attributes)s) in hierarchy view. Attributes must be in (%(valid_attributes)s)",
-                invalid_attributes=format_list(self.env, remaining),
-                valid_attributes=format_list(self.env, HIERARCHY_VALID_ATTRIBUTES),
+                invalid_attributes=remaining,
+                valid_attributes=HIERARCHY_VALID_ATTRIBUTES,
             )
             self._raise_view_error(msg, node)
 

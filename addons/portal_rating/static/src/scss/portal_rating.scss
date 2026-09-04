@@ -1,7 +1,14 @@
 /* static stars */
+// portal_rating
 $o-w-rating-star-color: #FACC2E;
-.o_website_rating_static{
-    color: $o-w-rating-star-color;
+
+.o_website_rating_static {
+    color: var(--WebsiteRating__star-color,  #{$o-w-rating-star-color});
+}
+
+// website_sale
+#product_details {
+    --WebsiteRating__star-color: currentColor;
 }
 
 .o_website_rating_card_container {
@@ -40,8 +47,11 @@ $o-w-rating-star-color: #FACC2E;
                 color: $red;
             }
         }
-        .o_website_rating_table_row:not(o_website_rating_table_row_selected) {
+        .o_website_rating_table_row:not(.o_website_rating_table_row_selected) {
             cursor: pointer;
+        }
+        .o_website_rating_table_row td {
+            padding-bottom: 0.4rem;
         }
     }
 }
@@ -49,21 +59,10 @@ $o-w-rating-star-color: #FACC2E;
 /* Star Widget */
 .o-mail-Composer-starCard{
     width: max-content;
-    margin-bottom: 5px;
     .o-mail-Composer-stars {
         display: inline-flex;
         color: #FACC2E;
         margin-right: 15px;
-    }
-
-    .o-mail-Composer-stars i {
-        padding-right: 1px;
-        padding-left: 1px;
-        text-align: center;
-    }
-
-    .o-mail-Composer-stars.enabled{
-        cursor: pointer;
     }
 }
 

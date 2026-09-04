@@ -1,9 +1,7 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
-import FormEditorRegistry from "@website/js/form_editor_registry";
+import { registry } from '@web/core/registry';
 
-FormEditorRegistry.add('apply_job', {
+registry.category("website.form_editor_actions").add('apply_job', {
     formFields: [{
         type: 'char',
         modelRequired: true,
@@ -28,7 +26,7 @@ FormEditorRegistry.add('apply_job', {
         string: _t('LinkedIn Profile'),
     }, {
         type: 'text',
-        name: 'description',
+        name: 'applicant_notes',
         string: _t('Short Introduction'),
     }, {
         type: 'binary',

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import base64
 import logging
 import json
 
@@ -19,7 +20,11 @@ class AccountMove(models.Model):
     l10n_eg_qr_code = fields.Char(string='ETA QR Code', compute='_compute_eta_qr_code_str')
     l10n_eg_submission_number = fields.Char(string='Submission ID', compute='_compute_eta_response_data', store=True, copy=False)
     l10n_eg_uuid = fields.Char(string='Document UUID', compute='_compute_eta_response_data', store=True, copy=False)
-    l10n_eg_eta_json_doc_id = fields.Many2one('ir.attachment', copy=False)
+    l10n_eg_eta_json_doc_file = fields.Binary(
+        string='ETA JSON Document',
+        attachment=True,
+        copy=False,
+    )
     l10n_eg_signing_time = fields.Datetime('Signing Time', copy=False)
     l10n_eg_is_signed = fields.Boolean(copy=False)
 
@@ -30,10 +35,10 @@ class AccountMove(models.Model):
             create_column(self.env.cr, "account_move", "l10n_eg_submission_number", "VARCHAR")
         return super()._auto_init()
 
-    @api.depends('l10n_eg_eta_json_doc_id.raw')
+    @api.depends('l10n_eg_eta_json_doc_file')
     def _compute_eta_long_id(self):
         for rec in self:
-            response_data = rec.l10n_eg_eta_json_doc_id and json.loads(rec.l10n_eg_eta_json_doc_id.raw).get('response')
+            response_data = rec.l10n_eg_eta_json_doc_file and json.loads(base64.b64decode(rec.l10n_eg_eta_json_doc_file)).get('response')
             if response_data:
                 rec.l10n_eg_long_id = response_data.get('l10n_eg_long_id')
             else:
@@ -50,21 +55,23 @@ class AccountMove(models.Model):
             else:
                 move.l10n_eg_qr_code = ''
 
-    @api.depends('l10n_eg_eta_json_doc_id.raw')
+    @api.depends('l10n_eg_eta_json_doc_file')
     def _compute_eta_response_data(self):
         for rec in self:
-            response_data = rec.l10n_eg_eta_json_doc_id and json.loads(rec.l10n_eg_eta_json_doc_id.raw).get('response')
+            response_data = rec.l10n_eg_eta_json_doc_file and json.loads(base64.b64decode(rec.l10n_eg_eta_json_doc_file)).get('response')
             if response_data:
                 rec.l10n_eg_uuid = response_data.get('l10n_eg_uuid')
                 rec.l10n_eg_submission_number = response_data.get('l10n_eg_submission_number')
-                rec.l10n_eg_long_id = response_data.get('l10n_eg_long_id')
             else:
                 rec.l10n_eg_uuid = False
                 rec.l10n_eg_submission_number = False
-                rec.l10n_eg_long_id = False
+
+    def _get_fields_to_detach(self):
+        fields_list = super()._get_fields_to_detach()
+        fields_list.append('l10n_eg_eta_json_doc_file')
+        return fields_list
 
     def button_draft(self):
-        self.l10n_eg_eta_json_doc_id = False
         self.l10n_eg_is_signed = False
         return super().button_draft()
 
@@ -89,21 +96,22 @@ class AccountMove(models.Model):
         if not drive_id.certificate:
             raise ValidationError(_('Please setup the certificate on the thumb drive menu'))
 
-        self.write({'l10n_eg_signing_time': datetime.utcnow()})
+        invoices.write({'l10n_eg_signing_time': datetime.utcnow()})
 
         for invoice in invoices:
             eta_invoice = self.env['account.edi.format']._l10n_eg_eta_prepare_eta_invoice(invoice)
-            attachment = self.env['ir.attachment'].create({
+            self.env['ir.attachment'].create({
                     'name': _('ETA_INVOICE_DOC_%s', invoice.name),
                     'res_id': invoice.id,
                     'res_model': invoice._name,
+                    'res_field': 'l10n_eg_eta_json_doc_file',
                     'type': 'binary',
                     'raw': json.dumps(dict(request=eta_invoice)),
                     'mimetype': 'application/json',
                     'description': _('Egyptian Tax authority JSON invoice generated for %s.', invoice.name),
                 })
-            invoice.l10n_eg_eta_json_doc_id = attachment.id
-        return drive_id.action_sign_invoices(self)
+            invoice.invalidate_recordset(fnames=['l10n_eg_eta_json_doc_file'])
+        return drive_id.action_sign_invoices(invoices)
 
     def action_get_eta_invoice_pdf(self):
         """ This is a pdf with the structure from the government.  While we can use our own format,
@@ -113,9 +121,10 @@ class AccountMove(models.Model):
         if eta_invoice_pdf.get('error', False):
             _logger.warning('PDF Content Error:  %s.', eta_invoice_pdf.get('error'))
             return
-        self.with_context(no_new_invoice=True).message_post(body=_('ETA invoice has been received'),
-                                                            attachments=[('ETA invoice of %s.pdf' % self.name,
-                                                                          eta_invoice_pdf.get('data'))])
+        self.message_post(
+            body=_('ETA invoice has been received'),
+            attachments=[('ETA invoice of %s.pdf' % self.name, eta_invoice_pdf.get('data'))]
+        )
 
     def _l10n_eg_edi_exchange_currency_rate(self):
         """ Calculate the rate based on the balance and amount_currency, so we recuperate the one used at the time"""
@@ -123,7 +132,11 @@ class AccountMove(models.Model):
         from_currency = self.currency_id
         to_currency = self.company_id.currency_id
         if from_currency != to_currency and self.invoice_line_ids:
-            amount_currency = self.invoice_line_ids[0].amount_currency
+            first_product_line = self.invoice_line_ids.filtered(lambda line: line.display_type == "product")[:1]
+            amount_currency = first_product_line.amount_currency
             if not float_is_zero(amount_currency, precision_rounding=from_currency.rounding):
-                return abs(self.invoice_line_ids[0].balance / amount_currency)
+                # The `balance` on an invoice line is a rounded value, calculated using the invoice_currency_rate.
+                # To avoid rounding discrepancies, the rate is recalculated from this final rounded balance instead of
+                # directly using invoice_currency_rate.
+                return abs(first_product_line.balance / amount_currency)
         return 1.0

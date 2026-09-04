@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests import tagged, TransactionCase
+from odoo.fields import Command
+from odoo.tests import TransactionCase, tagged
 
 
 @tagged('post_install', '-at_install')
@@ -32,7 +33,7 @@ class TestName(TransactionCase):
 
     def test_product_template_search_name_no_product_product(self):
         # To be able to test dynamic variant "variants" feature must be set up
-        self.env.user.write({'groups_id': [(4, self.env.ref('product.group_product_variant').id)]})
+        self.env.user.write({'group_ids': [(4, self.env.ref('product.group_product_variant').id)]})
         color_attr = self.env['product.attribute'].create({'name': 'Color', 'create_variant': 'dynamic'})
         color_attr_value_r = self.env['product.attribute.value'].create({'name': 'Red', 'attribute_id': color_attr.id})
         color_attr_value_b = self.env['product.attribute.value'].create({'name': 'Blue', 'attribute_id': color_attr.id})
@@ -56,3 +57,27 @@ class TestName(TransactionCase):
         res_ids = [r[0] for r in res]
         self.assertIn(template_dyn.id, res_ids)
         self.assertIn(product.product_tmpl_id.id, res_ids)
+
+    def test_product_product_name_search(self):
+        attribute = self.env['product.attribute'].create({
+            'name': 'Attribute',
+            'value_ids': [
+                Command.create({'name': f'value {i}'})
+                for i in range(3)
+            ]
+        })
+        template = self.env['product.template'].create({
+            'name': 'Whatever',
+            'attribute_line_ids': [
+                Command.create({
+                    'attribute_id': attribute.id,
+                    'value_ids': [Command.set(attribute.value_ids.ids)]
+                })
+            ]
+        })
+        variant1, _variant2, _variant3 = template.product_variant_ids
+        variant1.default_code = 'HOHO'
+        product_search = self.env['product.product'].with_context(partner_id=33).search([
+            ('display_name', '=', 'HOHO'),
+        ])
+        self.assertEqual(variant1, product_search)

@@ -51,7 +51,7 @@
                 <t t-name="card">
                     <div class="row mb-auto">
                         <div class="col-8 fw-bolder">
-                            <field class="text-truncate" name="name"/>
+                            <field class="d-block text-truncate" name="name"/>
                             <div class="text-muted" t-if="record.website_id.value" groups="website.group_multi_website">
                                 <i class="fa fa-globe me-1" title="Website"/>
                                 <field name="website_id"/>
@@ -85,7 +85,7 @@
             <field name="name" string="Content" filter_domain="['|', ('name','ilike',self), ('content','ilike',self)]"/>
             <field name="write_uid"/>
             <field name="blog_id"/>
-            <group expand="0" string="Group By">
+            <group>
                 <filter string="Blog" name="group_by_blog" domain="[]" context="{'group_by': 'blog_id'}"/>
                 <filter string="Author" name="group_by_author" domain="[]" context="{'group_by': 'create_uid'}"/>
                 <filter string="Last Contributor" name="last_contributor" domain="[]" context="{'group_by': 'write_uid'}"/>
@@ -121,6 +121,7 @@
 <record id="action_blog_post" model="ir.actions.act_window">
     <field name="name">Blog Post Pages</field>
     <field name="res_model">blog.post</field>
+    <field name="path">blog-post-pages</field>
     <field name="view_mode">list,kanban,form</field>
     <field name="view_ids" eval="[(5, 0, 0),
         (0, 0, {'view_mode': 'list', 'view_id': ref('view_blog_post_list')}),

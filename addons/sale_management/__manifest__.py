@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
@@ -43,8 +42,6 @@ The Dashboard for the Sales Manager will include
         'security/ir.model.access.csv',
         'security/sale_management_security.xml',
 
-        'report/sale_report_templates.xml',
-
         # Define SO template views & actions before their place of use
         'views/sale_order_template_views.xml',
 
@@ -59,13 +56,23 @@ The Dashboard for the Sales Manager will include
         'data/sale_order_template_demo.xml',
     ],
     'assets': {
+        'web.assets_backend': [
+            'sale_management/static/src/fields/**/*',
+        ],
         'web.assets_frontend': [
-            'sale_management/static/src/js/**/*',
+            'sale_management/static/src/interactions/**/*',
+        ],
+        'web.assets_tests': [
+            'sale_management/static/tests/tours/**/*',
+        ],
+        'web.assets_unit_tests': [
+            'sale_management/static/tests/**/*.test.js',
         ],
     },
     'application': True,
     'pre_init_hook': 'pre_init_hook',
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

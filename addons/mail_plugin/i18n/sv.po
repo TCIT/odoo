@@ -1,32 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* mail_plugin
-# 
-# Translators:
-# Robin Calvin, 2024
-# Anders Wallenquist <anders.wallenquist@vertel.se>, 2024
-# Simon S, 2024
-# Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2024
-# Martin Trigaux, 2024
-# Kristoffer Grundström <lovaren@gmail.com>, 2024
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2024
-# Kim Asplund <kim.asplund@gmail.com>, 2024
-# Lasse L, 2024
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
-# 
+# * mail_plugin
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Hanna Kharraziha <hakha@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2024\n"
-"Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-06 23:12+0000\n"
+"Last-Translator: Hanna Kharraziha <hakha@odoo.com>\n"
+"Language-Team: Swedish <https://translate.odoo.com/projects/odoo-19/"
+"mail_plugin/sv/>\n"
+"Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sv\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -187,8 +179,7 @@ msgstr "Kontakter hittade (%(count)s)"
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Could not autocomplete the company. Internal error. Try again later..."
 msgstr ""
-"Det gick inte att autofullborda företaget. Internt fel. Försök igen "
-"senare..."
+"Det gick inte att autofullborda företaget. Internt fel. Försök igen senare..."
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -219,6 +210,11 @@ msgstr "Skapa"
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Create a Company"
 msgstr "Skapa ett företag"
+
+#. module: mail_plugin
+#: model:ir.model,website_form_label:mail_plugin.model_res_partner
+msgid "Create a Customer"
+msgstr "Skapa en kund"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -266,6 +262,8 @@ msgid "Description"
 msgstr "Beskrivning"
 
 #. module: mail_plugin
+#: model:ir.model.fields,field_description:mail_plugin.field_ir_http__display_name
+#: model:ir.model.fields,field_description:mail_plugin.field_res_partner__display_name
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__display_name
 msgid "Display Name"
 msgstr "Visningsnamn"
@@ -357,6 +355,8 @@ msgid "IAP response stored as a JSON string"
 msgstr "IAP-svar lagras som en JSON-sträng"
 
 #. module: mail_plugin
+#: model:ir.model.fields,field_description:mail_plugin.field_ir_http__id
+#: model:ir.model.fields,field_description:mail_plugin.field_res_partner__id
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__id
 msgid "ID"
 msgstr "ID"
@@ -579,7 +579,7 @@ msgstr "Läs mer på"
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Refresh"
-msgstr "Ladda om"
+msgstr "Uppdatera"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -688,8 +688,8 @@ msgid ""
 "This is your notification address. Search the Contact manually to link this "
 "email to a record."
 msgstr ""
-"Detta är din aviseringsadress. Sök manuellt i Kontakt för att koppla detta "
-"e-postmeddelande till en post."
+"Detta är din aviseringsadress. Sök manuellt i Kontakt för att koppla detta e-"
+"postmeddelande till en post."
 
 #. module: mail_plugin
 #. odoo-python
@@ -722,7 +722,7 @@ msgstr ""
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Website"
-msgstr "Webbplats"
+msgstr "Hemsida"
 
 #. module: mail_plugin
 #. odoo-javascript

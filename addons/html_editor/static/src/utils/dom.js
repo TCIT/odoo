@@ -1,9 +1,18 @@
 import { closestBlock, isBlock } from "./blocks";
-import { isParagraphRelatedElement, isShrunkBlock, isVisible } from "./dom_info";
+import {
+    isElement,
+    isEmptyTextNode,
+    isParagraphRelatedElement,
+    isShrunkBlock,
+    isTextNode,
+    isVisible,
+    nextLeaf,
+    previousLeaf,
+} from "./dom_info";
 import { callbacksForCursorUpdate } from "./selection";
 import { isEmptyBlock, isPhrasingContent } from "../utils/dom_info";
-import { childNodes } from "./dom_traversal";
-import { childNodeIndex, DIRECTIONS } from "./position";
+import { childNodes, descendants } from "./dom_traversal";
+import { childNodeIndex, DIRECTIONS, nodeSize } from "./position";
 import {
     baseContainerGlobalSelector,
     createBaseContainer,
@@ -12,27 +21,24 @@ import {
 /** @typedef {import("@html_editor/core/selection_plugin").Cursors} Cursors */
 
 /**
- * Take a node and unwrap all of its block contents recursively. All blocks
- * (except for firstChilds) are preceded by a <br> in order to preserve the line
- * breaks.
+ * Take a node and unwrap all of its block contents recursively. Paragraph
+ * related elements (except the first child) are preceded by a <br> in order to
+ * preserve the line breaks.
  *
  * @param {Node} node
  */
 export function makeContentsInline(node) {
     const document = node.ownerDocument;
-    let childIndex = 0;
-    for (const child of node.childNodes) {
-        if (isBlock(child)) {
-            if (childIndex && isParagraphRelatedElement(child)) {
-                child.before(document.createElement("br"));
+    let currentNode = node.firstChild;
+    while (currentNode) {
+        if (isBlock(currentNode)) {
+            if (currentNode.previousSibling && isParagraphRelatedElement(currentNode)) {
+                currentNode.before(document.createElement("br"));
             }
-            for (const grandChild of child.childNodes) {
-                child.before(grandChild);
-                makeContentsInline(grandChild);
-            }
-            child.remove();
+            currentNode = unwrapContents(currentNode)[0];
+        } else {
+            currentNode = currentNode.nextSibling;
         }
-        childIndex += 1;
     }
 }
 
@@ -126,31 +132,6 @@ export function unwrapContents(node) {
     return contents;
 }
 
-// @todo @phoenix
-// This utils seem to handle a particular case of LI element.
-// If only relevant to the list plugin, a specific util should be created
-// that plugin instead.
-// TODO: deprecated, use the DomPlugin shared function instead.
-export function setTagName(el, newTagName) {
-    const document = el.ownerDocument;
-    if (el.tagName === newTagName) {
-        return el;
-    }
-    const newEl = document.createElement(newTagName);
-    while (el.firstChild) {
-        newEl.append(el.firstChild);
-    }
-    if (el.tagName === "LI") {
-        el.append(newEl);
-    } else {
-        for (const attribute of el.attributes) {
-            newEl.setAttribute(attribute.name, attribute.value);
-        }
-        el.parentNode.replaceChild(newEl, el);
-    }
-    return newEl;
-}
-
 /**
  * Removes the specified class names from the given element.  If the element has
  * no more class names after removal, the "class" attribute is removed.
@@ -167,6 +148,15 @@ export function removeClass(element, ...classNames) {
     }
 }
 
+export function removeStyle(element, ...styleProperties) {
+    const propsToRemoveSet = new Set(styleProperties);
+    if ([...element.style].every((prop) => propsToRemoveSet.has(prop))) {
+        element.removeAttribute("style");
+    } else {
+        styleProperties.forEach((prop) => element.style.removeProperty(prop));
+    }
+}
+
 /**
  * Add a BR in the given node if its closest ancestor block has nothing to make
  * it visible, and/or add a zero-width space in the given node if it's an empty
@@ -178,18 +168,19 @@ export function removeClass(element, ...classNames) {
  */
 export function fillEmpty(el) {
     const document = el.ownerDocument;
-    const fillers = { ...fillShrunkPhrasingParent(el) };
-    if (!isBlock(el) && !isVisible(el) && !el.hasAttribute("data-oe-zws-empty-inline")) {
+    if (!isVisible(el) && !el.hasAttribute("data-oe-zws-empty-inline") && !isBlock(el)) {
         const zws = document.createTextNode("\u200B");
         el.appendChild(zws);
         el.setAttribute("data-oe-zws-empty-inline", "");
-        fillers.zws = zws;
         const previousSibling = el.previousSibling;
         if (previousSibling && previousSibling.nodeName === "BR") {
             previousSibling.remove();
         }
+        return { zws };
+    } else {
+        // If a ZWS was inserted, there is no need for a <br>.
+        return fillShrunkPhrasingParent(el);
     }
-    return fillers;
 }
 
 /**
@@ -234,10 +225,28 @@ export function cleanTrailingBR(el, predicates = []) {
     }
 }
 
-export function toggleClass(node, className) {
-    node.classList.toggle(className);
-    if (!node.className) {
-        node.removeAttribute("class");
+/**
+ * Wrapper for classList.toggle that removes the class attribute if the
+ * element has no class name after the toggle.
+ *
+ * @param {Element} element
+ * @param {string} className
+ * @param {boolean} [force]
+ */
+export function toggleClass(element, className, force) {
+    element.classList.toggle(className, force);
+    if (!element.className) {
+        element.removeAttribute("class");
+    }
+}
+
+export function cleanEmptyAncestors(node, cursors, exclude = () => false) {
+    let currentNode = node;
+    while (currentNode && !nodeSize(currentNode) && !exclude(currentNode)) {
+        cursors?.update(callbacksForCursorUpdate.remove(currentNode));
+        const parent = currentNode.parentNode;
+        currentNode.remove();
+        currentNode = parent;
     }
 }
 
@@ -261,11 +270,33 @@ export function cleanTextNode(node, char, cursors) {
         removedIndexes.push(offset);
         return "";
     });
-    cursors?.update((cursor) => {
-        if (cursor.node === node) {
-            cursor.offset -= removedIndexes.filter((index) => cursor.offset > index).length;
-        }
-    });
+    if (isEmptyTextNode(node)) {
+        cursors?.update(callbacksForCursorUpdate.remove(node));
+        node.remove();
+    } else {
+        cursors?.update((cursor) => {
+            if (cursor.node === node) {
+                cursor.offset -= removedIndexes.filter((index) => cursor.offset > index).length;
+            }
+        });
+    }
+}
+
+/**
+ * Remove all empty text nodes within the given root element
+ * and update cursors for later selection restore.
+ *
+ * This prevents the editor from keeping unnecessary empty text
+ * nodes that may create extra nodes during split operations.
+ *
+ * @param {HTMLElement} root
+ * @param {Cursors} [cursors]
+ */
+export function removeEmptyTextNodes(root, cursors) {
+    for (const node of childNodes(root).filter((n) => isEmptyTextNode(n))) {
+        cursors?.update(callbacksForCursorUpdate.remove(node));
+        node.remove();
+    }
 }
 
 /**
@@ -306,4 +337,95 @@ export function splitTextNode(textNode, offset, originalNodeSide = DIRECTIONS.RI
         }
     }
     return parentOffset;
+}
+
+/**
+ * Remove invisible whitespace from an element and adapt the given cursors
+ * accordingly if any.
+ *
+ * Note (TODO): in the future, this function should use the mechanism used by
+ * `enforceWhitespace` but doing so would require a little overhaul of it and of
+ * `getState`/`restoreState` to isolate the part that identifies invisible
+ * whitespace.
+ *
+ * @param {Element} el
+ * @param {import("@html_editor/core/selection_plugin").Cursors} [cursors]
+ */
+export function removeInvisibleWhitespace(el, cursors) {
+    const whitespaceRegex = /[^\S\u00A0\uFEFF]/;
+    const [countLeadingWhitespace, countTrailingWhitespace] = [
+        new RegExp(`^${whitespaceRegex.source}+`),
+        new RegExp(`${whitespaceRegex.source}+$`),
+    ].map((regex) => (node) => node?.textContent.match(regex)?.[0]?.length || 0);
+    const isInlineElement = (node) => node?.nodeType === Node.ELEMENT_NODE && !isBlock(node);
+    const textChildren = descendants(el).filter((child) => child.nodeType === Node.TEXT_NODE);
+    let removedTrailingSpaceBefore = false;
+    let index = 0;
+    for (const child of textChildren) {
+        let leadingWhitespace = countLeadingWhitespace(child);
+        let trailingWhitespace = countTrailingWhitespace(child);
+        const previous = previousLeaf(child, el);
+        if (
+            leadingWhitespace &&
+            previous &&
+            (isInlineElement(child.previousSibling) || removedTrailingSpaceBefore)
+        ) {
+            // `<span>a</span>\n   b` shows as `<span>a</span> b`
+            leadingWhitespace -= 1; // Keep one space.
+        } else if (
+            trailingWhitespace &&
+            index !== textChildren.length - 1 &&
+            isInlineElement(child.nextSibling) &&
+            !countTrailingWhitespace(nextLeaf(child, el))
+        ) {
+            // `a\n   <span>\n   b\n</span>` shows as `a <span>b</span>`
+            trailingWhitespace -= 1; // Keep one space.
+        }
+        removedTrailingSpaceBefore = !!trailingWhitespace;
+        cursors?.shiftOffset(child, -leadingWhitespace);
+        child.textContent = child.textContent
+            .substring(
+                leadingWhitespace,
+                child.textContent.length - trailingWhitespace || leadingWhitespace
+            )
+            .replace(new RegExp(`^${whitespaceRegex.source}+`), " ")
+            .replace(new RegExp(`${whitespaceRegex.source}+$`), " ");
+        if (!child.textContent) {
+            child.remove();
+        }
+        index += 1;
+    }
+}
+
+/**
+ * This is used as a replacement for `node.normalize()` which in Safari
+ * incorrectly moves the selection to the parent element instead of
+ * restoring it to the correct offset in the merged text node.
+ *
+ * @param {HTMLElement} node
+ * @param {Cursors} cursor
+ */
+export function mergeAdjacentTextNodes(node, cursor) {
+    let child = node.firstChild;
+    while (child) {
+        if (isElement(child)) {
+            mergeAdjacentTextNodes(child, cursor);
+        }
+
+        const next = child.nextSibling;
+        if (isTextNode(child) && next && isTextNode(next)) {
+            if (cursor.anchor.node === next) {
+                cursor.anchor.node = child;
+                cursor.anchor.offset = child.textContent.length + cursor.anchor.offset;
+            }
+            if (cursor.focus.node === next) {
+                cursor.focus.node = child;
+                cursor.focus.offset = child.textContent.length + cursor.focus.offset;
+            }
+            child.textContent += next.textContent;
+            next.remove();
+        } else {
+            child = next;
+        }
+    }
 }

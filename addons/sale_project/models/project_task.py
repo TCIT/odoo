@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, AccessError
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools import SQL
 from odoo.tools.misc import unquote
 
@@ -11,7 +11,7 @@ class ProjectTask(models.Model):
     _inherit = "project.task"
 
     def _domain_sale_line_id(self):
-        domain = expression.AND([
+        domain = Domain.AND([
             self.env['sale.order.line']._sellable_lines_domain(),
             self.env['sale.order.line']._domain_sale_line_service(),
             [
@@ -28,11 +28,12 @@ class ProjectTask(models.Model):
         copy=True, tracking=True, index='btree_not_null', recursive=True,
         compute='_compute_sale_line', store=True, readonly=False,
         domain=lambda self: str(self._domain_sale_line_id()),
+        context={'with_remaining_hours': True},
         help="Sales Order Item to which the time spent on this task will be added in order to be invoiced to your customer.\n"
              "By default the sales order item set on the project will be selected. In the absence of one, the last prepaid sales order item that has time remaining will be used.\n"
              "Remove the sales order item in order to make this task non billable. You can also change or remove the sales order item of each timesheet entry individually.")
     project_sale_order_id = fields.Many2one('sale.order', string="Project's sale order", related='project_id.sale_order_id')
-    sale_order_state = fields.Selection(related='sale_order_id.state')
+    sale_order_state = fields.Selection(related='sale_order_id.state', tracking=False)
     task_to_invoice = fields.Boolean("To invoice", compute='_compute_task_to_invoice', search='_search_task_to_invoice', groups='sales_team.group_sale_salesman_all_leads')
     allow_billable = fields.Boolean(related="project_id.allow_billable")
     partner_id = fields.Many2one(inverse='_inverse_partner_id')
@@ -41,13 +42,25 @@ class ProjectTask(models.Model):
     display_sale_order_button = fields.Boolean(string='Display Sales Order', compute='_compute_display_sale_order_button')
 
     @property
-    def SELF_READABLE_FIELDS(self):
-        return super().SELF_READABLE_FIELDS | {'allow_billable', 'sale_order_id', 'sale_line_id', 'display_sale_order_button'}
+    def TASK_PORTAL_READABLE_FIELDS(self):
+        return super().TASK_PORTAL_READABLE_FIELDS | {'allow_billable', 'sale_order_id', 'sale_line_id', 'display_sale_order_button'}
+
+    @api.model
+    def default_get(self, fields):
+        default = super().default_get(fields)
+        if self.env.context.get("from_sale_order_action"):
+            sol = self.env['sale.order.line'].search([
+                ("order_id", "=", self.env.context.get("default_sale_order_id")),
+                ("project_id", "=", self.env.context.get("active_id")),
+            ], limit=1)
+            if sol:
+                default["sale_line_id"] = sol.id
+        return default
 
     @api.model
     def _group_expand_sales_order(self, sales_orders, domain):
-        start_date = self._context.get('gantt_start_date')
-        scale = self._context.get('gantt_scale')
+        start_date = self.env.context.get('gantt_start_date')
+        scale = self.env.context.get('gantt_scale')
         if not (start_date and scale):
             return sales_orders
         search_on_comodel = self._search_on_comodel(domain, "sale_order_id", "sale.order")
@@ -55,15 +68,16 @@ class ProjectTask(models.Model):
             return search_on_comodel
         return sales_orders
 
-    @api.depends('sale_line_id', 'project_id', 'allow_billable')
+    @api.depends('sale_line_id', 'project_id', 'allow_billable', 'project_id.reinvoiced_sale_order_id')
     def _compute_sale_order_id(self):
         for task in self:
-            if not task.allow_billable:
+            if not (task.allow_billable and task.sale_line_id):
                 task.sale_order_id = False
                 continue
             sale_order = (
                 task.sale_line_id.order_id
                 or task.project_id.sale_order_id
+                or task.project_id.reinvoiced_sale_order_id
                 or task.sale_order_id
             )
             if sale_order and not task.partner_id:
@@ -87,10 +101,11 @@ class ProjectTask(models.Model):
     def _inverse_partner_id(self):
         for task in self:
             # check that sale_line_id/sale_order_id and customer are consistent
+            task_sale_order_sudo = task.sale_order_id.sudo()
             consistent_partners = (
-                task.sale_order_id.partner_id
-                | task.sale_order_id.partner_invoice_id
-                | task.sale_order_id.partner_shipping_id
+                task_sale_order_sudo.partner_id
+                | task_sale_order_sudo.partner_invoice_id
+                | task_sale_order_sudo.partner_shipping_id
             ).commercial_partner_id
             if task.sale_order_id and task.partner_id.commercial_partner_id not in consistent_partners:
                 task.sale_order_id = task.sale_line_id = False
@@ -108,9 +123,11 @@ class ProjectTask(models.Model):
                 sale_line = False
                 if task.parent_id.sale_line_id and task.parent_id.partner_id.commercial_partner_id == task.partner_id.commercial_partner_id:
                     sale_line = task.parent_id.sale_line_id
+                elif task.milestone_id.sale_line_id:
+                    sale_line = task.milestone_id.sale_line_id
                 elif task.project_id.sale_line_id and task.project_id.partner_id.commercial_partner_id == task.partner_id.commercial_partner_id:
                     sale_line = task.project_id.sale_line_id
-                task.sale_line_id = sale_line or task.milestone_id.sale_line_id
+                task.sale_line_id = sale_line
 
     @api.depends('sale_order_id')
     def _compute_display_sale_order_button(self):
@@ -193,7 +210,7 @@ class ProjectTask(models.Model):
         if not self.display_sale_order_button:
             return {}
         return {
-            "name": "Portal Sale Order",
+            "name": self.env._("Portal Sale Order"),
             "type": "ir.actions.act_url",
             "url": self.sale_order_id.access_url,
         }
@@ -212,16 +229,15 @@ class ProjectTask(models.Model):
 
     @api.model
     def _search_task_to_invoice(self, operator, value):
+        if operator != 'in':
+            return NotImplemented
         sql = SQL("""(
             SELECT so.id
             FROM sale_order so
             WHERE so.invoice_status != 'invoiced'
                 AND so.invoice_status != 'no'
         )""")
-        operator_new = 'in'
-        if (bool(operator == '=') ^ bool(value)):
-            operator_new = 'not in'
-        return [('sale_order_id', operator_new, sql)]
+        return [('sale_order_id', 'in', sql)]
 
     @api.onchange('sale_line_id')
     def _onchange_partner_id(self):
@@ -229,7 +245,7 @@ class ProjectTask(models.Model):
             self.partner_id = self.sale_line_id.order_partner_id
 
     def _get_projects_to_make_billable_domain(self, additional_domain=None):
-        return expression.AND([
+        return Domain.AND([
             super()._get_projects_to_make_billable_domain(additional_domain),
             [
                 ('partner_id', '!=', False),
@@ -237,3 +253,10 @@ class ProjectTask(models.Model):
                 ('project_id', '!=', False),
             ],
         ])
+
+    def _get_template_default_context_whitelist(self):
+        return [
+            *super()._get_template_default_context_whitelist(),
+            'sale_line_id',
+            'from_sale_order_action',
+        ]

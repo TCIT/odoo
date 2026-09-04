@@ -1,4 +1,3 @@
-/** @odoo-module **/
 import { router } from "@web/core/browser/router";
 import { registry } from "@web/core/registry";
 
@@ -13,20 +12,10 @@ function assertEqual(actual, expected, msg = "") {
 registry.category("web_tour.tours").add("test_company_switch_access_error", {
     steps: () => [
         {
-            trigger: ".o_list_view",
-            run() {
-                assertEqual(
-                    JSON.stringify(
-                        Array.from(this.anchor.querySelectorAll(".o_data_cell")).map(
-                            (n) => n.innerText
-                        )
-                    ),
-                    JSON.stringify(["p1", "p2"])
-                );
-            },
+            trigger: ".o_view_controller.o_list_view .o_data_cell:contains(p1)",
         },
         {
-            trigger: ".o_list_view .o_data_cell:contains(p2)",
+            trigger: ".o_view_controller.o_list_view .o_data_cell:contains(p2)",
             run: "click",
         },
         {
@@ -43,26 +32,18 @@ registry.category("web_tour.tours").add("test_company_switch_access_error", {
         {
             trigger: ".o_switch_company_menu_buttons button:contains(Confirm)",
             run: "click",
+            expectUnloadPage: true,
         },
         {
             trigger: ".o_view_controller.o_list_view",
             run: "click",
         },
         {
-            trigger: ".o_view_controller.o_list_view",
+            trigger: "header.o_navbar .o_menu_brand:contains(model_multicompany_menu)",
+        },
+        {
+            trigger: ".o_view_controller.o_list_view .o_data_cell:contains(p1)",
             async run() {
-                assertEqual(
-                    JSON.stringify(
-                        Array.from(this.anchor.querySelectorAll(".o_data_cell")).map(
-                            (n) => n.innerText
-                        )
-                    ),
-                    JSON.stringify(["p1"])
-                );
-                assertEqual(
-                    document.querySelector("header.o_navbar .o_menu_brand").innerText,
-                    "model_multicompany_menu"
-                );
                 assertEqual("action" in router.current, true);
             },
         },

@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-from odoo.osv import expression
+from odoo.fields import Domain
+
 
 class LoyaltyRule(models.Model):
     _name = 'loyalty.rule'
@@ -20,12 +20,11 @@ class LoyaltyRule(models.Model):
     )
 
     @api.model
-    def _load_pos_data_domain(self, data):
-        config_id = self.env['pos.config'].browse(data['pos.config']['data'][0]['id'])
-        return [('program_id', 'in', config_id._get_program_ids().ids)]
+    def _load_pos_data_domain(self, data, config):
+        return [('program_id', 'in', config._get_program_ids().ids)]
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
+    def _load_pos_data_fields(self, config):
         return ['program_id', 'valid_product_ids', 'any_product', 'currency_id',
             'reward_point_amount', 'reward_point_split', 'reward_point_mode',
             'minimum_qty', 'minimum_amount', 'minimum_amount_tax_mode', 'mode', 'code']
@@ -39,7 +38,7 @@ class LoyaltyRule(models.Model):
             '' if rule.product_domain in ('[]', "[['sale_ok', '=', True]]") else rule.product_domain,
         )).items():
             if any(key):
-                domain = expression.AND([[('available_in_pos', '=', True)], rules[:1]._get_valid_product_domain()])
+                domain = Domain.AND([[('available_in_pos', '=', True)], rules[:1]._get_valid_product_domain()])
                 rules.valid_product_ids = self.env['product.product'].search(domain, order="id")
                 rules.any_product = False
             else:

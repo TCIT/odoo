@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { _t } from "@web/core/l10n/translation";
 
 import { Component, useState } from "@odoo/owl";
@@ -24,7 +22,7 @@ export class DashboardMobileSearchPanel extends Component {
 
     get searchBarText() {
         return this.props.activeDashboard
-            ? this.props.activeDashboard.displayName
+            ? this.props.activeDashboard.data.name
             : _t("Choose a dashboard....");
     }
 

@@ -1,23 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* microsoft_calendar
-# 
-# Translators:
-# Wil Odoo, 2024
-# 
+# * microsoft_calendar
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Jan Zorko <jan.zorko@implex.si>, 2026.
+# Žiga Trček <ziga.trcek@implex.si>, 2026.
+# NEDŽAD BEUS <nedzad.beus@implex.si>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-08 07:23+0000\n"
+"Last-Translator: NEDŽAD BEUS <nedzad.beus@implex.si>\n"
+"Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-19/"
+"microsoft_calendar/sl/>\n"
+"Language: sl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: sl\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
+"n%100==4 ? 2 : 3;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: microsoft_calendar
 #. odoo-python
@@ -29,25 +34,26 @@ msgstr "%(reminder_type)s - %(duration)s Dni"
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 msgid "%(reminder_type)s - %(duration)s Hours"
-msgstr ""
+msgstr "%(reminder_type)s - %(duration)s Ure"
 
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 msgid "%(reminder_type)s - %(duration)s Minutes"
-msgstr ""
+msgstr "%(reminder_type)s - %(duration)s Minute"
 
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
+#, fuzzy
 msgid "%s - At time of event"
-msgstr ""
+msgstr "%s - Ob času dogodka"
 
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 msgid "(No title)"
-msgstr ""
+msgstr "(Brez naslova)"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__active
@@ -59,20 +65,28 @@ msgstr "Aktivno"
 #. module: microsoft_calendar
 #. odoo-javascript
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
+#, fuzzy
 msgid ""
 "An administrator needs to configure Outlook Synchronization before you can "
 "use it!"
 msgstr ""
+"Administrator mora nastaviti Outlook sinhronizacijo preden jo lahko "
+"uporabljate!"
 
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/res_users.py:0
+#, fuzzy
 msgid ""
-"An error occurred while generating the token. Your authorization code may be"
-" invalid or has already expired [%s]. You should check your Client ID and "
+"An error occurred while generating the token. Your authorization code may be "
+"invalid or has already expired [%s]. You should check your Client ID and "
 "secret on the Microsoft Azure portal or try to stop and restart your "
 "calendar synchronisation."
 msgstr ""
+"Pri ustvarjanju žetona je prišlo do napake. Vaša avtorizacijska koda je "
+"morda neveljavna ali je že potekla [%s]. Preverite svoj ID odjemalca in "
+"skrivnost na portalu Microsoft Azure ali poskusite ustaviti in znova zagnati "
+"sinhronizacijo koledarja."
 
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_calendar_attendee
@@ -134,17 +148,18 @@ msgstr "Ustvarjeno"
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__delete_policy__delete_odoo
 msgid "Delete from Odoo"
-msgstr ""
+msgstr "Izbriši iz Odooja"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__delete_policy__delete_both
 msgid "Delete from both"
-msgstr ""
+msgstr "Izbriši iz obeh"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__delete_policy__delete_microsoft
+#, fuzzy
 msgid "Delete from the current Microsoft Calendar account"
-msgstr ""
+msgstr "Izbriši iz trenutnega računa Microsoftovega Koledarja"
 
 #. module: microsoft_calendar
 #. odoo-javascript
@@ -153,33 +168,59 @@ msgid "Discard"
 msgstr "Opusti"
 
 #. module: microsoft_calendar
+#: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_alarm_manager__display_name
+#: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_attendee__display_name
+#: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__display_name
+#: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__display_name
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__display_name
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__display_name
+#: model:ir.model.fields,field_description:microsoft_calendar.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__display_name
+#: model:ir.model.fields,field_description:microsoft_calendar.field_res_users_settings__display_name
 msgid "Display Name"
 msgstr "Prikazani naziv"
 
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
+#, fuzzy
 msgid ""
 "Due to an Outlook Calendar limitation, recurrence updates must be done "
 "directly in Outlook Calendar."
 msgstr ""
+"Zaradi omejitve Outlookovega koledarja je treba posodobitve ponavljanj "
+"izvesti neposredno v Outlookovem koledarju."
 
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
+#, fuzzy
 msgid ""
-"Due to an Outlook Calendar limitation, recurrence updates must be done directly in Outlook Calendar.\n"
-"If this recurrence is not shown in Outlook Calendar, you must delete it in Odoo Calendar and recreate it in Outlook Calendar."
+"Due to an Outlook Calendar limitation, recurrence updates must be done "
+"directly in Outlook Calendar.\n"
+"If this recurrence is not shown in Outlook Calendar, you must delete it in "
+"Odoo Calendar and recreate it in Outlook Calendar."
 msgstr ""
+"Zaradi omejitve Outlookovega koledarja je treba posodobitve ponavljanja "
+"opraviti neposredno v Outlookovem koledarju.\n"
+"Če to ponavljanje ni prikazano v Outlookovem koledarju, ga morate izbrisati "
+"v Odoojevem koledarju in ga znova ustvariti v Outlookovem koledarju."
 
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
+#, fuzzy
 msgid ""
 "Due to an Outlook Calendar limitation, recurrent events must be created "
 "directly in Outlook Calendar."
 msgstr ""
+"Zaradi omejitve Outlookovega koledarja je treba ponavljajoče se dogodke "
+"ustvariti neposredno v Outlookovem koledarju."
+
+#. module: microsoft_calendar
+#: model:ir.model,name:microsoft_calendar.model_calendar_alarm_manager
+msgid "Event Alarm Manager"
+msgstr "Upravitelj alarmov dogodkov"
 
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_calendar_recurrence
@@ -189,22 +230,44 @@ msgstr "Pravilo o ponovitvi dogodka"
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
+#, fuzzy
 msgid ""
-"For a correct synchronization between Odoo and Outlook Calendar, all attendees must have an email address. However, some events do not respect this condition. As long as the events are incorrect, the calendars will not be synchronized.\n"
+"For a correct synchronization between Odoo and Outlook Calendar, all "
+"attendees must have an email address. However, some events do not respect "
+"this condition. As long as the events are incorrect, the calendars will not "
+"be synchronized.\n"
 "Either update the events/attendees or archive these events %(details)s:\n"
 "%(invalid_events)s"
 msgstr ""
+"Za pravilno sinhronizacijo med Odoojem in Outlookovim koledarjem morajo "
+"imeti vsi udeleženci e-poštni naslov. Vendar nekateri dogodki tega pogoja ne "
+"izpolnjujejo. Dokler so dogodki nepravilni, koledarja ne bosta "
+"sinhronizirana.\n"
+"Posodobite dogodke/udeležence ali arhivirajte te dogodke %(details)s:\n"
+"%(invalid_events)s\n"
+"Lokacija: code:addons/microsoft_calendar/models/calendar.py:0"
 
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
+#, fuzzy
 msgid ""
 "For having a different organizer in your event, it is necessary that the "
 "organizer have its Odoo Calendar synced with Outlook Calendar."
 msgstr ""
+"Če želite imeti drugega organizatorja dogodka, mora imeti organizator svoj "
+"Odoo koledar sinhroniziran z Outlookovim koledarjem."
 
 #. module: microsoft_calendar
+#: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_alarm_manager__id
+#: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_attendee__id
+#: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__id
+#: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__id
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__id
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__id
+#: model:ir.model.fields,field_description:microsoft_calendar.field_res_config_settings__id
+#: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__id
+#: model:ir.model.fields,field_description:microsoft_calendar.field_res_users_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -219,27 +282,34 @@ msgstr ""
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,help:microsoft_calendar.field_res_config_settings__cal_microsoft_sync_paused
+#, fuzzy
 msgid "Indicates if synchronization with Outlook Calendar is paused or not."
 msgstr ""
+"Označuje, ali je sinhronizacija z Outlookovim koledarjem zaustavljena ali ne."
 
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
+#, fuzzy
 msgid ""
 "It is necessary adding the proposed organizer as attendee before saving the "
 "event."
 msgstr ""
+"Pred shranjevanjem dogodka je treba predlaganega organizatorja dodati kot "
+"udeleženca."
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__microsoft_last_sync_date
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_users_settings__microsoft_last_sync_date
+#, fuzzy
 msgid "Last Sync Date"
-msgstr ""
+msgstr "Datum zadnje sinhronizacije"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
+#, fuzzy
 msgid "Last Sync Time"
-msgstr ""
+msgstr "Čas zadnje sinhronizacije"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__write_uid
@@ -254,62 +324,70 @@ msgstr "Zadnjič posodobljeno"
 #. module: microsoft_calendar
 #: model:ir.model.fields,help:microsoft_calendar.field_res_users__microsoft_last_sync_date
 #: model:ir.model.fields,help:microsoft_calendar.field_res_users_settings__microsoft_last_sync_date
+#, fuzzy
 msgid "Last synchronization date with Outlook Calendar"
-msgstr ""
+msgstr "Datum zadnje sinhronizacije z Outlookovim koledarjem"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__delete_policy__dont_delete
 msgid "Leave them untouched"
-msgstr ""
+msgstr "Pustite jih nedotaknjene"
 
 #. module: microsoft_calendar
 #: model:ir.actions.act_window,name:microsoft_calendar.microsoft_calendar_reset_account_action
 #: model:ir.model,name:microsoft_calendar.model_microsoft_calendar_account_reset
+#, fuzzy
 msgid "Microsoft Calendar Account Reset"
-msgstr ""
+msgstr "Ponastavitev računa Microsoft Koledarja"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_config_settings__cal_microsoft_client_id
+#, fuzzy
 msgid "Microsoft Client_id"
-msgstr ""
+msgstr "Microsoftov ID odjemalca"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_config_settings__cal_microsoft_client_secret
+#, fuzzy
 msgid "Microsoft Client_key"
-msgstr ""
+msgstr "Microsoftov ključ odjemalca"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__microsoft_calendar_sync_token
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_users_settings__microsoft_calendar_sync_token
+#, fuzzy
 msgid "Microsoft Next Sync Token"
-msgstr ""
+msgstr "Microsoftov žeton za naslednjo sinhronizacijo"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__microsoft_recurrence_master_id
+#, fuzzy
 msgid "Microsoft Recurrence Master Id"
-msgstr ""
+msgstr "ID Microsoftovega glavnega dogodka ponavljanja"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_config_settings__cal_microsoft_sync_paused
+#, fuzzy
 msgid "Microsoft Synchronization Paused"
-msgstr ""
+msgstr "Microsoft Sinhronizacija začasno ustavljena"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__need_sync_m
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__need_sync_m
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__need_sync_m
+#, fuzzy
 msgid "Need Sync M"
-msgstr ""
+msgstr "Potrebna je sinhronizacija M"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
 msgid "Next Sync Token"
-msgstr ""
+msgstr "Naslednji žeton za sinhronizacijo"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__sync_policy
 msgid "Next Synchronization"
-msgstr ""
+msgstr "Naslednja sinhronizacija"
 
 #. module: microsoft_calendar
 #. odoo-python
@@ -321,44 +399,50 @@ msgstr "Obvestilo"
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__microsoft_id
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__microsoft_id
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__microsoft_id
+#, fuzzy
 msgid "Organizer event Id"
-msgstr ""
+msgstr "ID dogodka organizatorja"
 
 #. module: microsoft_calendar
 #. odoo-javascript
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.xml:0
 msgid "Outlook"
-msgstr ""
+msgstr "Outlook"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
 msgid "Outlook Calendar"
-msgstr ""
+msgstr "Outlookov koledar"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__microsoft_synchronization_stopped
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_users_settings__microsoft_synchronization_stopped
+#, fuzzy
 msgid "Outlook Synchronization stopped"
-msgstr ""
+msgstr "Sinhronizacija z Outlookom je ustavljena"
 
 #. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
+#, fuzzy
 msgid ""
 "Outlook limitation: in a recurrence, an event cannot be moved to or before "
 "the day of the previous event, and cannot be moved to or after the day of "
 "the following event."
 msgstr ""
+"Omejitev Outlooka: pri ponovitvi dogodka dogodka ni mogoče premakniti na dan "
+"prejšnjega dogodka ali pred njim ter na dan naslednjega dogodka ali po njem."
 
 #. module: microsoft_calendar
 #: model:ir.actions.server,name:microsoft_calendar.ir_cron_sync_all_cals_ir_actions_server
+#, fuzzy
 msgid "Outlook: synchronization"
-msgstr ""
+msgstr "Outlook: sinhronizacija"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.res_config_settings_view_form
 msgid "Pause Synchronization"
-msgstr ""
+msgstr "Začasna ustavitev sinhronizacije"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
@@ -368,46 +452,45 @@ msgstr "Osvežitev žetona"
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
 msgid "Reset Account"
-msgstr ""
+msgstr "Ponastavi račun"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.microsoft_calendar_reset_account_view_form
+#, fuzzy
 msgid "Reset Outlook Calendar Account"
-msgstr ""
+msgstr "Ponastavi račun Outlook Koledarja"
 
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_microsoft_calendar_sync
+#, fuzzy
 msgid "Synchronize a record with Microsoft Calendar"
-msgstr ""
+msgstr "Sinhronizacija zapisa z Microsoftovim koledarjem"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__sync_policy__all
 msgid "Synchronize all existing events"
-msgstr ""
+msgstr "Sinhroniziraj vse obstoječe dogodke"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__sync_policy__new
 msgid "Synchronize only new events"
-msgstr ""
+msgstr "Sinhroniziraj samo nove dogodke"
 
 #. module: microsoft_calendar
 #. odoo-javascript
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
+#, fuzzy
 msgid ""
-"The Outlook Synchronization needs to be configured before you can use it, do"
-" you want to do it now?"
+"The Outlook Synchronization needs to be configured before you can use it, do "
+"you want to do it now?"
 msgstr ""
-
-#. module: microsoft_calendar
-#. odoo-python
-#: code:addons/microsoft_calendar/models/res_users.py:0
-msgid "The account for the Outlook Calendar service is not configured."
-msgstr ""
+"Outlook sinhronizacija mora biti nastavljena preden jo lahko uporabljate. Jo "
+"želite opraviti zdaj?"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,help:microsoft_calendar.field_microsoft_calendar_account_reset__delete_policy
 msgid "This will only affect events for which the user is the owner"
-msgstr ""
+msgstr "To bo vplivalo samo na dogodke, katerih lastnik je uporabnik."
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
@@ -418,8 +501,9 @@ msgstr "Veljavnost žetona"
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__ms_universal_event_id
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__ms_universal_event_id
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__ms_universal_event_id
+#, fuzzy
 msgid "Universal event Id"
-msgstr ""
+msgstr "Univerzalni ID dogodka"
 
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_res_users
@@ -430,14 +514,15 @@ msgstr "Uporabnik"
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_res_users_settings
 msgid "User Settings"
-msgstr ""
+msgstr "Uporabniške nastavitve"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
+#, fuzzy
 msgid "User Token"
-msgstr ""
+msgstr "Uporabniški žeton"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__delete_policy
 msgid "User's Existing Events"
-msgstr ""
+msgstr "Obstoječi dogodki uporabnika"

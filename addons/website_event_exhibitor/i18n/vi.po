@@ -1,35 +1,52 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_event_exhibitor
-# 
-# Translators:
-# Wil Odoo, 2024
-# Thi Huong Nguyen, 2025
-# 
+# * website_event_exhibitor
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:05+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2025\n"
-"Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 19:14+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-19/"
+"website_event_exhibitor/vi/>\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: vi\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_event_exhibitor
 #. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/components/exhibitor_connect_closed_dialog/exhibitor_connect_closed_dialog.xml:0
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 msgid ""
 ")\n"
 "                    to meet them!"
 msgstr ""
 ")\n"
 "                    để gặp họ!"
+
+#. module: website_event_exhibitor
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
+msgid ""
+"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
+msgstr ""
+"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Khám phá thêm</a>"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_card
@@ -58,39 +75,7 @@ msgstr "<span class=\"fa fa-plus me-1\"/> Thêm đơn vị triển lãm"
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_aside
 msgid "<span class=\"h5 m-3\">Other exhibitors</span>"
-msgstr "<span class=\"h5 m-3\">Các nhà triển lãm khác</span>"
-
-#. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
-msgid ""
-"<span>Oops! This room is currently closed</span><br/>\n"
-"                    Come back between"
-msgstr ""
-"<span>Xin lỗi! Phòng này hiện đang đóng</span><br/>\n"
-"                    Hãy quay lại giữa"
-
-#. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
-msgid ""
-"<span>Oops! This room is full</span><br/>Come back later to have a chat with"
-" us!"
-msgstr ""
-"<span>Phòng này hiện đã đủ người</span><br/>Vui lòng quay lại sau và trò "
-"chuyện với chúng tôi!"
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
-msgid ""
-"A non-profit international educational and scientific\n"
-"                    organisation, hosting three departments (aeronautics and\n"
-"                    aerospace, environmental and applied fluid dynamics, and\n"
-"                    turbomachinery and propulsion)."
-msgstr ""
-"Một tổ chức khoa học và giáo dục quốc tế phi\n"
-"                      lợi nhuận, có ba khoa (hàng không và vũ trụ,\n"
-"                      động lực học chất lỏng ứng dụng và môi trường,\n"
-"                       và máy tuabin và động cơ đẩy)."
+msgstr "<span class=\"h5 m-3\">Các đơn vị triển lãm khác</span>"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
@@ -133,6 +118,11 @@ msgid "All Countries"
 msgstr "Tất cả quốc gia"
 
 #. module: website_event_exhibitor
+#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
+msgid "All Events"
+msgstr "Tất cả các Sự kiện"
+
+#. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_exhibitor_main
 msgid "All Exhibitors"
 msgstr "Tất cả đơn vị triển lãm"
@@ -150,17 +140,23 @@ msgstr "Đã lưu trữ"
 
 #. module: website_event_exhibitor
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
 msgid "As a team, we are happy to contribute to this event."
 msgstr ""
-"Với tư cách là một đội nhóm, chúng tôi rất vui khi được đóng góp vào sự kiện"
-" này."
+"Với tư cách là một đội nhóm, chúng tôi rất vui khi được đóng góp vào sự kiện "
+"này."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_attachment_count
@@ -204,11 +200,6 @@ msgid "Can Publish"
 msgstr "Có thể đăng"
 
 #. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__chat_room_id
-msgid "Chat Room"
-msgstr "Phòng chat"
-
-#. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_topbar
 msgid "Close"
 msgstr "Đóng"
@@ -221,13 +212,19 @@ msgstr "Hãy quay lại giữa"
 
 #. module: website_event_exhibitor
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
 msgid "Come see us live, we hope to meet you!"
 msgstr "Hãy đón xem trực tiếp. Chúng tôi rất mong gặp các bạn!"
 
@@ -237,7 +234,8 @@ msgid "Connect"
 msgstr "Kết nối"
 
 #. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.snippet_options
+#. odoo-javascript
+#: code:addons/website_event_exhibitor/static/src/website_builder/event_page_option.xml:0
 msgid "Countries"
 msgstr "Quốc gia"
 
@@ -255,7 +253,7 @@ msgstr "Lá cờ Tổ quốc"
 #: model_terms:ir.actions.act_window,help:website_event_exhibitor.event_sponsor_action
 #: model_terms:ir.actions.act_window,help:website_event_exhibitor.event_sponsor_action_from_event
 msgid "Create a Sponsor / Exhibitor"
-msgstr "Tạo một nhà tài trợ/ nhà triển lãm"
+msgstr "Tạo một nhà tài trợ/ đơn vị triển lãm"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.actions.act_window,help:website_event_exhibitor.event_sponsor_type_action
@@ -275,62 +273,23 @@ msgid "Created on"
 msgstr "Được tạo vào"
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Customer Relationship Management"
-msgstr "Quản trị quan hệ khách hàng"
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid ""
-"Deco Addict designs, develops, integrates and supports HR and Supply\n"
-"                Chain processes in order to make our customers more productive,\n"
-"                responsive and profitable."
-msgstr ""
-"Deco Addict thiết kế, phát triển, tích hợp cũng như hỗ trợ các quy trình Nhân sự và Chuỗi\n"
-"                  cung ứng nhằm giúp khách hàng của chúng tôi làm việc hiệu quả hơn,\n"
-"                  phản ứng nhanh hơn và sinh lời nhiều hơn."
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid ""
-"Deco Addict integrates ERP for Global Companies and supports PME\n"
-"                with Open Sources software to manage their businesses. Our\n"
-"                consultants are experts in the following areas:"
-msgstr ""
-"Deco Addict tích hợp ERP cho các công ty toàn cầu và hỗ trợ PME\n"
-"                bằng phần mềm Nguồn mở để quản lý doanh nghiệp của họ.\n"
-"                Các chuyên viên tư vấn của chúng tôi là chuyên gia trong các lĩnh vực sau:"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__website_description
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 msgid "Description"
 msgstr "Mô tả"
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
 msgid "Discover more"
 msgstr "Khám phá thêm"
 
 #. module: website_event_exhibitor
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__display_name
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__display_name
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__display_name
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_type__display_name
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_website__display_name
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_website_event_menu__display_name
 msgid "Display Name"
 msgstr "Tên hiển thị"
 
@@ -339,13 +298,13 @@ msgstr "Tên hiển thị"
 msgid ""
 "Display exhibitors on website, in the footer of every page of the event."
 msgstr ""
-"Hiển thị các đơn vị triển lãm trên trang web, ở phần footer của mỗi trang sự"
-" kiện."
+"Hiển thị các đơn vị triển lãm trên trang web, ở phần footer của mỗi trang sự "
+"kiện."
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
-msgid "Display in footer"
-msgstr "Hiển thị ở footer"
+msgid "Display on website footer"
+msgstr "Hiển thị trên footer trang web"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_email
@@ -367,11 +326,6 @@ msgstr "Giờ kết thúc"
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 msgid "Event"
 msgstr "Sự kiện"
-
-#. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.snippet_options
-msgid "Event Page"
-msgstr "Trang sự kiện"
 
 #. module: website_event_exhibitor
 #: model:ir.model,name:website_event_exhibitor.model_event_sponsor
@@ -404,26 +358,30 @@ msgstr "Event Template"
 #. module: website_event_exhibitor
 #: model:ir.model.fields.selection,name:website_event_exhibitor.selection__event_sponsor__exhibitor_type__exhibitor
 msgid "Exhibitor"
-msgstr "Nhà triển lãm"
+msgstr "Đơn vị triển lãm"
 
 #. module: website_event_exhibitor
-#. odoo-python
-#: code:addons/website_event_exhibitor/models/event_event.py:0
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_search
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_topbar
 msgid "Exhibitors"
-msgstr "Nhà triển lãm"
+msgstr "Đơn vị triển lãm"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_type_view_form
 msgid "Exhibitors Menu Item"
-msgstr "Mục menu nhà triển lãm "
+msgstr "Mục menu đơn vị triển lãm"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__exhibitor_menu_ids
 #: model:ir.model.fields.selection,name:website_event_exhibitor.selection__website_event_menu__menu_type__exhibitor
 msgid "Exhibitors Menus"
-msgstr "Menu nhà triển lãm"
+msgstr "Menu đơn vị triển lãm"
+
+#. module: website_event_exhibitor
+#. odoo-python
+#: code:addons/website_event_exhibitor/models/event_event.py:0
+msgid "Exhibitors list"
+msgstr "Danh sách đơn vị triển lãm"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_topbar
@@ -457,19 +415,20 @@ msgid "Gold"
 msgstr "Vàng"
 
 #. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_search
-msgid "Group By"
-msgstr "Nhóm theo"
-
-#. module: website_event_exhibitor
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
 msgid "Happy to be Sponsor"
 msgstr "Hân hạnh là nhà tài trợ"
 
@@ -479,8 +438,12 @@ msgid "Has Message"
 msgstr "Có tin nhắn"
 
 #. module: website_event_exhibitor
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__id
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__id
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__id
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_type__id
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_website__id
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_website_event_menu__id
 msgid "ID"
 msgstr "ID"
 
@@ -528,14 +491,6 @@ msgid ""
 msgstr "Chỉ ra múi giờ mà ngày/giờ sự kiện sẽ được hiển thị trên trang web."
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Inventory and Warehouse management"
-msgstr "Quản lý Tồn kho và Kho hàng"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_is_follower
 msgid "Is Follower"
 msgstr "Là người theo dõi"
@@ -544,51 +499,6 @@ msgstr "Là người theo dõi"
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__is_published
 msgid "Is Published"
 msgstr "Được đăng"
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
-msgid ""
-"It provides post-graduate education in fluid dynamics\n"
-"                    (research master in fluid dynamics, former \"Diploma\n"
-"                    Course\", doctoral program, stagiaire program and lecture\n"
-"                    series) and encourages \"training in research through\n"
-"                    research\"."
-msgstr ""
-"Tổ chức này đào tạo sau đại học về động lực học chất lỏng\n"
-"                    (thạc sĩ nghiên cứu về động lực học chất lỏng, trước đây là\n"
-"                    \"Khóa học văn bằng\", chương trình tiến sĩ, chương trình stagiaire\n"
-"                    và các bài giảng) và khuyến khích \"đào tạo nghiên cứu thông qua\n"
-"                    nghiên cứu\"."
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
-msgid ""
-"It undertakes and promotes research in the field of fluid\n"
-"                    dynamics. It possesses about fifty different wind tunnels,\n"
-"                    turbomachinery and other specialized test facilities, some\n"
-"                    of which are unique or the largest in the world. Extensive\n"
-"                    research on experimental, computational and theoretical\n"
-"                    aspects of gas and liquid flows is carried out under the\n"
-"                    direction of the faculty and research engineers, sponsored\n"
-"                    mainly by governmental and international agencies as well\n"
-"                    as industries."
-msgstr ""
-"Tổ chức này đảm nhận và thúc đẩy nghiên cứu trong lĩnh vực\n"
-"                   động lực học chất lỏng. Họ sở hữu khoảng 50 đường hầm gió\n"
-"                   khác nhau, máy tuabin và các cơ sở thử nghiệm chuyên dụng khác,\n"
-"                   một số trong đó là duy nhất hoặc lớn nhất trên thế giới. Hoạt động\n"
-"                   nghiên cứu sâu rộng về các khía cạnh thực nghiệm, tính toán và lý\n"
-"                   thuyết của dòng khí cũng như chất lỏng được thực hiện dưới sự chỉ\n"
-"                   đạo của giảng viên và kỹ sư nghiên cứu. Nguồn tài trợ chủ yếu đến\n"
-"                   từ các cơ quan chính phủ, tổ chức quốc tế, và các ngành\n"
-"                   công nghiệp."
-
-#. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
-msgid "Jitsi Name"
-msgstr "Tên Jitsi"
 
 #. module: website_event_exhibitor
 #. odoo-javascript
@@ -603,11 +513,6 @@ msgid "Join us there to meet"
 msgstr "Tham gia ở địa điểm đó để gặp"
 
 #. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_lang_id
-msgid "Language"
-msgstr "Ngôn ngữ"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__write_uid
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__write_uid
 msgid "Last Updated by"
@@ -618,11 +523,6 @@ msgstr "Cập nhật lần cuối bởi"
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__write_date
 msgid "Last Updated on"
 msgstr "Cập nhật lần cuối vào"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_last_activity
-msgid "Last activity"
-msgstr "Hoạt động cuối cùng"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_search
@@ -645,24 +545,6 @@ msgid "Logo"
 msgstr "Logo"
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Materials Management"
-msgstr "Quản lý nguyên liệu"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_max_capacity
-msgid "Max capacity"
-msgstr "Số lượng tối đa"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__room_max_participant_reached
-msgid "Maximum number of participant reached in the room at the same time"
-msgstr "Cùng lúc đã đạt số lượng tối đa người tham dự trong phòng"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_website_event_menu__menu_type
 msgid "Menu Type"
 msgstr "Loại menu"
@@ -678,12 +560,6 @@ msgid "Messages"
 msgstr "Tin nhắn"
 
 #. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_mobile
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
-msgid "Mobile"
-msgstr "Di động"
-
-#. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_card
 msgid "More info"
 msgstr "Thêm thông tin"
@@ -691,7 +567,7 @@ msgstr "Thêm thông tin"
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "Hạn chót hoạt động của tôi"
+msgstr "Thời hạn hoạt động của tôi"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_name
@@ -706,7 +582,7 @@ msgstr "Sự kiện trên lịch cho hoạt động tiếp theo"
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Hạn chót cho hoạt động tiếp theo"
+msgstr "Thời hạn cho hoạt động tiếp theo"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__activity_summary
@@ -726,7 +602,7 @@ msgstr "Không ruy-băng"
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
 msgid "No exhibitor found."
-msgstr "Không tìm thấy nhà triển lãm. "
+msgstr "Không tìm thấy đơn vị triển lãm."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_needaction_counter
@@ -749,7 +625,6 @@ msgid "Number of messages with delivery error"
 msgstr "Số tin nhắn bị gửi lỗi"
 
 #. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_search
 msgid "Online"
 msgstr "Online"
@@ -757,7 +632,7 @@ msgstr "Online"
 #. module: website_event_exhibitor
 #: model:ir.model.fields.selection,name:website_event_exhibitor.selection__event_sponsor__exhibitor_type__online
 msgid "Online Exhibitor"
-msgstr "Nhà triển lãm online"
+msgstr "Đơn vị triển lãm online"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
@@ -770,46 +645,10 @@ msgid "Opening hour"
 msgstr "Giờ mở cửa"
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid ""
-"Our experts invent, imagine and develop solutions which meet\n"
-"                your business requirements. They build a new technical\n"
-"                environment for your company, but they always take the already\n"
-"                installed IT software into account. That is why Idealis\n"
-"                Consulting delivers excellence in HR and SC Management."
-msgstr ""
-"Các chuyên viên của chúng tôi phát minh, tưởng tượng và phát triển\n"
-"                các giải pháp đáp ứng yêu cầu kinh doanh của bạn. Họ vừa tạo\n"
-"                dựng một môi trường kỹ thuật mới cho công ty bạn vừa cân nhắc\n"
-"                cả phần mềm CNTT đã được cài đặt sẵn. Đó là lý do tại sao Idealis\n"
-"                Consulting tạo ra sự xuất sắc trong Quản lý Nhân sự và SC."
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_participant_count
-msgid "Participant count"
-msgstr "Số người tham dự "
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_id
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 msgid "Partner"
 msgstr "Đối tác"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_max_participant_reached
-msgid "Peak participants"
-msgstr "Số người tham dự tối đa "
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Personnel Administration"
-msgstr "Quản trị nhân sự"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_phone
@@ -830,20 +669,12 @@ msgid ""
 "Bronze\")."
 msgstr ""
 "Xếp hạng nhà tài trợ dựa vào hệ thống xếp loại của bạn (vd. Vàng, Bạc, "
-"Đồng\"). "
+"Đồng\")."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__rating_ids
 msgid "Ratings"
 msgstr "Đánh giá"
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Reporting"
-msgstr "Báo cáo"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__activity_user_id
@@ -856,27 +687,9 @@ msgid "Ribbon Style"
 msgstr "Kiểu ruy-băng"
 
 #. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_is_full
-msgid "Room Is Full"
-msgstr "Phòng đã đủ chỗ"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_name
-msgid "Room Name"
-msgstr "Tên phòng"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_has_sms_error
 msgid "SMS Delivery error"
 msgstr "Lỗi gửi SMS"
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Sales and Distribution"
-msgstr "Bán hàng và phân phối"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_topbar
@@ -890,10 +703,15 @@ msgid "Sequence"
 msgstr "Trình tự"
 
 #. module: website_event_exhibitor
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__show_on_ticket
+msgid "Show on ticket"
+msgstr "Hiển thị trên vé"
+
+#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__exhibitor_menu
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_type__exhibitor_menu
 msgid "Showcase Exhibitors"
-msgstr "Hiển thị nhà triển lãm"
+msgstr "Hiển thị đơn vị triển lãm"
 
 #. module: website_event_exhibitor
 #: model:event.sponsor.type,name:website_event_exhibitor.event_sponsor_type2
@@ -907,12 +725,6 @@ msgid "Slogan"
 msgstr "Slogan"
 
 #. module: website_event_exhibitor
-#. odoo-python
-#: code:addons/website_event_exhibitor/models/event_sponsor.py:0
-msgid "Sponsor"
-msgstr "Nhà tài trợ "
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__sponsor_count
 msgid "Sponsor Count"
 msgstr "Số lượng nhà tài trợ"
@@ -920,23 +732,18 @@ msgstr "Số lượng nhà tài trợ"
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__email
 msgid "Sponsor Email"
-msgstr "Email nhà tài trợ "
+msgstr "Email nhà tài trợ"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__name
 msgid "Sponsor Level"
-msgstr "Cấp độ tài trợ "
+msgstr "Cấp độ tài trợ"
 
 #. module: website_event_exhibitor
 #: model:ir.actions.act_window,name:website_event_exhibitor.event_sponsor_type_action
 #: model:ir.ui.menu,name:website_event_exhibitor.menu_event_sponsor_type
 msgid "Sponsor Levels"
 msgstr "Cấp độ nhà tài trợ"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__mobile
-msgid "Sponsor Mobile"
-msgstr "SĐT nhà tài trợ"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__name
@@ -965,9 +772,10 @@ msgid "Sponsor image"
 msgstr "Hình ảnh nhà tài trợ"
 
 #. module: website_event_exhibitor
+#. odoo-javascript
+#: code:addons/website_event_exhibitor/static/src/website_builder/event_page_option.xml:0
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__sponsor_ids
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_event_view_form
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.snippet_options
 msgid "Sponsors"
 msgstr "Nhà Tài trợ"
 
@@ -976,15 +784,18 @@ msgstr "Nhà Tài trợ"
 #: model_terms:ir.actions.act_window,help:website_event_exhibitor.event_sponsor_action_from_event
 msgid ""
 "Sponsors are advertised on your event pages.<br>\n"
-"    Exhibitors have a dedicated page a with chat room for people to connect with them."
+"    Exhibitors have a dedicated page a with chat room for people to connect "
+"with them."
 msgstr ""
 "Nhà tài trợ được quảng cáo trên trang sự kiện.<br>\n"
-"   Nhà triển lãm có một trang riêng cùng với phòng chat để mọi người có thể kết nối với họ. "
+"   Đơn vị triển lãm có một trang riêng cùng với phòng chat để mọi người có "
+"thể kết nối với họ."
 
 #. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.snippet_options
+#. odoo-javascript
+#: code:addons/website_event_exhibitor/static/src/website_builder/event_page_option.xml:0
 msgid "Sponsorship"
-msgstr "Chương trình tài trợ "
+msgstr "Chương trình tài trợ"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__sponsor_type_id
@@ -1005,17 +816,14 @@ msgstr ""
 "Kế hoạch: Cần thực hiện trong tương lai."
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Talent Management"
-msgstr "Quản lý nhân tài"
+#: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__website_absolute_url
+msgid "The full absolute URL to access the document through the website."
+msgstr "URL tuyệt đối đầy đủ để truy cập tài liệu thông qua trang web."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__website_url
-msgid "The full URL to access the document through the website."
-msgstr "URL đầy đủ để truy cập tài liệu thông qua trang web."
+msgid "The full relative URL to access the document through the website."
+msgstr "URL tương đối đầy đủ để truy cập tài liệu thông qua trang web."
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
@@ -1028,7 +836,8 @@ msgid "Timezone"
 msgstr "Múi giờ"
 
 #. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.snippet_options
+#. odoo-javascript
+#: code:addons/website_event_exhibitor/static/src/website_builder/event_page_option.xml:0
 msgid "Top Bar Filter"
 msgstr "Bộ lọc thanh trên"
 
@@ -1055,14 +864,19 @@ msgstr "Chúng tôi không thể tìm thấy đơn vị triển lãm nào tại 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
 msgid "We could not find any exhibitor matching your search for:"
-msgstr ""
-"Chúng tôi không thể tìm thấy đơn vị triển lãm nào phù hợp với tìm kiếm:"
+msgstr "Chúng tôi không thể tìm thấy đơn vị triển lãm nào phù hợp với tìm kiếm:"
 
 #. module: website_event_exhibitor
+#: model:ir.model,name:website_event_exhibitor.model_website
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_tree
 msgid "Website"
 msgstr "Trang web"
+
+#. module: website_event_exhibitor
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__website_absolute_url
+msgid "Website Absolute URL"
+msgstr "URL tuyệt đối của trang web"
 
 #. module: website_event_exhibitor
 #: model:ir.model,name:website_event_exhibitor.model_website_event_menu
@@ -1126,13 +940,13 @@ msgstr "vd. Lựa chọn tốt nhất cho ngôi nhà của bạn"
 #. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/components/exhibitor_connect_closed_dialog/exhibitor_connect_closed_dialog.xml:0
 msgid "is not available right now."
-msgstr "hiện chưa sẵn sàng. "
+msgstr "hiện chưa sẵn sàng."
 
 #. module: website_event_exhibitor
 #. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/components/exhibitor_connect_closed_dialog/exhibitor_connect_closed_dialog.xml:0
 msgid "is over."
-msgstr "đã kết thúc. "
+msgstr "đã kết thúc."
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main

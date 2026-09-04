@@ -6,9 +6,9 @@ from odoo import fields, models, api
 from markupsafe import escape
 
 
-class PosSelfOrderCustomLink(models.Model):
-    _name = "pos_self_order.custom_link"
-    _inherit = "pos.load.mixin"
+class Pos_Self_OrderCustom_Link(models.Model):
+    _name = 'pos_self_order.custom_link'
+    _inherit = ["pos.load.mixin"]
     _description = (
         "Custom links that the restaurant can configure to be displayed on the self order screen"
     )
@@ -39,11 +39,11 @@ class PosSelfOrderCustomLink(models.Model):
     sequence = fields.Integer("Sequence", default=1)
 
     @api.model
-    def _load_pos_self_data_domain(self, data):
-        return [('pos_config_ids', 'in', data['pos.config']['data'][0]['id'])]
+    def _load_pos_self_data_domain(self, data, config):
+        return [('pos_config_ids', 'in', config.id)]
 
     @api.model
-    def _load_pos_self_data_fields(self, config_id):
+    def _load_pos_self_data_fields(self, config):
         return ['name', 'url', 'style', 'link_html', 'sequence']
 
     @api.depends("name", "style")

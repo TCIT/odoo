@@ -4,10 +4,12 @@ import {
     defineModels,
     fields,
     models,
+    onRpc,
     serverState,
     webModels,
 } from "@web/../tests/web_test_helpers";
 import { mailModels } from "@mail/../tests/mail_test_helpers";
+import { RPCError } from "@web/core/network/rpc";
 
 /**
  * @typedef {object} ServerData
@@ -83,10 +85,11 @@ export function getBasicServerData() {
  *
  * @param {string} model
  * @param {Array<string>} columns
+ * @param {{name: string, asc: boolean}[]} orderBy
  *
  * @returns { {definition: Object, columns: Array<Object>}}
  */
-export function generateListDefinition(model, columns) {
+export function generateListDefinition(model, columns, actionXmlId, orderBy = []) {
     const cols = [];
     for (const name of columns) {
         const PyModel = Object.values(SpreadsheetModels).find((m) => m._name === model);
@@ -104,9 +107,10 @@ export function generateListDefinition(model, columns) {
             searchParams: {
                 domain: [],
                 context: {},
-                orderBy: [],
+                orderBy,
             },
             name: "List",
+            actionXmlId,
         },
         columns: cols,
     };
@@ -115,10 +119,26 @@ export function generateListDefinition(model, columns) {
 export function getBasicListArchs() {
     return {
         "partner,false,list": getBasicListArch(),
-        "partner,false,search": /* xml */ `<search/>`,
-        "partner,false,form": /* xml */ `<form/>`,
     };
 }
+
+function mockSpreadsheetDataController(_request, { res_model, res_id }) {
+    const [record] = this.env[res_model].search_read([["id", "=", parseInt(res_id)]]);
+    if (!record) {
+        const error = new RPCError(`Spreadsheet ${res_id} does not exist`);
+        error.data = {};
+        throw error;
+    }
+    return {
+        data: JSON.parse(record.spreadsheet_data),
+        name: record.name,
+        revisions: [],
+        isReadonly: false,
+        writable_rec_name_field: "name",
+    };
+}
+
+onRpc("/spreadsheet/data/<string:res_model>/<int:res_id>", mockSpreadsheetDataController);
 
 export function defineSpreadsheetModels() {
     defineModels(SpreadsheetModels);
@@ -144,11 +164,31 @@ export function defineSpreadsheetActions() {
 
 export class IrModel extends webModels.IrModel {
     display_name_for(models) {
-        const records = this.env["ir.model"].search_read([["model", "in", models]]);
-        return records.map((record) => ({
-            model: record.model,
-            display_name: record.name,
-        }));
+        const records = this.env["ir.model"].search_read(
+            [["model", "in", models]],
+            ["name", "model"]
+        );
+        const result = [];
+        for (const model of models) {
+            const record = records.find((record) => record.model === model);
+            if (record) {
+                result.push({ model: model, display_name: record.name });
+            } else {
+                result.push({ model: model, display_name: model });
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @param {string[]} modelNames
+     */
+    has_searchable_parent_relation(modelNames) {
+        return Object.fromEntries(modelNames.map((modelName) => [modelName, false]));
+    }
+
+    get_available_models() {
+        return this.env["ir.model"].search_read([], ["display_name", "model"]);
     }
 
     _records = [
@@ -167,6 +207,16 @@ export class IrModel extends webModels.IrModel {
             name: "Users",
             model: "res.users",
         },
+        {
+            id: 56,
+            name: "Currency",
+            model: "res.currency",
+        },
+        {
+            id: 57,
+            name: "Tag",
+            model: "tag",
+        },
     ];
 }
 
@@ -175,7 +225,7 @@ export class IrUIMenu extends models.Model {
 
     name = fields.Char({ string: "Name" });
     action = fields.Char({ string: "Action" });
-    groups_id = fields.Many2many({ string: "Groups", relation: "res.group" });
+    group_ids = fields.Many2many({ string: "Groups", relation: "res.group" });
 }
 
 export class IrActions extends models.Model {
@@ -190,7 +240,7 @@ export class ResUsers extends mailModels.ResUsers {
     _name = "res.users";
 
     name = fields.Char({ string: "Name" });
-    groups_id = fields.Many2many({ string: "Groups", relation: "res.group" });
+    group_ids = fields.Many2many({ string: "Groups", relation: "res.group" });
 }
 
 export class SpreadsheetMixin extends models.Model {
@@ -198,7 +248,7 @@ export class SpreadsheetMixin extends models.Model {
 
     spreadsheet_binary_data = fields.Binary({ string: "Spreadsheet file" });
     spreadsheet_data = fields.Text();
-    thumbnail = fields.Binary();
+    display_thumbnail = fields.Binary();
 
     get_display_names_for_spreadsheet(args) {
         const result = [];
@@ -258,6 +308,32 @@ export class ResCurrency extends models.Model {
             position: "before",
             decimal_places: 2,
         },
+    ];
+}
+
+export class ResCountry extends webModels.ResCountry {
+    _name = "res.country";
+    name = fields.Char({ string: "Country" });
+    code = fields.Char({ string: "Code" });
+
+    _records = [
+        { id: 1, name: "Belgium", code: "BE" },
+        { id: 2, name: "France", code: "FR" },
+        { id: 3, name: "United States", code: "US" },
+    ];
+}
+
+export class ResCountryState extends models.Model {
+    _name = "res.country.state";
+    name = fields.Char({ string: "Name" });
+    code = fields.Char({ string: "Code" });
+    country_id = fields.Many2one({ relation: "res.country" });
+    display_name = fields.Char({ string: "Display Name" });
+
+    _records = [
+        { id: 1, name: "California", code: "CA", country_id: 3, display_name: "California (US)" },
+        { id: 2, name: "New York", code: "NY", country_id: 3, display_name: "New York (US)" },
+        { id: 3, name: "Texas", code: "TX", country_id: 3, display_name: "Texas (US)" },
     ];
 }
 
@@ -372,6 +448,7 @@ export class Partner extends models.Model {
             id: 1,
             foo: 12,
             bar: true,
+            name: "Raoul",
             date: "2016-04-14",
             create_date: "2016-04-03 00:00:00",
             product_id: 37,
@@ -385,6 +462,7 @@ export class Partner extends models.Model {
             id: 2,
             foo: 1,
             bar: true,
+            name: "Steven",
             date: "2016-10-26",
             create_date: "2014-04-03 00:05:32",
             product_id: 41,
@@ -398,6 +476,7 @@ export class Partner extends models.Model {
             id: 3,
             foo: 17,
             bar: true,
+            name: "Taylor",
             date: "2016-12-15",
             create_date: "2006-01-03 11:30:50",
             product_id: 41,
@@ -411,6 +490,7 @@ export class Partner extends models.Model {
             id: 4,
             foo: 2,
             bar: false,
+            name: "Zara",
             date: "2016-12-11",
             create_date: "2016-12-10 21:59:59",
             product_id: 41,
@@ -427,8 +507,6 @@ export class Partner extends models.Model {
         list: getBasicListArch(),
         pivot: getBasicPivotArch(),
         graph: getBasicGraphArch(),
-        form: /* xml */ `<Form/>`,
-        search: /* xml */ `<search/>`,
     };
 }
 
@@ -438,18 +516,48 @@ export class Product extends models.Model {
     name = fields.Char({ string: "Product Name" });
     display_name = fields.Char({ string: "Product Name" });
     active = fields.Boolean({ string: "Active", default: true });
+    template_id = fields.Many2one({
+        string: "Template",
+        relation: "product",
+        store: true,
+        sortable: true,
+        groupable: true,
+        searchable: true,
+    });
     properties_definitions = fields.PropertiesDefinition();
+    pognon = fields.Monetary({
+        string: "Money!",
+        currency_field: "currency_id",
+        store: true,
+        sortable: true,
+        aggregator: "avg",
+        groupable: true,
+        searchable: true,
+    });
+    currency_id = fields.Many2one({
+        string: "Currency",
+        relation: "res.currency",
+        store: true,
+        sortable: true,
+        groupable: true,
+        searchable: true,
+    });
 
     _records = [
         {
             id: 37,
             display_name: "xphone",
             name: "xphone",
+            currency_id: 2,
+            pognon: 699.99,
         },
         {
             id: 41,
             display_name: "xpad",
+            template_id: 37,
             name: "xpad",
+            currency_id: 2,
+            pognon: 599.99,
         },
     ];
 }
@@ -494,6 +602,8 @@ export const SpreadsheetModels = {
     IrActions,
     ResGroup,
     ResUsers,
+    ResCountry,
+    ResCountryState,
     SpreadsheetMixin,
     ResCurrency,
     Partner,

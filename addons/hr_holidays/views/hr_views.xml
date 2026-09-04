@@ -75,6 +75,9 @@
                 <filter name="on_timeoff" string="On Time Off" domain="[('is_absent', '=', True)]"/>
                 <separator/>
             </xpath>
+            <xpath expr="//separator[@name='secondary_groupby_separator']" position="after">
+                <filter name="group_leave_manager" string="Time Off Approver" context="{'group_by': 'leave_manager_id'}"/>
+            </xpath>
         </field>
     </record>
 
@@ -102,7 +105,7 @@
                 <field name="leave_date_to"/>
                 <field name="is_absent"/>
             </xpath>
-            <xpath expr="//field[@name='hr_icon_display'][hasclass('o_employee_availability')]" position="attributes">
+            <xpath expr="//field[@name='hr_icon_display']" position="attributes">
                 <attribute name="widget">hr_presence_status_private</attribute>
             </xpath>
         </field>
@@ -113,59 +116,35 @@
         <field name="name">hr.employee.leave.form.inherit</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
-        <field name = "priority" eval="20" />
+        <field name="priority" eval="20"/>
         <field name="arch" type="xml">
             <xpath expr="//group[@name='managers']" position="inside">
-                <field name="leave_manager_id" widget="many2one_avatar_user"/>
+                <field name="leave_manager_id" string="Time Off" widget="many2one_avatar_user"/>
             </xpath>
-            <xpath expr="//group[@name='managers']" position="attributes">
-                <attribute name="invisible">0</attribute>
+            <xpath expr="//field[@name='hr_icon_display']" position="attributes">
+                <attribute name="widget">hr_presence_status_private</attribute>
             </xpath>
-            <xpath expr="//div[@name='button_box']" position="inside">
+            <button name="action_open_versions" position="before">
                 <field name="show_leaves" invisible="1"/>
                 <field name="is_absent" invisible="1"/>
                 <field name="hr_icon_display" invisible="1"/>
                 <button name="action_time_off_dashboard"
                         type="object"
                         class="oe_stat_button"
-                        context="{'search_default_employee_ids': id}"
-                        invisible="not is_absent">
-                        <div invisible="hr_icon_display != 'presence_holiday_present'"
-                              role="img" class="fa fa-fw fa-plane o_button_icon text-success" aria-label="Back On" title="Back On"/>
-                        <div invisible="hr_icon_display != 'presence_holiday_absent'" role="img"
-                             class="fa fa-fw fa-plane o_button_icon text-warning" aria-label="Back On" title="Back On"/>
-                    <div class="o_field_widget o_stat_info">
-                        <span class="o_stat_text">
-                            Back On
-                        </span>
-                        <span class="o_stat_value">
-                            <field name="leave_date_to"/>
-                        </span>
-                    </div>
-                </button>
-                <button name="action_time_off_dashboard"
-                        type="object"
-                        class="oe_stat_button"
                         icon="fa-calendar"
-                        invisible="not show_leaves"
-                        context="{'search_default_employee_ids': id}"
+                        invisible="not show_leaves or company_id not in allowed_company_ids"
                         groups="base.group_user"
                         help="Remaining leaves">
-                    <div class="o_field_widget o_stat_info" invisible="allocation_display == '0'">
-                        <span class="o_stat_value">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value" invisible="allocation_display == '0'">
                             <field name="allocation_remaining_display"/>/<field name="allocation_display"/> Days
                         </span>
                         <span class="o_stat_text">
                             Time Off
                         </span>
                     </div>
-                    <div class="o_field_widget o_stat_info" invisible="allocation_display != '0'">
-                        <span class="o_stat_text">
-                           Time Off
-                        </span>
-                    </div>
                 </button>
-            </xpath>
+            </button>
         </field>
     </record>
 
@@ -175,7 +154,7 @@
         <field name="inherit_id" ref="hr.view_employee_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='work_location_id']" position="after">
-                <field name="leave_manager_id" optional="hide" string="Time Off Approver" widget="many2one_avatar_user"/>
+                <field name="leave_manager_id" optional="hide" widget="many2one_avatar_user"/>
             </xpath>
         </field>
     </record>
@@ -185,82 +164,30 @@
         <field name="model">hr.employee.public</field>
         <field name="inherit_id" ref="hr.hr_employee_public_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='coach_id']" position="after">
-                <field name="company_id" invisible="1"/>
-                <field name="leave_manager_id" widget="many2one_avatar_user"/>
-            </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <field name="show_leaves" invisible="1"/>
-                <field name="is_absent" invisible="1"/>
-                <button disabled="1"
+                <button name="action_open_time_off_calendar"
+                        type="object"
                         class="oe_stat_button"
-                        invisible="not is_absent">
-                        <div role="img" invisible="hr_icon_display != 'presence_holiday_present'"
-                             class="fa fa-fw fa-plane o_button_icon text-success" aria-label="Back On" title="Back On"/>
-                        <div invisible="hr_icon_display != 'presence_holiday_absent'" role="img"
-                             class="fa fa-fw fa-plane o_button_icon text-warning" aria-label="Back On" title="Back On"/>
+                        icon="fa-calendar"
+                        invisible="show_leaves"
+                        groups="base.group_user"
+                        help="Remaining leaves">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_text">
-                            Back On
-                        </span>
-                        <span class="o_stat_value">
-                            <field name="leave_date_to"/>
+                            Time Off
                         </span>
                     </div>
                 </button>
             </xpath>
-        </field>
-    </record>
 
-    <record id="res_users_view_form" model="ir.ui.view">
-        <field name="name">hr.user.preferences.view.form.leave.inherit</field>
-        <field name="model">res.users</field>
-        <field name="inherit_id" ref="hr.res_users_view_form_profile"/>
-        <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
-                <button name="%(hr_leave_action_new_request)d"
-                string="Request Time off"
-                type="action"
-                class="btn btn-primary"/>
-                <button name="%(hr_leave_allocation_action_my)d"
-                string="Request Allocation"
-                type="action"
-                class="btn btn-primary"/>
-            </xpath>
-            <xpath expr="//group[@name='managers']" position="inside">
-                <field name="leave_manager_id" readonly="not can_edit"/>
-            </xpath>
-            <xpath expr="//group[@name='managers']" position="attributes">
-                <attribute name="invisible">0</attribute>
-            </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <field name="show_leaves" invisible="1"/>
-                <field name="employee_ids" invisible="1"/>
-                <field name="is_absent" invisible="1"/>
-                <field name="hr_icon_display" invisible="1"/>
-                <button name="%(hr_leave_action_new_request)d" type="action"
-                        class="oe_stat_button"
-                        invisible="context.get('from_my_profile', False) or not is_absent">
-                        <div invisible="hr_icon_display != 'presence_holiday_present'"
-                             role="img" class="fa fa-fw fa-plane o_button_icon text-success" aria-label="Back On"
-                             title="Back On"/>
-                        <div invisible="hr_icon_display != 'presence_holiday_absent'"
-                             role="img" class="fa fa-fw fa-plane o_button_icon text-warning" aria-label="Back On"
-                             title="Back On"/>
-                    <div class="o_field_widget o_stat_info">
-                        <span class="o_stat_text">
-                            Back On
-                        </span>
-                        <span class="o_stat_value">
-                            <field name="leave_date_to"/>
-                        </span>
-                    </div>
-                </button>
                 <button name="%(hr_leave_action_new_request)d"
                         type="action"
                         class="oe_stat_button"
                         icon="fa-calendar"
-                        invisible="not show_leaves"
+                        invisible="not is_user or not show_leaves"
                         groups="base.group_user"
                         help="Remaining leaves">
                     <div class="o_field_widget o_stat_info">

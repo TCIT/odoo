@@ -5,7 +5,7 @@
 {
     'name': 'Sales and MRP Management',
     'version': '1.0',
-    'category': 'Hidden',
+    'category': 'Sales/Sales',
     'description': """
 This module provides facility to the user to install mrp and sales modulesat a time.
 ====================================================================================
@@ -22,5 +22,6 @@ from sales order. It adds sales name and sales Reference on production order.
     ],
     'installable': True,
     'auto_install': True,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

@@ -21,16 +21,6 @@ class ResUsersSettings(models.Model):
         "Channel Notifications",
         help="This setting will only be applied to channels. Mentions only if not specified.",
     )
-    mute_until_dt = fields.Datetime(string="Mute notifications until", index=True, help="If set, the user will not receive notifications from all the channels until this date.")
-
-    @api.model
-    def _cleanup_expired_mutes(self):
-        """
-        Cron job for cleanup expired unmute by resetting mute_until_dt and sending bus notifications.
-        """
-        settings = self.search([("mute_until_dt", "<=", fields.Datetime.now())])
-        settings.write({"mute_until_dt": False})
-        settings._notify_mute()
 
     @api.model
     def _format_settings(self, fields_to_format):
@@ -39,18 +29,7 @@ class ResUsersSettings(models.Model):
             volume_settings = self.volume_settings_ids._discuss_users_settings_volume_format()
             res.pop('volume_settings_ids', None)
             res['volumes'] = [('ADD', volume_settings)]
-        if "mute_until_dt" in fields_to_format:
-            res["mute_until_dt"] = fields.Datetime.to_string(self.mute_until_dt)
         return res
-
-    def _notify_mute(self):
-        for setting in self:
-            setting._bus_send("res.users.settings", {"mute_until_dt": setting.mute_until_dt})
-            if setting.mute_until_dt and setting.mute_until_dt != -1:
-                self.env.ref("mail.ir_cron_discuss_users_settings_unmute")._trigger(setting.mute_until_dt)
-
-    def set_custom_notifications(self, custom_notifications):
-        self.set_res_users_settings({"channel_notifications": custom_notifications})
 
     def set_res_users_settings(self, new_settings):
         formatted = super().set_res_users_settings(new_settings)

@@ -73,3 +73,74 @@ class TestAccountMoveDuplicate(AccountTestInvoicingCommon):
             {'duplicated_ref_ids': (invoice_1 + invoice_3).ids},
             {'duplicated_ref_ids': (invoice_1 + invoice_2).ids},
         ])
+
+    def test_in_invoice_multiple_duplicate_reference_batch_in_edit_mode(self):
+        """
+            Ensure duplicated ref are computed correctly even when updated in batch
+            when they are in edit mode
+        """
+        invoice_1 = self.invoice
+        invoice_1.ref = 'a unique supplier reference that will be copied'
+        invoice_2 = invoice_1.copy(default={'invoice_date': invoice_1.invoice_date})
+        invoices_new = self.env['account.move'].browse([
+            self.env['account.move'].new(origin=inv).id for inv in (invoice_1, invoice_2)
+        ])
+        # reassign to trigger the compute method
+        invoices_new.ref = invoice_1.ref
+        self.assertRecordValues(invoices_new, [
+            {'duplicated_ref_ids': (invoices_new[1]).ids},
+            {'duplicated_ref_ids': (invoices_new[0]).ids},
+        ])
+
+    def test_in_invoice_single_duplicate_reference_diff_date(self):
+        """ Ensure duplicated ref are computed correctly for different dates"""
+        bill1 = self.invoice.copy({'invoice_date': self.invoice.invoice_date})
+        bill1.ref = 'bill1'
+
+        # Same ref but different year -> Not duplicated
+        bill2 = bill1.copy({'invoice_date': '2020-01-01'})
+        bill2.ref = bill1.ref
+        self.assertNotIn(bill1, bill2.duplicated_ref_ids)
+        self.assertNotIn(bill2, bill1.duplicated_ref_ids)
+
+        # Same ref and same year -> Duplicated
+        bill3 = bill1.copy({'invoice_date': f"{bill1.invoice_date.year}-04-11"})
+        bill3.ref = bill1.ref
+        self.assertEqual(bill3.duplicated_ref_ids, bill1)
+
+        # Even after posting
+        bill3.action_post()
+        self.assertEqual(bill3.duplicated_ref_ids, bill1)
+
+        # Same ref and no invoice date -> Duplicated
+        bill4 = self.invoice.copy()
+        bill4.ref = "bill4"
+        bill5 = bill4.copy()
+        bill5.ref = bill4.ref
+        self.assertEqual(bill5.duplicated_ref_ids, bill4)
+
+    def test_in_invoice_single_duplicate_no_reference(self):
+        """ Ensure duplicated bills are recognized with or without
+            a reference when the amount, date, partner are equal"""
+        bill1 = self.invoice.copy({'invoice_date': '2020-01-01'})
+        bill2 = bill1.copy()
+
+        # trigger compute method
+        all_bills = bill1 + bill2
+        all_bills.invoice_date = self.invoice.invoice_date
+
+        # Assert duplicates when there is no ref
+        self.assertIn(bill1, bill2.duplicated_ref_ids)
+        self.assertIn(bill2, bill1.duplicated_ref_ids)
+
+        # Assert duplicates when there is one ref
+        bill1.update({'ref': "bill1 ref"})
+        bill2.update({'ref': bill2.ref})
+        self.assertIn(bill1, bill2.duplicated_ref_ids)
+        self.assertIn(bill2, bill1.duplicated_ref_ids)
+
+        # Assert duplicated when different refs
+        bill1.update({'ref': bill1.ref})
+        bill2.update({'ref': "bill2 ref"})
+        self.assertIn(bill1, bill2.duplicated_ref_ids)
+        self.assertIn(bill2, bill1.duplicated_ref_ids)

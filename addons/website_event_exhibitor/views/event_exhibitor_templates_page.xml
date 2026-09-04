@@ -5,9 +5,9 @@
     <t t-set="no_header" t-value="option_widescreen"/>
     <t t-set="no_footer" t-value="option_widescreen"/>
     <t t-call="website_event.layout">
-        <t t-set="navbar__back_url" t-value="'/event/%s/exhibitors' % (slug(event))"/>
-        <t t-set="navbar__back_title">Back to all Exhibitors</t>
-        <t t-set="navbar__back_text">All Exhibitors</t>
+        <t t-set="navbar_back_url" t-value="'/event/%s/exhibitors' % (slug(event))"/>
+        <t t-set="navbar_back_title">Back to all Exhibitors</t>
+        <t t-set="navbar_back_text">All Exhibitors</t>
 
 
         <div class="o_wevent_online o_wesponsor_index">
@@ -56,48 +56,14 @@
                 <span class="my-0" t-else="">
                     starts on
                     <span t-field="sponsor.event_id.date_begin"
-                        t-options="{'format': 'medium', 'tz_name': sponsor.event_id.date_tz}"/> (<t t-out="sponsor.event_id.date_tz"/>).
+                        t-options="{'format': 'medium', 'tz_name': sponsor.event_id.date_tz}"/>
+                    <span t-if="website_visitor_timezone != sponsor.event_id.date_tz">(<t t-out="event.date_tz"/>)</span>
                 </span>
                 <br/>
                 <span t-if="is_event_user">Attendees will be able to join to meet <b t-out="sponsor.partner_name"/> .</span>
                 <span t-else="">Join us there to meet <b t-out="sponsor.partner_name"/>!</span>
             </div>
         </t>
-        <!-- SPONSOR JITSI + CLOSED/FULL ALERTS -->
-        <div t-if="sponsor.exhibitor_type == 'online' and sponsor.event_id.is_ongoing and sponsor.chat_room_id" class="d-flex flex-column">
-            <t t-if="not sponsor.is_in_opening_hours">
-                <div class="col-12 alert alert-warning rounded-0 text-center" role="alert">
-                    <span>Oops! This room is currently closed</span><br />
-                    Come back between
-                    <strong>
-                        <t t-out="sponsor.hour_from" t-options="{'widget': 'time'}"/>
-                        -
-                        <t t-out="sponsor.hour_to" t-options="{'widget': 'time'}"/>
-                    </strong> (<span t-out="sponsor.event_date_tz"/>)
-                    to meet them!
-                </div>
-            </t>
-            <t t-elif="sponsor.room_is_full">
-                <div class="col-12 alert alert-warning rounded-0 text-center" role="alert">
-                    <span>Oops! This room is full</span><br />Come back later to have a chat with us!
-                </div>
-            </t>
-            <t t-else="">
-                <div id="o_wsponsor_jitsi_iframe"/>
-                <div class="d-flex flex-row-reverse">
-                    <t t-call="website_jitsi.chat_room_join_button">
-                        <t t-set="_classes" t-value="'d-none'"/>
-                        <t t-set="room_name" t-value="sponsor.room_name"/>
-                        <t t-set="chat_room_id" t-value="sponsor.chat_room_id.id"/>
-                        <t t-set="auto_open" t-value="1"/>
-                        <t t-set="attach_to" t-value="'#o_wsponsor_jitsi_iframe'"/>
-                        <t t-set="max_capacity" t-value="sponsor.room_max_capacity"/>
-                        <t t-set="check_full" t-value="int(not option_can_edit)"/>
-                        <t t-set="jitsi_server_domain" t-value="sponsor.chat_room_id.jitsi_server_domain"/>
-                    </t>
-                </div>
-            </t>
-        </div>
         <!-- SPONSOR DESCRIPTION -->
         <div class="h5 m-3">
             About <t t-out="sponsor.name"/>
@@ -124,7 +90,7 @@
                         <t t-out="sponsor.hour_from" t-options="{'widget': 'time'}"/>
                         -
                         <t t-out="sponsor.hour_to" t-options="{'widget': 'time'}"/>
-                        (<span t-out="sponsor.event_date_tz"/>)
+                        <span t-if="website_visitor_timezone != sponsor.event_id.date_tz">(<t t-out="event.date_tz"/>)</span>
                     </div>
                     <div t-if="sponsor.url" class="d-flex text-break align-items-baseline">
                         <i class="fa fa-globe me-2"/><a t-att-href="sponsor.url"><span t-field="sponsor.url"/></a>
@@ -179,7 +145,7 @@
             <ul id="collapse_exhibitor_aside" class="list-group list-group-flush collapse d-lg-block">
                 <li class="list-group-item list-group-item-action" t-foreach="sponsors_other" t-as="sponsor_other">
                     <a class="d-flex flex-wrap flex-md-nowrap text-decoration-none text-reset"
-                        t-att-href="sponsor_other.website_url"
+                        t-att-href="sponsor_other.website_absolute_url"
                         t-att-data-publish="sponsor_other.website_published and 'on' or 'off'">
                         <div class="d-flex flex-column align-items-center">
                             <img t-if="sponsor_other.partner_id.country_id"

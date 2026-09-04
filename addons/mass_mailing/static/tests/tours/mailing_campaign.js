@@ -1,6 +1,5 @@
-/** @odoo-module **/
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category('web_tour.tours').add('mailing_campaign', {
     url: '/odoo',
@@ -28,8 +27,11 @@ registry.category('web_tour.tours').add('mailing_campaign', {
         },
         {
             content: 'Pick the basic theme',
-            trigger: ":iframe #basic",
+            trigger: ".o_mailing_template_preview_wrapper [data-name='basic']",
             run: "click",
+        },
+        {
+            trigger: ":iframe .o_mass_mailing_value .o_layout",
         },
         {
             content: 'Fill in Subject',

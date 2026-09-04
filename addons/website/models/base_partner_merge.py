@@ -4,7 +4,7 @@
 from odoo import api, models
 
 
-class MergePartnerAutomatic(models.TransientModel):
+class BasePartnerMergeAutomaticWizard(models.TransientModel):
     _inherit = 'base.partner.merge.automatic.wizard'
 
     @api.model

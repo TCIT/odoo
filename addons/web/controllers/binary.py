@@ -72,13 +72,14 @@ class Binary(http.Controller):
     def content_common(self, xmlid=None, model='ir.attachment', id=None, field='raw',
                        filename=None, filename_field='name', mimetype=None, unique=False,
                        download=False, access_token=None, nocache=False):
+        download = str2bool(download)
         with replace_exceptions(UserError, by=request.not_found()):
             record = request.env['ir.binary']._find_record(xmlid, model, id and int(id), access_token, field=field)
-            stream = request.env['ir.binary']._get_stream_from(record, field, filename, filename_field, mimetype)
+            stream = request.env['ir.binary']._get_stream_from(record.with_context(download_attachments=download), field, filename, filename_field, mimetype)
             if request.httprequest.args.get('access_token'):
                 stream.public = True
 
-        send_file_kwargs = {'as_attachment': str2bool(download)}
+        send_file_kwargs = {'as_attachment': download}
         if unique:
             send_file_kwargs['immutable'] = True
             send_file_kwargs['max_age'] = http.STATIC_CACHE_LONG
@@ -94,9 +95,9 @@ class Binary(http.Controller):
         assets_params = assets_params or {}
         assert isinstance(assets_params, dict)
         debug_assets = unique == 'debug'
+        stream = None
         if unique in ('any', '%'):
             unique = ANY_UNIQUE
-        attachment = None
         if unique != 'debug':
             url = env['ir.asset']._get_asset_bundle_url(filename, unique, assets_params)
             assert not '%' in url
@@ -109,7 +110,9 @@ class Binary(http.Controller):
                 ('create_uid', '=', SUPERUSER_ID),
             ]
             attachment = env['ir.attachment'].sudo().search(domain, limit=1)
-        if not attachment:
+            if attachment:
+                stream = env['ir.binary']._get_stream_from(attachment, 'raw', filename)
+        if stream is None:
             # try to generate one
             if env.cr.readonly:
                 env.cr.rollback()  # reset state to detect newly generated assets
@@ -123,7 +126,7 @@ class Binary(http.Controller):
                     if filename.endswith('.map'):
                         _logger.error(".map should have been generated through debug assets, (version %s most likely outdated)", unique)
                         raise request.not_found()
-                    bundle_name, rtl, asset_type = rw_env['ir.asset']._parse_bundle_name(filename, debug_assets)
+                    bundle_name, rtl, asset_type, autoprefix = rw_env['ir.asset']._parse_bundle_name(filename, debug_assets)
                     css = asset_type == 'css'
                     js = asset_type == 'js'
                     bundle = rw_env['ir.qweb']._get_asset_bundle(
@@ -132,21 +135,24 @@ class Binary(http.Controller):
                         js=js,
                         debug_assets=debug_assets,
                         rtl=rtl,
+                        autoprefix=autoprefix,
                         assets_params=assets_params,
                     )
                     # check if the version matches. If not, redirect to the last version
                     if not debug_assets and unique != ANY_UNIQUE and unique != bundle.get_version(asset_type):
                         return request.redirect(bundle.get_link(asset_type))
+                    attachment = None
                     if css and bundle.stylesheets:
-                        attachment = env['ir.attachment'].sudo().browse(bundle.css().id)
+                        attachment = bundle.css()
                     elif js and bundle.javascripts:
-                        attachment = env['ir.attachment'].sudo().browse(bundle.js().id)
+                        attachment = bundle.js()
+                    if attachment:
+                        stream = rw_env['ir.binary']._get_stream_from(attachment, 'raw', filename)
                 except ValueError as e:
                     _logger.warning("Parsing asset bundle %s has failed: %s", filename, e)
                     raise request.not_found() from e
-        if not attachment:
+        if stream is None:
             raise request.not_found()
-        stream = env['ir.binary']._get_stream_from(attachment, 'raw', filename)
         send_file_kwargs = {'as_attachment': False, 'content_security_policy': None}
         if unique and unique != 'debug':
             send_file_kwargs['immutable'] = True
@@ -174,16 +180,17 @@ class Binary(http.Controller):
         '/web/image/<int:id>-<string:unique>/<string:filename>',
         '/web/image/<int:id>-<string:unique>/<int:width>x<int:height>',
         '/web/image/<int:id>-<string:unique>/<int:width>x<int:height>/<string:filename>',
-    ], type='http', auth='public', readonly=True)
+    ], type='http', auth='public', readonly=True, save_session=False)
     # pylint: disable=redefined-builtin,invalid-name
     def content_image(self, xmlid=None, model='ir.attachment', id=None, field='raw',
                       filename_field='name', filename=None, mimetype=None, unique=False,
                       download=False, width=0, height=0, crop=False, access_token=None,
                       nocache=False):
+        download = str2bool(download)
         try:
             record = request.env['ir.binary']._find_record(xmlid, model, id and int(id), access_token, field=field)
             stream = request.env['ir.binary']._get_image_stream_from(
-                record, field, filename=filename, filename_field=filename_field,
+                record.with_context(download_attachments=download), field, filename=filename, filename_field=filename_field,
                 mimetype=mimetype, width=int(width), height=int(height), crop=crop,
             )
             if request.httprequest.args.get('access_token'):
@@ -196,11 +203,11 @@ class Binary(http.Controller):
                 width, height = image_guess_size_from_field_name(field)
             record = request.env.ref('web.image_placeholder').sudo()
             stream = request.env['ir.binary']._get_image_stream_from(
-                record, 'raw', width=int(width), height=int(height), crop=crop,
+                record.with_context(download_attachments=download), 'raw', width=int(width), height=int(height), crop=crop,
             )
             stream.public = False
 
-        send_file_kwargs = {'as_attachment': str2bool(download)}
+        send_file_kwargs = {'as_attachment': download}
         if unique:
             send_file_kwargs['immutable'] = True
             send_file_kwargs['max_age'] = http.STATIC_CACHE_LONG
@@ -305,7 +312,7 @@ class Binary(http.Controller):
     @http.route([
         '/web/sign/get_fonts',
         '/web/sign/get_fonts/<string:fontname>',
-    ], type='json', auth='none')
+    ], type='jsonrpc', auth='none')
     def get_fonts(self, fontname=None):
         """This route will return a list of base64 encoded fonts.
 
@@ -326,7 +333,7 @@ class Binary(http.Controller):
         else:
             font_filenames = sorted([fn for fn in os.listdir(fonts_directory) if fn.endswith(supported_exts)])
             for filename in font_filenames:
-                font_file = file_open(os.path.join(fonts_directory, filename), 'rb', filter_ext=supported_exts)
-                font = base64.b64encode(font_file.read())
+                with file_open(os.path.join(fonts_directory, filename), 'rb', filter_ext=supported_exts) as font_file:
+                    font = base64.b64encode(font_file.read())
                 fonts.append(font)
         return fonts

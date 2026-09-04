@@ -4,49 +4,31 @@ import contextlib
 import logging
 
 from ast import literal_eval
-from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.osv import expression
-from odoo.http import request
+from odoo.fields import Domain
 
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 from odoo.addons.auth_signup.models.res_partner import SignupError
 
 _logger = logging.getLogger(__name__)
 
+
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
     state = fields.Selection(compute='_compute_state', search='_search_state', string='Status',
-                 selection=[('new', 'Never Connected'), ('active', 'Confirmed')])
+                 selection=[('new', 'Invited'), ('active', 'Confirmed')])
 
     def _search_state(self, operator, value):
-        negative = operator in expression.NEGATIVE_TERM_OPERATORS
-
-        # In case we have no value
-        if not value:
-            return expression.TRUE_DOMAIN if negative else expression.FALSE_DOMAIN
-
-        if operator in ['in', 'not in']:
-            if len(value) > 1:
-                return expression.FALSE_DOMAIN if negative else expression.TRUE_DOMAIN
-            if value[0] == 'new':
-                comp = '!=' if negative else '='
-            if value[0] == 'active':
-                comp = '=' if negative else '!='
-            return [('log_ids', comp, False)]
-
-        if operator in ['=', '!=']:
-            # In case we search against anything else than new, we have to invert the operator
-            if value != 'new':
-                operator = expression.TERM_OPERATORS_NEGATION[operator]
-
-            return [('log_ids', operator, False)]
-
-        return expression.TRUE_DOMAIN
+        if operator != 'in':
+            return NotImplemented
+        if len(value) > 1:
+            return Domain.TRUE
+        in_log = 'active' in value
+        return Domain('log_ids', '!=' if in_log else '=', False)
 
     def _compute_state(self):
         for user in self:
@@ -81,7 +63,7 @@ class ResUsers(models.Model):
                 values.pop('login', None)
                 values.pop('name', None)
                 partner_user.write(values)
-                if not partner_user.login_date:
+                if not partner_user.login_date and partner_user._is_internal():
                     partner_user._notify_inviter()
                 return (partner_user.login, values.get('password'))
             else:
@@ -95,7 +77,6 @@ class ResUsers(models.Model):
                     values['company_id'] = partner.company_id.id
                     values['company_ids'] = [(6, 0, [partner.company_id.id])]
                 partner_user = self._signup_create_user(values)
-                partner_user._notify_inviter()
         else:
             # no token, sign up an external user
             values['email'] = values.get('email') or values.get('login')
@@ -115,19 +96,10 @@ class ResUsers(models.Model):
         if 'partner_id' not in values:
             if self._get_signup_invitation_scope() != 'b2c':
                 raise SignupError(_('Signup is not allowed for uninvited users'))
+        if values.get('email') and self.with_context(active_test=False).search_count(
+                self._get_email_domain(values['email']), limit=1):
+            raise UserError(_("Another user is already registered using this email address."))
         return self._create_user_from_template(values)
-
-    @classmethod
-    def authenticate(cls, db, credential, user_agent_env):
-        auth_info = super().authenticate(db, credential, user_agent_env)
-        try:
-            with cls.pool.cursor() as cr:
-                env = api.Environment(cr, auth_info['uid'], {})
-                if env.user._should_alert_new_device():
-                    env.user._alert_new_device()
-        except MailDeliveryException:
-            pass
-        return auth_info
 
     def _notify_inviter(self):
         for user in self:
@@ -193,12 +165,20 @@ class ResUsers(models.Model):
         self.mapped('partner_id').signup_prepare(signup_type=signup_type)
 
         # send email to users with their signup url
-        account_created_template = None
+        internal_account_created_template = None
+        portal_account_created_template = None
         if create_mode:
-            account_created_template = self.env.ref('auth_signup.set_password_email', raise_if_not_found=False)
-            if account_created_template and account_created_template._name != 'mail.template':
-                _logger.error("Wrong set password template %r", account_created_template)
-                return
+            if any(user._is_internal() for user in self):
+                internal_account_created_template = self.env.ref('auth_signup.set_password_email', raise_if_not_found=False)
+                if internal_account_created_template and internal_account_created_template._name != 'mail.template':
+                    _logger.error("Wrong set password template %r", internal_account_created_template)
+                    return
+
+            if any(not user._is_internal() for user in self):
+                portal_account_created_template = self.env.ref('auth_signup.portal_set_password_email', raise_if_not_found=False)
+                if portal_account_created_template and portal_account_created_template._name != 'mail.template':
+                    _logger.error("Wrong set password template %r", portal_account_created_template)
+                    return
 
         email_values = {
             'email_cc': False,
@@ -214,6 +194,8 @@ class ResUsers(models.Model):
                 raise UserError(_("Cannot send email: user %s has no email address.", user.name))
             email_values['email_to'] = user.email
             with contextlib.closing(self.env.cr.savepoint()):
+                is_internal = user._is_internal()
+                account_created_template = internal_account_created_template if is_internal else portal_account_created_template
                 if account_created_template:
                     account_created_template.send_mail(
                         user.id, force_send=True,
@@ -233,10 +215,10 @@ class ResUsers(models.Model):
                     mail.send()
             if signup_type == 'reset':
                 _logger.info("Password reset email sent for user <%s> to <%s>", user.login, user.email)
-                message = _('A reset password link was send by email')
+                message = _('A reset password link was sent by email')
             else:
                 _logger.info("Signup email sent for user <%s> to <%s>", user.login, user.email)
-                message = _('A signup link was send by email')
+                message = _('A signup link was sent by email')
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -247,96 +229,33 @@ class ResUsers(models.Model):
             }
         }
 
-    def send_unregistered_user_reminder(self, after_days=5, batch_size=100):
+    def send_unregistered_user_reminder(self, *, after_days=5, batch_size=100):
         email_template = self.env.ref('auth_signup.mail_template_data_unregistered_users', raise_if_not_found=False)
         if not email_template:
             _logger.warning("Template 'auth_signup.mail_template_data_unregistered_users' was not found. Cannot send reminder notifications.")
+            self.env['ir.cron']._commit_progress(deactivate=True)
             return
         datetime_min = fields.Datetime.today() - relativedelta(days=after_days)
-        datetime_max = datetime_min + relativedelta(hours=23, minutes=59, seconds=59)
+        datetime_max = datetime_min + relativedelta(days=1)
 
-        domain = [('share', '=', False),
+        invited_by_users = self.search_fetch([
+            ('share', '=', False),
             ('create_uid.email', '!=', False),
             ('create_date', '>=', datetime_min),
-            ('create_date', '<=', datetime_max),
-            ('log_ids', '=', False)]
+            ('create_date', '<', datetime_max),
+            ('log_ids', '=', False),
+        ], ['name', 'login', 'create_uid']).grouped('create_uid')
 
-        res_users_with_details = self.env['res.users'].search_read(domain, ['create_uid', 'name', 'login'], limit=batch_size)
+        # Do not use progress since we have no way of knowing to whom we have
+        # already sent e-mails.
 
-        # group by invited by
-        invited_users = defaultdict(list)
-        for user in res_users_with_details:
-            invited_users[user.get('create_uid')[0]].append("%s (%s)" % (user.get('name'), user.get('login')))
-
-        # For sending mail to all the invitors about their invited users
-        for user in invited_users:
-            template = email_template.with_context(dbname=self._cr.dbname, invited_users=invited_users[user])
-            template.send_mail(user, email_layout_xmlid='mail.mail_notification_light', force_send=False)
-
-        done = len(res_users_with_details)
-        self.env['ir.cron']._notify_progress(
-            done=done,
-            remaining=0 if done < batch_size else self.env['res.users'].search_count(domain)
-        )
-
-    def _alert_new_device(self):
-        self.ensure_one()
-        if self.email:
-            email_values = {
-                'email_cc': False,
-                'auto_delete': True,
-                'message_type': 'user_notification',
-                'recipient_ids': [],
-                'partner_ids': [],
-                'scheduled_date': False,
-                'email_to': self.email
-            }
-
-            body = self.env['mail.render.mixin']._render_template(
-                    'auth_signup.alert_login_new_device',
-                    model='res.users', res_ids=self.ids,
-                    engine='qweb_view', options={'post_process': True},
-                    add_context=self._prepare_new_device_notice_values())[self.id]
-            mail = self.env['mail.mail'].sudo().create({
-                'subject': _('New Connection to your Account'),
-                'email_from': self.company_id.email_formatted or self.email_formatted,
-                'body_html': body,
-                **email_values,
-            })
-            mail.send()
-            _logger.info("New device alert email sent for user <%s> to <%s>", self.login, self.email)
-
-    def _prepare_new_device_notice_values(self):
-        values = {
-            'login_date': fields.Datetime.now(),
-            'location_address': False,
-            'ip_address': False,
-            'browser': False,
-            'useros': False,
-        }
-
-        if not request:
-            return values
-
-        city = request.geoip.get('city') or False
-        region = request.geoip.get('region_name') or False
-        country = request.geoip.get('country') or False
-        if country:
-            if region and city:
-                values['location_address'] = _("Near %(city)s, %(region)s, %(country)s", city=city, region=region, country=country)
-            elif region:
-                values['location_address'] = _("Near %(region)s, %(country)s", region=region, country=country)
-            else:
-                values['location_address'] = _("In %(country)s", country=country)
-        else:
-            values['location_address'] = False
-        values['ip_address'] = request.httprequest.environ['REMOTE_ADDR']
-        if request.httprequest.user_agent:
-            if request.httprequest.user_agent.browser:
-                values['browser'] = request.httprequest.user_agent.browser.capitalize()
-            if request.httprequest.user_agent.platform:
-                values['useros'] = request.httprequest.user_agent.platform.capitalize()
-        return values
+        for user, invited_users in invited_by_users.items():
+            invited_user_emails = [f"{u.name} ({u.login})" for u in invited_users]
+            template = email_template.with_context(dbname=self.env.cr.dbname, invited_users=invited_user_emails)
+            template.send_mail(user.id, email_layout_xmlid='mail.mail_notification_light', force_send=False)
+            if not self.env['ir.cron']._commit_progress(len(invited_users)):
+                _logger.info("send_unregistered_user_reminder: timeout reached, stopping")
+                break
 
     @api.model
     def web_create_users(self, emails):
@@ -359,6 +278,18 @@ class ResUsers(models.Model):
                 except MailDeliveryException:
                     users_with_email.partner_id.with_context(create_user=True).signup_cancel()
         return users
+
+    def write(self, vals):
+        if 'active' in vals and not vals['active']:
+            self.partner_id.sudo().signup_cancel()
+        return super().write(vals)
+
+    @api.ondelete(at_uninstall=False)
+    def _ondelete_signup_cancel(self):
+        # Cancel pending partner signup when the user is deleted.
+        for user in self:
+            if user.partner_id:
+                user.partner_id.signup_cancel()
 
     def copy(self, default=None):
         if not default or not default.get('email'):

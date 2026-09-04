@@ -1,7 +1,5 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import { browser } from "@web/core/browser/browser";
+import { stepUtils } from "@web_tour/tour_utils";
 
 function fillSelectMenu(inputID, search) {
     return [
@@ -10,20 +8,15 @@ function fillSelectMenu(inputID, search) {
             trigger: `.o_website_links_utm_forms div#${inputID} .o_select_menu_toggler`,
             run: "click",
         },
-        {
-            content: "Enter selectMenu search query",
-            trigger: ".o_popover input.o_select_menu_sticky",
-            run: `edit ${search}`,
-        },
+        ...stepUtils.editSelectMenuInput(`.o_website_links_utm_forms div#${inputID} .o_select_menu_input`, search),
         {
             content: "Select found selectMenu item",
-            trigger: `.o_popover span.o_select_menu_item div.o_select_menu_item_label:contains("/^${search}$/")`,
+            trigger: `.o_popover .o_select_menu_item:contains("${search}")`,
             run: "click",
         },
         {
             content: "Check that selectMenu is properly filled",
-            trigger: `#${inputID} .o_select_menu_toggler span.o_select_menu_toggler_slot:contains('/^${search}$/')`,
-            run: () => null,
+            trigger: `#${inputID} .o_select_menu_toggler:value('${search}')`,
         },
     ];
 }
@@ -49,41 +42,11 @@ registry.category("web_tour.tours").add('website_links_tour', {
             },
         },
         // First try to create a new UTM campaign from the UI
-        {
-            content: "Click select menu form item",
-            trigger: ".o_website_links_utm_forms div#campaign-select-wrapper .o_select_menu_toggler",
-            run: "click",
-        },
-        {
-            content: "Enter select menu search query",
-            trigger: '.o_popover input.o_select_menu_sticky',
-            run: "edit Some new campaign",
-        },
-        {
-            content: "Select found select menu item",
-            trigger: ".o_popover.o_select_menu_menu .o_select_menu_item span:contains('Some new campaign')",
-            run: 'click',
-        },
-        {
-            content: "Check that select menu is properly filled",
-            trigger: "#campaign-select-wrapper .o_select_menu_toggler span.o_select_menu_toggler_slot:contains('Some new campaign')"
-        },
+        ...fillSelectMenu("campaign-select-wrapper", "Some new campaign"),
         // Then proceed by using existing ones
         ...fillSelectMenu("campaign-select-wrapper", campaignValue),
         ...fillSelectMenu("channel-select-wrapper", mediumValue),
         ...fillSelectMenu("source-select-wrapper", sourceValue),
-        {
-            content: "Copy tracker link",
-            trigger: '#btn_shorten_url',
-            run: function () {
-                // Patch and ignore write on clipboard in tour as we don't have permissions
-                const oldWriteText = browser.navigator.clipboard.writeText;
-                browser.navigator.clipboard.writeText = () => {
-                    console.info("Copy in clipboard ignored!");
-                };
-                browser.navigator.clipboard.writeText = oldWriteText;
-            },
-        },
         {
             content: "Generate Link Tracker",
             trigger: "#btn_shorten_url",
@@ -99,10 +62,11 @@ registry.category("web_tour.tours").add('website_links_tour', {
             run: function () {
                 window.location.href = $('#generated_tracked_link .o_website_links_short_url').text();
             },
+            expectUnloadPage: true,
         },
         {
             content: "check that we landed on correct page with correct query strings",
-            trigger: ".s_title h1:contains(/^Contact us$/)",
+            trigger: ".s_title h1:text(Contact us)",
             run: function () {
                 const enc = c => encodeURIComponent(c).replace(/%20/g, '+');
                 const expectedUrl = `/contactus?utm_campaign=${enc(campaignValue)}&utm_source=${enc(sourceValue)}&utm_medium=${enc(mediumValue)}`;
@@ -111,6 +75,7 @@ registry.category("web_tour.tours").add('website_links_tour', {
                 }
                 window.location.href = '/r';
             },
+            expectUnloadPage: true,
         },
         // 3. Check that counter got incremented and charts are correctly displayed
         {
@@ -127,6 +92,7 @@ registry.category("web_tour.tours").add('website_links_tour', {
             content: "visit link stats page",
             trigger: ".o_website_links_card",
             run: "click",
+            expectUnloadPage: true,
         },
         {
             trigger: '.website_links_click_chart .title:contains("1 clicks")',

@@ -1,22 +1,19 @@
+import { BlurPerformanceWarning } from "@mail/discuss/call/common/blur_performance_warning";
 import { CallActionList } from "@mail/discuss/call/common/call_action_list";
 import { CallParticipantCard } from "@mail/discuss/call/common/call_participant_card";
 import { PttAdBanner } from "@mail/discuss/call/common/ptt_ad_banner";
-import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
 
-import {
-    Component,
-    onMounted,
-    onPatched,
-    onWillUnmount,
-    toRaw,
-    useExternalListener,
-    useRef,
-    useState,
-} from "@odoo/owl";
+import { Component, onMounted, onPatched, onWillUnmount, toRaw, useRef, useState } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
-import { _t } from "@web/core/l10n/translation";
+import { isMobileOS } from "@web/core/browser/feature_detection";
+import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useService } from "@web/core/utils/hooks";
+import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
+import { useCallActions } from "@mail/discuss/call/common/call_actions";
+import { ActionList } from "@mail/core/common/action_list";
+import { ACTION_TAGS } from "@mail/core/common/action";
+import { inDiscussCallViewProps, useInDiscussCallView } from "@mail/utils/common/hooks";
 
 /**
  * @typedef CardData
@@ -33,8 +30,15 @@ import { useService } from "@web/core/utils/hooks";
  * @extends {Component<Props, Env>}
  */
 export class Call extends Component {
-    static components = { CallActionList, CallParticipantCard, PttAdBanner };
-    static props = ["thread", "compact?"];
+    static components = {
+        ActionList,
+        BlurPerformanceWarning,
+        CallActionList,
+        CallParticipantCard,
+        PttAdBanner,
+    };
+    static props = ["thread?", "compact?", "hasOverlay?", ...inDiscussCallViewProps];
+    static defaultProps = { hasOverlay: true };
     static template = "discuss.Call";
 
     overlayTimeout;
@@ -42,10 +46,12 @@ export class Call extends Component {
     setup() {
         super.setup();
         this.grid = useRef("grid");
+        this.root = useRef("root");
         this.notification = useService("notification");
-        this.rtc = useState(useService("discuss.rtc"));
+        this.rtc = useService("discuss.rtc");
+        this.isMobileOs = isMobileOS();
+        this.ui = useService("ui");
         this.state = useState({
-            isFullscreen: false,
             sidebar: false,
             tileWidth: 0,
             tileHeight: 0,
@@ -54,7 +60,8 @@ export class Call extends Component {
             /** @type {CardData|undefined} */
             insetCard: undefined,
         });
-        this.store = useState(useService("mail.store"));
+        this.store = useService("mail.store");
+        this.callActions = useCallActions({ thread: () => this.channel });
         onMounted(() => {
             this.resizeObserver = new ResizeObserver(() => this.arrangeTiles());
             this.resizeObserver.observe(this.grid.el);
@@ -65,87 +72,51 @@ export class Call extends Component {
             this.resizeObserver.disconnect();
             browser.clearTimeout(this.overlayTimeout);
         });
-        useExternalListener(browser, "fullscreenchange", this.onFullScreenChange);
+        useHotkey("shift+d", () => this.rtc.toggleDeafen());
+        useHotkey("shift+m", () => this.rtc.toggleMicrophone());
+        useInDiscussCallView();
+    }
+
+    get layoutActions() {
+        if (!this.isActiveCall) {
+            return [];
+        }
+        return this.callActions.actions.filter((action) =>
+            action.tags.includes(ACTION_TAGS.CALL_LAYOUT)
+        );
+    }
+
+    get isFullSize() {
+        return this.props.isPip || this.rtc.state.isFullscreen;
     }
 
     get isActiveCall() {
-        return Boolean(this.props.thread.eq(this.rtc.state?.channel));
+        return Boolean(this.channel.eq(this.rtc.channel));
     }
 
     get minimized() {
-        if (this.state.isFullscreen || this.props.thread.activeRtcSession) {
+        if (this.rtc.state.isFullscreen || !this.channel || this.channel.activeRtcSession) {
             return false;
         }
-        if (!this.isActiveCall || this.props.thread.videoCount === 0 || this.props.compact) {
+        if (!this.isActiveCall || this.channel.videoCount === 0 || this.props.compact) {
             return true;
         }
         return false;
     }
 
-    /** @returns {CardData[]} */
-    get visibleCards() {
-        const raisingHandCards = [];
-        const sessionCards = [];
-        const invitationCards = [];
-        const filterVideos = this.store.settings.showOnlyVideo && this.props.thread.videoCount > 0;
-        for (const session of this.props.thread.rtcSessions) {
-            const target = session.raisingHand ? raisingHandCards : sessionCards;
-            const cameraStream = session.isCameraOn
-                ? session.videoStreams.get("camera")
-                : undefined;
-            if (!filterVideos || cameraStream) {
-                target.push({
-                    key: "session_main_" + session.id,
-                    session,
-                    type: "camera",
-                    videoStream: cameraStream,
-                });
-            }
-            const screenStream = session.isScreenSharingOn
-                ? session.videoStreams.get("screen")
-                : undefined;
-            if (screenStream) {
-                target.push({
-                    key: "session_secondary_" + session.id,
-                    session,
-                    type: "screen",
-                    videoStream: screenStream,
-                });
-            }
-        }
-        if (!filterVideos) {
-            for (const member of this.props.thread.invitedMembers) {
-                invitationCards.push({
-                    key: "member_" + member.id,
-                    member,
-                });
-            }
-        }
-        raisingHandCards.sort((c1, c2) => {
-            return c1.session.raisingHand - c2.session.raisingHand;
-        });
-        sessionCards.sort((c1, c2) => {
-            return (
-                c1.session.channelMember?.persona?.name?.localeCompare(
-                    c2.session.channelMember?.persona?.name
-                ) ?? 1
-            );
-        });
-        invitationCards.sort((c1, c2) => {
-            return c1.member.persona?.name?.localeCompare(c2.member.persona?.name) ?? 1;
-        });
-        return raisingHandCards.concat(sessionCards, invitationCards);
+    get channel() {
+        return this.props.thread || this.rtc.channel;
     }
 
     /** @returns {CardData[]} */
     get visibleMainCards() {
-        const activeSession = this.props.thread.activeRtcSession;
+        const activeSession = this.channel.activeRtcSession;
         if (!activeSession) {
             this.state.insetCard = undefined;
-            return this.visibleCards;
+            return this.channel.visibleCards;
         }
         const type = activeSession.mainVideoStreamType;
-        if (type === "screen" || activeSession.isScreenSharingOn) {
+        if (type === "screen" || activeSession.is_screen_sharing_on) {
             this.setInset(activeSession, type === "camera" ? "screen" : "camera");
         } else {
             this.state.insetCard = undefined;
@@ -161,7 +132,7 @@ export class Call extends Component {
     }
 
     /**
-     * @param {RtcSession} session
+     * @param {import("models").RtcSession} session
      * @param {String} [videoType]
      */
     setInset(session, videoType) {
@@ -181,7 +152,7 @@ export class Call extends Component {
 
     get hasCallNotifications() {
         return Boolean(
-            (!this.props.compact || this.state.isFullscreen) &&
+            (!this.props.compact || this.rtc.state.isFullscreen) &&
                 this.isActiveCall &&
                 this.rtc.notifications.size
         );
@@ -189,14 +160,14 @@ export class Call extends Component {
 
     get hasSidebarButton() {
         return Boolean(
-            this.props.thread.activeRtcSession && this.state.overlay && !this.props.compact
+            this.channel.activeRtcSession &&
+                this.state.overlay &&
+                (!this.props.compact || this.rtc.state.isFullscreen)
         );
     }
 
     get isControllerFloating() {
-        return (
-            this.state.isFullscreen || (this.props.thread.activeRtcSession && !this.props.compact)
-        );
+        return this.rtc.state.isFullscreen || (this.channel.activeRtcSession && !this.ui.isSmall);
     }
 
     onMouseleaveMain(ev) {
@@ -232,6 +203,8 @@ export class Call extends Component {
         if (!this.grid.el) {
             return;
         }
+        this.grid.el.style.setProperty("--width", "0");
+        this.grid.el.style.setProperty("--height", "0");
         const { width, height } = this.grid.el.getBoundingClientRect();
         const aspectRatio = this.minimized ? 1 : 16 / 9;
         const tileCount = this.grid.el.children.length;
@@ -270,47 +243,7 @@ export class Call extends Component {
             tileHeight: optimal.tileHeight,
             columnCount: optimal.columnCount,
         });
-    }
-
-    async enterFullScreen() {
-        const el = document.body;
-        try {
-            if (el.requestFullscreen) {
-                await el.requestFullscreen();
-            } else if (el.mozRequestFullScreen) {
-                await el.mozRequestFullScreen();
-            } else if (el.webkitRequestFullscreen) {
-                await el.webkitRequestFullscreen();
-            }
-            this.state.isFullscreen = true;
-        } catch {
-            this.state.isFullscreen = false;
-            this.notification.add(_t("The Fullscreen mode was denied by the browser"), {
-                type: "warning",
-            });
-        }
-    }
-
-    async exitFullScreen() {
-        const fullscreenElement = document.webkitFullscreenElement || document.fullscreenElement;
-        if (fullscreenElement) {
-            if (document.exitFullscreen) {
-                await document.exitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-                await document.mozCancelFullScreen();
-            } else if (document.webkitCancelFullScreen) {
-                await document.webkitCancelFullScreen();
-            }
-        }
-        this.state.isFullscreen = false;
-    }
-
-    /**
-     * @private
-     */
-    onFullScreenChange() {
-        this.state.isFullscreen = Boolean(
-            document.webkitFullscreenElement || document.fullscreenElement
-        );
+        this.grid.el.style.setProperty("--width", `${this.state.tileWidth}px`);
+        this.grid.el.style.setProperty("--height", `${this.state.tileHeight}px`);
     }
 }

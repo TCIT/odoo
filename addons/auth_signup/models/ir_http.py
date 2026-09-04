@@ -5,7 +5,7 @@ from odoo import models
 from odoo.http import request
 
 
-class Http(models.AbstractModel):
+class IrHttp(models.AbstractModel):
     _inherit = 'ir.http'
 
     @classmethod

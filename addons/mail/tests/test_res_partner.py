@@ -7,13 +7,13 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from odoo import tools
-from odoo.addons.base.models.res_partner import Partner
+from odoo.addons.base.models.res_partner import ResPartner
 from odoo.addons.mail.tests.common import MailCommon, mail_new_test_user
 from odoo.tests import Form, tagged, users
 from odoo.tools import mute_logger
 
 
-@tagged('res_partner', 'mail_tools')
+@tagged('res_partner', 'mail_tools', 'mail_thread_api')
 class TestPartner(MailCommon):
 
     @classmethod
@@ -35,8 +35,8 @@ class TestPartner(MailCommon):
         ]
     @contextmanager
     def mockPartnerCalls(self):
-        _original_create = Partner.create
-        _original_search = Partner.search
+        _original_create = ResPartner.create
+        _original_search = ResPartner.search
         self._new_partners = self.env['res.partner']
 
         def _res_partner_create(model, *args, **kwargs):
@@ -44,9 +44,9 @@ class TestPartner(MailCommon):
             self._new_partners += records.sudo()
             return records
 
-        with patch.object(Partner, 'create',
+        with patch.object(ResPartner, 'create',
                           autospec=True, side_effect=_res_partner_create) as mock_partner_create, \
-             patch.object(Partner, 'search',
+             patch.object(ResPartner, 'search',
                           autospec=True, side_effect=_original_search) as mock_partner_search:
             self._mock_partner_create = mock_partner_create
             self._mock_partner_search = mock_partner_search
@@ -121,13 +121,39 @@ class TestPartner(MailCommon):
         for i in range(0, 2):
             mail_new_test_user(self.env, login=f'{name}-{i}-portal-user', groups='base.group_portal')
             mail_new_test_user(self.env, login=f'{name}-{i}-internal-user', groups='base.group_user')
-        partners_format = self.env["res.partner"].get_mention_suggestions(name, limit=5)[
-            "res.partner"
+
+        # suggest portal user of this company in another company
+        suggested_partners = self.env["res.partner"].with_user(self.user_employee_c2).get_mention_suggestions("portal-user")
+
+        porter_user_suggested = [
+            p for p in suggested_partners['res.partner']
+            if p["name"] == f'{name}-1-portal-user (base.group_portal)'
         ]
+        self.assertEqual(len(porter_user_suggested), 1, "porter_user_suggested should contain one user")
+        store_data = self.env["res.partner"].get_mention_suggestions(name, limit=5)
+        partners_format = store_data["res.partner"]
         self.assertEqual(len(partners_format), 5, "should have found limit (5) partners")
         # return format for user is either a dict (there is a user and the dict is data) or a list of command (clear)
-        self.assertEqual(list(map(lambda p: p['isInternalUser'], partners_format)), [True, True, False, False, False], "should return internal users in priority")
-        self.assertEqual(list(map(lambda p: bool(p['userId']), partners_format)), [True, True, True, True, False], "should return partners without users last")
+        self.assertEqual(
+            [
+                next(
+                    (
+                        not u["share"]
+                        for u in store_data["res.users"]
+                        if u["id"] == p["main_user_id"]
+                    ),
+                    False,
+                )
+                for p in partners_format
+            ],
+            [True, True, False, False, False],
+            "should return internal users in priority",
+        )
+        self.assertEqual(
+            [bool(p["main_user_id"]) for p in partners_format],
+            [True, True, True, True, False],
+            "should return partners without users last",
+        )
 
     @users('admin')
     def test_find_or_create(self):
@@ -241,10 +267,6 @@ class TestPartner(MailCommon):
     def test_find_or_create_from_emails(self):
         """ Test for '_find_or_create_from_emails' allowing to find or create
         partner based on emails in a batch-enabled and optimized fashion. """
-        self.user_employee_c2.write({
-            'groups_id': [(4, self.env.ref('base.group_partner_manager').id)],
-        })
-
         with self.mockPartnerCalls():
             partners = self.env['res.partner'].with_context(lang='en_US')._find_or_create_from_emails(
                 [item[0] for item in self.samples],
@@ -282,10 +304,10 @@ class TestPartner(MailCommon):
             partners = self.env['res.partner'].with_context(lang='en_US')._find_or_create_from_emails(
                 all_emails,
                 additional_values={
-                    tools.email_normalize(email): {
+                    tools.email_normalize(email) or email: {
                         'company_id': self.env.company.id,
                     }
-                    for email in all_emails
+                    for email in all_emails if email and email.strip()
                 },
             )
         self.assertEqual(len(partners), len(new_samples))
@@ -308,13 +330,9 @@ class TestPartner(MailCommon):
                     self.assertEqual(partner.name, exp_name)
 
     @users('employee_c2')
-    def test_res_partner_find_or_create_from_emails_dupes_email_field(self):
+    def test_find_or_create_from_emails_dupes_email_field(self):
         """ Specific test for duplicates management: based on email to avoid
         creating similar partners. """
-        self.user_employee_c2.write({
-            'groups_id': [(4, self.env.ref('base.group_partner_manager').id)],
-        })
-
         # all same partner, same email 'test.customer@test.dupe.example.com'
         email_dupes_samples = [
             '"Formatted Customer" <test.customer@TEST.DUPE.EXAMPLE.COM>',
@@ -442,6 +460,36 @@ class TestPartner(MailCommon):
                 self.assertEqual(partner.email, expected_email)
                 self.assertEqual(partner.name, expected_name)
 
+    def test_message_get_default_recipients(self):
+        """ Specific use case: partner should contact himself """
+        partners = self.env['res.partner'].create([
+            {'name': 'Raoulette', 'email': '"Raoulette" <raoulette@example.com>'},
+            {'name': 'Ignassette', 'email': 'wrong'}
+        ])
+        defaults = partners._message_get_default_recipients()
+        for partner in partners:
+            with self.subTest(partner=partner.name):
+                self.assertEqual(defaults[partner.id], {
+                    'email_cc': '', 'email_to': '',
+                    'partner_ids': partner.ids,
+                })
+
+    def test_message_get_suggested_recipients(self):
+        """ Specific use case: partner should contact himself """
+        partners = self.env['res.partner'].create([
+            {'name': 'Raoulette', 'email': '"Raoulette" <raoulette@example.com>'},
+            {'name': 'Ignassette', 'email': 'wrong'}
+        ])
+        for partner in partners:
+            with self.subTest(partner_name=partner.name):
+                suggested = partner._message_get_suggested_recipients()
+                self.assertEqual(suggested, [{
+                    'create_values': {},
+                    'email': partner.email_normalized,
+                    'name': partner.name,
+                    'partner_id': partner.id,
+                }])
+
     def test_log_portal_group(self):
         Users = self.env['res.users']
         subtype_note = self.env.ref('mail.mt_note')
@@ -458,7 +506,7 @@ class TestPartner(MailCommon):
         self.assertNotIn('Portal Access Granted', new_msg.body)
         self.assertIn('Contact created', new_msg.body)
 
-        new_user.write({'groups_id': [(4, group_portal.id), (3, group_user.id)]})
+        new_user.write({'group_ids': [(4, group_portal.id), (3, group_user.id)]})
         new_msg = new_user.message_ids[0]
         self.assertIn('Portal Access Granted', new_msg.body)
         self.assertEqual(new_msg.subtype_id, subtype_note)
@@ -466,7 +514,7 @@ class TestPartner(MailCommon):
         # check at create
         new_user = Users.create({
             'email': 'micheline.2@test.example.com',
-            'groups_id': [(4, group_portal.id)],
+            'group_ids': [(4, group_portal.id)],
             'login': 'michmich.2',
             'name': 'Micheline Portal',
         })
@@ -521,10 +569,10 @@ class TestPartner(MailCommon):
 
         # add some mail related documents
         p1.message_subscribe(partner_ids=p3.ids)
-        p1_act1 = p1.activity_schedule(act_type_xmlid='mail.mail_activity_data_todo')
+        p1_act1 = p1.activity_schedule(act_type_xmlid='mail.mail_activity_data_todo', user_id=self.user_admin.id)
         p1_msg1 = p1.message_post(
             body=Markup('<p>Log on P1</p>'),
-            subtype_id=self.env.ref('mail.mt_comment').id
+            subtype_id=self.env.ref('mail.mt_comment').id,
         )
         self.assertEqual(p1.activity_ids, p1_act1)
         self.assertEqual(p1.message_follower_ids.partner_id, self.partner_admin + p3)

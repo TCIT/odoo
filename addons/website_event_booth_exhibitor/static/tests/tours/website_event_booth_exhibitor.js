@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
     import { registry } from "@web/core/registry";
     import FinalSteps from "@website_event_booth_exhibitor/../tests/tours/website_event_booth_exhibitor_steps";
 
@@ -10,10 +8,12 @@
         content: 'Go on "Online Reveal" page',
         trigger: 'a[href*="/event"]:contains("Online Reveal"):first',
         run: "click",
+        expectUnloadPage: true,
     }, {
         content: 'Browse Booths',
-        trigger: 'a:contains("Get A Booth")',
+        trigger: 'a:contains("Become exhibitor")',
         run: "click",
+        expectUnloadPage: true,
     }, {
         content: 'Wait for the first item to be properly selected before proceeding',
         trigger: 'label.d-block:has(input:checked) h5[name=booth_category_name]',
@@ -29,6 +29,7 @@
         content: "Validate attendees details",
         trigger: 'button:enabled:contains("Book my Booth(s)")',
         run: 'click',
+        expectUnloadPage: true,
     }, {
         content: "Fill booth details",
         trigger: 'form[id="o_wbooth_contact_details_form"]',
@@ -42,9 +43,4 @@
     },
     {
         trigger: "input[name='sponsor_name'], input[name='sponsor_email'], input[name='sponsor_phone']",
-    },
-    {
-        content: "Validate booth details",
-        trigger: 'button.o_wbooth_registration_confirm',
-        run: 'click',
     }, ...new FinalSteps()._getSteps()].filter(Boolean)});

@@ -26,19 +26,27 @@ class StockWarehouse(models.Model):
 
     def _get_picking_type_create_values(self, max_sequence):
         data, next_sequence = super(StockWarehouse, self)._get_picking_type_create_values(max_sequence)
-        prod_location = self.env['stock.location'].search([('usage', '=', 'production'), ('company_id', '=', self.company_id.id)], limit=1)
-        scrap_location = self.env['stock.location'].search([('scrap_location', '=', True), ('company_id', 'in', [self.company_id.id, False])], limit=1)
+        prod_location = self._get_production_location()
+        scrap_location = self.env['stock.location'].search([
+            ('usage', '=', 'inventory'),
+            ('company_id', 'in', [self.company_id.id, False]),
+        ], limit=1)
+        if not scrap_location:
+            raise UserError(_("No location of type Inventory Loss found"))
+
         data.update({
             'repair_type_id': {
                 'name': _('Repairs'),
                 'code': 'repair_operation',
                 'default_location_src_id': self.lot_stock_id.id,
                 'default_location_dest_id': prod_location.id,
-                'default_remove_location_dest_id':scrap_location.id,
+                'default_remove_location_dest_id': scrap_location.id,
                 'default_recycle_location_dest_id': self.lot_stock_id.id,
                 'sequence': next_sequence + 1,
                 'sequence_code': 'RO',
                 'company_id': self.company_id.id,
+                'use_create_lots': True,
+                'use_existing_lots': True,
             },
         })
         return data, max_sequence + 2
@@ -59,6 +67,13 @@ class StockWarehouse(models.Model):
         if not location:
             raise UserError(_("Can't find any production location."))
         return location
+
+    def _create_missing_locations(self, vals):
+        super()._create_missing_locations(vals)
+        for company_id in self.company_id:
+            location = self.env['stock.location'].search([('usage', '=', 'production'), ('company_id', '=', company_id.id)], limit=1)
+            if not location:
+                company_id._create_production_location()
 
     def _generate_global_route_rules_values(self):
         rules = super()._generate_global_route_rules_values()

@@ -3,14 +3,14 @@
 import datetime
 import markupsafe
 
-from odoo import _, api, fields, models, tools
+from odoo import _, fields, models, tools
 
 
 class MailThread(models.AbstractModel):
     _inherit = 'mail.thread'
 
     rating_ids = fields.One2many('rating.rating', 'res_id', string='Ratings', groups='base.group_user',
-                                 domain=lambda self: [('res_model', '=', self._name)], auto_join=True)
+                                 domain=lambda self: [('res_model', '=', self._name)], bypass_search_access=True)
 
     # MAIL OVERRIDES
     # --------------------------------------------------
@@ -34,7 +34,7 @@ class MailThread(models.AbstractModel):
     def _rating_get_operator(self):
         """ Return the operator (partner) that is the person who is rated.
 
-        :return record: res.partner singleton
+        :return: res.partner singleton
         """
         if 'user_id' in self and self.user_id.partner_id:
             return self.user_id.partner_id
@@ -43,7 +43,7 @@ class MailThread(models.AbstractModel):
     def _rating_get_partner(self):
         """ Return the customer (partner) that performs the rating.
 
-        :return record: res.partner singleton
+        :return: res.partner singleton
         """
         if 'partner_id' in self and self.partner_id:
             return self.partner_id
@@ -117,7 +117,7 @@ class MailThread(models.AbstractModel):
         :param notify_delay_send: Delay the sending by 2 hours of the email so the user
             can still change his feedback. If False, the email will be sent immediately.
 
-        :returns rating: rating.rating record
+        :returns: rating.rating record
         """
         if rate < 0 or rate > 5:
             raise ValueError(_('Wrong rating value. A rate should be between 0 and 5 (received %d).', rate))
@@ -132,7 +132,7 @@ class MailThread(models.AbstractModel):
                 subtype_id = self._rating_apply_get_default_subtype_id()
             else:
                 subtype_id = False
-            feedback = tools.plaintext2html(feedback or '')
+            feedback = tools.plaintext2html(feedback or '', with_paragraph=False)
 
             scheduled_datetime = (
                 fields.Datetime.now() + datetime.timedelta(hours=2)
@@ -146,9 +146,10 @@ class MailThread(models.AbstractModel):
 
             if rating.message_id:
                 self._message_update_content(
-                    rating.message_id, rating_body,
+                    rating.message_id,
+                    body=rating_body,
                     scheduled_date=scheduled_datetime,
-                    strict=False
+                    strict=False,
                 )
             else:
                 self.message_post(
@@ -161,7 +162,6 @@ class MailThread(models.AbstractModel):
                 )
         return rating
 
-    @api.returns('mail.message', lambda value: value.id)
     def message_post(self, **kwargs):
         rating_id = kwargs.pop('rating_id', False)
         rating_value = kwargs.pop('rating_value', False)
@@ -190,3 +190,16 @@ class MailThread(models.AbstractModel):
         if same_author and rating.res_model == message.model and rating.res_id == message.res_id:
             rating.message_id = message.id
         super()._message_post_after_hook(message, msg_values)
+
+    def _get_allowed_message_params(self):
+        return super()._get_allowed_message_params() | {"rating_value"}
+
+    def _message_update_content(self, message, /, *, body, rating_value=None, **kwargs):
+        if rating_value:
+            message.rating_id.rating = rating_value
+            message.rating_id.feedback = tools.html2plaintext(body)
+        elif rating_value is False:
+            rating_ids = message.rating_ids
+            rating_ids.message_id = False
+            rating_ids.unlink()
+        return super()._message_update_content(message, body=body, **kwargs)

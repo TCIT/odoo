@@ -1,54 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="base.module_category_services_project" model="ir.module.category">
-        <field name="description" />
+    <record model="res.groups.privilege" id="res_groups_privilege_project">
+        <field name="name">Project</field>
         <field name="sequence">3</field>
+        <field name="category_id" ref="base.module_category_services"/>
     </record>
 
     <record id="group_project_user" model="res.groups">
         <field name="name">User</field>
+        <field name="comment">User: Can manage tasks in projects shared with them.</field>
+        <field name="sequence">10</field>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
-        <field name="category_id" ref="base.module_category_services_project"/>
+        <field name="privilege_id" ref="res_groups_privilege_project"/>
     </record>
 
     <record id="group_project_manager" model="res.groups">
         <field name="name">Administrator</field>
-        <field name="category_id" ref="base.module_category_services_project"/>
-        <field name="implied_ids" eval="[(4, ref('group_project_user')), (4, ref('mail.group_mail_canned_response_admin'))]"/>
-        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
-    </record>
-
-    <record id="group_project_rating" model="res.groups">
-        <field name="name">Use Rating on Project</field>
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
-        <field name="category_id" ref="base.module_category_hidden"/>
+        <field name="comment">Administrator: Can manage projects and stages, with access to reporting and configuration.</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_project"/>
+        <field name="implied_ids" eval="[(4, ref('project.group_project_user')), (4, ref('mail.group_mail_canned_response_admin'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
 
     <record id="group_project_stages" model="res.groups">
         <field name="name">Use Stages on Project</field>
-        <field name="category_id" ref="base.module_category_hidden"/>
     </record>
 
     <record id="group_project_recurring_tasks" model="res.groups">
         <field name="name">Use Recurring Tasks</field>
-        <field name="category_id" ref="base.module_category_hidden"/>
     </record>
 
     <record id="group_project_task_dependencies" model="res.groups">
         <field name="name">Use Task Dependencies</field>
-        <field name="category_id" ref="base.module_category_hidden"/>
     </record>
 
     <record id="group_project_milestone" model="res.groups">
         <field name="name">Use Milestones</field>
-        <field name="category_id" ref="base.module_category_hidden"/>
     </record>
 
 <data noupdate="1">
-    <record id="base.default_user" model="res.users">
-        <field name="groups_id" eval="[(4,ref('project.group_project_manager'))]"/>
-    </record>
 
     <record model="ir.rule" id="project_comp_rule">
         <field name="name">Project: multi-company</field>
@@ -73,7 +65,7 @@
         <field name="name">Project: employees: following required for follower-only projects</field>
         <field name="model_id" ref="model_project_project"/>
         <field name="domain_force">['|',
-                                        ('privacy_visibility', '!=', 'followers'),
+                                        ('privacy_visibility', 'in', ['employees', 'portal']),
                                         ('message_partner_ids', 'in', [user.partner_id.id])
                                     ]</field>
         <field name="groups" eval="[(4, ref('base.group_user'))]"/>
@@ -96,7 +88,7 @@
                 '&amp;',
                     ('project_id', '!=', False),
                     '|',
-                        ('project_id.privacy_visibility', '!=', 'followers'),
+                        ('project_id.privacy_visibility', 'in', ['employees', 'portal']),
                         ('project_id.message_partner_ids', 'in', [user.partner_id.id]),
                 '|',
                     ('message_partner_ids', 'in', [user.partner_id.id]),
@@ -161,7 +153,7 @@
                 '&amp;',
                     ('project_id', '!=', False),
                     '|',
-                        ('project_id.privacy_visibility', '!=', 'followers'),
+                        ('project_id.privacy_visibility', 'in', ['employees', 'portal']),
                         ('project_id.message_partner_ids', 'in', [user.partner_id.id]),
                 '|',
                     ('message_partner_ids', 'in', [user.partner_id.id]),
@@ -175,7 +167,7 @@
         <field name="name">Project: See private tasks</field>
         <field name="model_id" ref="project.model_project_task"/>
         <field name="domain_force">[
-            ('project_id.privacy_visibility', '!=', 'followers'),
+            ('project_id.privacy_visibility', 'in', ['employees', 'portal']),
             '|', '|', ('project_id', '!=', False),
                       ('parent_id', '!=', False),
                  ('user_ids', 'in', user.id),
@@ -189,7 +181,7 @@
         <field name="model_id" ref="project.model_project_project"/>
         <field name="domain_force">[
             '&amp;',
-                ('privacy_visibility', '=', 'portal'),
+                ('privacy_visibility', 'in', ['invited_users', 'portal']),
                 ('message_partner_ids', 'child_of', [user.partner_id.commercial_partner_id.id]),
         ]</field>
         <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
@@ -199,7 +191,7 @@
         <field name="name">Project/Collaborator: portal users: can only see his own collobaroration in shared projects</field>
         <field name="model_id" ref="project.model_project_collaborator"/>
         <field name="domain_force">[
-            ('project_id.privacy_visibility', '=', 'portal'),
+            ('project_id.privacy_visibility', 'in', ['invited_users', 'portal']),
             ('partner_id', '=', user.partner_id.id),
         ]</field>
         <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
@@ -209,7 +201,7 @@
         <field name="name">Project/Task: portal users: can only see a task if he's a collaborator of the project and a follower of the task</field>
         <field name="model_id" ref="project.model_project_task"/>
         <field name="domain_force">[
-            ('project_id.privacy_visibility', '=', 'portal'),
+            ('project_id.privacy_visibility', 'in', ['invited_users', 'portal']),
             ('active', '=', True),
             '|',
                 ('message_partner_ids', 'child_of', [user.partner_id.commercial_partner_id.id]),
@@ -230,10 +222,12 @@
         <field name="model_id" ref="project.model_project_task"/>
         <field name="active">0</field>
         <field name="domain_force">[
-            ('project_id.privacy_visibility', '=', 'portal'),
+            ('project_id.privacy_visibility', 'in', ['invited_users', 'portal']),
             ('active', '=', True),
             '|',
-                ('message_partner_ids', 'child_of', [user.partner_id.commercial_partner_id.id]),
+                '&amp;',
+                    ('message_partner_ids', 'child_of', [user.partner_id.commercial_partner_id.id]),
+                    ('project_id.collaborator_ids.partner_id', 'in', [user.partner_id.id]),
                 ('project_id.collaborator_ids', 'any', [
                     ('partner_id', '=', user.partner_id.id),
                     ('limited_access', '=', False),
@@ -257,7 +251,7 @@
         <field name="model_id" ref="model_project_update"/>
         <field name="domain_force">[
         '|',
-            ('project_id.privacy_visibility', '!=', 'followers'),
+            ('project_id.privacy_visibility', 'in', ['employees', 'portal']),
             '|',
                 ('project_id.message_partner_ids', 'in', [user.partner_id.id]),
                 '|',
@@ -272,7 +266,7 @@
         <field name="model_id" ref="model_report_project_task_user"/>
         <field name="domain_force">[
         '|',
-            ('project_id.privacy_visibility', '!=', 'followers'),
+            ('project_id.privacy_visibility', 'in', ['employees', 'portal']),
             '|',
                 ('project_id.message_partner_ids', 'in', [user.partner_id.id]),
                 '|',
@@ -301,7 +295,7 @@
         <field name="model_id" ref="model_project_task_burndown_chart_report"/>
         <field name="domain_force">[
         '|',
-            ('project_id.privacy_visibility', '!=', 'followers'),
+            ('project_id.privacy_visibility', 'in', ['employees', 'portal']),
             '|',
                 ('project_id.message_partner_ids', 'in', [user.partner_id.id]),
                 ('user_ids', 'in', user.id),
@@ -327,7 +321,7 @@
         <field name="model_id" ref="model_project_milestone"/>
         <field name="domain_force">[
         '|',
-            ('project_id.privacy_visibility', '!=', 'followers'),
+            ('project_id.privacy_visibility', 'in', ['employees', 'portal']),
             '|',
                 ('project_id.message_partner_ids', 'in', [user.partner_id.id]),
                 ('project_id.user_id', '=', user.id),
@@ -346,7 +340,7 @@
         <field name="name">Project/milestone portal users: portal user can read with project sharing feature</field>
         <field name="model_id" ref="project.model_project_milestone"/>
         <field name="domain_force">[
-            ('project_id.privacy_visibility', '=', 'portal'),
+            ('project_id.privacy_visibility', 'in', ['invited_users', 'portal']),
             ('project_id.collaborator_ids.partner_id', 'in', [user.partner_id.id]),
         ]</field>
         <field name="groups" eval="[(4, ref('base.group_portal'))]"/>

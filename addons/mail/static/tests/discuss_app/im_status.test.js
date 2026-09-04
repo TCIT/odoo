@@ -6,7 +6,7 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { Persona } from "@mail/core/common/persona_model";
+import { Store } from "@mail/core/common/store_service";
 import { describe, test } from "@odoo/hoot";
 import { Command, patchWithCleanup, serverState } from "@web/../tests/web_test_helpers";
 
@@ -25,7 +25,7 @@ test("initially online", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-ImStatus i[title='Online']");
+    await contains(".o-mail-DiscussContent-header .o-mail-ImStatus i[title='Online']");
 });
 
 test("initially offline", async () => {
@@ -40,7 +40,7 @@ test("initially offline", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-ImStatus i[title='Offline']");
+    await contains(".o-mail-DiscussContent-header .o-mail-ImStatus i[title='Offline']");
 });
 
 test("initially away", async () => {
@@ -55,38 +55,38 @@ test("initially away", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-ImStatus i[title='Idle']");
+    await contains(".o-mail-DiscussContent-header .o-mail-ImStatus i[title='Idle']");
 });
 
 test("change icon on change partner im_status", async () => {
-    patchWithCleanup(Persona, { IM_STATUS_DEBOUNCE_DELAY: 0 });
+    patchWithCleanup(Store, { IM_STATUS_DEBOUNCE_DELAY: 0 });
     const pyEnv = await startServer();
-    const channelId = pyEnv["discuss.channel"].create({
-        channel_member_ids: [Command.create({ partner_id: serverState.partnerId })],
-        channel_type: "chat",
-    });
+    const channelId = pyEnv["discuss.channel"].create({ channel_type: "chat" });
     pyEnv["res.partner"].write([serverState.partnerId], { im_status: "online" });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-ImStatus i[title='Online']");
+    await contains(".o-mail-DiscussContent-header .o-mail-ImStatus i[title='Online']");
     pyEnv["res.partner"].write([serverState.partnerId], { im_status: "offline" });
     pyEnv["bus.bus"]._sendone(serverState.partnerId, "bus.bus/im_status_updated", {
         partner_id: serverState.partnerId,
         im_status: "offline",
+        presence_status: "offline",
     });
-    await contains(".o-mail-ImStatus i[title='Offline']");
+    await contains(".o-mail-DiscussContent-header .o-mail-ImStatus i[title='Offline']");
     pyEnv["res.partner"].write([serverState.partnerId], { im_status: "away" });
     pyEnv["bus.bus"]._sendone(serverState.partnerId, "bus.bus/im_status_updated", {
         partner_id: serverState.partnerId,
         im_status: "away",
+        presence_status: "away",
     });
-    await contains(".o-mail-ImStatus i[title='Idle']");
+    await contains(".o-mail-DiscussContent-header .o-mail-ImStatus i[title='Idle']");
     pyEnv["res.partner"].write([serverState.partnerId], { im_status: "online" });
     pyEnv["bus.bus"]._sendone(serverState.partnerId, "bus.bus/im_status_updated", {
         partner_id: serverState.partnerId,
         im_status: "online",
+        presence_status: "online",
     });
-    await contains(".o-mail-ImStatus i[title='Online']");
+    await contains(".o-mail-DiscussContent-header .o-mail-ImStatus i[title='Online']");
 });
 
 test("show im status in messaging menu preview of chat", async () => {

@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
 import babel.dates
-import re
 import werkzeug
 
 from ast import literal_eval
@@ -10,11 +7,15 @@ from werkzeug.exceptions import NotFound
 
 from odoo import fields, http, _
 from odoo.addons.website.controllers.main import QueryURL
+from odoo.fields import Domain
 from odoo.http import request
-from odoo.osv import expression
 from odoo.tools.misc import get_lang
 from odoo.tools import lazy
-from odoo.exceptions import UserError
+from odoo.tools.translate import LazyTranslate
+from odoo.exceptions import UserError, ValidationError
+
+_lt = LazyTranslate(__name__)
+
 
 class WebsiteEventController(http.Controller):
 
@@ -26,23 +27,32 @@ class WebsiteEventController(http.Controller):
     # EVENT LIST
     # ------------------------------------------------------------
 
-    def _get_events_search_options(self, **post):
+    def _get_events_search_options(self, slug_tags, **post):
         return {
-            'displayDescription': False,
+            'displayDescription': True,
             'displayDetail': False,
             'displayExtraDetail': False,
             'displayExtraLink': False,
             'displayImage': False,
             'allowFuzzy': not post.get('noFuzzy'),
             'date': post.get('date'),
-            'tags': post.get('tags'),
+            'tags': slug_tags or post.get('tags'),
             'type': post.get('type'),
             'country': post.get('country'),
         }
 
-    @http.route(['/event', '/event/page/<int:page>', '/events', '/events/page/<int:page>'], type='http', auth="public", website=True, sitemap=sitemap_event, readonly=True)
-    def events(self, page=1, **searches):
-        if searches.get('tags', '[]').count(',') > 0 and request.httprequest.method == 'GET' and not searches.get('prevent_redirect'):
+    @http.route([
+        path
+        for base in ('event', 'events')
+        for path in [
+            f'/{base}',
+            f'/{base}/page/<int:page>',
+            f'/{base}/tags/<string:slug_tags>',
+            f'/{base}/tags/<string:slug_tags>/page/<int:page>',
+        ]
+    ], type='http', auth="public", website=True, sitemap=sitemap_event, list_as_website_content=_lt("Events"))
+    def events(self, page=1, slug_tags=None, **searches):
+        if (slug_tags or searches.get('tags', '[]').count(',') > 0) and request.httprequest.method == 'GET' and not searches.get('prevent_redirect'):
             # Previously, the tags were searched using GET, which caused issues with crawlers (too many hits)
             # We replaced those with POST to avoid that, but it's not sufficient as bots "remember" crawled pages for a while
             # This permanent redirect is placed to instruct the bots that this page is no longer valid
@@ -56,18 +66,21 @@ class WebsiteEventController(http.Controller):
         SudoEventType = request.env['event.type'].sudo()
 
         searches.setdefault('search', '')
-        searches.setdefault('date', 'upcoming')
+        searches.setdefault('date', 'scheduled')
         searches.setdefault('tags', '')
         searches.setdefault('type', 'all')
         searches.setdefault('country', 'all')
+        # The previous name of the 'scheduled' filter is 'upcoming' and may still be present in URL's saved by users.
+        if searches['date'] == 'upcoming':
+            searches['date'] = 'scheduled'
 
         website = request.website
 
         step = 12  # Number of events per page
 
-        options = self._get_events_search_options(**searches)
+        options = self._get_events_search_options(slug_tags, **searches)
         order = 'date_begin'
-        if searches.get('date', 'upcoming') == 'old':
+        if searches.get('date', 'scheduled') == 'old':
             order = 'date_begin desc'
         order = 'is_published desc, ' + order + ', id desc'
         search = searches.get('search')
@@ -78,23 +91,29 @@ class WebsiteEventController(http.Controller):
         events = events[(page - 1) * step:page * step]
 
         # count by domains without self search
-        domain_search = [('name', 'ilike', fuzzy_search_term or searches['search'])] if searches['search'] else []
+        domain_search = Domain('name', 'ilike', fuzzy_search_term or searches['search']) if searches['search'] else Domain.TRUE
 
-        no_date_domain = event_details['no_date_domain']
+        no_date_domain = Domain.AND(event_details['no_date_domain'])
         dates = event_details['dates']
         for date in dates:
             if date[0] not in ['all', 'old']:
-                date[3] = Event.search_count(expression.AND(no_date_domain) + domain_search + date[2])
+                date[3] = Event.search_count(no_date_domain & domain_search & Domain(date[2]))
 
-        no_country_domain = event_details['no_country_domain']
-        countries = Event.read_group(expression.AND(no_country_domain) + domain_search, ["id", "country_id"],
-            groupby="country_id", orderby="country_id")
-        countries.insert(0, {
-            'country_id_count': sum([int(country['country_id_count']) for country in countries]),
-            'country_id': ("all", _("All Countries"))
-        })
+        no_country_domain = Domain.AND(event_details['no_country_domain'])
+        country_groups = Event._read_group(
+            no_country_domain & domain_search,
+            ["country_id"], ["__count"], order="country_id")
+        countries = [{
+            'country_id_count': sum(count for __, count in country_groups),
+            'country_id': (0, _("All Countries")),
+        }]
+        for g_country, count in country_groups:
+            countries.append({
+                'country_id_count': count,
+                'country_id': g_country and (g_country.id, g_country.sudo().display_name),
+            })
 
-        search_tags = event_details['search_tags']
+        search_tags = self._extract_searched_event_tags(searches, slug_tags)
         current_date = event_details['current_date']
         current_type = None
         current_country = None
@@ -106,17 +125,21 @@ class WebsiteEventController(http.Controller):
             current_country = request.env['res.country'].browse(int(searches['country']))
 
         pager = website.pager(
-            url="/event",
+            url=f"/event/tags/{slug_tags}" if slug_tags else "/event",
             url_args=searches,
             total=event_count,
             page=page,
             step=step,
             scope=5)
 
-        keep = QueryURL('/event', **{
+        keep = QueryURL('/event', ['tags'],
+            tags=slug_tags,
+            **{
             key: value for key, value in searches.items() if (
-                key == 'search' or
-                (value != 'upcoming' if key == 'date' else value != 'all'))
+                key != 'tags' and (
+                    key == 'search' or
+                    (value != 'scheduled' if key == 'date' else value != 'all'))
+                )
             })
 
         searches['search'] = fuzzy_search_term or search
@@ -134,7 +157,8 @@ class WebsiteEventController(http.Controller):
             'pager': pager,
             'searches': searches,
             'search_tags': search_tags,
-            'keep': keep,
+            'keep_event_url': keep,
+            'slugify_tags': self._slugify_tags,
             'search_count': event_count,
             'original_search': fuzzy_search_term and search,
             'website': website
@@ -150,13 +174,19 @@ class WebsiteEventController(http.Controller):
     def event_page(self, event, page, **post):
         values = {
             'event': event,
+            'event_page': True,
         }
 
+        base_page_name = page
         if '.' not in page:
             page = 'website_event.%s' % page
 
         view = request.env["website.event.menu"].sudo().search([
-            ("event_id", "=", event.id), ("view_id.key", "ilike", page)], limit=1).view_id
+            ("event_id", "=", event.id),
+            '|',
+              ("view_id.key", "ilike", page),
+              ("view_id.key", "ilike", f'website_event.{event.name}-{base_page_name.split("/")[-1]}'),
+        ], limit=1).view_id
 
         try:
             # Every event page view should have its own SEO.
@@ -165,9 +195,7 @@ class WebsiteEventController(http.Controller):
             values['main_object'] = event
         except ValueError:
             # page not found
-            values['path'] = re.sub(r"^website_event\.", '', page)
-            values['from_template'] = 'website_event.default_page'  # .strip('website_event.')
-            page = request.env.user.has_group('website.group_website_designer') and 'website.page_404' or 'http_routing.404'
+            page = 'website.page_404'
 
         return request.render(page, values)
 
@@ -196,6 +224,8 @@ class WebsiteEventController(http.Controller):
             'google_url': lazy(lambda: urls.get('google_url')),
             'iCal_url': lazy(lambda: urls.get('iCal_url')),
             'registration_error_code': post.get('registration_error_code'),
+            'slots': event.event_slot_ids._filter_open_slots().grouped('date'),
+            'website_visitor_timezone': request.env['website.visitor']._get_visitor_timezone(),
         }
 
     def _process_tickets_form(self, event, form_details):
@@ -207,6 +237,7 @@ class WebsiteEventController(http.Controller):
             'ticket': browse record of ticket if any (None if no ticket),
             'name': ticket name (or generic 'Registration' name if no ticket),
             'quantity': number of registrations for that ticket,
+            'current_limit_per_order': maximum of ticket orderable
         }, {...}]
         """
         ticket_order = {}
@@ -221,22 +252,53 @@ class WebsiteEventController(http.Controller):
             ('event_id', '=', event.id)
         ]))
 
+        tickets = request.env['event.event.ticket'].browse(ticket_dict.keys())
+        slot = request.env['event.slot'].browse(int(slot)) if (slot := form_details.get("event_slot_id", False)) else slot
+        tickets_limits = tickets._get_current_limit_per_order(slot, event)
+
         return [{
             'id': tid if ticket_dict.get(tid) else 0,
             'ticket': ticket_dict.get(tid),
             'name': ticket_dict[tid]['name'] if ticket_dict.get(tid) else _('Registration'),
             'quantity': count,
+            'current_limit_per_order': tickets_limits.get(tid, next(iter(tickets_limits.values()))),  # next is used if the ticket id isn't known (alone event case)
         } for tid, count in ticket_order.items() if count]
 
-    @http.route(['/event/<model("event.event"):event>/registration/new'], type='json', auth="public", methods=['POST'], website=True)
-    def registration_new(self, event, **post):
+    @http.route(['/event/<model("event.event"):event>/registration/slot/<int:slot_id>/tickets'], type='jsonrpc', auth="public", methods=['POST'], website=True)
+    def registration_tickets(self, event, slot_id):
+        """ After slot selection, render ticket selection modal.
+        To restrict the selectable number of tickets, give the slot seats available and
+        each slot tickets seats available to the template.
+        """
+        slot = request.env['event.slot'].browse(slot_id)
+        slot_tickets = [
+            (slot, ticket)
+            for ticket in event.event_ticket_ids
+        ]
+        return request.env['ir.ui.view']._render_template("website_event.modal_ticket_registration", {
+            'event': event,
+            'event_slot': slot,
+            'seats_available_slot_tickets': {
+                ticket.id: availability
+                for (_, ticket), availability in zip(slot_tickets, event._get_seats_availability(slot_tickets))
+            }
+        })
+
+    def _prepare_registration_new_values(self, event, **post):
         tickets = self._process_tickets_form(event, post)
+        slot_id = post.get('event_slot_id', False)
+        # Availability check needed as the total number of tickets can exceed the event/slot available tickets
         availability_check = True
+        # Double check to verify that we are ordering fewer tickets than the limit conditions set
+        limit_check = not any(ticket['quantity'] > ticket['current_limit_per_order'] for ticket in tickets)
         if event.seats_limited:
             ordered_seats = 0
             for ticket in tickets:
                 ordered_seats += ticket['quantity']
-            if event.seats_available < ordered_seats:
+            seats_available = event.seats_available
+            if slot_id:
+                seats_available = request.env['event.slot'].browse(int(slot_id)).seats_available or 0
+            if seats_available < ordered_seats:
                 availability_check = False
         if not tickets:
             return False
@@ -245,7 +307,7 @@ class WebsiteEventController(http.Controller):
             default_first_attendee = {
                 "name": request.env.user.name,
                 "email": request.env.user.email,
-                "phone": request.env.user.mobile or request.env.user.phone,
+                "phone": request.env.user.phone,
             }
         else:
             visitor = request.env['website.visitor']._get_visitor_from_request()
@@ -255,12 +317,24 @@ class WebsiteEventController(http.Controller):
                     "email": visitor.email,
                     "phone": visitor.mobile,
                 }
-        return request.env['ir.ui.view']._render_template("website_event.registration_attendee_details", {
+
+        return {
             'tickets': tickets,
+            'event_slot_id': slot_id,
             'event': event,
             'availability_check': availability_check,
             'default_first_attendee': default_first_attendee,
-        })
+            'limit_check': limit_check,
+        }
+
+    @http.route(['/event/<model("event.event"):event>/registration/new'], type='jsonrpc', auth="public", methods=['POST'], website=True)
+    def registration_new(self, event, **post):
+        """ After (slot and) tickets selection, render attendee(s) registration form.
+        Slot and tickets availability check already performed in the template. """
+        values = self._prepare_registration_new_values(event, **post)
+        if not values:
+            return values
+        return request.env['ir.ui.view']._render_template("website_event.registration_attendee_details", values)
 
     def _process_attendees_form(self, event, form_details):
         """ Process data posted from the attendee details form.
@@ -270,14 +344,17 @@ class WebsiteEventController(http.Controller):
         - For questions of type 'text_box', extracting the text answer of the attendee.
 
         :param form_details: posted data from frontend registration form, like
-            {'1-name': 'r', '1-email': 'r@r.com', '1-phone': '', '1-event_ticket_id': '1'}
+            {'1-name': 'r', '1-email': 'r@r.com', '1-phone': '', '1-event_slot_id': '1', '1-event_ticket_id': '1'}
         """
-        form_details.pop("recaptcha_token_response", None)
         allowed_fields = request.env['event.registration']._get_website_registration_allowed_fields()
         registration_fields = {key: v for key, v in request.env['event.registration']._fields.items() if key in allowed_fields}
         for ticket_id in list(filter(lambda x: x is not None, [form_details[field] if 'event_ticket_id' in field else None for field in form_details.keys()])):
-            if int(ticket_id) not in event.event_ticket_ids.ids and len(event.event_ticket_ids.ids) > 0:
-                raise UserError(_("This ticket is not available for sale for this event"))
+            ticket_id = int(ticket_id)
+            # ticket_id=0 means "no ticket selected", only valid on events without tickets
+            if ticket_id or event.event_ticket_ids:
+                ticket = event.event_ticket_ids.filtered(lambda t: t.id == ticket_id)
+                if not ticket or not ticket.is_launched or ticket.is_expired:
+                    raise UserError(_("This ticket is not available for sale for this event"))
         registrations = {}
         general_answer_ids = []
         general_identification_answers = {}
@@ -286,7 +363,7 @@ class WebsiteEventController(http.Controller):
         # goal is to use the answer to the first question of every 'type' (aka name / phone / email / company name)
         already_handled_fields_data = {}
         for key, value in form_details.items():
-            if not value:
+            if not value or '-' not in key:
                 continue
 
             key_values = key.split('-')
@@ -295,7 +372,13 @@ class WebsiteEventController(http.Controller):
                 registration_index, field_name = key_values
                 if field_name not in registration_fields:
                     continue
-                registrations.setdefault(registration_index, dict())[field_name] = int(value) or False
+                # Only cast when needed, as it might crash here for custom inputs in overrides
+                if isinstance(registration_fields[field_name], (fields.Many2one, fields.Integer)):
+                    value = int(value) or False
+                registrations.setdefault(registration_index, dict())[field_name] = value
+                continue
+
+            if len(key_values) != 3:
                 continue
 
             registration_index, question_type, question_id = key_values
@@ -368,12 +451,22 @@ class WebsiteEventController(http.Controller):
             that we have enough seats for all selected tickets.
             If we don't, the user is instead redirected to page to register with a
             formatted error message. """
-        if not request.env['ir.http']._verify_request_recaptcha_token('website_event_registration'):
-            raise UserError(_('Suspicious activity detected by Google reCaptcha.'))
+        try:
+            request.env['ir.http']._verify_request_recaptcha_token('website_event_registration')
+        except UserError:
+            return request.redirect('/event/%s/register?registration_error_code=recaptcha_failed' % event.id)
         registrations_data = self._process_attendees_form(event, post)
-        registration_tickets = Counter(registration['event_ticket_id'] for registration in registrations_data)
-        event_tickets = request.env['event.event.ticket'].browse(list(registration_tickets.keys()))
-        if any(event_ticket.seats_limited and event_ticket.seats_available < registration_tickets.get(event_ticket.id) for event_ticket in event_tickets):
+        counter_per_combination = Counter((registration.get('event_slot_id', False), registration['event_ticket_id']) for registration in registrations_data)
+        slot_ids = {slot_id for slot_id, _ in counter_per_combination if slot_id}
+        ticket_ids = {ticket_id for _, ticket_id in counter_per_combination if ticket_id}
+        slots_per_id = {slot.id: slot for slot in self.env['event.slot'].browse(slot_ids)}
+        tickets_per_id = {ticket.id: ticket for ticket in self.env['event.event.ticket'].browse(ticket_ids)}
+        try:
+            event._verify_seats_availability(list({
+                (slots_per_id.get(slot_id, False), tickets_per_id.get(ticket_id, False), count)
+                for (slot_id, ticket_id), count in counter_per_combination.items()
+            }))
+        except ValidationError:
             return request.redirect('/event/%s/register?registration_error_code=insufficient_seats' % event.id)
         attendees_sudo = self._create_attendees_from_registration_post(event, registrations_data)
 
@@ -394,12 +487,16 @@ class WebsiteEventController(http.Controller):
             self._get_registration_confirm_values(event, attendees_sudo))
 
     def _get_registration_confirm_values(self, event, attendees_sudo):
-        urls = event._get_event_resource_urls()
+        slot = attendees_sudo.event_slot_id
+        urls = event._get_event_resource_urls(slot)
         return {
             'attendees': attendees_sudo,
             'event': event,
             'google_url': urls.get('google_url'),
-            'iCal_url': urls.get('iCal_url')
+            'iCal_url': urls.get('iCal_url'),
+            'slot': slot,
+            'slots': event.event_slot_ids._filter_open_slots().grouped('date'),
+            'website_visitor_timezone': request.env['website.visitor']._get_visitor_timezone(),
         }
 
     # ------------------------------------------------------------
@@ -412,14 +509,45 @@ class WebsiteEventController(http.Controller):
         month = babel.dates.get_month_names('abbreviated', locale=get_lang(event.env).code)[start_date.month]
         return ('%s %s%s') % (month, start_date.strftime("%e"), (end_date != start_date and ("-" + end_date.strftime("%e")) or ""))
 
-    def _extract_searched_event_tags(self, searches):
+    def _extract_searched_event_tags(self, searches, slug_tags):
         tags = request.env['event.tag']
-        if searches.get('tags'):
-            try:
-                tag_ids = literal_eval(searches['tags'])
-            except:
-                pass
-            else:
-                # perform a search to filter on existing / valid tags implicitely + apply rules on color
-                tags = request.env['event.tag'].search([('id', 'in', tag_ids)])
+        if slug_tags:
+            tags = self._event_search_tags_slug(slug_tags)
+        elif 'tags' in searches:
+            tags = self._event_search_tags_ids(searches['tags'])
         return tags
+
+    def _slugify_tags(self, tag_ids, toggle_tag_id=None):
+        """ Prepares a comma separated slugified tags for the sake of readable URLs.
+
+        :param toggle_tag_id: add the tag being clicked to the already
+          selected tags as well as in URL; if tag is already selected
+          by the user it is removed from the selected tags (and so from the URL);
+        """
+        tag_ids = list(tag_ids)
+        if toggle_tag_id and toggle_tag_id in tag_ids:
+            tag_ids.remove(toggle_tag_id)
+        elif toggle_tag_id:
+            tag_ids.append(toggle_tag_id)
+
+        return ','.join(request.env['ir.http']._slug(tag_id) for tag_id in request.env['event.tag'].browse(tag_ids)) or ''
+
+    def _event_search_tags_ids(self, search_tags):
+        """ Input: %5B4%5D """
+        EventTag = request.env['event.tag']
+        try:
+            tag_ids = literal_eval(search_tags or '')
+        except Exception:  # noqa: BLE001
+            return EventTag
+
+        return EventTag.search([('id', 'in', tag_ids)]) if tag_ids else EventTag
+
+    def _event_search_tags_slug(self, search_tags):
+        """ Input: event-1,event-2 """
+        EventTag = request.env['event.tag']
+        try:
+            tag_ids = list(filter(None, [request.env['ir.http']._unslug(tag)[1] for tag in (search_tags or '').split(',')]))
+        except Exception:  # noqa: BLE001
+            return EventTag
+
+        return EventTag.search([('id', 'in', tag_ids)]) if tag_ids else EventTag

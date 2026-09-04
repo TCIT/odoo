@@ -27,9 +27,6 @@
                                     </div>
                                 </div>
                             </setting>
-                            <setting string="Community Chat Rooms" help="Foster interactions between attendees by creating virtual conference rooms">
-                                <field name="module_website_event_meet"/>
-                            </setting>
                             <setting string="Online Exhibitors" help="Display Sponsors and Exhibitors on your event pages">
                                 <field name="module_website_event_exhibitor"/>
                             </setting>
@@ -85,7 +82,6 @@
             <field name="name">Settings</field>
             <field name="res_model">res.config.settings</field>
             <field name="view_mode">form</field>
-            <field name="target">inline</field>
             <field name="context">{'module' : 'event', 'bin_size': False}</field>
         </record>
 

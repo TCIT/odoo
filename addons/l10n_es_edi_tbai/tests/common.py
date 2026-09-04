@@ -2,11 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
+import requests
+
 from pytz import timezone
 from datetime import date, datetime
-import requests
 from unittest.mock import Mock
+from dateutil.relativedelta import relativedelta
 
+from odoo import fields
 from odoo.tools import file_open
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
@@ -19,7 +22,7 @@ class TestEsEdiTbaiCommon(TestAccountMoveSendCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.frozen_today = datetime(year=2022, month=1, day=1, hour=0, minute=0, second=0, tzinfo=timezone('utc'))
+        cls.frozen_today = datetime(year=2025, month=1, day=1, hour=0, minute=0, second=0, tzinfo=timezone('utc'))
 
         # Allow to see the full result of AssertionError.
         cls.maxDiff = None
@@ -55,11 +58,11 @@ class TestEsEdiTbaiCommon(TestAccountMoveSendCommon):
             cert_name = 'araba_1234.p12'
             cert_password = '1234'
         elif agency == 'bizkaia':
-            cert_name = 'bizkaia_111111.p12'
-            cert_password = '111111'
+            cert_name = 'Bizkaia-IZDesa2025.p12'
+            cert_password = 'IZDesa2025'
         elif agency == 'gipuzkoa':
-            cert_name = 'gipuzkoa_IZDesa2021.p12'
-            cert_password = 'IZDesa2021'
+            cert_name = 'gipuzkoa_Iz3np32024.p12'
+            cert_password = 'Iz3np32024'
         else:
             raise ValueError("Unknown tax agency: " + agency)
 
@@ -71,6 +74,9 @@ class TestEsEdiTbaiCommon(TestAccountMoveSendCommon):
             'scope': 'tbai',
             'company_id': cls.company_data['company'].id,
         })
+
+        # Prevent certificate expiration in tests
+        cls.certificate.date_end = fields.Datetime.now() + relativedelta(days=2)
         cls.company_data['company'].write({
             'l10n_es_tbai_tax_agency': agency,
             'l10n_es_tbai_certificate_id': cls.certificate.id,
@@ -90,8 +96,8 @@ class TestEsEdiTbaiCommon(TestAccountMoveSendCommon):
         return cls.env['account.move'].with_context(edi_test_mode=True).create({
             'move_type': 'out_invoice',
             'partner_id': cls.partner_a.id,
-            'invoice_date': '2022-01-01',
-            'date': '2022-01-01',
+            'invoice_date': '2025-01-01',
+            'date': '2025-01-01',
             **kwargs,
             'invoice_line_ids': [(0, 0, {
                 'product_id': cls.product_a.id,
@@ -104,7 +110,7 @@ class TestEsEdiTbaiCommon(TestAccountMoveSendCommon):
     def _create_posted_invoice(cls):
         out_invoice = cls.env['account.move'].create({
                 'move_type': 'out_invoice',
-                'invoice_date': date(2022, 1, 1),
+                'invoice_date': date(2025, 1, 1),
                 'partner_id': cls.partner_a.id,
                 'invoice_line_ids': [(0, 0, {
                     'product_id': cls.product_a.id,

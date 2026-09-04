@@ -2,7 +2,8 @@
 
 from odoo import _, api, models
 
-class PricelistItem(models.Model):
+
+class ProductPricelistItem(models.Model):
     _inherit = "product.pricelist.item"
 
     @api.onchange('applied_on', 'product_id', 'product_tmpl_id', 'min_quantity')

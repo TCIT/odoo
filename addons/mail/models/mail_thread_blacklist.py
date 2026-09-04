@@ -6,7 +6,7 @@ from odoo.exceptions import AccessError, UserError
 from odoo.tools import SQL
 
 
-class MailBlackListMixin(models.AbstractModel):
+class MailThreadBlacklist(models.AbstractModel):
     """ Mixin that is inherited by all model with opt out. This mixin stores a normalized
     email based on primary_email field.
 
@@ -51,17 +51,13 @@ class MailBlackListMixin(models.AbstractModel):
 
     @api.model
     def _search_is_blacklisted(self, operator, value):
-        # Assumes operator is '=' or '!=' and value is True or False
+        if operator not in ('in', 'not in'):
+            return NotImplemented
         self.flush_model(['email_normalized'])
         self.env['mail.blacklist'].flush_model(['email', 'active'])
         self._assert_primary_email()
-        if operator != '=':
-            if operator == '!=' and isinstance(value, bool):
-                value = not value
-            else:
-                raise NotImplementedError()
 
-        if value:
+        if operator == 'in':
             sql = SQL("""
                 SELECT m.id
                     FROM mail_blacklist bl
@@ -77,8 +73,8 @@ class MailBlackListMixin(models.AbstractModel):
                     WHERE bl.id IS NULL
             """, SQL.identifier(self._table))
 
-        self._cr.execute(SQL("%s FETCH FIRST ROW ONLY", sql))
-        res = self._cr.fetchall()
+        self.env.cr.execute(SQL("%s FETCH FIRST ROW ONLY", sql))
+        res = self.env.cr.fetchall()
         if not res:
             return [(0, '=', 1)]
         return [('id', 'in', SQL("(%s)", sql))]
@@ -87,7 +83,7 @@ class MailBlackListMixin(models.AbstractModel):
     def _compute_is_blacklisted(self):
         # TODO : Should remove the sudo as compute_sudo defined on methods.
         # But if user doesn't have access to mail.blacklist, doen't work without sudo().
-        blacklist = set(self.env['mail.blacklist'].sudo().search([
+        blacklist = set(self.env['mail.blacklist'].sudo().with_context(active_test=True).search([
             ('email', 'in', self.mapped('email_normalized'))]).mapped('email'))
         for record in self:
             record.is_blacklisted = record.email_normalized in blacklist
@@ -101,14 +97,14 @@ class MailBlackListMixin(models.AbstractModel):
     def _message_receive_bounce(self, email, partner):
         """ Override of mail.thread generic method. Purpose is to increment the
         bounce counter of the record. """
-        super(MailBlackListMixin, self)._message_receive_bounce(email, partner)
+        super()._message_receive_bounce(email, partner)
         for record in self:
             record.message_bounce = record.message_bounce + 1
 
     def _message_reset_bounce(self, email):
         """ Override of mail.thread generic method. Purpose is to reset the
         bounce counter of the record. """
-        super(MailBlackListMixin, self)._message_reset_bounce(email)
+        super()._message_reset_bounce(email)
         self.write({'message_bounce': 0})
 
     def mail_action_blacklist_remove(self):

@@ -4,6 +4,7 @@ from odoo import api, models
 class ResCurrency(models.Model):
     _inherit = "res.currency"
 
+    @api.readonly
     @api.model
     def get_company_currency_for_spreadsheet(self, company_id=None):
         """
@@ -11,7 +12,7 @@ class ResCurrency(models.Model):
         This function is meant to be called by the spreadsheet js lib,
         hence the formatting of the result.
 
-        :company_id int: Id of the company
+        :param int company_id: Id of the company
         :return: dict of the form `{ "code": str, "symbol": str, "decimalPlaces": int, "position":str }`
         """
         company = self.env["res.company"].browse(company_id) if company_id else self.env.company

@@ -15,6 +15,7 @@ class TestReports(L10nInTestInvoicingCommon):
         cls.partner_b.l10n_in_gst_treatment = 'regular'
         cls.partner_a.l10n_in_gst_treatment = 'composition'
         cls.partner_foreign.l10n_in_gst_treatment = 'overseas'
+        cls.partner_foreign_no_state.l10n_in_gst_treatment = 'overseas'
 
         cls.igst_sale_18 = cls.env['account.chart.template'].ref('igst_sale_18')
 
@@ -45,19 +46,6 @@ class TestReports(L10nInTestInvoicingCommon):
                 'l10n_in_state_id': expected_pos_id,
             }]
         )
-        self.partner_b.write({
-            'vat': False,
-            'l10n_in_gst_treatment': 'unregistered',
-            'state_id': self.state_in_hp,  # change state of partner
-        })
-        self.assertRecordValues(
-            self.invoice_b,
-            [{
-                'state': 'draft',
-                'l10n_in_gst_treatment': self.partner_b.l10n_in_gst_treatment,
-                'l10n_in_state_id': expected_pos_id, # POS doesn't change unless the partner changes
-            }]
-        )
         self.assertRecordValues(
             invoice_b_2,
             [{ # check gst treatment and pos doesn't change on posted invoice
@@ -65,12 +53,6 @@ class TestReports(L10nInTestInvoicingCommon):
                 'l10n_in_gst_treatment': 'regular',
             }]
         )
-        invoice_b_2.button_draft()
-        self.assertRecordValues(invoice_b_2, [{
-            'state': 'draft',
-            'l10n_in_gst_treatment': self.partner_b.l10n_in_gst_treatment,
-            'l10n_in_state_id': expected_pos_id,
-        }])
 
     def test_partner_change_with_invoice(self):
         in_invoice = self.init_invoice(
@@ -80,14 +62,6 @@ class TestReports(L10nInTestInvoicingCommon):
             taxes=[self.igst_sale_18],
         )
 
-        self.assertRecordValues(
-            self.invoice_a,
-            [{
-                'state': 'draft',
-                'l10n_in_gst_treatment': self.partner_a.l10n_in_gst_treatment,
-                'l10n_in_state_id': self.state_in_gj.id,
-            }]
-        )
         self.invoice_a.partner_id = self.partner_foreign
         self.assertRecordValues(
             self.invoice_a,
@@ -136,3 +110,26 @@ class TestReports(L10nInTestInvoicingCommon):
                 'l10n_in_state_id': self.partner_a.state_id.id,
             }]
         )
+
+    def test_foreign_customer_without_state(self):
+        """ Verify foreign customer without state_id gets foreign state reference """
+        self.assertRecordValues(
+            self.invoice_d,
+            [{
+                'l10n_in_gst_treatment': 'overseas',
+                'l10n_in_state_id': self.env.ref("l10n_in.state_in_oc").id,
+            }]
+        )
+
+    def test_government_gstin_extraction_tan(self):
+        """ Verify that a GSTIN based on a TAN (Government entity) correctly populates the TAN field and leaves the PAN field empty. """
+        gov_partner = self.env['res.partner'].create({
+            'name': "Gov Partner",
+            'country_id': self.env.ref('base.in').id,
+            'state_id': self.env.ref('base.state_in_dl').id,
+            'vat': '07DELN10357E1DH',
+        })
+        self.assertRecordValues(gov_partner, [{
+            'l10n_in_pan_entity_id': False,
+            'l10n_in_tan': 'DELN10357E',
+        }])

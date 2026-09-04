@@ -1,14 +1,16 @@
-import { defineResourceMailModels } from "./resource_mail_test_helpers";
-import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { queryFirst } from "@odoo/hoot-dom";
 import {
     click,
     contains,
     openFormView,
     openKanbanView,
+    openListView,
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { queryFirst } from "@odoo/hoot-dom";
+import { defineResourceMailModels } from "./resource_mail_test_helpers";
+import { onRpc } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 const data = {};
@@ -80,6 +82,20 @@ beforeEach(async () => {
             resource_type: "user",
         },
     ]);
+    onRpc("resource.resource", "get_avatar_card_data", (params) => {
+        const resourceIdArray = params.args[0];
+        const resourceId = resourceIdArray[0];
+        const resources = pyEnv['resource.resource'].read([resourceId]);
+        const result = resources.map(resource => ({
+            name: resource.name,
+            role_ids: resource.role_ids,
+            email:resource.email,
+            phone: resource.phone,
+            user_id: resource.user_id,
+        }));
+        return result;
+    });
+
 });
 
 test("many2one_avatar_resource widget in form view", async () => {
@@ -91,6 +107,23 @@ test("many2one_avatar_resource widget in form view", async () => {
             </form>`,
     });
     expect(queryFirst(".o_material_resource")).toHaveClass("o_material_resource");
+    expect(".o_field_many2one_avatar_resource .o_external_button").toHaveCount(1);
+});
+
+test("many2one_avatar_resource widget in list view", async () => {
+    await start();
+    await openListView("resource.task", {
+        arch: `<list>
+                <field name="display_name"/>
+                <field name="resource_id" widget="many2one_avatar_resource"/>
+            </list>`,
+    });
+    await contains(".o_m2o_avatar", { count: 3 });
+    // fa-wrench should be displayed for the first task
+    await contains(".o_m2o_avatar > span.o_material_resource > i.fa-wrench");
+    // Second and third slots should display employee avatar
+    await contains(".o_field_many2one_avatar_resource img", { count: 2 });
+    await contains(".o_field_many2one_avatar_resource a", { count: 0 });
 });
 
 test("many2one_avatar_resource widget in kanban view", async () => {
@@ -119,10 +152,10 @@ test("many2one_avatar_resource widget in kanban view", async () => {
         ).getAttribute("data-src")
     ).toBe("/web/image/resource.resource/" + data.resourcePierreId + "/avatar_128");
     // 1. Clicking on material resource's icon
-    await click(".o_kanban_record:nth-of-type(1) .o_m2o_avatar");
+    await click(".o_kanban_record:nth-of-type(1) .o_m2o_avatar > span > i");
     await contains(".o_avatar_card", { count: 0 });
     // 2. Clicking on human resource's avatar with no user associated
-    await click(".o_kanban_record:nth-of-type(2) .o_m2o_avatar");
+    await click(".o_kanban_record:nth-of-type(2) .o_m2o_avatar > img");
     await contains(".o_card_user_infos span", { text: "Marie" });
     await contains(
         ".o_avatar_card",
@@ -135,7 +168,7 @@ test("many2one_avatar_resource widget in kanban view", async () => {
         'No "Send Message" button should be displayed for this employee as it is linked to no user'
     );
     // 3. Clicking on human resource's avatar with one user associated
-    await click(".o_kanban_record:nth-of-type(3) .o_m2o_avatar");
+    await click(".o_kanban_record:nth-of-type(3) .o_m2o_avatar > img");
     await contains(".o_card_user_infos span", { text: "Pierre" });
     await contains(
         ".o_avatar_card",
@@ -147,7 +180,5 @@ test("many2one_avatar_resource widget in kanban view", async () => {
     expect(".o_avatar_card_buttons button:first").toHaveText("Send message");
     await click(".o_avatar_card_buttons button");
     await contains(".o-mail-ChatWindow");
-    expect(
-        ".o-mail-ChatWindow-header button.o-dropdown.o-mail-ChatWindow-command > .text-truncate:first"
-    ).toHaveText("Pierre");
+    expect(".o-mail-ChatWindow-moreActions > .text-truncate:first").toHaveText("Pierre");
 });

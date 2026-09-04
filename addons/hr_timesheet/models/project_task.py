@@ -25,11 +25,11 @@ PROJECT_TASK_READABLE_FIELDS = {
     'total_hours_spent',
 }
 
-class Task(models.Model):
-    _name = "project.task"
+
+class ProjectTask(models.Model):
     _inherit = "project.task"
 
-    project_id = fields.Many2one(domain="['|', ('company_id', '=', False), ('company_id', '=?',  company_id), ('is_internal_project', '=', False)]")
+    project_id = fields.Many2one(domain="['|', ('company_id', '=', False), ('company_id', '=?',  company_id), ('is_internal_project', '=', False), ('is_template', 'in', [is_template, False])]")
     analytic_account_active = fields.Boolean("Active Analytic Account", related='project_id.analytic_account_active', export_string_translation=False)
     allow_timesheets = fields.Boolean(
         "Allow timesheets",
@@ -48,12 +48,14 @@ class Task(models.Model):
         30h Allocate 30 hours to the task
         #tags Set tags on the task
         @user Assign the task to a user
-        ! Set the task a high priority\n
-        Make sure to use the right format and order e.g. Improve the configuration screen 5h #feature #v16 @Mitchell !""",
+        ! Set the task a medium priority
+        !! Set the task a high priority
+        !!! Set the task a urgent priority\n
+        Make sure to use the right format and order e.g. Improve the configuration screen 5h #feature #v16 @Mitchell !""",
     )
     @property
-    def SELF_READABLE_FIELDS(self):
-        return super().SELF_READABLE_FIELDS | PROJECT_TASK_READABLE_FIELDS
+    def TASK_PORTAL_READABLE_FIELDS(self):
+        return super().TASK_PORTAL_READABLE_FIELDS | PROJECT_TASK_READABLE_FIELDS
 
     @api.constrains('project_id')
     def _check_project_root(self):
@@ -110,7 +112,9 @@ class Task(models.Model):
 
     def _search_remaining_hours_percentage(self, operator, value):
         if operator not in OPERATOR_MAPPING:
-            raise NotImplementedError(_('This operator %s is not supported in this search method.', operator))
+            return NotImplemented
+        if operator in ('in', 'not in'):
+            value = tuple(value)
         sql = SQL("""(
             SELECT id
               FROM %s
@@ -248,17 +252,39 @@ class Task(models.Model):
             ['task_id'],
         )
         task_with_timesheets_ids = [task.id for task, in timesheet_data]
-        if task_with_timesheets_ids:
-            if len(task_with_timesheets_ids) > 1:
-                warning_msg = _("These tasks have some timesheet entries referencing them. Before removing these tasks, you have to remove these timesheet entries.")
-            else:
-                warning_msg = _("This task has some timesheet entries referencing it. Before removing this task, you have to remove these timesheet entries.")
-            raise RedirectWarning(
-                warning_msg, self.env.ref('hr_timesheet.timesheet_action_task').id,
-                _('See timesheet entries'), {'active_ids': task_with_timesheets_ids})
+        if not task_with_timesheets_ids:
+            return
+        # Fetch task IDs with timesheets that the user has read access.
+        inaccessible_task_ids = set(task_with_timesheets_ids) - set(
+            self.env['account.analytic.line'].search([
+                ('task_id', 'in', task_with_timesheets_ids)
+            ]).mapped('task_id.id')
+        )
+        if inaccessible_task_ids:
+            raise UserError(
+                _("This task can’t be deleted because it’s linked to timesheets. Please contact someone with higher access to remove the timesheets first, "
+                "and then you’ll be able to delete the task.")
+            )
+        if len(task_with_timesheets_ids) > 1:
+            warning_msg = _("Some timesheet entries are weighing down these tasks! Remove them first, then you’ll be able to delete the tasks!")
+        else:
+            warning_msg = _("Some timesheet entries are weighing down these tasks! Remove them first, then you’ll be able to delete the tasks!")
+        raise RedirectWarning(
+            warning_msg, self.env.ref('hr_timesheet.timesheet_action_task').id,
+            _('See timesheet entries'), {'active_ids': task_with_timesheets_ids})
 
     @api.model
     def _convert_hours_to_days(self, time):
         uom_hour = self.env.ref('uom.product_uom_hour')
         uom_day = self.env.ref('uom.product_uom_day')
         return round(uom_hour._compute_quantity(time, uom_day, raise_if_failure=False), 2)
+
+    def _get_portal_total_hours_dict(self):
+        if not (timesheetable_tasks := self.filtered('allow_timesheets')):
+            return {}
+        sub_tasks = timesheetable_tasks._get_all_subtasks()
+        tasks_for_total = timesheetable_tasks - sub_tasks
+        return {
+            'allocated_hours': sum(tasks_for_total.mapped('allocated_hours')),
+            'effective_hours': sum(tasks_for_total.mapped('total_hours_spent')),
+        }

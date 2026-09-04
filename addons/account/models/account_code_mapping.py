@@ -1,4 +1,6 @@
-from odoo import fields, models, api
+from odoo import fields, models, api, _
+from odoo.fields import Domain
+from odoo.exceptions import UserError
 from odoo.tools import Query
 
 COMPANY_OFFSET = 10000
@@ -44,15 +46,26 @@ class AccountCodeMapping(models.Model):
             mapping.code = vals['code']
         return mappings
 
-    def _search(self, domain, offset=0, limit=None, order=None) -> Query:
-        match domain:
-            case [('account_id', 'in', account_ids), *remaining_domain]:
-                return self.browse([
-                    account_id * COMPANY_OFFSET + company.id
-                    for account_id in account_ids
-                    for company in self.env.user.with_context(active_test=True).company_ids.sorted(lambda c: (c.sequence, c.name))
-                ]).filtered_domain(remaining_domain)._as_query()
-        raise NotImplementedError
+    def _search(self, domain, offset=0, limit=None, order=None, **kw) -> Query:
+        account_ids = []
+
+        def get_accounts(condition):
+            if not account_ids and condition.field_expr == 'account_id' and condition.operator == 'in':
+                account_ids.extend(condition.value)
+                return Domain(bool(condition.value))
+            return condition
+
+        remaining_domain = Domain(domain).map_conditions(get_accounts)
+        if not account_ids:
+            raise UserError(_(
+                "Account Code Mapping cannot be accessed directly. "
+                "It is designed to be used only through the Chart of Accounts."
+            ))
+        return self.browse([
+            account_id * COMPANY_OFFSET + company.id
+            for account_id in account_ids
+            for company in self.env.user.with_context(active_test=True).company_ids.sorted(lambda c: (c.sequence, c.name))
+        ]).filtered_domain(remaining_domain)._as_query()
 
     def _compute_account_id(self):
         for record in self:

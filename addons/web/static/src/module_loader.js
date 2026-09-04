@@ -32,6 +32,9 @@
          */
         constructor(root) {
             this.root = root;
+
+            const strDebug = new URLSearchParams(location.search).get("debug");
+            this.debug = Boolean(strDebug && strDebug !== "0");
         }
 
         /** @type {OdooModuleLoader["addJob"]} */
@@ -153,32 +156,53 @@
                 return;
             }
 
-            const style = document.createElement("style");
-            style.textContent = `
-                body::before {
-                    font-weight: bold;
-                    content: "An error occurred while loading javascript modules, you may find more information in the devtools console";
-                    position: fixed;
-                    left: 0;
-                    bottom: 0;
-                    z-index: 100000000000;
-                    background-color: #C00;
-                    color: #DDD;
-                }
-            `;
-
-            document.head.appendChild(style);
             if (errors.failed) {
-                console.error("The following modules failed to load because of an error:", [...errors.failed])
+                console.error("The following modules failed to load because of an error:", [
+                    ...errors.failed,
+                ]);
             }
             if (errors.missing) {
-                console.error("The following modules are needed by other modules but have not been defined, they may not be present in the correct asset bundle:", [...errors.missing]);
+                console.error(
+                    "The following modules are needed by other modules but have not been defined, they may not be present in the correct asset bundle:",
+                    [...errors.missing]
+                );
             }
             if (errors.cycle) {
-                console.error("The following modules could not be loaded because they form a dependency cycle:", errors.cycle);
+                console.error(
+                    "The following modules could not be loaded because they form a dependency cycle:",
+                    errors.cycle
+                );
             }
             if (errors.unloaded) {
-                console.error("The following modules could not be loaded because they have unmet dependencies, this is a secondary error which is likely caused by one of the above problems:", [...errors.unloaded]);
+                console.error(
+                    "The following modules could not be loaded because they have unmet dependencies, this is a secondary error which is likely caused by one of the above problems:",
+                    [...errors.unloaded]
+                );
+            }
+
+            const document = this.root?.ownerDocument || globalThis.document;
+            if (document.readyState === "loading") {
+                await new Promise((resolve) =>
+                    document.addEventListener("DOMContentLoaded", resolve)
+                );
+            }
+
+            if (this.debug) {
+                const style = document.createElement("style");
+                style.className = "o_module_error_banner";
+                style.textContent = `
+                    body::before {
+                        font-weight: bold;
+                        content: "An error occurred while loading javascript modules, you may find more information in the devtools console";
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        z-index: 100000000000;
+                        background-color: #C00;
+                        color: #DDD;
+                    }
+                `;
+                document.head.appendChild(style);
             }
         }
 
@@ -214,12 +238,12 @@
         }
     }
 
-    if (odoo.debug && !new URLSearchParams(location.search).has("debug")) {
-        // remove debug mode if not explicitely set in url
-        odoo.debug = "";
-    }
-
     const loader = new ModuleLoader();
     odoo.define = loader.define.bind(loader);
     odoo.loader = loader;
+
+    if (odoo.debug && !loader.debug) {
+        // remove debug mode if not explicitely set in url
+        odoo.debug = "";
+    }
 })((globalThis.odoo ||= {}));

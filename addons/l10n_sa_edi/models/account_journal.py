@@ -1,7 +1,7 @@
 import json
+import logging
 from base64 import b64decode, b64encode
 from datetime import datetime
-from urllib.parse import urljoin
 
 import requests
 from lxml import etree
@@ -11,6 +11,10 @@ from requests.exceptions import HTTPError, RequestException
 from odoo import _, fields, models
 from odoo.exceptions import UserError
 from odoo.tools.misc import file_open
+from odoo.tools.translate import LazyTranslate
+from odoo.tools.urls import urljoin
+
+_lt = LazyTranslate(__name__)
 
 ZATCA_API_URLS = {
     "sandbox": "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/",
@@ -30,6 +34,10 @@ SANDBOX_AUTH = {
     'binarySecurityToken': "TUlJRDFEQ0NBM21nQXdJQkFnSVRid0FBZTNVQVlWVTM0SS8rNVFBQkFBQjdkVEFLQmdncWhrak9QUVFEQWpCak1SVXdFd1lLQ1pJbWlaUHlMR1FCR1JZRmJHOWpZV3d4RXpBUkJnb0praWFKay9Jc1pBRVpGZ05uYjNZeEZ6QVZCZ29Ka2lhSmsvSXNaQUVaRmdkbGVIUm5ZWHAwTVJ3d0dnWURWUVFERXhOVVUxcEZTVTVXVDBsRFJTMVRkV0pEUVMweE1CNFhEVEl5TURZeE1qRTNOREExTWxvWERUSTBNRFl4TVRFM05EQTFNbG93U1RFTE1Ba0dBMVVFQmhNQ1UwRXhEakFNQmdOVkJBb1RCV0ZuYVd4bE1SWXdGQVlEVlFRTEV3MW9ZWGxoSUhsaFoyaHRiM1Z5TVJJd0VBWURWUVFERXdreE1qY3VNQzR3TGpFd1ZqQVFCZ2NxaGtqT1BRSUJCZ1VyZ1FRQUNnTkNBQVRUQUs5bHJUVmtvOXJrcTZaWWNjOUhEUlpQNGI5UzR6QTRLbTdZWEorc25UVmhMa3pVMEhzbVNYOVVuOGpEaFJUT0hES2FmdDhDL3V1VVk5MzR2dU1ObzRJQ0p6Q0NBaU13Z1lnR0ExVWRFUVNCZ0RCK3BId3dlakViTUJrR0ExVUVCQXdTTVMxb1lYbGhmREl0TWpNMGZETXRNVEV5TVI4d0hRWUtDWkltaVpQeUxHUUJBUXdQTXpBd01EYzFOVGc0TnpBd01EQXpNUTB3Q3dZRFZRUU1EQVF4TVRBd01SRXdEd1lEVlFRYURBaGFZWFJqWVNBeE1qRVlNQllHQTFVRUR3d1BSbTl2WkNCQ2RYTnphVzVsYzNNek1CMEdBMVVkRGdRV0JCU2dtSVdENmJQZmJiS2ttVHdPSlJYdkliSDlIakFmQmdOVkhTTUVHREFXZ0JSMllJejdCcUNzWjFjMW5jK2FyS2NybVRXMUx6Qk9CZ05WSFI4RVJ6QkZNRU9nUWFBL2hqMW9kSFJ3T2k4dmRITjBZM0pzTG5waGRHTmhMbWR2ZGk1ellTOURaWEowUlc1eWIyeHNMMVJUV2tWSlRsWlBTVU5GTFZOMVlrTkJMVEV1WTNKc01JR3RCZ2dyQmdFRkJRY0JBUVNCb0RDQm5UQnVCZ2dyQmdFRkJRY3dBWVppYUhSMGNEb3ZMM1J6ZEdOeWJDNTZZWFJqWVM1bmIzWXVjMkV2UTJWeWRFVnVjbTlzYkM5VVUxcEZhVzUyYjJsalpWTkRRVEV1WlhoMFoyRjZkQzVuYjNZdWJHOWpZV3hmVkZOYVJVbE9WazlKUTBVdFUzVmlRMEV0TVNneEtTNWpjblF3S3dZSUt3WUJCUVVITUFHR0gyaDBkSEE2THk5MGMzUmpjbXd1ZW1GMFkyRXVaMjkyTG5OaEwyOWpjM0F3RGdZRFZSMFBBUUgvQkFRREFnZUFNQjBHQTFVZEpRUVdNQlFHQ0NzR0FRVUZCd01DQmdnckJnRUZCUWNEQXpBbkJna3JCZ0VFQVlJM0ZRb0VHakFZTUFvR0NDc0dBUVVGQndNQ01Bb0dDQ3NHQVFVRkJ3TURNQW9HQ0NxR1NNNDlCQU1DQTBrQU1FWUNJUUNWd0RNY3E2UE8rTWNtc0JYVXovdjFHZGhHcDdycVNhMkF4VEtTdjgzOElBSWhBT0JOREJ0OSszRFNsaWpvVmZ4enJkRGg1MjhXQzM3c21FZG9HV1ZyU3BHMQ==",
     'secret': "Xlj15LyMCgSC66ObnEO/qVPfhSbs3kDTjWnGheYhfSs="
 }
+
+ERROR_MESSAGE = _lt("Something went wrong. Please onboard the journal again.")
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountJournal(models.Model):
@@ -79,11 +87,19 @@ class AccountJournal(models.Model):
     l10n_sa_chain_sequence_id = fields.Many2one('ir.sequence', string='ZATCA account.move chain sequence',
                                                 readonly=True, copy=False)
 
-    l10n_sa_serial_number = fields.Char("Serial Number", copy=False,
-                                        help="The serial number of the Taxpayer solution unit. Provided by ZATCA")
-
     l10n_sa_latest_submission_hash = fields.Char("Latest Submission Hash", copy=False,
                                                  help="Hash of the latest submitted invoice to be used as the Previous Invoice Hash (KSA-13)")
+
+    def _l10n_sa_reset_chain_head_error(self):
+        """
+            Reset the chain head error from the journal's stuck invoices
+        """
+        stuck_invoices = self.env['account.move'].search([
+            ('l10n_sa_edi_chain_head_id', '!=', False),
+            ('journal_id', 'in', self.ids),
+        ])
+        # We only need to remove blocking errors, so webservices do not need to be triggered
+        stuck_invoices._retry_edi_documents_error()
 
     # ====== Utility Functions =======
 
@@ -95,11 +111,27 @@ class AccountJournal(models.Model):
         self.ensure_one()
         return self.sudo().l10n_sa_production_csid_json
 
+    def _l10n_sa_api_onboard_sanity_checks(self):
+        """
+            Perform a sanity check to validate that the journal is ready to be onboarded
+        """
+
+        # If the invoice wasn't sent to ZATCA because of a timeout, it will retain its existing chain index
+        # Make sure there are no opened invoices with the journal's existing sequence
+        has_stuck_moves = self.env['account.edi.document'].search([
+            ('move_id.journal_id', '=', self.id),
+            ('move_id.l10n_sa_chain_index', '!=', 0),
+            ('edi_format_id.code', '=', 'sa_zatca'),
+            ('state', '=', 'to_send'),
+        ], limit=1)
+        if has_stuck_moves:
+            raise UserError(_("Oops! The journal is stuck. Please submit the pending invoices to ZATCA and try again."))
+
     # ====== CSR Generation =======
 
     def _l10n_sa_csr_required_fields(self):
         """ Return the list of fields required to generate a valid CSR as per ZATCA requirements """
-        return ['l10n_sa_private_key_id', 'vat', 'name', 'city', 'country_id', 'state_id']
+        return ['l10n_sa_private_key_id', 'vat', 'name', 'city', 'country_id', 'state_id', 'street']
 
     def _l10n_sa_generate_csr(self):
         """
@@ -109,9 +141,10 @@ class AccountJournal(models.Model):
         if any(not self.company_id[f] for f in self._l10n_sa_csr_required_fields()):
             raise UserError(
                 _(
-                    "Please, make sure all the following fields have been correctly set on the Company:%(fields)s",
-                    fields="".join(
-                        "\n - %s" % self.company_id._fields[f].string
+                    "Please set the following on %(company_name)s: %(fields)s",
+                    company_name=self.company_id.name,
+                    fields=", ".join(
+                        self.company_id._fields[f].string
                         for f in self._l10n_sa_csr_required_fields()
                         if not self.company_id[f]
                     ),
@@ -121,6 +154,27 @@ class AccountJournal(models.Model):
         self.l10n_sa_csr = self.env['certificate.certificate'].sudo()._l10n_sa_get_csr_str(self)
 
     # ====== Certificate Methods =======
+
+    def _l10n_sa_get_csid_error(self, csid):
+        """
+            Return a formatted error string if the CSID response has an 'error' or 'errors'
+            key or doesn't have a 'binarySecurityToken'
+        """
+        error_msg = ""
+        unknown_error_msg = _("Unknown response returned from ZATCA. Please check the logs.")
+        if error := csid.get('error'):
+            error_msg = error
+        elif errors := csid.get('errors'):
+            error_msg = " <br/>" + " <br/>- ".join([err['message'] if isinstance(err, dict) else err for err in errors])
+        elif 'error' in [csid.get('type', "").lower(), csid.get('status', "").lower()]:
+            error_msg = csid.get('message') or unknown_error_msg
+        elif not csid.get('binarySecurityToken'):
+            error_msg = unknown_error_msg
+
+        if error_msg:
+            _logger.warning("Failed to obtain CSID: %s", csid)
+
+        return error_msg
 
     def _l10n_sa_reset_certificates(self):
         """
@@ -140,6 +194,10 @@ class AccountJournal(models.Model):
                 3.  Get the Production CSID
         """
         self.ensure_one()
+        # we want to perform sanity checks to ensure that the journal is ready to be onboarded
+        # If the check fails, we do not want to revoke the existing PCSID because the user might still need it to post hanging invoices
+        self._l10n_sa_api_onboard_sanity_checks()
+
         try:
             # If the company does not have a private key, we generate it.
             # The private key is used to generate the CSR but also to sign the invoices
@@ -156,6 +214,8 @@ class AccountJournal(models.Model):
             self._l10n_sa_get_production_CSID()
             # Once all three steps are completed, we set the errors field to False
             self.l10n_sa_csr_errors = False
+            # Regenerate a new chain sequence
+            self._l10n_sa_edi_icv_onboarding()
         except (RequestException, HTTPError, UserError) as e:
             # In case of an exception returned from ZATCA (not timeout), we will need to regenerate the CSR
             # As the same CSR cannot be used twice for the same CCSID request
@@ -167,12 +227,14 @@ class AccountJournal(models.Model):
             Request a Compliance Cryptographic Stamp Identifier (CCSID) from ZATCA
         """
         CCSID_data = self._l10n_sa_api_get_compliance_CSID(otp)
-        if CCSID_data.get('error'):
-            raise UserError(_("Could not obtain Compliance CSID: %s", CCSID_data['error']))
+        if error := self._l10n_sa_get_csid_error(CCSID_data):
+            raise UserError(_("Please check the details below and onboard the journal again: %s", error))
+
         cert_id = self.env['certificate.certificate'].sudo().create({
             'name': 'CCSID Certificate',
             'content': b64decode(CCSID_data['binarySecurityToken']),
             'private_key_id': self.company_id.sudo().l10n_sa_private_key_id.id,
+            'company_id': self.company_id.id,
         }).id
         self.sudo().write({
             'l10n_sa_compliance_csid_json': json.dumps(CCSID_data),
@@ -188,25 +250,34 @@ class AccountJournal(models.Model):
 
         self_sudo = self.sudo()
 
-        if not self_sudo.l10n_sa_compliance_csid_json or not self_sudo.l10n_sa_compliance_csid_certificate_id:
-            raise UserError(_("Cannot request a Production CSID before requesting a CCSID first"))
-        elif not self_sudo.l10n_sa_compliance_checks_passed:
-            raise UserError(_("Cannot request a Production CSID before completing the Compliance Checks"))
+        if not self_sudo.l10n_sa_compliance_csid_json or not self_sudo.l10n_sa_compliance_csid_certificate_id or not self_sudo.l10n_sa_compliance_checks_passed:
+            _logger.warning(
+                "ZATCA_ERROR: Production CSID precheck failed for journal=%s (id=%s, company_id=%s): "
+                "has_compliance_json=%s, has_compliance_cert=%s, compliance_checks_passed=%s",
+                self.display_name,
+                self.id,
+                self.company_id.id,
+                bool(self_sudo.l10n_sa_compliance_csid_json),
+                bool(self_sudo.l10n_sa_compliance_csid_certificate_id),
+                self_sudo.l10n_sa_compliance_checks_passed,
+            )
+            raise UserError(str(ERROR_MESSAGE))
 
         renew = False
         zatca_format = self.env.ref('l10n_sa_edi.edi_sa_zatca')
 
         if self_sudo.l10n_sa_production_csid_json:
             time_now = zatca_format._l10n_sa_get_zatca_datetime(datetime.now())
-            if zatca_format._l10n_sa_get_zatca_datetime(self_sudo.l10n_sa_production_csid_validity) < time_now:
+            validity_time = self_sudo.l10n_sa_production_csid_validity
+            if zatca_format._l10n_sa_get_zatca_datetime(validity_time) < time_now:
                 renew = True
             else:
-                raise UserError(_("The Production CSID is still valid. You can only renew it once it has expired."))
+                raise UserError(_("The Journal is valid until (%s) and can only be renewed upon expiry.", validity_time))
 
         CCSID_data = json.loads(self_sudo.l10n_sa_compliance_csid_json)
         PCSID_data = self_sudo._l10n_sa_request_production_csid(CCSID_data, renew, OTP)
-        if PCSID_data.get('error'):
-            raise UserError(_("Could not obtain Production CSID: %s", PCSID_data['error']))
+        if error := self._l10n_sa_get_csid_error(PCSID_data):
+            raise UserError(_("Could not obtain Production CSID: %s", error))
         self_sudo.l10n_sa_production_csid_json = json.dumps(PCSID_data)
         pcsid_certificate = self_sudo.env['certificate.certificate'].create({
             'name': 'PCSID Certificate',
@@ -246,9 +317,15 @@ class AccountJournal(models.Model):
         self.ensure_one()
         self_sudo = self.sudo()
         if self.country_code != 'SA':
-            raise UserError(_("Compliance checks can only be run for companies operating from KSA"))
+            raise UserError(_("Please change the (%s)'s country to Saudi Arabia and try again.", self.company_id.name))
         if not self_sudo.l10n_sa_compliance_csid_json or not self_sudo.l10n_sa_compliance_csid_certificate_id:
-            raise UserError(_("You need to request the CCSID first before you can proceed"))
+            _logger.warning(
+                "ZATCA_ERROR: Compliance-check precheck failed for journal=%s (id=%s, company_id=%s): missing compliance CSID data",
+                self.display_name,
+                self.id,
+                self.company_id.id,
+            )
+            raise UserError(str(ERROR_MESSAGE))
         CCSID_data = json.loads(self_sudo.l10n_sa_compliance_csid_json)
         compliance_files = self._l10n_sa_get_compliance_files()
         for fname, fval in compliance_files.items():
@@ -258,14 +335,29 @@ class AccountJournal(models.Model):
             prepared_xml = self._l10n_sa_prepare_compliance_xml(fname, fval, self_sudo.l10n_sa_compliance_csid_certificate_id, digital_signature)
             result = self._l10n_sa_api_compliance_checks(prepared_xml.decode(), CCSID_data)
             if result.get('error'):
-                raise UserError(Markup("<p class='mb-0'>%s <b>%s</b></p>") % (_("Could not complete Compliance Checks for the following file:"), fname))
+                _logger.warning(
+                    "ZATCA_ERROR: Compliance API returned an error for journal=%s (id=%s, company_id=%s, file=%s, error=%s)",
+                    self.display_name,
+                    self.id,
+                    self.company_id.id,
+                    fname,
+                    result.get('error'),
+                )
+                raise UserError(Markup("<p class='mb-0'>%s</p>") % (str(ERROR_MESSAGE)))
             if result['validationResults']['status'] == 'WARNING':
                 warnings = Markup().join(Markup("<li><b>%(code)s</b>: %(message)s </li>") % e for e in result['validationResults']['warningMessages'])
                 self.l10n_sa_csr_errors = Markup("<br/><br/><ul class='pl-3'><b>%s</b>%s</ul>") % (_("Warnings:"), warnings)
             elif result['validationResults']['status'] != 'PASS':
-                errors = Markup().join(Markup("<li><b>%(code)s</b>: %(message)s </li>") % e for e in result['validationResults']['errorMessages'])
-                raise UserError(Markup("<p class='mb-0'>%s <b>%s</b> %s</p>")
-                                % (_("Could not complete Compliance Checks for the following file:"), fname, Markup("<br/><br/><ul class='pl-3'><b>%s</b>%s</ul>") % (_("Errors:"), errors)))
+                _logger.warning(
+                    "ZATCA_ERROR: Compliance validation failed for journal=%s (id=%s, company_id=%s, file=%s, status=%s, error_messages=%s)",
+                    self.display_name,
+                    self.id,
+                    self.company_id.id,
+                    fname,
+                    result['validationResults'].get('status'),
+                    result['validationResults'].get('errorMessages'),
+                )
+                raise UserError(Markup("<p class='mb-0'>%s</p>") % (str(ERROR_MESSAGE)))
         self.l10n_sa_compliance_checks_passed = True
 
     def _l10n_sa_prepare_compliance_xml(self, xml_name, xml_raw, certificate, signature):
@@ -275,7 +367,7 @@ class AccountJournal(models.Model):
         xml_content = self._l10n_sa_prepare_invoice_xml(xml_raw)
         signed_xml = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_sign_xml(xml_content, certificate, signature)
         if xml_name.startswith('simplified'):
-            qr_code_str = self.env['account.move']._l10n_sa_get_qr_code(self, signed_xml, certificate, signature, True)
+            qr_code_str = self.env['account.move']._l10n_sa_get_qr_code(self.company_id, signed_xml, certificate, signature, True)
             root = etree.fromstring(signed_xml)
             qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
             qr_node.text = b64encode(qr_code_str).decode()
@@ -307,16 +399,32 @@ class AccountJournal(models.Model):
         return etree.tostring(root)
 
     # ====== Index Chain & Previous Invoice Calculation =======
+    def _l10n_sa_edi_icv_onboarding(self):
+        """
+            Onboarding method to create or reset ICV sequence for the journal
+        """
+        self.ensure_one()
+        if self.l10n_sa_chain_sequence_id:
+            self.l10n_sa_chain_sequence_id.number_next = 1
+            message = _("Journal re-onboarded with ZATCA successfully")
+        else:
+            self.l10n_sa_chain_sequence_id = self._l10n_sa_edi_create_new_chain()
+            message = _("Journal onboarded with ZATCA successfully")
+        self.message_post(body=message)
+
+    def _l10n_sa_edi_create_new_chain(self):
+        self.ensure_one()
+        return self.env['ir.sequence'].create({
+            'name': f'ZATCA account move sequence for Journal {self.name} (id: {self.id})',
+            'code': f'l10n_sa_edi.account.move.{self.id}',
+            'implementation': 'no_gap',
+            'company_id': self.company_id.id,
+        })
 
     def _l10n_sa_edi_get_next_chain_index(self):
         self.ensure_one()
         if not self.l10n_sa_chain_sequence_id:
-            self.l10n_sa_chain_sequence_id = self.env['ir.sequence'].create({
-                'name': f'ZATCA account move sequence for Journal {self.name} (id: {self.id})',
-                'code': f'l10n_sa_edi.account.move.{self.id}',
-                'implementation': 'no_gap',
-                'company_id': self.company_id.id,
-            })
+            self.l10n_sa_chain_sequence_id = self._l10n_sa_edi_create_new_chain()
         return self.l10n_sa_chain_sequence_id.next_by_id()
 
     def _l10n_sa_get_last_posted_invoice(self):
@@ -343,9 +451,15 @@ class AccountJournal(models.Model):
         """
         self.ensure_one()
         if not otp:
-            raise UserError(_("Please, set a valid OTP to be used for Onboarding"))
+            raise UserError(_("The OTP is invalid. Please try again."))
         if not self.l10n_sa_csr:
-            raise UserError(_("Please, generate a CSR before requesting a CCSID"))
+            _logger.warning(
+                "ZATCA_ERROR: CCSID request precheck failed for journal=%s (id=%s, company_id=%s): CSR missing",
+                self.display_name,
+                self.id,
+                self.company_id.id,
+            )
+            raise UserError(str(ERROR_MESSAGE))
         request_data = {
             'body': json.dumps({'csr': self.l10n_sa_csr.decode()}),
             'header': {'OTP': otp}
@@ -459,11 +573,19 @@ class AccountJournal(models.Model):
         self.ensure_one()
         self_sudo = self.sudo()
         if not self_sudo.l10n_sa_production_csid_json or not self_sudo.l10n_sa_production_csid_certificate_id:
-            raise UserError(_("Please, make a request to obtain the Compliance CSID and Production CSID before sending "
-                            "documents to ZATCA"))
+            _logger.info(
+                "ZATCA_ERROR: PCSID retrieval precheck failed for journal=%s (id=%s, company_id=%s): "
+                "has_production_json=%s, has_production_cert=%s",
+                self.display_name,
+                self.id,
+                self.company_id.id,
+                bool(self_sudo.l10n_sa_production_csid_json),
+                bool(self_sudo.l10n_sa_production_csid_certificate_id),
+            )
+            raise UserError(str(ERROR_MESSAGE))
         certificate = self_sudo.l10n_sa_production_csid_certificate_id
         if not certificate.is_valid and self.company_id.l10n_sa_api_mode != 'sandbox':
-            raise UserError(_("Production certificate has expired, please renew the PCSID before proceeding"))
+            raise UserError(_("The Journal is not valid anymore. Please Renew it."))
         return json.loads(self_sudo.l10n_sa_production_csid_json), certificate.id
 
     # ====== API Helper Methods =======
@@ -474,23 +596,34 @@ class AccountJournal(models.Model):
         """
         api_url = ZATCA_API_URLS[self.company_id.l10n_sa_api_mode]
         request_url = urljoin(api_url, request_url)
+        status_code = False
         try:
             request_response = requests.request(method, request_url, data=request_data.get('body'),
                                                 headers={
                                                     **self._l10n_sa_api_headers(),
                                                     **request_data.get('header')
-                                                }, timeout=(30, 30))
+                                                }, timeout=30)
             request_response.raise_for_status()
         except (ValueError, HTTPError) as ex:
-            # In the case of an explicit error from ZATCA, i.e we got a response but the code of the response is not 2xx
-            return {
-                'error': _("Server returned an unexpected error: %(error)s", error=(request_response.text or str(ex))),
-                'blocking_level': 'error'
-            }
+            # The 400 case means that it is rejected by ZATCA, but we need to update the hash as done for accepted.
+            # In the 401+ cases, it is like the server is overloaded e.g. and we still need to resend later.  We do not
+            # erase the index chain (excepted) because for ZATCA, one ICV (index chain) needs to correspond to one invoice.
+            if (status_code := ex.response.status_code) not in {400, 409}:
+                return {
+                    'error': (Markup("<b>[%s]</b>") % status_code) + _("Server returned an unexpected error: %(error)s",
+                               error=(request_response.text or str(ex))),
+                    'blocking_level': 'warning',
+                    'status_code': status_code,
+                    'excepted': True,
+                }
         except RequestException as ex:
             # Usually only happens if a Timeout occurs. In this case we're not sure if the invoice was accepted or
             # rejected, or if it even made it to ZATCA
             return {'error': str(ex), 'blocking_level': 'warning', 'excepted': True}
+
+        if request_response.status_code == '303':
+            return {'error': _('Clearance and reporting seem to have been mixed up. '),
+                    'blocking_level': 'warning', 'excepted': True}
 
         try:
             response_data = request_response.json()
@@ -499,17 +632,25 @@ class AccountJournal(models.Model):
                 'error': _("JSON response from ZATCA could not be decoded"),
                 'blocking_level': 'error'
             }
+        response_data['status_code'] = request_response.status_code
 
-        if not request_response.ok and (response_data.get('errors') or response_data.get('warnings')):
-            if isinstance(response_data, dict) and response_data.get('errors'):
+        if status_code == 409:
+            return response_data
+
+        val_res = response_data.get('validationResults', {})
+        if not request_response.ok and (val_res.get('errorMessages') or val_res.get('warningMessages')):
+            error = "" if not status_code else Markup("<b>[%s]</b>") % (status_code)
+            if isinstance(response_data, dict) and val_res.get('errorMessages'):
+                error += _("Invoice submission to ZATCA returned errors")
                 return {
-                    'error': _("Invoice submission to ZATCA returned errors"),
-                    'json_errors': response_data['errors'],
+                    'error': error,
+                    'json_errors': response_data,
                     'blocking_level': 'error',
                 }
+            error += request_response.reason
             return {
-                'error': request_response.reason,
-                'blocking_level': 'error'
+                'error': error,
+                'blocking_level': 'error',
             }
         return response_data
 
@@ -535,7 +676,6 @@ class AccountJournal(models.Model):
         self.ensure_one()
         self.company_id.l10n_sa_private_key_id = self.env['certificate.key']._generate_ec_private_key(self.company_id)
         self.write({
-            'l10n_sa_serial_number': 'SIDI3-CBMPR-L2D8X-KM0KN-X4ISJ',
             'l10n_sa_compliance_checks_passed': True,
             'l10n_sa_csr': b'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ2NqQ0NBaGNDQVFBd2djRXhDekFKQmdOVkJBWVRBbE5CTVJNd0VRWURWUVFMREFvek1UQXhOelV6T1RjMApNUk13RVFZRFZRUUtEQXBUUVNCRGIyMXdZVzU1TVJNd0VRWURWUVFEREFwVFFTQkRiMjF3WVc1NU1SZ3dGZ1lEClZRUmhEQTh6TVRBeE56VXpPVGMwTURBd01ETXhEekFOQmdOVkJBZ01CbEpwZVdGa2FERklNRVlHQTFVRUJ3dy8KdzVqQ3A4T1o0b0NldzVuaWdLYkRtTUt2dzVuRm9NT1o0b0NndzVqQ3FTRERtTUtudzVuaWdKN0RtZUtBcHNPWgo0b0NndzVuTGhzT1l3ckhEbU1LcE1GWXdFQVlIS29aSXpqMENBUVlGSzRFRUFBb0RRZ0FFN2ZpZWZWQ21HcTlzCmV0OVl4aWdQNzZWUmJxZlh0VWNtTk1VN3FkTlBiSm5NNGh5R1QwanpPcXUrSWNXWW5IelFJYmxJVmsydENPQnQKYjExanY4MGVwcUNCOVRDQjhnWUpLb1pJaHZjTkFRa09NWUhrTUlIaE1DUUdDU3NHQVFRQmdqY1VBZ1FYRXhWUQpVa1ZhUVZSRFFTMURiMlJsTFZOcFoyNXBibWN3Z2JnR0ExVWRFUVNCc0RDQnJhU0JxakNCcHpFME1ESUdBMVVFCkJBd3JNUzFQWkc5dmZESXRNVFY4TXkxVFNVUkpNeTFEUWsxUVVpMU1Na1E0V0MxTFRUQkxUaTFZTkVsVFNqRWYKTUIwR0NnbVNKb21UOGl4a0FRRU1Eek14TURFM05UTTVOelF3TURBd016RU5NQXNHQTFVRURBd0VNVEV3TURFdgpNQzBHQTFVRUdnd21RV3dnUVcxcGNpQk5iMmhoYlcxbFpDQkNhVzRnUVdKa2RXd2dRWHBwZWlCVGRISmxaWFF4CkRqQU1CZ05WQkE4TUJVOTBhR1Z5TUFvR0NDcUdTTTQ5QkFNQ0Ewa0FNRVlDSVFEb3VCeXhZRDRuQ2pUQ2V6TkYKczV6SmlVWW1QZVBRNnFWNDdZemRHeWRla1FJaEFPRjNVTWF4UFZuc29zOTRFMlNkT2JJcTVYYVAvKzlFYWs5TgozMUtWRUkvTQotLS0tLUVORCBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0K',
             'l10n_sa_compliance_csid_json': """{"requestID": 1234567890123, "dispositionMessage": "ISSUED", "binarySecurityToken": "TUlJQ2N6Q0NBaG1nQXdJQkFnSUdBWStWTmxza01Bb0dDQ3FHU000OUJBTUNNQlV4RXpBUkJnTlZCQU1NQ21WSmJuWnZhV05wYm1jd0hoY05NalF3TlRJd01EZzFOVEV6V2hjTk1qa3dOVEU1TWpFd01EQXdXakNCbnpFTE1Ba0dBMVVFQmhNQ1UwRXhFekFSQmdOVkJBc01Dak01T1RrNU9UazVPVGt4RXpBUkJnTlZCQW9NQ2xOQklFTnZiWEJoYm5reEV6QVJCZ05WQkFNTUNsTkJJRU52YlhCaGJua3hHREFXQmdOVkJHRU1Eek01T1RrNU9UazVPVGt3TURBd016RVBNQTBHQTFVRUNBd0dVbWw1WVdSb01TWXdKQVlEVlFRSERCM1lwOW1FMllYWXI5bUsyWWJZcVNEWXA5bUUyWVhaaHRtSTJMSFlxVEJXTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQTBJQUJOVlB3N0hGNjhUVWtQTkJQb29uT0Y2NnRPMm5IcmxUNlRMcmk3MEpLY1MvYmVMWitoRVE0MmdXdUtYckp5RmxnWm9kUVJzTFQyMEtQZnE0Q3N2YlFJMmpnY3d3Z2Nrd0RBWURWUjBUQVFIL0JBSXdBRENCdUFZRFZSMFJCSUd3TUlHdHBJR3FNSUduTVRRd01nWURWUVFFRENzeExVOWtiMjk4TWkweE5Yd3pMVk5KUkVrekxVTkNUVkJTTFV3eVJEaFlMVXROTUV0T0xWZzBTVk5LTVI4d0hRWUtDWkltaVpQeUxHUUJBUXdQTXprNU9UazVPVGs1T1RBd01EQXpNUTB3Q3dZRFZRUU1EQVF4TVRBd01TOHdMUVlEVlFRYURDWkJiQ0JCYldseUlFMXZhR0Z0YldWa0lFSnBiaUJCWW1SMWJDQkJlbWw2SUZOMGNtVmxkREVPTUF3R0ExVUVEd3dGVDNSb1pYSXdDZ1lJS29aSXpqMEVBd0lEU0FBd1JRSWdTeVhlZExqOUtMVTRUMWFBbVQvL09GZDBGWWxLQnIraFFIeGNDM0c2ajc4Q0lRRGdlNjNsQkVqTU1ETktqTm1pTklaQlBWSnlHRzl5bVJaSHdvUzV5TEQyZXc9PQ==", "secret": "uMpSz85cV0h/e/uqpJ+FaZkdYZ76uoaRYOevGufcup0=", "errors": null}""",

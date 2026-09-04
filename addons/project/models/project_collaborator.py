@@ -7,14 +7,15 @@ class ProjectCollaborator(models.Model):
     _name = 'project.collaborator'
     _description = 'Collaborators in project shared'
 
-    project_id = fields.Many2one('project.project', 'Project Shared', domain=[('privacy_visibility', '=', 'portal')], required=True, readonly=True, export_string_translation=False)
+    project_id = fields.Many2one('project.project', 'Project Shared', domain=[('privacy_visibility', 'in', ['portal', 'invited_users']), ('is_template', '=', False)], required=True, readonly=True, export_string_translation=False)
     partner_id = fields.Many2one('res.partner', 'Collaborator', required=True, readonly=True, export_string_translation=False)
     partner_email = fields.Char(related='partner_id.email', export_string_translation=False)
     limited_access = fields.Boolean('Limited Access', default=False, export_string_translation=False)
 
-    _sql_constraints = [
-        ('unique_collaborator', 'UNIQUE(project_id, partner_id)', 'A collaborator cannot be selected more than once in the project sharing access. Please remove duplicate(s) and try again.'),
-    ]
+    _unique_collaborator = models.Constraint(
+        'UNIQUE(project_id, partner_id)',
+        'A collaborator cannot be selected more than once in the project sharing access. Please remove duplicate(s) and try again.',
+    )
 
     @api.depends('project_id', 'partner_id')
     def _compute_display_name(self):

@@ -4,7 +4,7 @@ from odoo import models, api, fields, _, Command
 from odoo.exceptions import UserError
 
 
-class L10nLatamPaymentMassTransfer(models.TransientModel):
+class L10n_LatamPaymentMassTransfer(models.TransientModel):
     _name = 'l10n_latam.payment.mass.transfer'
     _description = 'Checks Mass Transfers'
     _check_company_auto = True
@@ -46,15 +46,15 @@ class L10nLatamPaymentMassTransfer(models.TransientModel):
         self.company_id = journal.company_id.id
 
     @api.model
-    def default_get(self, fields_list):
-        res = super().default_get(fields_list)
-        if 'check_ids' in fields_list and 'check_ids' not in res:
-            if self._context.get('active_model') != 'l10n_latam.check':
+    def default_get(self, fields):
+        res = super().default_get(fields)
+        if 'check_ids' in fields and 'check_ids' not in res:
+            if self.env.context.get('active_model') != 'l10n_latam.check':
                 raise UserError(_("The register payment wizard should only be called on account.payment records."))
-            checks = self.env['l10n_latam.check'].browse(self._context.get('active_ids', []))
+            checks = self.env['l10n_latam.check'].browse(self.env.context.get('active_ids', []))
             if checks.filtered(lambda x: x.payment_method_line_id.code != 'new_third_party_checks'):
-                raise 'You have select some payments that are not checks. Please call this action from the Third Party Checks menu'
-            elif not all(check.payment_id.state != 'draft' for check in checks):
+                raise UserError(_('You have selected payments which are not checks. Please call this action from the Third Party Checks menu'))
+            elif not all(check.payment_id.state not in ('draft', 'canceled') for check in checks):
                 raise UserError(_("All the selected checks must be posted"))
             currency_ids = checks.mapped('currency_id')
             if any(x != currency_ids[0] for x in currency_ids):

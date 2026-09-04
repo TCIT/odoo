@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import { patch } from "@web/core/utils/patch";
@@ -11,11 +9,11 @@ patch(PaymentScreen.prototype, {
         super.setup(...arguments);
         onMounted(() => {
             if (this.checkIsToInvoice()) {
-                this.currentOrder.set_to_invoice(true);
+                this.currentOrder.setToInvoice(true);
             }
         });
     },
-    toggleIsToInvoice() {
+    async toggleIsToInvoice() {
         if (this.checkIsToInvoice()) {
             this.dialog.add(AlertDialog, {
                 title: _t("This order needs to be invoiced"),
@@ -24,14 +22,14 @@ patch(PaymentScreen.prototype, {
                 ),
             });
         } else {
-            super.toggleIsToInvoice(...arguments);
+            await super.toggleIsToInvoice(...arguments);
         }
     },
     checkIsToInvoice() {
-        const orderLines = this.currentOrder.get_orderlines();
+        const orderLines = this.currentOrder.getOrderlines();
         const has_origin_order = orderLines.some((line) => line.sale_order_origin_id);
         const has_intracom_taxes = orderLines.some((line) =>
-            line.tax_ids?.some((tax) => this.pos.session._intracom_tax_ids?.includes(tax.id))
+            line.tax_ids?.some((tax) => this.pos.config._intracom_tax_ids?.includes(tax.id))
         );
         if (
             this.pos.company.country_id &&

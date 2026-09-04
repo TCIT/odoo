@@ -17,7 +17,7 @@ $o-base-color-palette: map-merge($o-base-color-palette, (
     'header-sales_three-custom': null,
     'header-sales_four': 1,
     'header-sales_four-custom': null,
-    'footer': 5, // o_cc5
+    'footer': 2, // o_cc2
     'footer-custom': null,
     'copyright': null,
     'copyright-custom': null,
@@ -48,6 +48,12 @@ $o-social-colors: (
     'whatsapp': #25d366,
     'pinterest': #C8232C,
     'tiktok': #000000,
+    'discord':#5865f2,
+    "kickstarter":#0f2105,
+    "google-play": #4285F4,
+    "strava": #fc4c02,
+    "bluesky": #1185FE,
+    "threads": #000000,
 );
 
 $o-theme-figcaption-opacity: 0.6;
@@ -55,7 +61,8 @@ $o-theme-figcaption-opacity: 0.6;
 $o-color-palettes: map-merge($o-color-palettes,
     (
         'base-1': map-merge(map-get($o-color-palettes, 'base-1'), (
-            'copyright-custom': 'black-15',
+            'menu': 1,
+            'footer': 2,
         )),
         'base-2': map-merge(map-get($o-color-palettes, 'base-2'), (
             'menu': 2,
@@ -2172,10 +2179,10 @@ $o-base-website-values-palette: (
     'header-template': 'default', // 'default' / 'hamburger' / 'vertical' / 'sidebar'
     'header-font-size': null, // Default to BS (normal font-size)
     'header-text-color': null, // TODO: should have been put in the color map
-    'header-links-style': 'default', // 'default' / 'fill' / 'outline' / 'pills' / 'block' / 'border-bottom'
+    'header-links-style': 'default', // 'default' / 'fill' / 'outline' / 'pills' / 'block' / 'border-bottom' / 'underline' / 'bold'
     'logo-height': null, // Default to navbar height (see portal)
     'hamburger-position': 'left', // 'left' / 'center' / 'right'
-    'hamburger-position-mobile': 'left', // 'left' / 'center' / 'right'
+    'hamburger-position-mobile': 'right', // 'left' / 'center' / 'right'
     'menu-border-width': null, // Default to classes used on the template
     'menu-border-style': solid, // Default to classes used on the template
     'menu-border-radius': null, // Default to classes used on the template
@@ -2201,13 +2208,15 @@ $o-font-aliases-to-keys: (
     'navbar': 'navbar-font',
     'buttons': 'buttons-font',
 );
+$o-website-default-headings-font: 'Inter Tight';
 $o-website-values-palettes: (
     (
         // By default, the $o-base-website-values-palette for fonts are "null"
         // but will actually automatically be filled with the first font themes
         // define in $o-theme-font-configs (for the base one). For the default
         // website, we use a combination of Inter Tight for headings and Inter.
-        'headings-font': 'Inter Tight',
+        'default-headings-font': $o-website-default-headings-font,
+        'headings-font': $o-website-default-headings-font,
         'font': 'Inter',
 
         'btn-padding-x': 1rem,
@@ -2297,6 +2306,14 @@ $o-theme-font-configs: (
 ) !default;
 
 //------------------------------------------------------------------------------
+// Components BS
+//------------------------------------------------------------------------------
+
+// == Offcanvas
+$o-offcanvas-horizontal-default-width: 400px !default;
+$o-offcanvas-horizontal-width: var(--Offcanvas-horizontal-width, #{$o-offcanvas-horizontal-default-width}) !default;
+
+//------------------------------------------------------------------------------
 // Mixins
 //------------------------------------------------------------------------------
 
@@ -2334,12 +2351,6 @@ $o-theme-font-configs: (
         background-image: $-gradient;
     }
 };
-
-@mixin o-line-clamp($lines) {
-    display: -webkit-box;
-    -webkit-line-clamp: $lines;
-    -webkit-box-orient: vertical;
-}
 
 // Replaces 'NULL' string values in a map by the sass null value (this is useful
 // as a "hack" to allow users to define null values in their custom palette as

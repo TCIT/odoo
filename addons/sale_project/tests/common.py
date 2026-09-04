@@ -8,10 +8,9 @@ class TestSaleProjectCommon(TestSaleCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.env.user.group_ids += cls.quick_ref('project.group_project_manager')
 
-        cls.env['res.config.settings'] \
-            .create({'group_project_milestone': True}) \
-            .execute()
+        cls.env.user.group_ids |= cls.env.ref('project.group_project_milestone')
 
         cls.uom_hour = cls.env.ref('uom.product_uom_hour')
         cls.account_sale = cls.company_data['default_account_revenue']
@@ -46,7 +45,6 @@ class TestSaleProjectCommon(TestSaleCommon):
             'type': 'service',
             'invoice_policy': 'delivery',
             'uom_id': cls.uom_hour.id,
-            'uom_po_id': cls.uom_hour.id,
             'default_code': 'SERV-DELI1',
             'service_type': 'manual',
             'service_tracking': 'no',
@@ -61,7 +59,6 @@ class TestSaleProjectCommon(TestSaleCommon):
             'type': 'service',
             'invoice_policy': 'delivery',
             'uom_id': cls.uom_hour.id,
-            'uom_po_id': cls.uom_hour.id,
             'default_code': 'SERV-DELI2',
             'service_type': 'manual',
             'service_tracking': 'task_global_project',
@@ -76,7 +73,6 @@ class TestSaleProjectCommon(TestSaleCommon):
             'type': 'service',
             'invoice_policy': 'delivery',
             'uom_id': cls.uom_hour.id,
-            'uom_po_id': cls.uom_hour.id,
             'default_code': 'SERV-DELI3',
             'service_type': 'manual',
             'service_tracking': 'task_in_project',
@@ -91,7 +87,6 @@ class TestSaleProjectCommon(TestSaleCommon):
             'type': 'service',
             'invoice_policy': 'delivery',
             'uom_id': cls.uom_hour.id,
-            'uom_po_id': cls.uom_hour.id,
             'default_code': 'SERV-DELI4',
             'service_type': 'manual',
             'service_tracking': 'project_only',
@@ -106,7 +101,6 @@ class TestSaleProjectCommon(TestSaleCommon):
             'type': 'service',
             'invoice_policy': 'delivery',
             'uom_id': cls.uom_hour.id,
-            'uom_po_id': cls.uom_hour.id,
             'default_code': 'SERV-DELI4',
             'service_type': 'manual',
             'service_tracking': 'project_only',
@@ -158,7 +152,6 @@ class TestSaleProjectCommon(TestSaleCommon):
             'type': 'service',
             'invoice_policy': 'delivery',
             'uom_id': cls.uom_hour.id,
-            'uom_po_id': cls.uom_hour.id,
             'default_code': 'SERV-MILES',
             'service_type': 'milestones',
             'service_tracking': 'no',
@@ -168,8 +161,3 @@ class TestSaleProjectCommon(TestSaleCommon):
             {**product_milestone_vals, 'name': 'Milestone Product', 'list_price': 20},
             {**product_milestone_vals, 'name': 'Milestone Product 2', 'list_price': 15},
         ])
-
-    def set_project_milestone_feature(self, value):
-        self.env['res.config.settings'] \
-            .create({'group_project_milestone': value}) \
-            .execute()

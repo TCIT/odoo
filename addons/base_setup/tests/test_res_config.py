@@ -43,7 +43,7 @@ class TestResConfig(TransactionCase):
         # Case 1: Enable a group
         default_values.update({'group_multi_currency': True})
         ResConfig.create(default_values).execute()
-        self.assertTrue(user in self.env.ref('base.group_multi_currency').sudo().users)
+        self.assertTrue(user in self.env.ref('base.group_multi_currency').sudo().all_user_ids)
 
         new_partner = self.env['res.partner'].create({'name': 'New User'})
         new_user = self.env['res.users'].create({
@@ -52,12 +52,12 @@ class TestResConfig(TransactionCase):
             'company_ids': [(4, company.id)],
             'partner_id': new_partner.id,
         })
-        self.assertTrue(new_user in self.env.ref('base.group_multi_currency').sudo().users)
+        self.assertTrue(new_user in self.env.ref('base.group_multi_currency').sudo().all_user_ids)
 
         # Case 2: Disable a group
         default_values.update({'group_multi_currency': False})
         ResConfig.create(default_values).execute()
-        self.assertTrue(user not in self.env.ref('base.group_multi_currency').sudo().users)
+        self.assertTrue(user not in self.env.ref('base.group_multi_currency').sudo().all_user_ids)
 
         new_partner = self.env['res.partner'].create({'name': 'New User'})
         new_user = self.env['res.users'].create({
@@ -66,7 +66,7 @@ class TestResConfig(TransactionCase):
             'company_ids': [(4, company.id)],
             'partner_id': new_partner.id,
         })
-        self.assertTrue(new_user not in self.env.ref('base.group_multi_currency').sudo().users)
+        self.assertTrue(new_user not in self.env.ref('base.group_multi_currency').sudo().all_user_ids)
 
     def test_no_install(self):
         """Make sure that when saving settings,
@@ -79,7 +79,7 @@ class TestResConfig(TransactionCase):
                 self.assertTrue(module.state != 'uninstalled',
                                 "All set modules should already be installed.")
         # if we try to install something, raise; so nothing should be installed
-        with patch('odoo.addons.base.models.ir_module.Module.button_immediate_install', new=just_raise):
+        with patch('odoo.addons.base.models.ir_module.IrModuleModule.button_immediate_install', new=just_raise):
             self.config.execute()
 
     def test_install(self):
@@ -91,6 +91,6 @@ class TestResConfig(TransactionCase):
         module_to_install = next(m for m in config_fields['module'] if m.state == 'uninstalled')
         self.config[f'module_{module_to_install.name}'] = True
 
-        with patch('odoo.addons.base.models.ir_module.Module.button_immediate_install', new=just_raise):
+        with patch('odoo.addons.base.models.ir_module.IrModuleModule.button_immediate_install', new=just_raise):
             with self.assertRaisesRegex(Exception, "We should not be here."):
                 self.config.execute()

@@ -54,6 +54,15 @@
     }
 }
 
-.submit-order {
+.multiprint-flex {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.multiprint-flex .product-quantity {
+    margin-right: 50px;
+}
+
+.submit-order, .set-table, .new-tab, .assign-button, .plan-button {
     min-height: 70px;
 }

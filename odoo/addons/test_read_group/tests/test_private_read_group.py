@@ -92,6 +92,41 @@ class TestPrivateReadGroup(common.TransactionCase):
                 ],
             )
 
+    def test_limit_offset(self):
+        Model = self.env['test_read_group.aggregate']
+        Model.create({'key': 1, 'value': 1})
+        Model.create({'key': 1, 'value': 2})
+        Model.create({'key': 1, 'value': 3})
+        Model.create({'key': 2, 'value': 4})
+        Model.create({'key': 2})
+        Model.create({'key': 2, 'value': 5})
+        Model.create({})
+        Model.create({'value': 6})
+
+        self.assertEqual(
+            Model._read_group([], groupby=['key'], aggregates=['value:sum'], limit=2),
+            [
+                (1, 1 + 2 + 3),
+                (2, 4 + 5),
+            ],
+        )
+
+        self.assertEqual(
+            Model._read_group([], groupby=['key'], aggregates=['value:sum'], offset=1),
+            [
+                (2, 4 + 5),
+                (False, 6),
+            ],
+        )
+
+        self.assertEqual(
+            Model._read_group([], groupby=['key'], aggregates=['value:sum'], offset=1, limit=2, order='key DESC'),
+            [
+                (2, 4 + 5),
+                (1, 1 + 2 + 3),
+            ],
+        )
+
     def test_falsy_domain(self):
         Model = self.env['test_read_group.aggregate']
 
@@ -331,7 +366,7 @@ class TestPrivateReadGroup(common.TransactionCase):
             Model._read_group([], ['"create_date:week'])
 
         with self.assertRaises(ValueError):
-            Model._read_group([], ['order_id.id'])
+            Model._read_group([], ['"create_date:unknown_number'])
 
         # Test malformed aggregate clause
         with self.assertRaises(ValueError):
@@ -357,6 +392,9 @@ class TestPrivateReadGroup(common.TransactionCase):
 
         with self.assertRaises(ValueError):
             Model._read_group([], aggregates=['order_id.create_date:min'])
+
+        with self.assertRaisesRegex(ValueError, "Invalid field 'not_another_field' on model 'test_read_group.order.line' for 'not_another_field:sum'."):
+            Model._read_group([], aggregates=['value:sum', 'not_another_field:sum'])
 
         # Test malformed having clause
         with self.assertRaises(ValueError):
@@ -469,13 +507,64 @@ class TestPrivateReadGroup(common.TransactionCase):
         """ Test grouping by date part number (ex. month_number gives 1 for January) """
         Model = self.env['test_read_group.fill_temporal']
         Model.create({})  # Falsy date
-        Model.create({'date': '2022-01-29'})  # W4, M1, Q1
-        Model.create({'date': '2022-01-29'})  # W4, M1, Q1
-        Model.create({'date': '2022-01-30'})  # W4, M1, Q1
-        Model.create({'date': '2022-01-31'})  # W5, M1, Q1
-        Model.create({'date': '2022-02-01'})  # W5, M2, Q1
-        Model.create({'date': '2022-05-29'})  # W21, M5, Q2
-        Model.create({'date': '2023-01-29'})  # W4, M1, Q1
+        Model.create({'date': '2022-01-29', 'datetime': '2022-01-29 13:55:12'})  # W4, M1, Q1
+        Model.create({'date': '2022-01-29', 'datetime': '2022-01-29 15:55:13'})  # W4, M1, Q1
+        Model.create({'date': '2022-01-30', 'datetime': '2022-01-30 13:54:14'})  # W4, M1, Q1
+        Model.create({'date': '2022-01-31', 'datetime': '2022-01-31 15:55:14'})  # W5, M1, Q1
+        Model.create({'date': '2022-02-01', 'datetime': '2022-02-01 14:54:13'})  # W5, M2, Q1
+        Model.create({'date': '2022-05-29', 'datetime': '2022-05-29 14:55:13'})  # W21, M5, Q2
+        Model.create({'date': '2023-01-29', 'datetime': '2023-01-29 15:55:13'})  # W4, M1, Q1
+
+        result = Model._read_group([], ['datetime:second_number'], ['__count'])
+        self.assertEqual(result, [
+            (12, 1),
+            (13, 4),
+            (14, 2),
+            (False, 1),
+        ])
+
+        result = Model._read_group([], ['datetime:minute_number'], ['__count'])
+        self.assertEqual(result, [
+            (54, 2),
+            (55, 5),
+            (False, 1),
+        ])
+
+        result = Model._read_group([], ['datetime:hour_number'], ['__count'])
+        self.assertEqual(result, [
+            (13, 2),
+            (14, 2),
+            (15, 3),
+            (False, 1),
+        ])
+
+        result = Model._read_group([], ['date:day_of_year'], ['__count'])
+        self.assertEqual(result, [
+            (29, 3),
+            (30, 1),
+            (31, 1),
+            (32, 1),
+            (149, 1),
+            (False, 1),
+        ])
+
+        result = Model._read_group([], ['date:day_of_month'], ['__count'])
+        self.assertEqual(result, [
+            (1, 1),
+            (29, 4),
+            (30, 1),
+            (31, 1),
+            (False, 1),
+        ])
+
+        result = Model._read_group([], ['date:day_of_week'], ['__count'])
+        self.assertEqual(result, [
+            (0, 3),
+            (1, 1),
+            (2, 1),
+            (6, 2),
+            (False, 1),
+        ])
 
         result = Model._read_group([], ['date:iso_week_number'], ['__count'])
         self.assertEqual(result, [
@@ -500,11 +589,19 @@ class TestPrivateReadGroup(common.TransactionCase):
             (False, 1),
         ])
 
-        result = Model._read_group([], ['date:quarter_number'], ['__count'], order="date:quarter_number DESC")
+        # Test datetime with quarter_number + DESC order
+        result = Model._read_group([], ['datetime:quarter_number'], ['__count'], order="datetime:quarter_number DESC")
         self.assertEqual(result, [
             (False, 1),
             (2, 1),
             (1, 6),
+        ])
+
+        result = Model._read_group([], ['date:year_number'], ['__count'])
+        self.assertEqual(result, [
+            (2022, 6),  # year 2022 has 6 records
+            (2023, 1),  # year 2023 has 1 record
+            (False, 1),
         ])
 
     def test_groupby_datetime(self):
@@ -679,8 +776,8 @@ class TestPrivateReadGroup(common.TransactionCase):
             )],
         )
 
-    def test_auto_join(self):
-        """ Test what happens when grouping with a domain using a one2many field with auto_join. """
+    def test_field_bypass_search_access(self):
+        """ Test what happens when grouping with a domain using a one2many field with bypass_search_access. """
         model = self.env['test_read_group.order']
         records = model.create([{
             'line_ids': [Command.create({'value': 1}), Command.create({'value': 2})],
@@ -701,8 +798,8 @@ class TestPrivateReadGroup(common.TransactionCase):
         result2 = model._read_group(domain2, aggregates=['__count'])
         self.assertEqual(result1, [(2,)])
 
-        # same requests, with auto_join
-        self.patch(type(model).line_ids, 'auto_join', True)
+        # same requests, with bypass_search_access
+        self.patch(type(model).line_ids, 'bypass_search_access', True)
 
         self.assertEqual(len(model.search(domain1)), 2)
         self.assertEqual(len(model.search(domain2)), 2)
@@ -734,58 +831,221 @@ class TestPrivateReadGroup(common.TransactionCase):
             },
         ])
 
-        # TODO: should we order by the relation and not by the id also for many2many (same than many2one) ? for public methods ?
-        self.assertEqual(tasks._read_group(
-                [('id', 'in', tasks.ids)],
-                ['user_ids'],
-                ['name:array_agg'],
-            ),
-            [
-                (mario, ["Super Mario Bros.", "Paper Mario"]),      # tasks of Mario
-                (luigi, ["Super Mario Bros.", "Luigi's Mansion"]),  # tasks of Luigi
-                (User, ["Donkey Kong"]),                            # tasks of nobody
-            ],
-        )
+        # TODO: should we order by the relation and not by the id also for many2many
+        # (same than many2one) ? for public methods ?
+        expected = """
+            SELECT
+                "test_read_group_task__user_ids"."user_id",
+                ARRAY_AGG("test_read_group_task"."name" ORDER BY "test_read_group_task"."id")
+            FROM "test_read_group_task"
+                LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids"
+                    ON ("test_read_group_task"."id" = "test_read_group_task__user_ids"."task_id")
+            WHERE "test_read_group_task"."id" IN %s
+            GROUP BY "test_read_group_task__user_ids"."user_id"
+            ORDER BY "test_read_group_task__user_ids"."user_id" ASC
+        """
+        with self.assertQueries([expected]):
+            self.assertEqual(tasks._read_group(
+                    [('id', 'in', tasks.ids)],
+                    ['user_ids'],
+                    ['name:array_agg'],
+                ),
+                [
+                    (mario, ["Super Mario Bros.", "Paper Mario"]),      # tasks of Mario
+                    (luigi, ["Super Mario Bros.", "Luigi's Mansion"]),  # tasks of Luigi
+                    (User, ["Donkey Kong"]),                            # tasks of nobody
+                ],
+            )
+
+        # Inverse the order, only inverse depending of id (see TODO above)
+        expected = """
+            SELECT
+                "test_read_group_task__user_ids"."user_id",
+                ARRAY_AGG("test_read_group_task"."name" ORDER BY "test_read_group_task"."id")
+            FROM "test_read_group_task"
+                LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids"
+                    ON ("test_read_group_task"."id" = "test_read_group_task__user_ids"."task_id")
+            WHERE "test_read_group_task"."id" IN %s
+            GROUP BY "test_read_group_task__user_ids"."user_id"
+            ORDER BY "test_read_group_task__user_ids"."user_id" DESC
+        """
+        with self.assertQueries([expected]):
+            self.assertEqual(tasks._read_group(
+                    [('id', 'in', tasks.ids)],
+                    ['user_ids'],
+                    ['name:array_agg'],
+                    order='user_ids DESC',
+                ),
+                [
+                    (User, ["Donkey Kong"]),                            # tasks of nobody
+                    (luigi, ["Super Mario Bros.", "Luigi's Mansion"]),  # tasks of Luigi
+                    (mario, ["Super Mario Bros.", "Paper Mario"]),      # tasks of Mario
+                ],
+            )
+
+        # group tasks with some ir.rule on users
+        users_model = self.env['ir.model']._get(mario._name)
+        self.env['ir.rule'].create({
+            'name': "Only The Lone Wanderer allowed",
+            'model_id': users_model.id,
+            'domain_force': [('id', '=', mario.id)],
+        })
+        # as demo user, ir.rule should apply
+        tasks = tasks.with_user(self.base_user)
+
+        # warming up various caches; this avoids extra queries
+        tasks._read_group([], groupby=['user_ids'], aggregates=['name:array_agg'])
+
+        expected = """
+            SELECT
+                "test_read_group_task__user_ids"."user_id",
+                ARRAY_AGG("test_read_group_task"."name" ORDER BY "test_read_group_task"."id")
+            FROM "test_read_group_task"
+            LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids"
+                ON (
+                    "test_read_group_task"."id" = "test_read_group_task__user_ids"."task_id"
+                    AND "test_read_group_task__user_ids"."user_id" IN (
+                        SELECT "test_read_group_user"."id"
+                        FROM "test_read_group_user"
+                        WHERE "test_read_group_user"."id" IN %s
+                    )
+                )
+            GROUP BY "test_read_group_task__user_ids"."user_id"
+            ORDER BY "test_read_group_task__user_ids"."user_id" ASC
+        """
+        with self.assertQueries([expected]):
+            self.assertEqual(
+                tasks._read_group([], groupby=['user_ids'], aggregates=['name:array_agg']),
+                [
+                    (mario, ['Super Mario Bros.', 'Paper Mario']),
+                    (User, ["Luigi's Mansion", 'Donkey Kong']),
+                ],
+            )
+
+    def test_groupby_many2many_active_test_domain(self):
+        Tag = self.env['test_read_group.tag']
+        active_tag, archive_tag = Tag.create([
+            {'name': 'Active tag', 'active': True},
+            {'name': 'Archive tag', 'active': False},
+        ])
+        tasks = self.env['test_read_group.task'].create([
+            {
+                'name': "Both tags",
+                'tag_ids': [Command.set((active_tag + archive_tag).ids)],
+            },
+            {
+                'name': "Active tag",
+                'tag_ids': [Command.set(active_tag.ids)],
+            },
+            {
+                'name': "Archive tag",
+                'tag_ids': [Command.set(archive_tag.ids)],
+            },
+            {
+                'name': "No tag",
+            },
+        ])
+
+        with self.assertQueries([
+            """
+            SELECT "test_read_group_task__tag_ids"."tag_id",
+                ARRAY_AGG("test_read_group_task"."name" ORDER BY "test_read_group_task"."id")
+            FROM "test_read_group_task"
+            LEFT JOIN "test_read_group_task_tag_rel" AS "test_read_group_task__tag_ids"
+                ON (
+                    "test_read_group_task"."id" = "test_read_group_task__tag_ids"."task_id"
+                    AND "test_read_group_task__tag_ids"."tag_id" IN (
+                        SELECT
+                            "test_read_group_tag"."id"
+                        FROM
+                            "test_read_group_tag"
+                        WHERE
+                            "test_read_group_tag"."active" IS TRUE
+                    )
+                )
+            WHERE "test_read_group_task"."id" IN %s
+            GROUP BY "test_read_group_task__tag_ids"."tag_id"
+            ORDER BY "test_read_group_task__tag_ids"."tag_id" ASC
+            """,
+        ]):
+            self.assertEqual(
+                tasks._read_group(
+                    [('id', 'in', tasks.ids)],
+                    ['tag_ids'],
+                    ['name:array_agg'],
+                ),
+                [
+                    (active_tag, ["Both tags", "Active tag"]),
+                    (Tag, ["Archive tag", "No tag"]),
+                ],
+            )
+
+        with self.assertQueries([
+            """
+            SELECT "test_read_group_task__active_tag_ids"."tag_id",
+                ARRAY_AGG("test_read_group_task"."name" ORDER BY "test_read_group_task"."id")
+            FROM "test_read_group_task"
+            LEFT JOIN "test_read_group_task_tag_rel" AS "test_read_group_task__active_tag_ids"
+                ON (
+                    "test_read_group_task"."id" = "test_read_group_task__active_tag_ids"."task_id"
+                    AND "test_read_group_task__active_tag_ids"."tag_id" IN (
+                        SELECT
+                            "test_read_group_tag"."id"
+                        FROM
+                            "test_read_group_tag"
+                        WHERE
+                            "test_read_group_tag"."active" IS TRUE
+                    )
+                )
+            WHERE "test_read_group_task"."id" IN %s
+            GROUP BY "test_read_group_task__active_tag_ids"."tag_id"
+            ORDER BY "test_read_group_task__active_tag_ids"."tag_id" ASC
+            """,
+        ]):
+            self.assertEqual(
+                tasks._read_group(
+                    [('id', 'in', tasks.ids)],
+                    ['active_tag_ids'],
+                    ['name:array_agg'],
+                ),
+                [
+                    (active_tag, ["Both tags", "Active tag"]),
+                    (Tag, ["Archive tag", "No tag"]),
+                ],
+            )
+
+        with self.assertQueries([
+            """
+            SELECT "test_read_group_task__all_tag_ids"."tag_id",
+                ARRAY_AGG("test_read_group_task"."name" ORDER BY "test_read_group_task"."id")
+            FROM "test_read_group_task"
+            LEFT JOIN "test_read_group_task_tag_rel" AS "test_read_group_task__all_tag_ids"
+                ON (
+                    "test_read_group_task"."id" = "test_read_group_task__all_tag_ids"."task_id"
+                )
+            WHERE "test_read_group_task"."id" IN %s
+            GROUP BY "test_read_group_task__all_tag_ids"."tag_id"
+            ORDER BY "test_read_group_task__all_tag_ids"."tag_id" ASC
+            """,
+        ]):
+            self.assertEqual(
+                tasks._read_group(
+                    [('id', 'in', tasks.ids)],
+                    ['all_tag_ids'],
+                    ['name:array_agg'],
+                ),
+                [
+                    (active_tag, ["Both tags", "Active tag"]),
+                    (archive_tag, ["Both tags", "Archive tag"]),
+                    (Tag, ["No tag"]),
+                ],
+            )
 
     def test_float_aggregate(self):
         records = self.env['test_read_group.aggregate'].create({'numeric_value': 42.42})
         [[result]] = records._read_group([('id', 'in', records.ids)], [], ['numeric_value:array_agg'])
         self.assertIsInstance(result, list)
         self.assertIsInstance(result[0], float)
-
-    def test_order_by_many2one_id(self):
-        # ordering by a many2one ordered itself by id does not use useless join
-        OrderLine = self.env["test_read_group.order.line"]
-        expected_query = '''
-            SELECT "test_read_group_order_line"."order_id", COUNT(*)
-            FROM "test_read_group_order_line"
-            GROUP BY "test_read_group_order_line"."order_id"
-            ORDER BY "test_read_group_order_line"."order_id"
-        '''
-        with self.assertQueries([expected_query + ' ASC']):
-            OrderLine.read_group([], ["order_id"], "order_id")
-        with self.assertQueries([expected_query + ' DESC']):
-            OrderLine.read_group([], ["order_id"], "order_id", orderby="order_id DESC")
-
-        # a hack to check model order
-        expected_query = '''
-            SELECT "test_read_group_order_line"."order_id", COUNT(*)
-            FROM "test_read_group_order_line"
-            LEFT JOIN "test_read_group_order" AS "test_read_group_order_line__order_id"
-            ON ("test_read_group_order_line"."order_id" = "test_read_group_order_line__order_id"."id")
-            GROUP BY "test_read_group_order_line"."order_id", (COALESCE("test_read_group_order_line__order_id"."company_dependent_name"->%s,to_jsonb(%s::VARCHAR))->>0)::VARCHAR
-            ORDER BY (COALESCE("test_read_group_order_line__order_id"."company_dependent_name"->%s,to_jsonb(%s::VARCHAR))->>0)::VARCHAR
-        '''
-        self.env['ir.default'].set('test_read_group.order', 'company_dependent_name', 'name with space')
-        OrderLine = OrderLine.with_context(test_read_group_order_company_dependent=True)
-        OrderLine.read_group([], ["order_id"], "order_id")
-        with self.assertQueries([expected_query]):
-            OrderLine.read_group([], ["order_id"], "order_id")
-        OrderLine.read_group([], ["order_id"], "order_id", orderby="order_id DESC")
-        with self.assertQueries([expected_query + ' DESC']):
-            OrderLine.read_group(
-                [], ["order_id"], "order_id", orderby="order_id DESC"
-            )
 
     def test_related(self):
         RelatedBar = self.env['test_read_group.related_bar']
@@ -1007,13 +1267,21 @@ class TestPrivateReadGroup(common.TransactionCase):
             LEFT JOIN "test_read_group_related_bar_test_read_group_related_base_rel" AS "test_read_group_related_foo__bar_id__base_ids"
                 ON ("test_read_group_related_foo__bar_id"."id" = "test_read_group_related_foo__bar_id__base_ids"."test_read_group_related_bar_id"
                     AND "test_read_group_related_foo__bar_id__base_ids"."test_read_group_related_base_id" IN (
-                        SELECT "test_read_group_related_base"."id" FROM "test_read_group_related_base" WHERE ("test_read_group_related_base"."id" = %s)
+                        SELECT "test_read_group_related_base"."id"
+                        FROM "test_read_group_related_base"
+                        WHERE "test_read_group_related_base"."id" IN %s
                     )
                 )
             GROUP BY "test_read_group_related_foo__bar_id__base_ids"."test_read_group_related_base_id"
             ORDER BY "test_read_group_related_foo__bar_id__base_ids"."test_read_group_related_base_id" ASC
         """]):
             RelatedFoo._read_group([], ['bar_base_ids'], ['__count'])
+
+        # Test chain of fields have the same result than the related one (no ir.rule)
+        self.assertEqual(
+            RelatedFoo._read_group([], ['bar_base_ids'], ['__count']),
+            RelatedFoo._read_group([], ['bar_id.base_ids'], ['__count']),
+        )
 
     def test_many2many_aggregate(self):
         """ many2many fields are not aggregable """
@@ -1029,3 +1297,221 @@ class TestPrivateReadGroup(common.TransactionCase):
         Model = self.env['test_read_group.related_bar']
         field_info = Model.fields_get(['computed_base_ids'], ['groupable'])
         self.assertFalse(field_info['computed_base_ids']['groupable'])
+
+    def test_duplicate_arguments(self):
+        Model = self.env['test_read_group.aggregate']
+        Model.create({'key': 1, 'value': 5})
+        self.assertEqual(
+            Model._read_group([], groupby=['key', 'key'], aggregates=['value:sum', 'value:sum', 'key:sum']),
+            [
+                (1, 1, 5, 5, 1),
+            ],
+        )
+
+    def test_groupby_chain_fnames_many2one(self):
+        RelatedBar = self.env['test_read_group.related_bar']
+        RelatedFoo = self.env['test_read_group.related_foo']
+        RelatedBase = self.env['test_read_group.related_base']
+
+        bars = RelatedBar.create([
+            {'name': 'bar_a'},
+            {'name': False},
+        ])
+
+        foos = RelatedFoo.create([
+            {'name': 'foo_a_bar_a', 'bar_id': bars[0].id},
+            {'name': 'foo_b_bar_false', 'bar_id': bars[1].id},
+            {'name': False, 'bar_id': bars[0].id},
+            {'name': False},
+        ])
+
+        RelatedBase.create([
+            {'name': 'base_foo_a_1', 'foo_id': foos[0].id},
+            {'name': 'base_foo_a_2', 'foo_id': foos[0].id},
+            {'name': 'base_foo_b_bar_false', 'foo_id': foos[1].id},
+            {'name': 'base_false_foo_bar_a', 'foo_id': foos[2].id},
+            {'name': 'base_false_foo', 'foo_id': foos[3].id},
+        ])
+
+        # warmup ormcache
+        RelatedBase._read_group([], ['foo_id.bar_id'], ['__count'])
+
+        expected_query = """
+            SELECT "test_read_group_related_base__foo_id"."bar_id",
+                    COUNT(*)
+            FROM "test_read_group_related_base"
+            LEFT JOIN "test_read_group_related_foo" AS "test_read_group_related_base__foo_id"
+                ON ("test_read_group_related_base"."foo_id" = "test_read_group_related_base__foo_id"."id")
+            GROUP BY "test_read_group_related_base__foo_id"."bar_id"
+            ORDER BY "test_read_group_related_base__foo_id"."bar_id" ASC
+        """
+        with self.assertQueries([expected_query]):
+            self.assertEqual(
+                RelatedBase._read_group([], ['foo_id.bar_id'], ['__count']),
+                [(bars[0], 3), (bars[1], 1), (RelatedBar, 1)],
+            )
+
+        # Test without sudo but without ir_rules
+        RelatedBase = RelatedBase.with_user(self.base_user)
+
+        # warmup ormcache
+        RelatedBase._read_group([], ['foo_id.bar_id'], ['__count'])
+
+        with self.assertQueries([expected_query]):
+            self.assertEqual(
+                RelatedBase._read_group([], ['foo_id.bar_id'], ['__count']),
+                [(bars[0], 3), (bars[1], 1), (RelatedBar, 1)],
+            )
+
+        # Test without sudo + ir_rules
+        users_model = self.env['ir.model']._get(RelatedFoo._name)
+        self.env['ir.rule'].create({
+            'name': "Only The Lone Wanderer allowed",
+            'model_id': users_model.id,
+            'domain_force': [('id', 'in', foos[1:].ids)],
+        })
+        RelatedBase = RelatedBase.with_user(self.base_user)
+
+        # warmup ormcache
+        RelatedBase._read_group([], ['foo_id.bar_id'], ['__count'])
+
+        alias_join = f"test_read_group_related_base__foo_id__{self.base_user.id}"
+        with self.assertQueries([f"""
+            SELECT "{alias_join}"."bar_id",
+                   COUNT(*)
+            FROM "test_read_group_related_base"
+            LEFT JOIN (
+                SELECT "test_read_group_related_foo".*
+                FROM "test_read_group_related_foo"
+                WHERE "test_read_group_related_foo"."id" IN %s
+            ) AS "{alias_join}"
+            ON (
+                "test_read_group_related_base"."foo_id" = "{alias_join}"."id"
+            )
+            GROUP BY "{alias_join}"."bar_id"
+            ORDER BY "{alias_join}"."bar_id" ASC
+        """]):
+            # foos[0] not accessible, then foo_id.bar_id result into empty recordset
+            self.assertEqual(
+                RelatedBase._read_group([], ['foo_id.bar_id'], ['__count']),
+                [(bars[0], 1), (bars[1], 1), (RelatedBar, 3)],
+            )
+
+    def test_groupby_chain_fnames_char(self):
+        RelatedBar = self.env['test_read_group.related_bar']
+        RelatedFoo = self.env['test_read_group.related_foo']
+        RelatedBase = self.env['test_read_group.related_base']
+
+        bars = RelatedBar.create([
+            {'name': 'bar_a'},
+            {'name': False},
+        ])
+
+        foos = RelatedFoo.create([
+            {'name': 'foo_a_bar_a', 'bar_id': bars[0].id},
+            {'name': 'foo_b_bar_false', 'bar_id': bars[1].id},
+            {'name': False, 'bar_id': bars[0].id},
+            {'name': False},
+        ])
+
+        RelatedBase.create([
+            {'name': 'base_foo_a_1', 'foo_id': foos[0].id},
+            {'name': 'base_foo_a_2', 'foo_id': foos[0].id},
+            {'name': 'base_foo_b_bar_false', 'foo_id': foos[1].id},
+            {'name': 'base_false_foo_bar_a', 'foo_id': foos[2].id},
+            {'name': 'base_false_foo', 'foo_id': foos[3].id},
+        ])
+
+        # Warmup ormcache
+        RelatedBase._read_group([], ['foo_id.bar_id.name'], ['__count'])
+
+        # Same query generated by grouping foo_id.bar_id.name/foo_id.bar_name/foo_id.bar_name_sudo
+        query_expected = """
+            SELECT "test_read_group_related_base__foo_id__bar_id"."name",
+                    COUNT(*)
+            FROM "test_read_group_related_base"
+            LEFT JOIN "test_read_group_related_foo" AS "test_read_group_related_base__foo_id"
+                ON ("test_read_group_related_base"."foo_id" = "test_read_group_related_base__foo_id"."id")
+            LEFT JOIN "test_read_group_related_bar" AS "test_read_group_related_base__foo_id__bar_id"
+                ON ("test_read_group_related_base__foo_id"."bar_id" = "test_read_group_related_base__foo_id__bar_id"."id")
+            GROUP BY "test_read_group_related_base__foo_id__bar_id"."name"
+            ORDER BY "test_read_group_related_base__foo_id__bar_id"."name" ASC
+        """
+        with self.assertQueries([query_expected] * 3):
+            for fname_chain in ['foo_id.bar_id.name', 'foo_id.bar_name_sudo', 'foo_id.bar_name']:
+                self.assertEqual(
+                    RelatedBase._read_group([], [fname_chain], ['__count']),
+                    [('bar_a', 3), (False, 2)],
+                )
+
+        # Cannot groupby on foo_ids.name because it traverse One2many
+        with self.assertRaises(ValueError):
+            RelatedBar._read_group([], ['foo_ids.name'])
+
+        # Test without sudo but without ir_rules
+        RelatedBase = RelatedBase.with_user(self.base_user)
+
+        # Warmup ormcache
+        RelatedBase._read_group([], ['foo_id.bar_id.name'], ['__count'])
+
+        # Same query generated by grouping foo_id.bar_id.name/foo_id.bar_name_sudo
+        expected_query = """
+            SELECT "test_read_group_related_base__foo_id__bar_id"."name",
+                    COUNT(*)
+            FROM "test_read_group_related_base"
+            LEFT JOIN "test_read_group_related_foo" AS "test_read_group_related_base__foo_id"
+                ON ("test_read_group_related_base"."foo_id" = "test_read_group_related_base__foo_id"."id")
+            LEFT JOIN "test_read_group_related_bar" AS "test_read_group_related_base__foo_id__bar_id"
+                ON ("test_read_group_related_base__foo_id"."bar_id" = "test_read_group_related_base__foo_id__bar_id"."id")
+            GROUP BY "test_read_group_related_base__foo_id__bar_id"."name"
+            ORDER BY "test_read_group_related_base__foo_id__bar_id"."name" ASC
+        """
+        for fname_chain in ['foo_id.bar_id.name', 'foo_id.bar_name_sudo']:
+            with self.assertQueries([expected_query]):
+                self.assertEqual(
+                    RelatedBase._read_group([], [fname_chain], ['__count']),
+                    [('bar_a', 3), (False, 2)],
+                )
+
+        # Doesn't work since bar_name is unsudoed
+        with self.assertRaises(ValueError):
+            RelatedBase._read_group([], ['foo_id.bar_name'], ['__count'])
+
+        # Test without sudo + ir_rules
+        users_model = self.env['ir.model']._get(RelatedFoo._name)
+        self.env['ir.rule'].create({
+            'name': "Only The Lone Wanderer allowed",
+            'model_id': users_model.id,
+            'domain_force': [('id', 'in', foos[1:].ids)],
+        })
+
+        # Warmup ormcache
+        RelatedBase._read_group([], ['foo_id.bar_id.name'], ['__count'])
+
+        # Same query generated by grouping foo_id.bar_id.name/foo_id.bar_name_sudo
+        alias_join = f"test_read_group_related_base__foo_id__{self.base_user.id}"
+        expected_query = f"""
+            SELECT "{alias_join}__bar_id"."name",
+                   COUNT(*)
+            FROM "test_read_group_related_base"
+            LEFT JOIN (
+                SELECT "test_read_group_related_foo".*
+                FROM "test_read_group_related_foo"
+                WHERE "test_read_group_related_foo"."id" IN %s
+            ) AS "{alias_join}" ON (
+                "test_read_group_related_base"."foo_id" = "{alias_join}"."id"
+            )
+            LEFT JOIN "test_read_group_related_bar" AS "{alias_join}__bar_id" ON (
+                "{alias_join}"."bar_id" = "{alias_join}__bar_id"."id"
+            )
+            GROUP BY "{alias_join}__bar_id"."name"
+            ORDER BY "{alias_join}__bar_id"."name" ASC
+        """
+
+        with self.assertQueries([expected_query] * 2):
+            for fname_chain in ['foo_id.bar_id.name', 'foo_id.bar_name_sudo']:
+                # foos[0] not accessible, then bar_a is only exist via foos[2]
+                self.assertEqual(
+                    RelatedBase._read_group([], [fname_chain], ['__count']),
+                    [('bar_a', 1), (False, 4)],
+                )

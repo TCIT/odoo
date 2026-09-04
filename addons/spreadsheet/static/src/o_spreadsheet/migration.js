@@ -1,11 +1,6 @@
-/** @odoo-module */
-
 import * as spreadsheet from "@odoo/o-spreadsheet";
-import { OdooCorePlugin } from "@spreadsheet/plugins";
 const { tokenize, parse, convertAstNodes, astToFormula } = spreadsheet;
-const { corePluginRegistry, migrationStepRegistry } = spreadsheet.registries;
-
-export const ODOO_VERSION = 12;
+const { migrationStepRegistry } = spreadsheet.registries;
 
 const MAP_V1 = {
     PIVOT: "ODOO.PIVOT",
@@ -24,10 +19,152 @@ const MAP_FN_NAMES_V10 = {
 
 const dmyRegex = /^([0|1|2|3][1-9])\/(0[1-9]|1[0-2])\/(\d{4})$/i;
 
-migrationStepRegistry.add("odoo_migration", {
-    versionFrom: "16.1",
+migrationStepRegistry.add("17.3.1", {
     migrate(data) {
         return migrateOdooData(data);
+    },
+});
+migrationStepRegistry.add("18.1.2", {
+    migrate(data) {
+        const version = data.odooVersion || 0;
+        if (version < 13) {
+            data = migrate12to13(data);
+        }
+        return data;
+    },
+});
+
+migrationStepRegistry.add("18.3.2", {
+    migrate(data) {
+        for (const sheet of data.sheets || []) {
+            for (const figure of sheet.figures || []) {
+                if (
+                    figure.tag === "chart" &&
+                    ["odoo_bar", "odoo_line", "odoo_pie"].includes(figure.data.type) &&
+                    !("cumulatedStart" in figure.data)
+                ) {
+                    const isCumulative = figure.data.cumulative || false;
+                    figure.data.cumulatedStart = isCumulative;
+                    figure.data.metaData.cumulatedStart = isCumulative;
+                }
+            }
+        }
+        return data;
+    },
+});
+
+migrationStepRegistry.add("18.4.10", {
+    migrate(data) {
+        for (const globalFilter of data.globalFilters || []) {
+            if (globalFilter.type === "text" && typeof globalFilter.defaultValue == "string") {
+                if (globalFilter.defaultValue === "") {
+                    delete globalFilter.defaultValue;
+                } else {
+                    globalFilter.defaultValue = [globalFilter.defaultValue];
+                }
+            }
+            if (globalFilter.type === "text" && globalFilter.rangeOfAllowedValues) {
+                globalFilter.rangesOfAllowedValues = [globalFilter.rangeOfAllowedValues];
+                delete globalFilter.rangeOfAllowedValues;
+            }
+        }
+        return data;
+    },
+});
+
+migrationStepRegistry.add("18.4.11", {
+    migrate(data) {
+        for (const globalFilter of data.globalFilters || []) {
+            if (globalFilter.type === "date" && globalFilter.rangeType === "fixedPeriod") {
+                if (typeof globalFilter.defaultValue !== "string") {
+                    // If the defaultValue is not a string, it's probably a
+                    // something very old that we do not support anymore
+                    // See migration2to3 (antepenultimate_year for example)
+                    delete globalFilter.defaultValue;
+                }
+            }
+        }
+        return data;
+    },
+});
+
+migrationStepRegistry.add("18.4.12", {
+    migrate(data) {
+        for (const globalFilter of data.globalFilters || []) {
+            if (globalFilter.defaultValue?.length === 0) {
+                delete globalFilter.defaultValue;
+            }
+        }
+        return data;
+    },
+});
+
+const defaultValueMap = {
+    last_week: "last_7_days",
+    last_month: "last_30_days",
+    last_three_months: "last_90_days",
+    last_year: "last_12_months",
+};
+
+migrationStepRegistry.add("18.4.13", {
+    migrate(data) {
+        for (const globalFilter of data.globalFilters || []) {
+            if (["last_six_month", "last_three_years"].includes(globalFilter.defaultValue)) {
+                delete globalFilter.defaultValue;
+            }
+            if (globalFilter.defaultValue in defaultValueMap) {
+                globalFilter.defaultValue = defaultValueMap[globalFilter.defaultValue];
+            }
+        }
+        return data;
+    },
+});
+
+migrationStepRegistry.add("18.4.14", {
+    migrate(data) {
+        for (const globalFilter of data.globalFilters || []) {
+            delete globalFilter.rangeType;
+            delete globalFilter.disabledPeriods;
+        }
+        return data;
+    },
+});
+
+migrationStepRegistry.add("18.5.10", {
+    migrate(data) {
+        for (const globalFilter of data.globalFilters || []) {
+            if (globalFilter.type === "relation" && globalFilter.defaultValue) {
+                const operator = globalFilter.includeChildren ? "child_of" : "in";
+                delete globalFilter.includeChildren;
+                globalFilter.defaultValue = {
+                    operator,
+                    ids: globalFilter.defaultValue,
+                };
+            } else if (globalFilter.type === "text" && globalFilter.defaultValue) {
+                globalFilter.defaultValue = {
+                    operator: "ilike",
+                    strings: globalFilter.defaultValue,
+                };
+            } else if (globalFilter.type === "boolean" && globalFilter.defaultValue) {
+                if (globalFilter.defaultValue.length === 2) {
+                    delete globalFilter.defaultValue; // [true, false] no longer supported
+                } else {
+                    globalFilter.defaultValue = {
+                        operator: globalFilter.defaultValue[0] ? "set" : "not set",
+                    };
+                }
+            }
+        }
+        const re = /ODOO\.FILTER\.VALUE/gi;
+        for (const sheet of data.sheets || []) {
+            for (const xc in sheet.cells || {}) {
+                const content = sheet.cells[xc];
+                if (re.test(content)) {
+                    sheet.cells[xc] = content.replaceAll(re, "ODOO.FILTER.LABEL");
+                }
+            }
+        }
+        return data;
     },
 });
 
@@ -378,12 +515,32 @@ function migrate11to12(data) {
     return data;
 }
 
-export class OdooVersion extends OdooCorePlugin {
-    static getters = /** @type {const} */ ([]);
-
-    export(data) {
-        data.odooVersion = ODOO_VERSION;
+/**
+ * Change pivot sortedColumn of the odoo's pivot model to the sortedColumn of o-spreadsheet
+ */
+function migrate12to13(data) {
+    if (data.pivots) {
+        for (const pivot of Object.values(data.pivots)) {
+            if (!pivot.sortedColumn) {
+                continue;
+            }
+            const measure = pivot.measures.find(
+                (measure) => measure.fieldName === pivot.sortedColumn.measure
+            );
+            // We're missing some information to convert the sortedColumn (fieldType), so we'll drop the sorted columns
+            // that are not on the total column
+            // Also, a previous bug allowed to have a sortedColumn measure that is not in the measures,
+            // in this case we also drop the sortedColumn because we can't sort a measure that is not there
+            if (pivot.sortedColumn.groupId[1]?.length || !measure) {
+                pivot.sortedColumn = undefined;
+                continue;
+            }
+            pivot.sortedColumn = {
+                measure: measure.id,
+                order: pivot.sortedColumn.order,
+                domain: [],
+            };
+        }
     }
+    return data;
 }
-
-corePluginRegistry.add("odooMigration", OdooVersion);

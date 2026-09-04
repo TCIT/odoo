@@ -12,12 +12,10 @@ the original source need to be supported by the browsers.
 """
 
 import re
-import logging
 from functools import partial
 
 from odoo.tools.misc import OrderedSet
 
-_logger = logging.getLogger(__name__)
 
 def transpile_javascript(url, content):
     """
@@ -50,6 +48,7 @@ def transpile_javascript(url, content):
         convert_default_export,
         partial(wrap_with_qunit_module, url),
         partial(wrap_with_odoo_define, module_path, dependencies),
+        partial(convert_t, url)
     ]
     for s in steps:
         content = s(content)
@@ -127,7 +126,7 @@ EXPORT_FCT_RE = re.compile(r"""
     (?P<space>\s*)                          # space and empty line
     export\s+                               # export
     (?P<type>(async\s+)?function)\s+        # async function or function
-    (?P<identifier>\w+)                     # name the function
+    (?P<identifier>[\w$]+)                  # name of the function
     """, re.MULTILINE | re.VERBOSE)
 
 
@@ -156,7 +155,7 @@ EXPORT_CLASS_RE = re.compile(r"""
     (?P<space>\s*)                          # space and empty line
     export\s+                               # export
     (?P<type>class)\s+                      # class
-    (?P<identifier>\w+)                     # name of the class
+    (?P<identifier>[\w$]+)                  # name of the class
     """, re.MULTILINE | re.VERBOSE)
 
 
@@ -181,7 +180,7 @@ EXPORT_FCT_DEFAULT_RE = re.compile(r"""
     (?P<space>\s*)                          # space and empty line
     export\s+default\s+                     # export default
     (?P<type>(async\s+)?function)\s+        # async function or function
-    (?P<identifier>\w+)                     # name of the function
+    (?P<identifier>[\w$]+)                  # name of the function
     """, re.MULTILINE | re.VERBOSE)
 
 
@@ -210,7 +209,7 @@ EXPORT_CLASS_DEFAULT_RE = re.compile(r"""
     (?P<space>\s*)                          # space and empty line
     export\s+default\s+                     # export default
     (?P<type>class)\s+                      # class
-    (?P<identifier>\w+)                     # name of the class or the function
+    (?P<identifier>[\w$]+)                  # name of the class or the function
     """, re.MULTILINE | re.VERBOSE)
 
 
@@ -229,12 +228,51 @@ def convert_export_class_default(content):
     repl = r"""\g<space>const \g<identifier> = __exports[Symbol.for("default")] = \g<type> \g<identifier>"""
     return EXPORT_CLASS_DEFAULT_RE.sub(repl, content)
 
+
+GETTEXT_RE = re.compile(r"""
+    ^
+    \s*const\s*{
+    (?:\s*\w*\s*,)*
+    \s*(_t)\s*
+    (?:,\s*\w*\s*)*,?\s*
+    }\s*=\s*require\("@web/core/l10n/translation"\);$
+""", re.MULTILINE | re.VERBOSE)
+
+
+T_FN_RE = re.compile(r"""
+    ^
+    \s*const\s*{
+    (?:\s*\w*\s*,)*
+    \s*(appTranslateFn)\s*
+    (?:,\s*\w*\s*)*,?\s*
+    }\s*=\s*require\("@web/core/l10n/translation"\);$
+""", re.MULTILINE | re.VERBOSE)
+
+
+def convert_t(url, content):
+    if url.endswith(".test.js"):
+        return content
+
+    module_name = URL_RE.match(url)["module"]
+    has_import_of_appTranslateFn = bool(T_FN_RE.search(content))
+
+    def rename_gettext(match_):
+        if has_import_of_appTranslateFn:
+            renamed_import = match_.group(0).replace("_t", "__not_defined__")
+        else:
+            renamed_import = match_.group(0).replace("_t", "appTranslateFn")
+        renamed_import += f"""const _t = (str, ...args) => appTranslateFn(str, "{module_name}", ...args);"""
+        return renamed_import
+
+    return GETTEXT_RE.sub(rename_gettext, content)
+
+
 EXPORT_VAR_RE = re.compile(r"""
     ^
     (?P<space>\s*)              # space and empty line
     export\s+                   # export
     (?P<type>let|const|var)\s+  # let or cont or var
-    (?P<identifier>\w+)         # variable name
+    (?P<identifier>[\w$]+)      # variable name
     """, re.MULTILINE | re.VERBOSE)
 
 
@@ -260,7 +298,7 @@ EXPORT_DEFAULT_VAR_RE = re.compile(r"""
     (?P<space>\s*)              # space and empty line
     export\s+default\s+         # export default
     (?P<type>let|const|var)\s+  # let or const or var
-    (?P<identifier>\w+)\s*      # variable name
+    (?P<identifier>[\w$]+)\s*   # variable name
     """, re.MULTILINE | re.VERBOSE)
 
 
@@ -284,7 +322,7 @@ EXPORT_OBJECT_RE = re.compile(r"""
     ^
     (?P<space>\s*)                      # space and empty line
     export\s*                           # export
-    (?P<object>{[\w\s,]+})              # { a, b, c as x, ... }
+    (?P<object>{[\w$\s,]+})             # { a, b, c as x, ... }
     """, re.MULTILINE | re.VERBOSE)
 
 
@@ -310,7 +348,7 @@ EXPORT_FROM_RE = re.compile(r"""
     ^
     (?P<space>\s*)                      # space and empty line
     export\s*                           # export
-    (?P<object>{[\w\s,]+})\s*           # { a, b, c as x, ... }
+    (?P<object>{[\w$\s,]+})\s*          # { a, b, c as x, ... }
     from\s*                             # from
     (?P<path>(?P<quote>["'`])([^"'`]+)(?P=quote))   # "file path" ("some/path.js")
     """, re.MULTILINE | re.VERBOSE)
@@ -366,7 +404,7 @@ EXPORT_DEFAULT_RE = re.compile(r"""
     ^
     (?P<space>\s*)      # space and empty line
     export\s+default    # export default
-    (\s+\w+\s*=)?       # something (optional)
+    (\s+[\w$]+\s*=)?    # something (optional)
     """, re.MULTILINE | re.VERBOSE)
 
 
@@ -402,7 +440,7 @@ IMPORT_BASIC_RE = re.compile(r"""
     ^
     (?P<space>\s*)                      # space and empty line
     import\s+                           # import
-    (?P<object>{[\s\w,]+})\s*           # { a, b, c as x, ... }
+    (?P<object>{[\s\w$,]+})\s*          # { a, b, c as x, ... }
     from\s*                             # from
     (?P<path>(?P<quote>["'`])([^"'`]+)(?P=quote))   # "file path" ("some/path")
     """, re.MULTILINE | re.VERBOSE)
@@ -429,7 +467,7 @@ IMPORT_LEGACY_DEFAULT_RE = re.compile(r"""
     ^
     (?P<space>\s*)                                      # space and empty line
     import\s+                                           # import
-    (?P<identifier>\w+)\s*                              # default variable name
+    (?P<identifier>[\w$]+)\s*                           # default variable name
     from\s*                                             # from
     (?P<path>(?P<quote>["'`])([^@\."'`][^"'`]*)(?P=quote))  # legacy alias file ("addon_name.module_name" or "some/path")
     """, re.MULTILINE | re.VERBOSE)
@@ -456,7 +494,7 @@ IMPORT_DEFAULT = re.compile(r"""
     ^
     (?P<space>\s*)                      # space and empty line
     import\s+                           # import
-    (?P<identifier>\w+)\s*              # default variable name
+    (?P<identifier>[\w$]+)\s*           # default variable name
     from\s*                             # from
     (?P<path>(?P<quote>["'`])([^"'`]+)(?P=quote))   # "file path" ("some/path")
     """, re.MULTILINE | re.VERBOSE)
@@ -483,8 +521,8 @@ IMPORT_DEFAULT_AND_NAMED_RE = re.compile(r"""
     ^
     (?P<space>\s*)                                  # space and empty line
     import\s+                                       # import
-    (?P<default_export>\w+)\s*,\s*                  # default variable name,
-    (?P<named_exports>{[\s\w,]+})\s*                # { a, b, c as x, ... }
+    (?P<default_export>[\w$]+)\s*,\s*               # default variable name,
+    (?P<named_exports>{[\s\w$,]+})\s*                # { a, b, c as x, ... }
     from\s*                                         # from
     (?P<path>(?P<quote>["'`])([^"'`]+)(?P=quote))   # "file path" ("some/path")
     """, re.MULTILINE | re.VERBOSE)
@@ -552,11 +590,11 @@ def convert_relative_require(url, dependencies, content):
 
 
 IMPORT_STAR = re.compile(r"""
-    ^(?P<space>\s*)       # indentation
-    import\s+\*\s+as\s+   # import * as
-    (?P<identifier>\w+)   # alias
-    \s*from\s*            # from
-    (?P<path>[^;\n]+)     # path
+    ^(?P<space>\s*)         # indentation
+    import\s+\*\s+as\s+     # import * as
+    (?P<identifier>[\w$]+)  # alias
+    \s*from\s*              # from
+    (?P<path>[^;\n]+)       # path
 """, re.MULTILINE | re.VERBOSE)
 
 
@@ -576,13 +614,13 @@ def convert_star_import(content):
 
 
 IMPORT_DEFAULT_AND_STAR = re.compile(r"""
-    ^(?P<space>\s*)                 # indentation
-    import\s+                       # import
-    (?P<default_export>\w+)\s*,\s*  # default export name,
-    \*\s+as\s+                      # * as
-    (?P<named_exports_alias>\w+)    # alias
-    \s*from\s*                      # from
-    (?P<path>[^;\n]+)               # path
+    ^(?P<space>\s*)                    # indentation
+    import\s+                          # import
+    (?P<default_export>[\w$]+)\s*,\s*  # default export name,
+    \*\s+as\s+                         # * as
+    (?P<named_exports_alias>[\w$]+)    # alias
+    \s*from\s*                         # from
+    (?P<path>[^;\n]+)                  # path
 """, re.MULTILINE | re.VERBOSE)
 
 
@@ -621,7 +659,7 @@ def convert_unnamed_relative_import(content):
         // after
         require("some/path")
     """
-    repl = r"require(\g<path>)"
+    repl = r"\g<space>require(\g<path>)"
     return IMPORT_UNNAMED_RELATIVE_RE.sub(repl, content)
 
 
@@ -662,13 +700,13 @@ def relative_path_to_module_path(url, path_rel):
 
 
 ODOO_MODULE_RE = re.compile(r"""
-    \s*                             # starting white space
-    \/(\*|\/)                       # /* or //
-    .*                              # any comment in between (optional)
-    @odoo-module                    # '@odoo-module' statement
-    (?P<ignore>\s+ignore)?          # module in src | tests which should not be transpiled (optional)
-    (\s+alias=(?P<alias>[^\s*]+))?  # alias (e.g. alias=web.Widget, alias=@web/../tests/utils) (optional)
-    (\s+default=(?P<default>\w+))?  # no implicit default export (e.g. default=false) (optional)
+    \s*                                # starting white space
+    \/(\*|\/)                          # /* or //
+    .*                                 # any comment in between (optional)
+    @odoo-module                       # '@odoo-module' statement
+    (?P<ignore>\s+ignore)?             # module in src | tests which should not be transpiled (optional)
+    (\s+alias=(?P<alias>[^\s*]+))?     # alias (e.g. alias=web.Widget, alias=@web/../tests/utils) (optional)
+    (\s+default=(?P<default>[\w$]+))?  # no implicit default export (e.g. default=false) (optional)
 """, re.VERBOSE)
 
 

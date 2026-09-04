@@ -5,7 +5,7 @@
         <div t-att-class="{ o_inline_mode: !props.editInDialog }">
             <t t-set="resModel" t-value="getResModel()"/>
             <t t-if="resModel">
-                <t t-if="props.isFoldable and state.folded and state.isValid">
+                <t t-if="props.isFoldable and state.folded and state.isValid !== false">
                     <div class="d-flex align-items-center" t-on-click="() => state.folded = false">
                         <i data-tooltip="Modify filter" class="fa fa-lg fa-caret-right pe-2"/>
                         <div class="d-print-contents">
@@ -32,7 +32,7 @@
                             </t>
                             <t t-if="state.isValid">
                                 <button class="btn btn-sm btn-link o_domain_show_selection_button" data-tooltip="Show matching records" type="button" t-on-click.stop="onButtonClick">
-                                    <t t-esc="state.recordCount" /> record(s)
+                                    <t t-esc="state.recordCount" /><t t-if="state.hasLimitedCount">+</t> record(s)
                                 </button>
                             </t>
                         </div>
@@ -61,7 +61,7 @@
                         <t t-else="">
                             <t t-if="state.isValid">
                                 <button class="btn btn-sm btn-link o_domain_show_selection_button" type="button" t-on-click.stop="onButtonClick">
-                                    <t t-esc="state.recordCount" /> record(s)
+                                    <t t-esc="state.recordCount" /><t t-if="state.hasLimitedCount">+</t> record(s)
                                 </button>
                             </t>
                             <t t-else="">

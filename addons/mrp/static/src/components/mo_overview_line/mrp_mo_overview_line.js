@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { Component } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
@@ -120,7 +118,7 @@ export class MoOverviewLine extends Component {
                 search_default_ready: true,
                 search_default_waiting: true,
                 search_default_progress: true,
-                search_default_pending: true,
+                search_default_blocked: true,
                 search_default_name: this.data.name,
                 search_default_production_id: this.data.production_id,
             },

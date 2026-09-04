@@ -1,10 +1,28 @@
-import { applyInheritance } from "@web/core/template_inheritance";
+import {
+    applyContextToTextNode,
+    applyInheritance,
+    deepClone,
+} from "@web/core/template_inheritance";
 
-const parser = new DOMParser();
-/** @type {((document: Document) => void)[]} */
-const templateProcessors = [];
-/** @type {((url: string) => boolean)[]} */
-let urlFilters = [];
+/**
+ * @param {Node} template
+ */
+function getClone(template) {
+    const c = deepClone(template);
+    new Document().append(c); // => c is the documentElement of its ownerDocument
+    return c;
+}
+
+/**
+ * @param {Iterable<unknown>} args
+ */
+function getKey(args) {
+    return JSON.stringify([...args]);
+}
+
+/**
+ * @param {string} templateString
+ */
 function getParsedTemplate(templateString) {
     const doc = parser.parseFromString(templateString, "text/xml");
     for (const processor of templateProcessors) {
@@ -13,79 +31,10 @@ function getParsedTemplate(templateString) {
     return doc.firstChild;
 }
 
-function getClone(template) {
-    const c = template.cloneNode(true);
-    new Document().append(c); // => c is the documentElement of its ownerDocument
-    return c;
-}
-
-const registered = new Set();
-function isRegistered(...args) {
-    const key = JSON.stringify([...args]);
-    if (registered.has(key)) {
-        return true;
-    }
-    registered.add(key);
-    return false;
-}
-
-let blockType = null;
-let blockId = 0;
-
-const templates = {};
-const parsedTemplates = {};
-const info = {};
-export function registerTemplate(name, url, templateString) {
-    if (isRegistered(...arguments)) {
-        return;
-    }
-    if (blockType !== "templates") {
-        blockType = "templates";
-        blockId++;
-    }
-    if (name in templates && (info[name].url !== url || templates[name] !== templateString)) {
-        throw new Error(`Template ${name} already exists`);
-    }
-    templates[name] = templateString;
-    info[name] = { blockId, url };
-}
-
-const templateExtensions = {};
-const parsedTemplateExtensions = {};
-export function registerTemplateExtension(inheritFrom, url, templateString) {
-    if (isRegistered(...arguments)) {
-        return;
-    }
-    if (blockType !== "extensions") {
-        blockType = "extensions";
-        blockId++;
-    }
-    if (!templateExtensions[inheritFrom]) {
-        templateExtensions[inheritFrom] = [];
-    }
-    if (!templateExtensions[inheritFrom][blockId]) {
-        templateExtensions[inheritFrom][blockId] = [];
-    }
-    templateExtensions[inheritFrom][blockId].push({
-        templateString,
-        url,
-    });
-}
-
 /**
- * @param {(document: Document) => void} processor
+ * @param {string} name
+ * @param {number | null} [blockId]
  */
-export function registerTemplateProcessor(processor) {
-    templateProcessors.push(processor);
-}
-
-/**
- * @param {typeof urlFilters} filters
- */
-export function setUrlFilters(filters) {
-    urlFilters = filters;
-}
-
 function _getTemplate(name, blockId = null) {
     if (!(name in parsedTemplates)) {
         if (!(name in templates)) {
@@ -93,6 +42,11 @@ function _getTemplate(name, blockId = null) {
         }
         const templateString = templates[name];
         parsedTemplates[name] = getParsedTemplate(templateString);
+        const inheritFrom = parsedTemplates[name].getAttribute("t-inherit");
+        if (!inheritFrom) {
+            const addon = info[name].url.split("/")[1];
+            parsedTemplates[name].setAttribute("t-translation-context", addon);
+        }
     }
     let processedTemplate = parsedTemplates[name];
 
@@ -118,6 +72,7 @@ function _getTemplate(name, blockId = null) {
         }
     }
 
+    let cloned = false;
     for (const otherBlockId in templateExtensions[name] || {}) {
         if (blockId && otherBlockId > blockId) {
             break;
@@ -138,37 +93,143 @@ function _getTemplate(name, blockId = null) {
             if (!urlFilters.every((filter) => filter(url))) {
                 continue;
             }
-            processedTemplate = applyInheritance(
-                inheritFrom ? processedTemplate : getClone(processedTemplate),
-                getClone(template),
-                url
-            );
+            if (!inheritFrom && !cloned) {
+                cloned = true;
+                processedTemplate = getClone(processedTemplate);
+            }
+            processedTemplate = applyInheritance(processedTemplate, getClone(template), url);
         }
     }
 
     return processedTemplate;
 }
 
+const info = Object.create(null);
+const parsedTemplateExtensions = Object.create(null);
 /** @type {Record<string, Element>} */
-let processedTemplates = {};
+const parsedTemplates = Object.create(null);
+const parser = new DOMParser();
+/** @type {Map<string, Element>} */
+const processedTemplates = new Map();
+const registered = new Set();
+/** @type {Record<string, Record<number, ({ templateString: string, url: string })[]>>} */
+const templateExtensions = Object.create(null);
+/** @type {((document: Document) => void)[]} */
+const templateProcessors = [];
+/** @type {Record<string, string>} */
+const templates = Object.create(null);
+let blockType = null;
+let blockId = 0;
+/** @type {((url: string) => boolean)[]} */
+let urlFilters = [];
 
 /**
- * @param {string} name
+ * @param {string[]} namesToCheck
  */
-export function getTemplate(name) {
-    if (!processedTemplates[name]) {
-        processedTemplates[name] = _getTemplate(name);
-    }
-    return processedTemplates[name];
-}
-
-export function clearProcessedTemplates() {
-    processedTemplates = {};
-}
-
 export function checkPrimaryTemplateParents(namesToCheck) {
     const missing = new Set(namesToCheck.filter((name) => !(name in templates)));
     if (missing.size) {
         console.error(`Missing (primary) parent templates: ${[...missing].join(", ")}`);
     }
+}
+
+export function clearProcessedTemplates() {
+    processedTemplates.clear();
+}
+
+/**
+ * @param {string} name
+ */
+export function getTemplate(name) {
+    if (!processedTemplates.has(name)) {
+        processedTemplates.set(name, _getTemplate(name));
+        applyContextToTextNode();
+    }
+    return processedTemplates.get(name);
+}
+
+/**
+ * @param {string} name
+ * @param {string} url
+ * @param {string} templateString
+ */
+export function registerTemplate(name, url, templateString) {
+    const key = getKey(arguments);
+    if (registered.has(key)) {
+        return;
+    }
+    registered.add(key);
+    if (blockType !== "templates") {
+        blockType = "templates";
+        blockId++;
+    }
+    if (name in templates && (info[name].url !== url || templates[name] !== templateString)) {
+        throw new Error(`Template ${name} already exists`);
+    }
+    templates[name] = templateString;
+    info[name] = { blockId, url };
+
+    return function unregisterTemplate() {
+        delete templates[name];
+        delete info[name];
+        delete parsedTemplates[name];
+        delete parsedTemplateExtensions[name];
+        processedTemplates.delete(name);
+        registered.delete(key);
+    };
+}
+
+/**
+ * @param {string} inheritFrom
+ * @param {string} url
+ * @param {string} templateString
+ */
+export function registerTemplateExtension(inheritFrom, url, templateString) {
+    const key = getKey(arguments);
+    if (registered.has(key)) {
+        return;
+    }
+    registered.add(key);
+    if (blockType !== "extensions") {
+        blockType = "extensions";
+        blockId++;
+    }
+    if (!templateExtensions[inheritFrom]) {
+        templateExtensions[inheritFrom] = [];
+    }
+    if (!templateExtensions[inheritFrom][blockId]) {
+        templateExtensions[inheritFrom][blockId] = [];
+    }
+    templateExtensions[inheritFrom][blockId].push({
+        templateString,
+        url,
+    });
+
+    return function unregisterTemplateExtension() {
+        const index = templateExtensions[inheritFrom]?.[blockId]?.findIndex(
+            (ext) => ext.templateString === templateString && ext.url === url
+        );
+        if (Number.isInteger(index) && index > -1) {
+            templateExtensions[inheritFrom][blockId].splice(index, 1);
+        }
+        registered.delete(key);
+    };
+}
+
+/**
+ * @param {(document: Document) => void} processor
+ */
+export function registerTemplateProcessor(processor) {
+    templateProcessors.push(processor);
+}
+
+/**
+ * @param {typeof urlFilters} filters
+ */
+export function setUrlFilters(filters) {
+    const prev = urlFilters;
+    urlFilters = filters;
+    return function restoreUrlFilters() {
+        urlFilters = prev;
+    };
 }

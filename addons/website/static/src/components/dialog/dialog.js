@@ -1,7 +1,6 @@
-/** @odoo-module **/
-
-import { Dialog } from '@web/core/dialog/dialog';
+import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
+import { useChildRef } from "@web/core/utils/hooks";
 import { useState, Component } from "@odoo/owl";
 
 const NO_OP = () => {};
@@ -38,6 +37,7 @@ export class WebsiteDialog extends Component {
         this.state = useState({
             disabled: false,
         });
+        this.modalRef = useChildRef();
     }
     /**
      * Disables the buttons of the dialog when a click is made.
@@ -61,11 +61,11 @@ export class WebsiteDialog extends Component {
                 return this.props.close();
             }
             this.state.disabled = false;
-        }
+        };
     }
 
     get contentClasses() {
-        const websiteDialogClass = 'o_website_dialog';
+        const websiteDialogClass = "o_website_dialog";
         if (this.props.contentClass) {
             return `${websiteDialogClass} ${this.props.contentClass}`;
         }

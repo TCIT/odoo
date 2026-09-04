@@ -11,7 +11,7 @@ Subject: {subject}
 MIME-Version: 1.0
 Content-Type: multipart/alternative;
     boundary="----=_Part_4200734_24778174.1344608186754"
-Date: Fri, 10 Aug 2012 14:16:26 +0000
+Date: {date}
 Message-ID: {msg_id}
 {extra}
 ------=_Part_4200734_24778174.1344608186754
@@ -134,6 +134,38 @@ Message-ID: {msg_id}
  </body>
 </html>
 """
+
+MAIL_TEMPLATE_SHORT = """Return-Path: {return_path}
+To: {to}
+cc: {cc}
+Received: by mail1.openerp.com (Postfix, from userid 10002)
+    id 5DF9ABFB2A; Fri, 10 Aug 2012 16:16:39 +0200 (CEST)
+From: {email_from}
+Subject: {subject}
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+    boundary="----=_Part_4200734_24778174.1344608186754"
+Date: Fri, 10 Aug 2012 14:16:26 +0000
+Message-ID: {msg_id}
+{extra}
+------=_Part_4200734_24778174.1344608186754
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Eli alla à l'eau
+
+--
+Signature
+------=_Part_4200734_24778174.1344608186754
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+<div>Eli alla à l'eau<br/>
+--<br/>
+Sylvie
+</div>
+------=_Part_4200734_24778174.1344608186754--
+"""
+
 
 MAIL_MULTIPART_MIXED = """Return-Path: <ignasse.carambar@gmail.com>
 X-Original-To: raoul@grosbedon.fr
@@ -276,34 +308,6 @@ Content-ID: <f_lfosfm0l0>
 {content}
 
 --000000000000b951de05f7c47a9e--
-"""
-
-MAIL_MULTIPART_BINARY_OCTET_STREAM = """X-Original-To: raoul@grosbedon.fr
-Delivered-To: raoul@grosbedon.fr
-Received: by mail1.grosbedon.com (Postfix, from userid 10002)
-    id E8166BFACA; Fri, 10 Nov 2021 06:04:01 +0200 (CEST)
-From: "Bruce Wayne" <bruce@wayneenterprises.com>
-Content-Type: multipart/alternative;
- boundary="Apple-Mail=_9331E12B-8BD2-4EC7-B53E-01F3FBEC9227"
-Message-Id: <6BB1FAB2-2104-438E-9447-07AE2C8C4A92@sexample.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \\(1878.6\\))
-
---Apple-Mail=_9331E12B-8BD2-4EC7-B53E-01F3FBEC9227
-Content-Transfer-Encoding: 7bit
-Content-Type: text/plain;
-    charset=us-ascii
-
-The attached file contains b"Hello world\\n"
-
---Apple-Mail=_9331E12B-8BD2-4EC7-B53E-01F3FBEC9227
-Content-Disposition: attachment;
- filename="hello_world.dat"
-Content-Type: binary/octet-stream;
- name="hello_world.dat"
-Content-Transfer-Encoding: base64
-
-SGVsbG8gd29ybGQK
---Apple-Mail=_9331E12B-8BD2-4EC7-B53E-01F3FBEC9227--
 """
 
 MAIL_MULTIPART_INVALID_ENCODING = """Return-Path: <whatever-2a840@postmaster.twitter.com>
@@ -648,11 +652,11 @@ AAAAACwAAAAAAgACAAAEA3DJFQA7
 --001a11416b9e9b229a05272b7052--
 """
 
-MAIL_EML_ATTACHMENT = """Subject: Re: test attac
+MAIL_EML_ATTACHMENT = """Subject: {subject}
 From: {email_from}
 To: {to}
-References: <f3b9f8f8-28fa-2543-cab2-7aa68f679ebb@odoo.com>
-Message-ID: <cb7eaf62-58dc-2017-148c-305d0c78892f@odoo.com>
+References: {references}
+Message-ID: {msg_id}
 Date: Wed, 14 Mar 2018 14:26:58 +0100
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101
  Thunderbird/52.6.0
@@ -1395,6 +1399,7 @@ Date: Fri, 10 Aug 2012 14:16:26 +0000
 
 ------=_Part_4200734_24778174.1344608186754
 Content-Type: {pdf_mime}; name="scan_soraya.lernout_1691652648.pdf"
+Content-Disposition: attachment; filename="scan_soraya.lernout_1691652648.pdf"
 Content-Transfer-Encoding: base64
 
 JVBERi0xLjEKJcKlwrHDqwoKMSAwIG9iagogIDw8IC9UeXBlIC9DYXRhbG9nCiAgICAgL1BhZ2VzIDIgMCBSCiAgPj4KZW5kb2JqCgoyIDAgb2JqCiAgPDwgL1R5cGUgL1BhZ2VzCiAgICAgL0tpZHMgWzMgMCBSXQogICAgIC9Db3VudCAxCiAgICAgL01lZGlhQm94IFswIDAgMzAwIDE0NF0KICA+PgplbmRvYmoKCjMgMCBvYmoKICA8PCAgL1R5cGUgL1BhZ2UKICAgICAgL1BhcmVudCAyIDAgUgogICAgICAvUmVzb3VyY2VzCiAgICAgICA8PCAvRm9udAogICAgICAgICAgIDw8IC9GMQogICAgICAgICAgICAgICA8PCAvVHlwZSAvRm9udAogICAgICAgICAgICAgICAgICAvU3VidHlwZSAvVHlwZTEKICAgICAgICAgICAgICAgICAgL0Jhc2VGb250IC9UaW1lcy1Sb21hbgogICAgICAgICAgICAgICA+PgogICAgICAgICAgID4+CiAgICAgICA+PgogICAgICAvQ29udGVudHMgNCAwIFIKICA+PgplbmRvYmoKCjQgMCBvYmoKICA8PCAvTGVuZ3RoIDU1ID4+CnN0cmVhbQogIEJUCiAgICAvRjEgMTggVGYKICAgIDAgMCBUZAogICAgKEhlbGxvIFdvcmxkKSBUagogIEVUCmVuZHN0cmVhbQplbmRvYmoKCnhyZWYKMCA1CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAxOCAwMDAwMCBuIAowMDAwMDAwMDc3IDAwMDAwIG4gCjAwMDAwMDAxNzggMDAwMDAgbiAKMDAwMDAwMDQ1NyAwMDAwMCBuIAp0cmFpbGVyCiAgPDwgIC9Sb290IDEgMCBSCiAgICAgIC9TaXplIDUKICA+PgpzdGFydHhyZWYKNTY1CiUlRU9GCg==

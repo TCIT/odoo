@@ -1,6 +1,28 @@
-import { describe, test } from "@odoo/hoot";
-import { testEditor } from "./_helpers/editor";
-import { alignCenter, justify, alignLeft, alignRight } from "./_helpers/user_actions";
+import { describe, expect, test } from "@odoo/hoot";
+import { setupEditor, testEditor } from "./_helpers/editor";
+import {
+    alignCenter,
+    justify,
+    alignLeft,
+    alignRight,
+    alignTop,
+    alignMiddle,
+    alignBottom,
+} from "./_helpers/user_actions";
+import { expandToolbar } from "./_helpers/toolbar";
+
+test("should have align tool only if the block is content editable", async () => {
+    for (const [contenteditable, count] of [
+        [false, 0],
+        [true, 1],
+    ]) {
+        await setupEditor(
+            `<div contenteditable="${contenteditable}"><p><span contenteditable="true">ab[cde]fg</span></p></div>`
+        );
+        await expandToolbar();
+        expect(".btn[name='text_align']").toHaveCount(count);
+    }
+});
 
 describe("left", () => {
     test("should align left", async () => {
@@ -14,9 +36,13 @@ describe("left", () => {
     test("should not align left a non-editable node", async () => {
         await testEditor({
             contentBefore: '<p>ab</p><div contenteditable="false"><p>c[]d</p></div>',
-            contentBeforeEdit: '<p>ab</p><div contenteditable="false"><p>c[]d</p></div>',
+            contentBeforeEdit:
+                '<p>ab</p><div contenteditable="false"><p>c[]d</p></div>' +
+                '<p data-selection-placeholder=""><br></p>',
             stepFunction: alignLeft,
-            contentAfterEdit: '<p>ab</p><div contenteditable="false"><p>c[]d</p></div>',
+            contentAfterEdit:
+                '<p>ab</p><div contenteditable="false"><p>c[]d</p></div>' +
+                '<p data-selection-placeholder=""><br></p>',
             contentAfter: '<p>ab</p><div contenteditable="false"><p>c[]d</p></div>',
         });
     });
@@ -307,6 +333,151 @@ describe("justify", () => {
             stepFunction: justify,
             contentAfter:
                 '<div contenteditable="true" style="text-align: center;"><h1 style="text-align: justify;">a[]b</h1></div>',
+        });
+    });
+});
+
+describe("top", () => {
+    test("should align top a selected cell", async () => {
+        await testEditor({
+            contentBefore: "<table><tbody><tr><td>a[]b</td></tr></tbody></table>",
+            stepFunction: alignTop,
+            contentAfter:
+                '<table><tbody><tr><td style="vertical-align: top;">a[]b</td></tr></tbody></table>',
+        });
+    });
+
+    test("should align top multiple selected cells", async () => {
+        await testEditor({
+            contentBefore: "<table><tbody><tr><td>a[b</td><td>c]d</td></tr></tbody></table>",
+            stepFunction: alignTop,
+            contentAfter:
+                '<table><tbody><tr><td style="vertical-align: top;">a[b</td><td style="vertical-align: top;">c]d</td></tr></tbody></table>',
+        });
+    });
+
+    test("should change previous alignment to top", async () => {
+        await testEditor({
+            contentBefore: `
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="vertical-align: bottom;">a[b</td>
+                            <td style="vertical-align: middle;">c]d</td>
+                        </tr>
+                    </tbody>
+                </table>`,
+            stepFunction: alignTop,
+            contentAfter: `
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="vertical-align: top;">a[b</td>
+                            <td style="vertical-align: top;">c]d</td>
+                        </tr>
+                    </tbody>
+                </table>`,
+        });
+    });
+});
+
+describe("middle", () => {
+    test("should align middle a selected cell", async () => {
+        await testEditor({
+            contentBefore: "<table><tbody><tr><td>a[b]c</td></tr></tbody></table>",
+            stepFunction: alignMiddle,
+            contentAfter:
+                '<table><tbody><tr><td style="vertical-align: middle;">a[b]c</td></tr></tbody></table>',
+        });
+    });
+
+    test("should align middle multiple selected cells", async () => {
+        await testEditor({
+            contentBefore: "<table><tbody><tr><td>a[b</td><td>c]d</td></tr></tbody></table>",
+            stepFunction: alignMiddle,
+            contentAfter:
+                '<table><tbody><tr><td style="vertical-align: middle;">a[b</td><td style="vertical-align: middle;">c]d</td></tr></tbody></table>',
+        });
+    });
+
+    test("should change previous alignment to middle", async () => {
+        await testEditor({
+            contentBefore: `
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="vertical-align: top;">a[b</td>
+                            <td style="vertical-align: bottom;">c]d</td>
+                        </tr>
+                    </tbody>
+                </table>`,
+            stepFunction: alignMiddle,
+            contentAfter: `
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="vertical-align: middle;">a[b</td>
+                            <td style="vertical-align: middle;">c]d</td>
+                        </tr>
+                    </tbody>
+                </table>`,
+        });
+    });
+});
+
+describe("bottom", () => {
+    test("should align bottom a selected cell", async () => {
+        await testEditor({
+            contentBefore: "<table><tbody><tr><td>a[b]c</td></tr></tbody></table>",
+            stepFunction: alignBottom,
+            contentAfter:
+                '<table><tbody><tr><td style="vertical-align: bottom;">a[b]c</td></tr></tbody></table>',
+        });
+    });
+
+    test("should align bottom multiple selected cells", async () => {
+        await testEditor({
+            contentBefore: "<table><tbody><tr><td>a[b</td><td>c]d</td></tr></tbody></table>",
+            stepFunction: alignBottom,
+            contentAfter:
+                '<table><tbody><tr><td style="vertical-align: bottom;">a[b</td><td style="vertical-align: bottom;">c]d</td></tr></tbody></table>',
+        });
+    });
+
+    test("should change previous alignment to bottom", async () => {
+        await testEditor({
+            contentBefore: `
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="vertical-align: top;">a[b</td>
+                            <td style="vertical-align: middle;">c]d</td>
+                        </tr>
+                    </tbody>
+                </table>`,
+            stepFunction: alignBottom,
+            contentAfter: `
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="vertical-align: bottom;">a[b</td>
+                            <td style="vertical-align: bottom;">c]d</td>
+                        </tr>
+                    </tbody>
+                </table>`,
+        });
+    });
+});
+
+describe("override !important class", () => {
+    test("should align left even if a class sets text-align with !important", async () => {
+        await testEditor({
+            contentBefore: '<p class="text-center">a[]b</p>',
+            styleContent: ".text-center { text-align: center !important; }",
+            stepFunction: alignLeft,
+            contentAfterEdit:
+                '<p class="text-center" style="text-align: left !important;">a[]b</p>',
+            contentAfter: '<p class="text-center" style="text-align: left !important;">a[]b</p>',
         });
     });
 });

@@ -1,24 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* event_booth_sale
-# 
-# Translators:
-# Wil Odoo, 2024
-# Manon Rondou, 2024
-# 
+# * event_booth_sale
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Manon Rondou, 2024\n"
-"Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 12:59+0000\n"
+"Last-Translator: \"Manon Rondou (ronm)\" <ronm@odoo.com>\n"
+"Language-Team: French <https://translate.odoo.com/projects/odoo-19/"
+"event_booth_sale/fr/>\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fr\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: event_booth_sale
 #: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_view_form_from_event
@@ -40,8 +40,8 @@ msgstr "Catégorie de stand"
 #: model:ir.model.fields,help:event_booth_sale.field_event_booth_configurator__event_booth_category_available_ids
 msgid "Booth Category for which booths are still available. Used in frontend"
 msgstr ""
-"Catégorie de stand pour laquelle des stands sont encore disponibles. Utilisé"
-" en frontend"
+"Catégorie de stand pour laquelle des stands sont encore disponibles. Utilisé "
+"en frontend"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_sale_order__event_booth_count
@@ -141,8 +141,16 @@ msgid "Details"
 msgstr "Détails"
 
 #. module: event_booth_sale
+#: model:ir.model.fields,field_description:event_booth_sale.field_account_move__display_name
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth__display_name
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_category__display_name
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__display_name
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__display_name
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_type_booth__display_name
+#: model:ir.model.fields,field_description:event_booth_sale.field_product_product__display_name
+#: model:ir.model.fields,field_description:event_booth_sale.field_product_template__display_name
+#: model:ir.model.fields,field_description:event_booth_sale.field_sale_order__display_name
+#: model:ir.model.fields,field_description:event_booth_sale.field_sale_order_line__display_name
 msgid "Display Name"
 msgstr "Nom d'affichage"
 
@@ -189,8 +197,16 @@ msgid "Final Sale Order Line"
 msgstr "Ligne finale de la commande"
 
 #. module: event_booth_sale
+#: model:ir.model.fields,field_description:event_booth_sale.field_account_move__id
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth__id
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_category__id
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__id
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__id
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_type_booth__id
+#: model:ir.model.fields,field_description:event_booth_sale.field_product_product__id
+#: model:ir.model.fields,field_description:event_booth_sale.field_product_template__id
+#: model:ir.model.fields,field_description:event_booth_sale.field_sale_order__id
+#: model:ir.model.fields,field_description:event_booth_sale.field_sale_order_line__id
 msgid "ID"
 msgstr "ID"
 
@@ -198,11 +214,6 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_category__image_1920
 msgid "Image"
 msgstr "Image"
-
-#. module: event_booth_sale
-#: model:ir.model.fields,field_description:event_booth_sale.field_sale_order_line__is_event_booth
-msgid "Is Event Booth"
-msgstr "Est un stand d'événement"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth__is_paid
@@ -240,7 +251,7 @@ msgstr "Ok"
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth__sale_order_id
 msgid "Order Reference"
-msgstr "Référence de commande"
+msgstr "Référence commande"
 
 #. module: event_booth_sale
 #: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_view_form_from_event
@@ -339,13 +350,38 @@ msgstr "Sélectionnez un stand d'événement"
 
 #. module: event_booth_sale
 #. odoo-python
+#: code:addons/event_booth_sale/models/product_template.py:0
+msgid ""
+"The \"service_tracking\" for the product template, %(product_template_name)s "
+"cannot be changed because one of its variants is assigned to the Event Booth "
+"Category, %(event_booth_category_name)s. The service_tracking must remain "
+"\"Event Booth\"."
+msgstr ""
+"Le paramètre \"service_tracking\" pour le modèle de produit %"
+"(product_template_name)s ne peut pas être modifié, car l’une de ses "
+"variantes est associée à la catégorie de stand d’événement %"
+"(event_booth_category_name)s. Le paramètre \"service_tracking\" doit rester "
+"\"Stand d’événement\"."
+
+#. module: event_booth_sale
+#. odoo-python
 #: code:addons/event_booth_sale/models/sale_order_line.py:0
 msgid ""
-"The following booths are unavailable, please remove them to continue : "
-"%(booth_names)s"
+"The following booths are unavailable, please remove them to continue : %"
+"(booth_names)s"
 msgstr ""
 "Les stands suivants sont indisponibles, veuillez les retirer pour continuer "
 ":%(booth_names)s"
+
+#. module: event_booth_sale
+#. odoo-python
+#: code:addons/event_booth_sale/models/event_booth_category.py:0
+msgid ""
+"The product, %(product_name)s , is used for Event Booth, it must have "
+"service_tracking set to \"Event Booth\"."
+msgstr ""
+"Le produit %(product_name)s est utilisé pour un stand d’événement, il doit "
+"avoir le paramètre \"service_tracking\" défini sur \"Stand d’événement\"."
 
 #. module: event_booth_sale
 #: model:ir.model.constraint,message:event_booth_sale.constraint_event_booth_registration_unique_registration
@@ -370,11 +406,23 @@ msgstr ""
 #. odoo-python
 #: code:addons/event_booth_sale/models/event_booth.py:0
 msgid ""
-"You can't delete the following booths as they are linked to sales orders: "
-"%(booths)s"
+"You can't delete the following booths as they are linked to sales orders: %"
+"(booths)s"
 msgstr ""
 "Vous ne pouvez pas supprimer les stands suivants, car ils sont liés à des "
 "commandes clients : %(booths)s"
+
+#. module: event_booth_sale
+#. odoo-python
+#: code:addons/event_booth_sale/models/product_product.py:0
+msgid ""
+"You cannot change the service_tracking of the product %(product_name)s "
+"because it is already assigned to %(booth_category_name)s. The "
+"service_tracking must remain 'event_booth'."
+msgstr ""
+"Vous ne pouvez pas modifier le service_tracking du produit %(product_name)s "
+"car il est déjà attribué à %(booth_category_name)s. Le paramètre "
+"service_tracking doit rester event_booth."
 
 #. module: event_booth_sale
 #. odoo-python
@@ -386,6 +434,5 @@ msgstr "Vous devez sélectionner au moins un stand."
 #. odoo-python
 #: code:addons/event_booth_sale/models/event_booth_registration.py:0
 msgid ""
-"Your order has been cancelled because the following booths have been "
-"reserved"
+"Your order has been cancelled because the following booths have been reserved"
 msgstr "Votre commande a été annulée car les stands suivants ont été réservés"

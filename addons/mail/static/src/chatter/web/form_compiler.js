@@ -12,13 +12,14 @@ function compileChatter(node, params) {
         hasAttachmentPreview: Boolean(
             this.templates.FormRenderer.querySelector(".o_attachment_preview")
         ),
+        hasParentReloadOnActivityChanged: Boolean(node.getAttribute("reload_on_activity")),
         hasParentReloadOnAttachmentsChanged: Boolean(node.getAttribute("reload_on_attachment")),
         hasParentReloadOnFollowersUpdate: Boolean(node.getAttribute("reload_on_follower")),
         hasParentReloadOnMessagePosted: Boolean(node.getAttribute("reload_on_post")),
         isAttachmentBoxVisibleInitially: Boolean(node.getAttribute("open_attachments")),
         threadId: "__comp__.props.record.resId or undefined",
         threadModel: "__comp__.props.record.resModel",
-        webRecord: "__comp__.props.record",
+        record: "__comp__.props.record",
         saveRecord: "() => __comp__.save and __comp__.save()",
         highlightMessageId: "__comp__.highlightMessageId",
     });

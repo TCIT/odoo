@@ -3,21 +3,23 @@
 from odoo import api, fields, models, tools
 
 from odoo.addons.base.models.res_partner import _tz_get
+from odoo.exceptions import ValidationError
 
-from odoo.osv import expression
 
-class LeaveReportCalendar(models.Model):
-    _name = "hr.leave.report.calendar"
+class HrLeaveReportCalendar(models.Model):
+    _name = 'hr.leave.report.calendar'
     _description = 'Time Off Calendar'
     _auto = False
     _order = "start_datetime DESC, employee_id"
 
-    name = fields.Char(string='Name', readonly=True, compute="_compute_name", search="_search_name")
+    name = fields.Char(string='Name', readonly=True, compute="_compute_name")
     start_datetime = fields.Datetime(string='From', readonly=True)
     stop_datetime = fields.Datetime(string='To', readonly=True)
+    duration_display = fields.Char(related='leave_id.duration_display', readonly=True)
     tz = fields.Selection(_tz_get, string="Timezone", readonly=True)
     duration = fields.Float(string='Duration', readonly=True)
     employee_id = fields.Many2one('hr.employee', readonly=True)
+    user_id = fields.Many2one('res.users', readonly=True)
     department_id = fields.Many2one('hr.department', readonly=True)
     job_id = fields.Many2one('hr.job', readonly=True)
     company_id = fields.Many2one('res.company', readonly=True)
@@ -36,13 +38,14 @@ class LeaveReportCalendar(models.Model):
     is_striked = fields.Boolean('Striked', readonly=True)
 
     is_absent = fields.Boolean(related='employee_id.is_absent')
+    member_of_department = fields.Boolean(related='employee_id.member_of_department')
     leave_manager_id = fields.Many2one(related='employee_id.leave_manager_id')
     leave_id = fields.Many2one(comodel_name='hr.leave', readonly=True, groups='hr_holidays.group_hr_holidays_user')
     is_manager = fields.Boolean("Manager", compute="_compute_is_manager")
 
     def init(self):
-        tools.drop_view_if_exists(self._cr, 'hr_leave_report_calendar')
-        self._cr.execute("""CREATE OR REPLACE VIEW hr_leave_report_calendar AS
+        tools.drop_view_if_exists(self.env.cr, 'hr_leave_report_calendar')
+        self.env.cr.execute("""CREATE OR REPLACE VIEW hr_leave_report_calendar AS
         (SELECT
             hl.id AS id,
             hl.id AS leave_id,
@@ -55,7 +58,8 @@ class LeaveReportCalendar(models.Model):
             hl.private_name AS description,
             hl.holiday_status_id AS holiday_status_id,
             em.company_id AS company_id,
-            em.job_id AS job_id,
+            v.job_id AS job_id,
+            em.user_id AS user_id,
             COALESCE(
                 rr.tz,
                 rc.tz,
@@ -67,10 +71,11 @@ class LeaveReportCalendar(models.Model):
         FROM hr_leave hl
             LEFT JOIN hr_employee em
                 ON em.id = hl.employee_id
+            LEFT JOIN hr_version v ON v.id = em.current_version_id
             LEFT JOIN resource_resource rr
                 ON rr.id = em.resource_id
             LEFT JOIN resource_calendar rc
-                ON rc.id = em.resource_calendar_id
+                ON rc.id = v.resource_calendar_id
             LEFT JOIN res_company co
                 ON co.id = em.company_id
             LEFT JOIN resource_calendar cc
@@ -101,23 +106,31 @@ class LeaveReportCalendar(models.Model):
             # Include the time off duration.
             leave.name += f": {leave.sudo().leave_id.duration_display}"
 
-    def _search_name(self, operator, value):
-        query = self.env['hr.leave'].sudo()._search([('duration_display', operator, value)])
-        domain = ['|', ('employee_id.name', operator, value), ('leave_id', 'in', query)]
-        if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
-            domain = expression.OR([domain , [('leave_id.holiday_status_id.name', operator, value)]])
-        return domain
-    
     @api.depends('leave_manager_id')
     def _compute_is_manager(self):
         for leave in self:
             leave.is_manager = self.env.user.has_group('hr_holidays.group_hr_holidays_user') or leave.leave_manager_id == self.env.user
 
     def action_approve(self):
-        self.leave_id.action_approve(check_state=False)
-
-    def action_validate(self):
-        self.leave_id.action_validate()
+        current_user = self.env.user
+        if current_user.has_group('hr_holidays.group_hr_holidays_user'):
+            # If the user is a leave manager, approve the leave
+            self.leave_id.action_approve()
+        elif self.leave_manager_id == current_user and self.sudo().holiday_status_id.leave_validation_type in ('manager', 'both'):
+            # If the user is the employee's time off approver, approve the leave
+            self.sudo().leave_id.sudo(False).action_approve()
+        else:
+            # If the user is not a leave manager, raise an error
+            raise ValidationError(self.env._("You are not allowed to approve this leave request."))
 
     def action_refuse(self):
-        self.leave_id.action_refuse()
+        current_user = self.env.user
+        if current_user.has_group('hr_holidays.group_hr_holidays_user'):
+            # If the user is a leave manager, refuse the leave
+            self.leave_id.action_refuse()
+        elif self.leave_manager_id == current_user and self.sudo().holiday_status_id.leave_validation_type in ('manager', 'both'):
+            # If the user is the employee's time off approver, refuse the leave
+            self.sudo().leave_id.sudo(False).action_refuse()
+        else:
+            # If the user is not a leave manager, raise an error
+            raise ValidationError(self.env._("You are not allowed to refuse this leave request."))

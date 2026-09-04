@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields
@@ -102,11 +101,8 @@ class TestSaleReportCurrencyRate(SaleCommon):
                     # to the currency of the so company and then from it to the currency of the so
                     # pricelist.
                     price_for_so_company = self.product.list_price / expected_product_currency_rate
-                    expected_rounded_price = pricelist.currency_id.round(
-                        price_for_so_company * expected_so_currency_rate
-                    )
 
-                    expected_amount_total = qty * expected_rounded_price
+                    expected_amount_total = pricelist.currency_id.round(qty * price_for_so_company * expected_so_currency_rate)
                     self.assertAlmostEqual(order.currency_rate, expected_so_currency_rate)
                     self.assertAlmostEqual(order.amount_total, expected_amount_total)
 
@@ -145,11 +141,10 @@ class TestSaleReportCurrencyRate(SaleCommon):
         order.invoice_ids.action_post()
         order.order_line.flush_recordset()
 
-        amount_line = self.env['sale.report'].read_group(
+        amount_line = self.env['sale.report'].formatted_read_group(
             [('order_reference', '=', f'sale.order,{order.id}')],
-            ['untaxed_amount_to_invoice:sum', 'untaxed_amount_invoiced:sum'],
-            []
+            aggregates=['untaxed_amount_to_invoice:sum', 'untaxed_amount_invoiced:sum'],
         )[0]
 
-        self.assertEqual(float_compare(amount_line['untaxed_amount_invoiced'], 200, precision_rounding=order.currency_id.rounding), 0)
-        self.assertEqual(float_compare(amount_line['untaxed_amount_to_invoice'], self.product.lst_price - 200, precision_rounding=order.currency_id.rounding), 0)
+        self.assertEqual(float_compare(amount_line['untaxed_amount_invoiced:sum'], 200, precision_rounding=order.currency_id.rounding), 0)
+        self.assertEqual(float_compare(amount_line['untaxed_amount_to_invoice:sum'], self.product.lst_price - 200, precision_rounding=order.currency_id.rounding), 0)

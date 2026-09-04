@@ -6,11 +6,12 @@ import requests
 from odoo import api, models, _
 from odoo.http import request
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.misc import str2bool
 
 logger = logging.getLogger(__name__)
 
 
-class Http(models.AbstractModel):
+class IrHttp(models.AbstractModel):
     _inherit = 'ir.http'
 
     def session_info(self):
@@ -25,8 +26,10 @@ class Http(models.AbstractModel):
     @api.model
     def _add_public_key_to_session_info(self, session_info):
         """Add the ReCaptcha public key to the given session_info object"""
-        public_key = self.env['ir.config_parameter'].sudo().get_param('recaptcha_public_key')
-        if public_key:
+        config_params = self.env['ir.config_parameter'].sudo()
+        recaptcha_enabled = str2bool(config_params.get_param('enable_recaptcha', default=True))
+        public_key = config_params.get_param('recaptcha_public_key')
+        if public_key and recaptcha_enabled:
             session_info['recaptcha_public_key'] = public_key
         return session_info
 
@@ -36,11 +39,16 @@ class Http(models.AbstractModel):
             If no recaptcha private key is set the recaptcha verification
             is considered inactive and this method will return True.
         """
+        super()._verify_request_recaptcha_token(action)
+        config_params = request.env['ir.config_parameter'].sudo()
+        recaptcha_enabled = str2bool(config_params.get_param('enable_recaptcha', default=True))
+        if not recaptcha_enabled:
+            return
         ip_addr = request.httprequest.remote_addr
         token = request.params.pop('recaptcha_token_response', False)
         recaptcha_result = request.env['ir.http']._verify_recaptcha_token(ip_addr, token, action)
         if recaptcha_result in ['is_human', 'no_secret']:
-            return True
+            return
         if recaptcha_result == 'wrong_secret':
             raise ValidationError(_("The reCaptcha private key is invalid."))
         elif recaptcha_result == 'wrong_token':
@@ -50,7 +58,7 @@ class Http(models.AbstractModel):
         elif recaptcha_result == 'bad_request':
             raise UserError(_("The request is invalid or malformed."))
         else:
-            return False
+            raise UserError(_("Suspicious activity detected by google reCAPTCHA."))
 
     @api.model
     def _verify_recaptcha_token(self, ip_addr, token, action=False):

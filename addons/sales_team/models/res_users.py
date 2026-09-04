@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
@@ -23,7 +22,18 @@ class ResUsers(models.Model):
             user.crm_team_ids = user.crm_team_member_ids.crm_team_id
 
     def _search_crm_team_ids(self, operator, value):
-        return [('crm_team_member_ids.crm_team_id', operator, value)]
+        # Equivalent to `[('crm_team_member_ids.crm_team_id', operator, value)]`,
+        # but we inline the ids directly to simplify final queries and improve performance,
+        # as it's part of a few ir.rules.
+        # If we're going to inject too many `ids`, we fall back on the default behavior
+        # to avoid a performance regression.
+        IN_MAX = 10_000
+        domain = [('crm_team_member_ids.crm_team_id', operator, value)]
+        user_ids = self.env['res.users'].with_context(active_test=False)._search(domain, limit=IN_MAX).get_result_ids()
+        if len(user_ids) < IN_MAX:
+            return [('id', 'in', user_ids)]
+
+        return domain
 
     @api.depends('crm_team_member_ids.crm_team_id', 'crm_team_member_ids.create_date', 'crm_team_member_ids.active')
     def _compute_sale_team_id(self):
@@ -33,3 +43,7 @@ class ResUsers(models.Model):
             else:
                 sorted_memberships = user.crm_team_member_ids  # sorted by create date
                 user.sale_team_id = sorted_memberships[0].crm_team_id if sorted_memberships else False
+
+    def action_archive(self):
+        self.env['crm.team.member'].search([('user_id', 'in', self.ids)]).action_archive()
+        return super().action_archive()

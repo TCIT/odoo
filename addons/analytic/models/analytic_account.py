@@ -4,8 +4,8 @@
 from collections import defaultdict
 import itertools
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
-from odoo.tools import groupby
+from odoo.exceptions import UserError, RedirectWarning
+from odoo.tools import groupby, SQL
 
 
 class AccountAnalyticAccount(models.Model):
@@ -39,6 +39,7 @@ class AccountAnalyticAccount(models.Model):
         'account.analytic.plan',
         string='Plan',
         required=True,
+        index=True,
     )
     root_plan_id = fields.Many2one(
         'account.analytic.plan',
@@ -63,13 +64,14 @@ class AccountAnalyticAccount(models.Model):
         default=lambda self: self.env.company,
     )
 
-    # use auto_join to speed up name_search call
     partner_id = fields.Many2one(
         'res.partner',
         string='Customer',
-        auto_join=True,
+        # use bypass_access to speed up name_search call
+        bypass_search_access=True,
         tracking=True,
         check_company=True,
+        index='btree_not_null',
     )
 
     balance = fields.Monetary(
@@ -97,7 +99,7 @@ class AccountAnalyticAccount(models.Model):
                 ('auto_account_id', 'in', [account.id for account in accounts]),
                 '!', ('company_id', 'child_of', company.id),
             ], limit=1):
-                raise UserError(_("You can't set a different company on your analytic account since there are some analytic items linked to it."))
+                raise UserError(_("You can't change the company of an analytic account that already has analytic items! It's a recipe for an analytical disaster!"))
 
     @api.depends('code', 'partner_id')
     def _compute_display_name(self):
@@ -126,15 +128,35 @@ class AccountAnalyticAccount(models.Model):
     def _read_group_select(self, aggregate_spec, query):
         # flag balance/debit/credit as aggregatable, and manually sum the values
         # from the records in the group
-        if aggregate_spec in ('balance:sum', 'debit:sum', 'credit:sum'):
+        if aggregate_spec in (
+            'balance:sum',
+            'balance:sum_currency',
+            'debit:sum',
+            'debit:sum_currency',
+            'credit:sum',
+            'credit:sum_currency',
+        ):
             return super()._read_group_select('id:recordset', query)
         return super()._read_group_select(aggregate_spec, query)
 
     def _read_group_postprocess_aggregate(self, aggregate_spec, raw_values):
-        if aggregate_spec in ('balance:sum', 'debit:sum', 'credit:sum'):
-            field_name = aggregate_spec.split(':')[0]
+        if aggregate_spec in (
+            'balance:sum',
+            'balance:sum_currency',
+            'debit:sum',
+            'debit:sum_currency',
+            'credit:sum',
+            'credit:sum_currency',
+        ):
+            field_name, op = aggregate_spec.split(':')
             column = super()._read_group_postprocess_aggregate('id:recordset', raw_values)
-            return (sum(records.mapped(field_name)) for records in column)
+            if op == 'sum':
+                return (sum(records.mapped(field_name)) for records in column)
+            if op == 'sum_currency':
+                return (sum(record.currency_id._convert(
+                    from_amount=record[field_name],
+                    to_currency=self.env.company.currency_id,
+                ) for record in records) for records in column)
         return super()._read_group_postprocess_aggregate(aggregate_spec, raw_values)
 
     @api.depends('line_ids.amount')
@@ -148,12 +170,15 @@ class AccountAnalyticAccount(models.Model):
             )
 
         domain = [('company_id', 'in', [False] + self.env.companies.ids)]
-        if self._context.get('from_date', False):
-            domain.append(('date', '>=', self._context['from_date']))
-        if self._context.get('to_date', False):
-            domain.append(('date', '<=', self._context['to_date']))
+        if self.env.context.get('from_date', False):
+            domain.append(('date', '>=', self.env.context['from_date']))
+        if self.env.context.get('to_date', False):
+            domain.append(('date', '<=', self.env.context['to_date']))
 
         for plan, accounts in self.grouped('plan_id').items():
+            if not plan:
+                accounts.debit = accounts.credit = accounts.balance = 0
+                continue
             credit_groups = self.env['account.analytic.line']._read_group(
                 domain=domain + [(plan._column_name(), 'in', self.ids), ('amount', '>=', 0.0)],
                 groupby=[plan._column_name(), 'currency_id'],
@@ -176,3 +201,43 @@ class AccountAnalyticAccount(models.Model):
                 account.debit = -data_debit.get(account.id, 0.0)
                 account.credit = data_credit.get(account.id, 0.0)
                 account.balance = account.credit - account.debit
+
+    def _update_accounts_in_analytic_lines(self, new_fname, current_fname, accounts):
+        if current_fname != new_fname:
+            domain = [
+                (new_fname, 'not in', accounts.ids + [False]),
+                (current_fname, 'in', accounts.ids),
+            ]
+            if self.env['account.analytic.line'].sudo().search_count(domain, limit=1):
+                list_view = self.env.ref('analytic.view_account_analytic_line_tree', raise_if_not_found=False)
+                raise RedirectWarning(
+                    message=_("Whoa there! Making this change would wipe out your current data. Let's avoid that, shall we?"),
+                    action={
+                        'res_model': 'account.analytic.line',
+                        'type': 'ir.actions.act_window',
+                        'domain': domain,
+                        'target': 'new',
+                        'views': [(list_view and list_view.id, 'list')]
+                    },
+                    button_text=_("See them"),
+                )
+            self.env.cr.execute(SQL(
+                """
+                UPDATE account_analytic_line
+                   SET %(new_fname)s = %(current_fname)s,
+                       %(current_fname)s = NULL
+                 WHERE %(current_fname)s = ANY(%(account_ids)s)
+                """,
+                new_fname=SQL.identifier(new_fname),
+                current_fname=SQL.identifier(current_fname),
+                account_ids=accounts.ids,
+            ))
+            self.env['account.analytic.line'].invalidate_model()
+
+    def write(self, vals):
+        if vals.get('plan_id'):
+            new_fname = self.env['account.analytic.plan'].browse(vals['plan_id'])._column_name()
+            for plan, accounts in self.grouped('plan_id').items():
+                current_fname = plan._column_name()
+                self._update_accounts_in_analytic_lines(new_fname, current_fname, accounts)
+        return super().write(vals)

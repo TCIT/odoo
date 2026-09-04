@@ -1,18 +1,26 @@
 /** @odoo-module */
 
-import { after, describe, expect, getFixture, test } from "@odoo/hoot";
 import {
+    advanceTime,
+    after,
+    animationFrame,
     clear,
     click,
     dblclick,
+    describe,
     drag,
     edit,
+    expect,
     fill,
+    getFixture,
     hover,
     keyDown,
     keyUp,
     leave,
     middleClick,
+    mockFetch,
+    mockTouch,
+    mockUserAgent,
     on,
     pointerDown,
     pointerUp,
@@ -24,12 +32,12 @@ import {
     select,
     setInputFiles,
     setInputRange,
+    test,
     uncheck,
-} from "@odoo/hoot-dom";
-import { advanceTime, animationFrame, mockFetch, mockTouch, mockUserAgent } from "@odoo/hoot-mock";
+} from "@odoo/hoot";
 import { Component, xml } from "@odoo/owl";
 import { EventList } from "@web/../lib/hoot-dom/helpers/events";
-import { mountForTest, parseUrl, waitForIframes } from "../local_helpers";
+import { mountForTest, parseUrl } from "../local_helpers";
 
 /**
  * @param {Event} ev
@@ -336,6 +344,66 @@ describe(parseUrl(import.meta.url), () => {
         ]);
     });
 
+    test("click on element allowing or disallowing pointer events", async () => {
+        await mountForTest(/* xml */ `
+            <div class="container">
+                <button class="first" style="pointer-events: none">
+                    Not allowed
+                </button>
+                <div style="pointer-events: none">
+                    <button class="second" style="pointer-events: auto">
+                        Allowed
+                    </button>
+                </div>
+                <button class="third" style="pointer-events: none">
+                    Not allowed
+                </button>
+            </div>
+        `);
+
+        const container = queryOne(".container");
+        const interactiveButton = queryOne(".second");
+        let events;
+
+        // Elements affected by pointer-events: none -> doesn't work
+        events = await click(".first");
+        expect(events.get("click").target).toBe(container);
+        events = await click(".third");
+        expect(events.get("click").target).toBe(container);
+
+        // Allowed button -> does work
+        events = await click(interactiveButton);
+        expect(events.get("click").target).toBe(interactiveButton);
+        expect("button:interactive").toHaveCount(1);
+
+        container.style.pointerEvents = "none";
+        interactiveButton.style.pointerEvents = "none";
+
+        // Does not work anymore
+        events = await click(interactiveButton);
+        expect(events.get("click").target).toBe(container.parentElement);
+        expect("button:interactive").not.toHaveCount();
+    });
+
+    test("click on inert element", async () => {
+        await mountForTest(/* xml */ `
+            <div class="container">
+                <button class="btn">Button</button>
+                <iframe inert="" srcdoc="&lt;button&gt;iframe button&lt;/button&gt;" />
+            </div>
+        `);
+
+        let events = await click(".btn");
+        expect(events.get("click")).not.toBe(null);
+
+        queryOne`.btn`.setAttribute("inert", "");
+
+        events = await click(".btn");
+        expect(events.get("click").target).toBe(queryOne`.container`);
+
+        await expect(click(":iframe button")).rejects.toThrow();
+    });
+
     test("click on common parent", async () => {
         await mountForTest(/* xml */ `
             <main class="parent">
@@ -423,13 +491,72 @@ describe(parseUrl(import.meta.url), () => {
         expect.verifySteps(["pointerdown:0(1)@button", "pointerup:0@button", "click:0@button"]);
     });
 
+    test("click on touch: slow listener does not suppress the click", async () => {
+        mockTouch(true);
+
+        await mountForTest(/* xml */ `<button type="button">Click me</button>`);
+
+        on("button", "pointerdown", () => advanceTime(600));
+
+        await hover("button");
+        monitorEvents("button");
+
+        await click("button");
+
+        expect.verifySteps([
+            "pointerdown:0(1)@button",
+            "focus@button",
+            "focusin@button",
+            "pointerup:0@button",
+            "click:0@button",
+        ]);
+    });
+
+    test("click on touch: a held pointer suppresses the click", async () => {
+        mockTouch(true);
+
+        await mountForTest(/* xml */ `<button type="button">Click me</button>`);
+
+        await hover("button");
+        monitorEvents("button");
+
+        await pointerDown("button");
+        await advanceTime(600);
+        await pointerUp("button");
+
+        expect.verifySteps([
+            "pointerdown:0(1)@button",
+            "focus@button",
+            "focusin@button",
+            "pointerup:0@button",
+        ]);
+    });
+
+    test("click on touch: a held drag suppresses the click on drop", async () => {
+        mockTouch(true);
+
+        await mountForTest(/* xml */ `<button type="button">Click me</button>`);
+
+        await hover("button");
+        monitorEvents("button");
+
+        const { drop } = await drag("button");
+        await advanceTime(600);
+        await drop();
+
+        expect.verifySteps([
+            "pointerdown:0(1)@button",
+            "focus@button",
+            "focusin@button",
+            "pointerup:0@button",
+        ]);
+    });
+
     test("click: iframe", async () => {
         await mountForTest(/* xml */ `
             <button>Click me</button>
             <iframe srcdoc="&lt;button&gt;iframe button&lt;/button&gt;" />
         `);
-
-        await waitForIframes();
 
         expect("button").toHaveCount(1);
         expect(":iframe button").toHaveCount(1);
@@ -683,6 +810,77 @@ describe(parseUrl(import.meta.url), () => {
             "dragend:0@#third-item",
             "dragend:0@body",
         ]);
+    });
+
+    test("drag & drop: draggable items with files", async () => {
+        await mountForTest(/* xml */ `
+            <ul>
+                <li id="first-item" draggable="true">Item 1</li>
+                <li id="second-item" draggable="true">Item 2</li>
+                <li id="third-item" draggable="true">Item 3</li>
+            </ul>
+        `);
+
+        const { drop, moveTo } = await drag("#first-item", {
+            dropEffect: "move",
+            files: [new File([""], "dragged-file.txt")],
+        });
+        await moveTo("#second-item");
+        const events = await drop("#third-item");
+
+        const dragEvents = events.getAll((ev) => ev.type.startsWith("drag"));
+        const { dataTransfer } = dragEvents[0];
+
+        expect(dataTransfer.dropEffect).toBe("move");
+        expect(dataTransfer.effectAllowed).toBe("all");
+        expect(dataTransfer.files).toHaveLength(1);
+        expect(dataTransfer.items).toHaveLength(1);
+        expect(dataTransfer.types).toEqual(["Files"]);
+
+        for (const event of dragEvents) {
+            expect(event.dataTransfer).toBe(dataTransfer, {
+                message: `drag event "${event.type}" should share the same dataTransfer object`,
+            });
+        }
+    });
+
+    test("drag & drop: draggable items with dataTransfer items", async () => {
+        await mountForTest(/* xml */ `
+            <ul>
+                <li id="first-item" draggable="true">Item 1</li>
+                <li id="second-item" draggable="true">Item 2</li>
+                <li id="third-item" draggable="true">Item 3</li>
+            </ul>
+        `);
+
+        const { drop, moveTo } = await drag("#first-item", {
+            items: [
+                ["abc", "text/plain"],
+                ["<html/>", "text/html"],
+            ],
+        });
+        await moveTo("#second-item");
+        const events = await drop("#third-item");
+
+        const dragEvents = events.getAll((ev) => ev.type.startsWith("drag"));
+        const { dataTransfer } = dragEvents[0];
+
+        expect(dataTransfer.dropEffect).toBe("none");
+        expect(dataTransfer.effectAllowed).toBe("all");
+        expect(dataTransfer.files).toHaveLength(0);
+        expect(dataTransfer.items).toHaveLength(2);
+        expect(dataTransfer.types).toEqual(["text/plain", "text/html"]);
+
+        dataTransfer.setData("custom-data", "yes");
+
+        expect(dataTransfer.items).toHaveLength(3);
+        expect(dataTransfer.types).toEqual(["text/plain", "text/html", "custom-data"]);
+
+        for (const event of dragEvents) {
+            expect(event.dataTransfer).toBe(dataTransfer, {
+                message: `drag event "${event.type}" should share the same dataTransfer object`,
+            });
+        }
     });
 
     test("drag & drop: non-draggable items", async () => {
@@ -1099,8 +1297,8 @@ describe(parseUrl(import.meta.url), () => {
             "pointerleave:0@input",
             "mouseleave:0@input",
             // Change
-            "blur@input",
             "change@input",
+            "blur@input",
             "focusout@input",
         ]);
     });
@@ -1135,7 +1333,6 @@ describe(parseUrl(import.meta.url), () => {
                 `input:${char}@input`,
                 `keyup:${char}@input`,
             ]),
-            "select@input",
         ]);
     });
 
@@ -1200,8 +1397,6 @@ describe(parseUrl(import.meta.url), () => {
             <input type="text" />
             <iframe srcdoc="&lt;input type='text' /&gt;" />
         `);
-
-        await waitForIframes();
 
         expect("input").toHaveCount(1);
         expect(":iframe input").toHaveCount(1);
@@ -1298,6 +1493,24 @@ describe(parseUrl(import.meta.url), () => {
         await setInputFiles(new File([""], "file.txt"));
 
         expect("input").toHaveValue(/file\.txt/);
+    });
+
+    test("setInputFiles: shadow root", async () => {
+        await mountForTest(/* xml */ `
+            <div class="container" />
+        `);
+
+        const shadow = queryOne(".container").attachShadow({
+            mode: "open",
+        });
+        const input = document.createElement("input");
+        input.type = "file";
+        shadow.appendChild(input);
+
+        await click(".container:shadow input");
+        await setInputFiles(new File([""], "file.txt"));
+
+        expect(".container:shadow input").toHaveValue(/file\.txt/);
     });
 
     test("setInputRange: basic case and events", async () => {
@@ -1607,8 +1820,8 @@ describe(parseUrl(import.meta.url), () => {
             "focus@input",
             "focusin@input",
             "focusin@form",
-            "select@input",
-            "select@form",
+            "keyup:Tab@input",
+            "keyup:Tab@form",
             // Enter
             "keydown:Enter@input",
             "keydown:Enter@form",
@@ -1640,6 +1853,8 @@ describe(parseUrl(import.meta.url), () => {
             "focus@button",
             "focusin@button",
             "focusin@form",
+            "keyup:Tab@button",
+            "keyup:Tab@form",
             // Enter
             "keydown:Enter@button",
             "keydown:Enter@form",
@@ -1672,6 +1887,8 @@ describe(parseUrl(import.meta.url), () => {
             "focus@button",
             "focusin@button",
             "focusin@form",
+            "keyup:Tab@button",
+            "keyup:Tab@form",
             // Enter
             "keydown:Enter@button",
             "keydown:Enter@form",
@@ -1691,10 +1908,11 @@ describe(parseUrl(import.meta.url), () => {
             </form>
         `);
 
-        mockFetch((url, { body, method }) => {
+        mockFetch((url, { body, headers, method }) => {
             expect.step(new URL(url).pathname);
 
-            expect(method).toBe("post");
+            expect(method).toBe("POST");
+            expect(headers).toEqual(new Headers([["Content-Type", "multipart/form-data"]]));
             expect(body).toBeInstanceOf(FormData);
             expect(body.get("csrf_token")).toBe("CSRF_TOKEN_VALUE");
             expect(body.get("name")).toBe("Pierre");

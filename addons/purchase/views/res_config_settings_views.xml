@@ -39,9 +39,6 @@
                         </setting>
                     </block>
                     <block title="Invoicing" name="invoicing_settings_container">
-                        <setting id="quantities_billed_vendor" title="This default value is applied to any new product created. This can be changed in the product detail form." documentation="/applications/inventory_and_mrp/purchase/manage_deals/control_bills.html" help="Quantities billed by vendors">
-                            <field name="default_purchase_method" class="o_light_label" widget="radio"/>
-                        </setting>
                         <setting id="three_way_matching" title="If enabled, activates 3-way matching on vendor bills : the items must be received in order to pay the invoice." documentation="/applications/inventory_and_mrp/purchase/manage_deals/control_bills.html" help="Make sure you only pay bills for which you received the goods you ordered">
                             <field name="module_account_3way_match" string="3-way matching" widget="upgrade_boolean"/>
                         </setting>
@@ -58,16 +55,13 @@
                         <setting id="product_matrix" title="If installed, the product variants will be added to purchase orders through a grid entry." string="Variant Grid Entry" help="Add several variants to the purchase order from a grid">
                             <field name="module_purchase_product_matrix"/>
                         </setting>
-                        <setting id="stock_packaging_purchase" help="Purchase products by multiple of unit # per package" title="Ability to select a package type in purchase orders and to force a quantity that is a multiple of the number of units per package.">
-                            <field name="group_stock_packaging"/>
-                        </setting>
-                        <setting id="sell_purchase_uom" help="Sell and purchase products in different units of measure"
+                        <setting id="sell_purchase_uom" help="Sell and purchase products in different units of measure or packagings"
                                  documentation="/applications/inventory_and_mrp/inventory/management/products/uom.html">
                             <field name="group_uom"/>
                             <div class="content-group">
                                 <div class="mt8" invisible="not group_uom">
-                                    <button name="%(uom.product_uom_categ_form_action)d" icon="oi-arrow-right"
-                                            type="action" string="Units Of Measure" class="btn-link"/>
+                                    <button name="%(uom.product_uom_form_action)d" icon="oi-arrow-right"
+                                            type="action" string="Units &amp; Packagings" class="btn-link"/>
                                 </div>
                             </div>
                         </setting>
@@ -81,7 +75,6 @@
         <field name="name">Settings</field>
         <field name="res_model">res.config.settings</field>
         <field name="view_mode">form</field>
-        <field name="target">inline</field>
         <field name="context">{'module' : 'purchase', 'bin_size': False}</field>
     </record>
 

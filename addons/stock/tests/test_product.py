@@ -6,7 +6,8 @@
 
 from odoo.addons.stock.tests.common import TestStockCommon
 from odoo.exceptions import UserError
-from odoo.tests import Form
+from odoo.fields import Command
+from odoo.tests import Form, tagged
 
 
 class TestVirtualAvailable(TestStockCommon):
@@ -17,44 +18,42 @@ class TestVirtualAvailable(TestStockCommon):
         # Make `product3` a storable product for this test. Indeed, creating quants
         # and playing with owners is not possible for consumables.
         cls.product_3.is_storable = True
-        cls.env['stock.picking.type'].browse(cls.env.ref('stock.picking_type_out').id).reservation_method = 'manual'
+        cls.picking_type_out.reservation_method = 'manual'
 
         cls.env['stock.quant'].create({
             'product_id': cls.product_3.id,
-            'location_id': cls.env.ref('stock.stock_location_stock').id,
+            'location_id': cls.stock_location.id,
             'quantity': 30.0})
 
         cls.env['stock.quant'].create({
             'product_id': cls.product_3.id,
-            'location_id': cls.env.ref('stock.stock_location_stock').id,
+            'location_id': cls.stock_location.id,
             'quantity': 10.0,
             'owner_id': cls.user_stock_user.partner_id.id})
 
         cls.picking_out = cls.env['stock.picking'].create({
             'state': 'draft',
-            'picking_type_id': cls.env.ref('stock.picking_type_out').id
+            'picking_type_id': cls.picking_type_out.id
         })
         cls.env['stock.move'].create({
-            'name': 'a move',
             'product_id': cls.product_3.id,
             'product_uom_qty': 3.0,
             'product_uom': cls.product_3.uom_id.id,
             'picking_id': cls.picking_out.id,
-            'location_id': cls.env.ref('stock.stock_location_stock').id,
-            'location_dest_id': cls.env.ref('stock.stock_location_customers').id})
+            'location_id': cls.stock_location.id,
+            'location_dest_id': cls.customer_location.id})
 
         cls.picking_out_2 = cls.env['stock.picking'].create({
             'state': 'draft',
-            'picking_type_id': cls.env.ref('stock.picking_type_out').id})
+            'picking_type_id': cls.picking_type_out.id})
         cls.env['stock.move'].create({
             'restrict_partner_id': cls.user_stock_user.partner_id.id,
-            'name': 'another move',
             'product_id': cls.product_3.id,
             'product_uom_qty': 5.0,
             'product_uom': cls.product_3.uom_id.id,
             'picking_id': cls.picking_out_2.id,
-            'location_id': cls.env.ref('stock.stock_location_stock').id,
-            'location_dest_id': cls.env.ref('stock.stock_location_customers').id})
+            'location_id': cls.stock_location.id,
+            'location_dest_id': cls.customer_location.id})
 
     def test_without_owner(self):
         self.assertAlmostEqual(40.0, self.product_3.virtual_available)
@@ -99,7 +98,7 @@ class TestVirtualAvailable(TestStockCommon):
         self.assertTrue(self.product_3.active)
         orderpoint_form = Form(self.env['stock.warehouse.orderpoint'])
         orderpoint_form.product_id = self.product_3
-        orderpoint_form.location_id = self.env.ref('stock.stock_location_stock')
+        orderpoint_form.location_id = self.stock_location
         orderpoint_form.product_min_qty = 0.0
         orderpoint_form.product_max_qty = 5.0
         orderpoint = orderpoint_form.save()
@@ -120,7 +119,7 @@ class TestVirtualAvailable(TestStockCommon):
         self.env['stock.quant'].create({
             'product_id': product.id,
             'product_uom_id': self.uom_unit.id,
-            'location_id': self.location_1.id,
+            'location_id': self.shelf_1.id,
             'quantity': 7,
             'reserved_quantity': 0,
         })
@@ -144,15 +143,14 @@ class TestVirtualAvailable(TestStockCommon):
             'type': 'consu',
         })
         picking = self.env['stock.picking'].create({
-            'location_id': self.env.ref('stock.stock_location_customers').id,
-            'location_dest_id': self.env.ref('stock.stock_location_stock').id,
-            'picking_type_id': self.ref('stock.picking_type_in'),
+            'location_id': self.customer_location.id,
+            'location_dest_id': self.stock_location.id,
+            'picking_type_id': self.picking_type_in.id,
             'state': 'draft',
         })
         self.env['stock.move'].create({
-            'name': 'test',
-            'location_id': self.env.ref('stock.stock_location_customers').id,
-            'location_dest_id': self.env.ref('stock.stock_location_stock').id,
+            'location_id': self.customer_location.id,
+            'location_dest_id': self.stock_location.id,
             'product_id': product.id,
             'product_uom': product.uom_id.id,
             'product_uom_qty': 1,
@@ -169,8 +167,6 @@ class TestVirtualAvailable(TestStockCommon):
         """ Checks we can change product company where only exist single company
         and exist quant in vendor/customer location"""
         company1 = self.env.ref('base.main_company')
-        customer_location = self.env.ref('stock.stock_location_customers')
-        supplier_location = self.env.ref('stock.stock_location_suppliers')
         product = self.env['product.product'].create({
             'name': 'Product Single Company',
             'is_storable': True,
@@ -179,21 +175,21 @@ class TestVirtualAvailable(TestStockCommon):
         self.env['stock.quant'].create({
             'product_id': product.id,
             'product_uom_id': self.uom_unit.id,
-            'location_id': self.location_1.id,
+            'location_id': self.shelf_1.id,
             'quantity': 5,
         })
         # Creates a quant for vendor location.
         self.env['stock.quant'].create({
             'product_id': product.id,
             'product_uom_id': self.uom_unit.id,
-            'location_id': supplier_location.id,
+            'location_id': self.supplier_location.id,
             'quantity': -15,
         })
         # Creates a quant for customer location.
         self.env['stock.quant'].create({
             'product_id': product.id,
             'product_uom_id': self.uom_unit.id,
-            'location_id': customer_location.id,
+            'location_id': self.customer_location.id,
             'quantity': 10,
         })
         # Assigns a company: should be ok because only exist one company (exclude vendor and customer location)
@@ -227,7 +223,7 @@ class TestVirtualAvailable(TestStockCommon):
         calling `name_search` with a negative operator will exclude T from the
         result.
         """
-        self.env.ref('base.group_user').write({'implied_ids': [(4, self.env.ref('product.group_product_variant').id)]})
+        self._enable_variants()
         template = self.env['product.template'].create({
             'name': 'Super Product',
         })
@@ -305,6 +301,7 @@ class TestVirtualAvailable(TestStockCommon):
             (False, sub_loc01.name, 10.0),
             (False, 'sub', 11.0),
             (False, main_loc.name, 1111.0),
+            (False, main_loc.complete_name.lower(), 111.0),
             (False, (sub_loc01 | sub_loc02 | sub_loc03).ids, 11.0),
             (main_warehouse.id, main_loc.name, 111.0),
             (main_warehouse.id, main_loc.id, 111.0),
@@ -368,11 +365,136 @@ class TestVirtualAvailable(TestStockCommon):
         # At this point product_3 should have the quantity reserved
         self.product_3.active = False
 
-        # Should not be possible to change the product type when quantities are reserved
-        with self.assertRaises(UserError):
-            self.product_3.write({'is_storable': False})
+        self.product_3.write({'is_storable': False})
 
-        # Should not be possible to change the product type when moves are done.
         self.picking_out.button_validate()
-        with self.assertRaises(UserError):
-            self.product_3.write({'is_storable': False})
+
+    def test_qty_available_values_on_product(self):
+        """
+        Test that qty_available can be set to 0.0 on a product
+        """
+        product = self.env['product.product'].create({
+            'name': 'Test Qty Available Product',
+            'type': 'consu',
+            'is_storable': True,
+        })
+        self.assertEqual(product.qty_available, 0.0)
+
+        with Form(product) as product_form:
+            product_form.qty_available = 10.0
+        self.assertEqual(product.qty_available, 10.0)
+
+        with Form(product) as product_form:
+            product_form.qty_available = 0.0
+        self.assertEqual(product.qty_available, 0.0)
+
+
+@tagged('post_install', '-at_install')
+class TestProductPostInstall(TestStockCommon):
+    def test_change_product_inventory_tracking_inventory_adjustment(self):
+        """
+        This test checks that inventory adjustments are performed to counter balance done stock
+        moves in order to reset the product quantity once a product is set as storable.
+
+        This adjustment is necessary to ensure a proper valorisation of goods.
+        """
+        product = self.product
+        self.assertFalse(product.is_storable)
+        product.uom_ids += self.uom_dozen
+        transit_location = self.env['stock.location'].create({
+            'name': 'Lovely transit-location',
+            'usage': 'transit',
+            'location_id': self.stock_location.id,
+        })
+        # validate a receipt an internal transfer and a delivery
+        pickings = self.env['stock.picking'].create([
+            {
+                'location_id': self.supplier_location.id,
+                'location_dest_id': self.stock_location.id,
+                'picking_type_id': self.picking_type_in.id,
+                'move_ids': [
+                    Command.create({
+                        'product_id': product.id,
+                        'product_uom_qty': 1.0,
+                        'product_uom': self.uom_dozen.id,
+                        'location_id': self.supplier_location.id,
+                        'location_dest_id': self.stock_location.id,
+                    })
+                ]
+            },
+            {
+                'location_id': self.stock_location.id,
+                'location_dest_id': transit_location.id,
+                'picking_type_id': self.picking_type_int.id,
+                'move_ids': [
+                    Command.create({
+                        'product_id': product.id,
+                        'product_uom_qty': 3.0,
+                        'location_id': self.stock_location.id,
+                        'location_dest_id': transit_location.id,
+                    })
+                ]
+            },
+            {
+                'location_id': self.stock_location.id,
+                'location_dest_id': self.customer_location.id,
+                'picking_type_id': self.picking_type_out.id,
+                'move_ids': [
+                    Command.create({
+                        'product_id': product.id,
+                        'product_uom_qty': 5.0,
+                        'location_id': self.stock_location.id,
+                        'location_dest_id': self.customer_location.id,
+                    })
+                ]
+            }
+        ])
+        pickings.action_confirm()
+        pickings.button_validate()
+        product.is_storable = True
+        self.assertEqual(product.qty_available, 0.0)
+        inventory_adjustments = self.env['stock.move'].search([('location_dest_usage', '=', 'inventory')], order='product_qty')
+        self.assertRecordValues(inventory_adjustments, [
+            {'location_id': transit_location.id, 'quantity': 3.0},
+            {'location_id': self.stock_location.id, 'quantity': 4.0},
+        ])
+
+    def test_toggle_inventory_tracking_keeps_stock_on_hand(self):
+        """ Toggling 'is_storable' off/on must keep the stock on hand
+        consistent with its moves, without counter balancing existing quants.
+        This is required to avoid incorrect inventory valuation at date. """
+        product = self.product
+        product.is_storable = True
+        self.env['stock.quant'].with_context(inventory_mode=True).create({
+            'product_id': product.id,
+            'location_id': self.stock_location.id,
+            'inventory_quantity': 10.0,
+        })._apply_inventory()
+        self.assertEqual(product.qty_available, 10.0)
+        self.assertEqual(product.with_context(to_date='2020-01-01 00:00:00').qty_available, 0.0)
+
+        product.is_storable = False
+        product.is_storable = True
+
+        self.assertEqual(product.qty_available, 10.0)
+        self.assertEqual(product.with_context(to_date='2020-01-01 00:00:00').qty_available, 0.0)
+        self.assertFalse(self.env['stock.move'].search([
+            ('product_id', '=', product.id),
+            ('location_dest_usage', '=', 'inventory'),
+        ]))
+
+    def test_user_inventory_permissions_change_lot_or_serial(self):
+        """
+        Test if a user with Product/Create can change the Custom Lot/Serial
+        """
+        product = self.productA
+        product.tracking = 'lot'
+
+        user = self.user_stock_manager
+        user.group_ids += self.env.ref('product.group_product_manager')
+
+        product.with_user(user).write({
+            'serial_prefix_format': 'TCLPP'
+        })
+
+        self.assertEqual(product.serial_prefix_format, 'TCLPP')

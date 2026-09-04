@@ -44,15 +44,17 @@ class Currency extends models.Model {
             ["before", "B"],
         ],
     });
+    inverse_rate = fields.Float();
 
     _records = [
-        { id: 1, name: "USD", symbol: "$", position: "before" },
-        { id: 2, name: "EUR", symbol: "€", position: "after" },
+        { id: 1, name: "USD", symbol: "$", position: "before", inverse_rate: 1 },
+        { id: 2, name: "EUR", symbol: "€", position: "after", inverse_rate: 0.5 },
         {
             id: 3,
             name: "VEF",
             symbol: "Bs.F",
             position: "after",
+            inverse_rate: 0.3,
         },
     ];
 }
@@ -306,7 +308,7 @@ test("basic flow in editable list view - float field", async () => {
     const euroValues = queryAll("td:contains(€)");
     expect(euroValues).toHaveLength(1, { message: "Only 1 line has euro as a currency." });
 
-    const noCurrencyValues = Array.from(queryAll("td.o_data_cell")).filter(
+    const noCurrencyValues = queryAll("td.o_data_cell").filter(
         (x) => !(x.textContent.includes("€") || x.textContent.includes("$"))
     );
     expect(noCurrencyValues).toHaveLength(1, { message: "Only 1 line has no currency." });
@@ -377,7 +379,7 @@ test("basic flow in editable list view - monetary field", async () => {
     const euroValues = queryAll("td:contains(€)");
     expect(euroValues).toHaveLength(1, { message: "Only 1 line has euro as a currency." });
 
-    const noCurrencyValues = Array.from(queryAll("td.o_data_cell")).filter(
+    const noCurrencyValues = queryAll("td.o_data_cell").filter(
         (x) => !(x.textContent.includes("€") || x.textContent.includes("$"))
     );
     expect(noCurrencyValues).toHaveLength(1, { message: "Only 1 line has no currency." });
@@ -694,23 +696,6 @@ test("MonetaryField without currency symbol", async () => {
     });
 });
 
-test("monetary field with placeholder", async () => {
-    await mountView({
-        type: "form",
-        resModel: "partner",
-        arch: `
-            <form>
-                <field name="float_field" widget="monetary" placeholder="Placeholder"/>
-                <field name="currency_id" invisible="1"/>
-            </form>`,
-    });
-    await contains(".o_field_widget[name='float_field'] input").clear();
-    expect(".o_field_widget[name='float_field'] input").toHaveAttribute(
-        "placeholder",
-        "Placeholder"
-    );
-});
-
 test("required monetary field with zero value", async () => {
     await mountView({
         type: "form",
@@ -795,4 +780,19 @@ test("monetary field with pending onchange", async () => {
     def.resolve();
     await animationFrame();
     expect(".o_field_monetary .o_monetary_ghost_value").toHaveText("1");
+});
+
+test("with 'hide_trailing_zeros' option", async () => {
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 5,
+        arch: `
+            <form>
+                <field name="float_field" widget="monetary" options="{'hide_trailing_zeros': true}"/>
+                <field name="currency_id" invisible="1"/>
+            </form>`,
+    });
+    expect(".o_field_widget input").toHaveValue("9.1");
+    expect(".o_field_widget .o_input span:eq(0)").toHaveText("$");
 });

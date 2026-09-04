@@ -1,8 +1,6 @@
-/** @odoo-module */
-
 import { expect, test } from "@odoo/hoot";
-import { queryAll, queryAllTexts, queryFirst, queryOne, queryText } from "@odoo/hoot-dom";
-import { Deferred, animationFrame, mockDate } from "@odoo/hoot-mock";
+import { queryAll, queryAllTexts, queryFirst, queryOne, queryText, resize } from "@odoo/hoot-dom";
+import { animationFrame, Deferred, mockDate } from "@odoo/hoot-mock";
 import { markup } from "@odoo/owl";
 import {
     contains,
@@ -12,7 +10,9 @@ import {
     findComponent,
     getDropdownMenu,
     getFacetTexts,
+    getMockEnv,
     getService,
+    MockServer,
     mockService,
     models,
     mountView,
@@ -26,7 +26,6 @@ import {
     toggleSaveFavorite,
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
-import { _t } from "@web/core/l10n/translation";
 import { download } from "@web/core/network/download";
 import { PivotController } from "@web/views/pivot/pivot_controller";
 import { WebClient } from "@web/webclient/webclient";
@@ -37,6 +36,14 @@ function getCurrentValues() {
 
 async function removeFacet() {
     await contains("div.o_searchview_facet:eq(0) .o_facet_remove").click();
+}
+
+async function toggleMultiCurrencyPopover(el) {
+    if (getMockEnv().isSmall) {
+        await contains(el).click();
+    } else {
+        await contains(el).hover();
+    }
 }
 
 class Partner extends models.Model {
@@ -64,7 +71,7 @@ class Partner extends models.Model {
     price_nonaggregable = fields.Monetary({
         string: "Price non-aggregable",
         aggregator: undefined,
-        currency_field: this.currency_id,
+        currency_field: "currency_id",
         groupable: false,
     });
     reference = fields.Reference({
@@ -91,6 +98,7 @@ class Partner extends models.Model {
             id: 1,
             foo: 12,
             bar: true,
+            display_name: "Raoul",
             date: "2016-12-14",
             product_id: 37,
             customer: 1,
@@ -108,6 +116,7 @@ class Partner extends models.Model {
             id: 2,
             foo: 1,
             bar: true,
+            display_name: "Steven",
             date: "2016-10-26",
             product_id: 41,
             customer: 2,
@@ -122,6 +131,7 @@ class Partner extends models.Model {
             id: 3,
             foo: 17,
             bar: true,
+            display_name: "Taylor",
             date: "2016-12-15",
             product_id: 41,
             customer: 2,
@@ -136,6 +146,7 @@ class Partner extends models.Model {
             id: 4,
             foo: 2,
             bar: false,
+            display_name: "Zara",
             date: "2016-04-11",
             product_id: 41,
             customer: 1,
@@ -157,6 +168,25 @@ class Product extends models.Model {
             id: 41,
             name: "xpad",
         },
+    ];
+}
+
+class Currency extends models.Model {
+    _name = "res.currency";
+
+    name = fields.Char();
+    symbol = fields.Char();
+    position = fields.Selection({
+        selection: [
+            ["after", "A"],
+            ["before", "B"],
+        ],
+    });
+    inverse_rate = fields.Float();
+
+    _records = [
+        { id: 1, name: "USD", symbol: "$", position: "before", inverse_rate: 1 },
+        { id: 2, name: "EUR", symbol: "€", position: "after", inverse_rate: 0.5 },
     ];
 }
 
@@ -185,7 +215,7 @@ class User extends models.Model {
     }
 }
 
-defineModels([Partner, Product, Customer, User]);
+defineModels([Partner, Product, Customer, Currency, User]);
 
 test('pivot view without "string" attribute', async () => {
     const view = await mountView({
@@ -199,7 +229,7 @@ test('pivot view without "string" attribute', async () => {
 
     const model = findComponent(view, (c) => c instanceof PivotController).model;
     // this is important for export functionality.
-    expect(model.metaData.title.toString()).toBe(_t("Untitled"));
+    expect(model.metaData.title.toString()).toBe("Untitled");
 });
 
 test('pivot view with "class" attribute', async () => {
@@ -212,11 +242,7 @@ test('pivot view with "class" attribute', async () => {
 });
 
 test("simple pivot rendering", async () => {
-    expect.assertions(4);
-
-    onRpc("read_group", ({ kwargs }) => {
-        expect(kwargs.lazy).toBe(false);
-    });
+    expect.assertions(3);
 
     await mountView({
         type: "pivot",
@@ -249,7 +275,7 @@ test("all measures should be displayed with a pivot_measures context", async () 
     });
 
     await contains("button:contains(Measures)").click();
-    expect(".o_popover.popover.o-dropdown--menu.dropdown-menu").toHaveCount(1);
+    expect(".o-dropdown--menu.o-dropdown--menu.dropdown-menu").toHaveCount(1);
     const measures = queryAllTexts(".o-dropdown-item");
     expect(measures).toEqual(["bouh", "Computed and not stored", "Foo", "Count"]);
 });
@@ -265,6 +291,49 @@ test("pivot rendering with widget", async () => {
 		`,
     });
     expect("td.o_pivot_cell_value:contains(32:00)").toHaveCount(1);
+});
+
+test("pivot rendering with widget and options", async () => {
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `
+			<pivot string="Partners">
+                <field name="foo" type="measure" widget="float_time" options="{'displaySeconds': True}"/>
+			</pivot>
+		`,
+    });
+    expect("td.o_pivot_cell_value:contains(32:00:00)").toHaveCount(1);
+});
+
+test("pivot rendering with widget and options from model field", async () => {
+    Partner._fields.biz = fields.Float({ digits: [16, 2] });
+    Partner._records[0].biz = 0.3333333;
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `
+			<pivot string="Partners">
+                <field name="biz" type="measure" widget="percentage"/>
+			</pivot>
+		`,
+    });
+    expect("td.o_pivot_cell_value:contains(33.33%)").toHaveCount(1);
+});
+
+test("pivot rendering with widget and options from field attrs", async () => {
+    Partner._fields.biz = fields.Float({ digits: [16, 2] });
+    Partner._records[0].biz = 0.3333333;
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `
+			<pivot string="Partners">
+                <field name="biz" type="measure" widget="float" digits="[16,4]"/>
+			</pivot>
+		`,
+    });
+    expect("td.o_pivot_cell_value:contains(0.3333)").toHaveCount(1);
 });
 
 test("pivot rendering with string attribute on field", async () => {
@@ -305,6 +374,22 @@ test("Pivot with integer row group by with 0 as header", async () => {
     expect(".o_pivot table tr td.o_pivot_cell_value").toHaveCount(2);
     expect(".o_pivot table tbody tr:eq(0) th:eq(0)").toHaveText("Total");
     expect(".o_pivot table tbody tr:eq(0) td:eq(0)").toHaveText("0");
+});
+
+test("pivot groupby id shows label, not empty cell", async () => {
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `
+            <pivot>
+                <field name="id" type="row"/>
+                <field name="foo" type="measure"/>
+            </pivot>`,
+    });
+
+    const rows = queryAllTexts("tbody th");
+    expect(rows).toEqual(["Total", "Raoul", "Steven", "Taylor", "Zara"]);
+    expect(".o_pivot_cell_value").toHaveCount(5);
 });
 
 test("Pivot with integer col group by with 0 as header", async () => {
@@ -420,7 +505,6 @@ test("pivot view do not add number field without aggregator", async () => {
 test("clicking on a cell triggers a doAction", async () => {
     expect.assertions(2);
     Partner._views["form,2"] = `<form/>`;
-    Partner._views["list,false"] = `<list/>`;
     Partner._views["kanban,5"] = `<kanban/>`;
 
     mockService("action", {
@@ -436,6 +520,7 @@ test("clicking on a cell triggers a doAction", async () => {
                 domain: [["product_id", "=", 37]],
                 name: "Partners",
                 res_model: "partner",
+                search_view_id: [67, "search"],
                 target: "current",
                 type: "ir.actions.act_window",
                 view_mode: "list",
@@ -451,6 +536,7 @@ test("clicking on a cell triggers a doAction", async () => {
     await mountView({
         type: "pivot",
         resModel: "partner",
+        searchViewId: 67,
         arch: `
 			<pivot string="Partners">
 				<field name="product_id" type="row"/>
@@ -473,8 +559,6 @@ test("clicking on a cell triggers a doAction", async () => {
 
 test.tags("desktop");
 test("row and column are highlighted when hovering a cell", async () => {
-    expect.assertions(11);
-
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -492,112 +576,16 @@ test("row and column are highlighted when hovering a cell", async () => {
     // hover third measure
     await contains("th.o_pivot_measure_row:nth-of-type(3)").hover();
     expect(".o_cell_hover").toHaveCount(3);
-    for (var i = 1; i <= 3; i++) {
-        expect(`tbody tr:nth-of-type(${i}) td:nth-of-type(3)`).toHaveClass("o_cell_hover");
-    }
+    expect(`tbody tr td:nth-of-type(3)`).toHaveCount(3);
+    expect(`tbody tr td:nth-of-type(3)`).toHaveClass("o_cell_hover");
     await contains(".o_pivot_buttons button.dropdown-toggle").hover();
     expect(".o_cell_hover").toHaveCount(0);
 
     // hover second cell, second row
     await contains("tbody tr:nth-of-type(1) td:nth-of-type(2)").hover();
     expect(".o_cell_hover").toHaveCount(3);
-    for (i = 1; i <= 3; i++) {
-        expect(`tbody tr:nth-of-type(${i}) td:nth-of-type(2)`).toHaveClass("o_cell_hover");
-    }
-    await contains(".o_pivot_buttons button.dropdown-toggle").hover();
-    expect(".o_cell_hover").toHaveCount(0);
-});
-
-test.tags("desktop");
-test("columns are highlighted when hovering a measure", async () => {
-    expect.assertions(15);
-
-    mockDate("2016-12-20T1:00:00");
-    Partner._records[0].date = "2016-11-15";
-    Partner._records[1].date = "2016-12-17";
-    Partner._records[2].date = "2016-11-22";
-    Partner._records[3].date = "2016-11-03";
-
-    await mountView({
-        type: "pivot",
-        resModel: "partner",
-        arch: `
-			<pivot>
-				<field name="product_id" type="row"/>
-				<field name="date" type="col"/>
-			</pivot>`,
-        searchViewArch: `
-			<search>
-				<filter name="date_filter" date="date" domain="[]" default_period='month'/>
-			</search>`,
-        context: { search_default_date_filter: true },
-    });
-
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date: Previous period");
-
-    // hover Count in first group
-    await contains("th.o_pivot_measure_row:nth-of-type(1)").hover();
-    expect(".o_cell_hover").toHaveCount(3);
-    for (let i = 1; i <= 3; i++) {
-        expect(`tbody tr:nth-of-type(${i}) td:nth-of-type(1)`).toHaveClass("o_cell_hover");
-    }
-    await contains(".o_pivot_buttons button.dropdown-toggle").hover();
-    expect(".o_cell_hover").toHaveCount(0);
-
-    // hover Count in second group
-    await contains("th.o_pivot_measure_row:nth-of-type(2)").hover();
-    expect(".o_cell_hover").toHaveCount(3);
-    for (let i = 1; i <= 3; i++) {
-        expect(`tbody tr:nth-of-type(${i}) td:nth-of-type(4)`).toHaveClass("o_cell_hover");
-    }
-    await contains(".o_pivot_buttons button.dropdown-toggle").hover();
-    expect(".o_cell_hover").toHaveCount(0);
-
-    // hover Count in total column
-    await contains("th.o_pivot_measure_row:nth-of-type(3)").hover();
-    expect(".o_cell_hover").toHaveCount(3);
-    for (let i = 1; i <= 3; i++) {
-        expect(`tbody tr:nth-of-type(${i}) td:nth-of-type(7)`).toHaveClass("o_cell_hover");
-    }
-    await contains(".o_pivot_buttons button.dropdown-toggle").hover();
-    expect(".o_cell_hover").toHaveCount(0);
-});
-
-test.tags("desktop");
-test("columns are highlighted when hovering an origin (comparison mode)", async () => {
-    expect.assertions(5);
-
-    mockDate("2016-12-20T1:00:00");
-    Partner._records[0].date = "2016-11-15";
-    Partner._records[1].date = "2016-12-17";
-    Partner._records[2].date = "2016-11-22";
-    Partner._records[3].date = "2016-11-03";
-
-    await mountView({
-        type: "pivot",
-        resModel: "partner",
-        arch: `
-			<pivot>
-				<field name="product_id" type="row"/>
-				<field name="date" type="col"/>
-			</pivot>`,
-        searchViewArch: `
-			<search>
-				<filter name="date_filter" date="date" domain="[]" default_period='month'/>
-			</search>`,
-        context: { search_default_date_filter: true },
-    });
-
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date: Previous period");
-
-    // hover the second origin in second group
-    await contains("th.o_pivot_origin_row:nth-of-type(5)").hover();
-    expect(".o_cell_hover").toHaveCount(3);
-    for (let i = 1; i <= 3; i++) {
-        expect(`tbody tr:nth-of-type(${i}) td:nth-of-type(5)`).toHaveClass("o_cell_hover");
-    }
+    expect(`tbody tr td:nth-of-type(2)`).toHaveCount(3);
+    expect(`tbody tr td:nth-of-type(2)`).toHaveClass("o_cell_hover");
     await contains(".o_pivot_buttons button.dropdown-toggle").hover();
     expect(".o_cell_hover").toHaveCount(0);
 });
@@ -620,6 +608,7 @@ test('pivot view with disable_linking="True"', async () => {
 
     expect("table").not.toHaveClass("o_enable_linking");
     expect(".o_pivot_cell_value").toHaveCount(1);
+    expect(".o_pivot_cell_value").not.toHaveClass("cursor-pointer");
     await contains(".o_pivot_cell_value").click(); // should not trigger a do_action
 });
 
@@ -654,55 +643,11 @@ test('clicking on the "Total" cell with time range activated', async () => {
     await contains(".o_pivot_cell_value").click();
 });
 
-test('clicking on a fake cell value ("empty group") in comparison mode', async () => {
-    expect.assertions(3);
-
-    mockDate("2016-12-20T1:00:00");
-    Partner._records[0].date = "2016-11-15";
-    Partner._records[1].date = "2016-12-17";
-    Partner._records[2].date = "2016-11-22";
-    Partner._records[3].date = "2016-11-03";
-
-    const expectedDomains = [
-        ["&", ["date", ">=", "2016-12-01"], ["date", "<=", "2016-12-31"]],
-        [[0, "=", 1]],
-    ];
-    mockService("action", {
-        doAction(action) {
-            expect(action.domain).toEqual(expectedDomains.shift());
-            return Promise.resolve(true);
-        },
-    });
-
-    await mountView({
-        type: "pivot",
-        resModel: "partner",
-        arch: `<pivot><field name="product_id" type="row"/></pivot>`,
-        searchViewArch: `
-				<search>
-					<filter name="date_filter" date="date" domain="[]" default_period='month'/>
-				</search>`,
-        context: { search_default_date_filter: true },
-    });
-
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date: Previous period");
-
-    expect("table").toHaveClass("o_enable_linking");
-    // here we click on the group corresponding to Total/Total/This Month
-    await contains(".o_pivot_cell_value:eq(1)").click(); // should trigger a do_action with appropriate domain
-    // here we click on the group corresponding to xphone/Total/This Month
-    await contains(".o_pivot_cell_value:eq(4)").click(); // should trigger a do_action with appropriate domain
-});
-
 test("pivot view grouped by date field", async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
-    onRpc("read_group", ({ kwargs }) => {
-        const wrongFields = kwargs.fields.filter((field) => {
-            return !(field.split(":")[0] in Partner._fields);
-        });
-        expect(wrongFields.length).toBe(0);
+    onRpc("formatted_read_grouping_sets", ({ kwargs }) => {
+        expect(kwargs.aggregates).toEqual(["foo:sum", "__count"]);
     });
 
     await mountView({
@@ -724,8 +669,8 @@ test("without measures, pivot view uses __count by default", async () => {
     Partner._fields.foo = fields.Integer({ aggregator: null });
     expect.assertions(4);
 
-    onRpc("read_group", ({ kwargs }) => {
-        expect(kwargs.fields).toEqual(["__count"]);
+    onRpc("formatted_read_grouping_sets", ({ kwargs }) => {
+        expect(kwargs.aggregates).toEqual(["__count"]);
     });
 
     await mountView({
@@ -760,7 +705,7 @@ test("pivot view grouped by many2one field", async () => {
 
 test("pivot view can be reloaded", async () => {
     let readGroupCount = 0;
-    onRpc("read_group", () => {
+    onRpc("formatted_read_grouping_sets", () => {
         readGroupCount++;
     });
     await mountView({
@@ -783,7 +728,7 @@ test("pivot view can be reloaded", async () => {
 test.tags("desktop");
 test("basic folding/unfolding", async () => {
     let rpcCount = 0;
-    onRpc("read_group", () => {
+    onRpc("formatted_read_grouping_sets", () => {
         rpcCount++;
     });
 
@@ -819,7 +764,7 @@ test("basic folding/unfolding", async () => {
 
     await contains(queryOne(".dropdown-item:eq(2)", { root: subDropdownMenu })).click();
     expect("tbody tr").toHaveCount(4);
-    expect(rpcCount).toBe(3);
+    expect(rpcCount).toBe(2);
 });
 
 test.tags("desktop");
@@ -932,6 +877,44 @@ test("pivot renders group dropdown same as search groupby dropdown if group bys 
     ]);
 });
 
+test("headers group dropdown should close on selection", async () => {
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `
+            <pivot>
+                <field name="product_id" type="row"/>
+                <field name="foo" type="measure"/>
+            </pivot>`,
+    });
+    // 1. with first-level dropdown groupby
+    // open a header group dropdown
+    await contains("tbody tr .o_pivot_header_cell_closed").click();
+    expect(".o-dropdown--menu").toHaveCount(1);
+    // select an item
+    await contains(".o-dropdown-item").click();
+    expect(".o-dropdown--menu").toHaveCount(0);
+
+    // 2. with sub dropdown groupby
+    // open a header group dropdown
+    await contains("tbody tr .o_pivot_header_cell_closed").click();
+    expect(".o-dropdown--menu").toHaveCount(1);
+    // open a subdropdown
+    await contains(".o-dropdown--menu .dropdown-toggle").click();
+    expect(".o-dropdown--menu").toHaveCount(2);
+    // select an item
+    const subDropdownMenu = getDropdownMenu(".o-dropdown--menu .dropdown-toggle");
+    await contains(queryFirst(".o-dropdown-item", { root: subDropdownMenu })).click();
+    expect(".o-dropdown--menu").toHaveCount(0);
+
+    // 3. with custom groupby
+    // open a header group dropdown
+    await contains("tbody tr .o_pivot_header_cell_closed").click();
+    expect(".o-dropdown--menu").toHaveCount(1);
+    await contains(`.o_add_custom_group_menu`).select("date");
+    expect(".o-dropdown--menu").toHaveCount(0);
+});
+
 test("pivot group dropdown sync with search groupby dropdown", async () => {
     await mountView({
         type: "pivot",
@@ -974,9 +957,9 @@ test("pivot custom groupby: grouping on date field use default interval month", 
     expect.assertions(1);
 
     let checkReadGroup = false;
-    onRpc("read_group", ({ kwargs }) => {
+    onRpc("formatted_read_grouping_sets", ({ kwargs }) => {
         if (checkReadGroup) {
-            expect(kwargs.groupby).toEqual(["date:month"]);
+            expect(kwargs.grouping_sets[0]).toEqual(["date:month"]);
             checkReadGroup = false;
         }
     });
@@ -1125,11 +1108,11 @@ test("can toggle extra measure", async () => {
     await contains(".dropdown-item:contains(Count):eq(0").click();
     expect(".dropdown-item:contains(Count)").toHaveClass("selected");
     expect(".o_pivot_cell_value").toHaveCount(6);
-    expect(rpcCount).toBe(2);
+    expect(rpcCount).toBe(1);
     await contains(".dropdown-item:contains(Count):eq(0)").click();
     expect(".dropdown-item:contains(Count):eq(0)").not.toHaveClass("selected");
     expect(".o_pivot_cell_value").toHaveCount(3);
-    expect(rpcCount).toBe(2);
+    expect(rpcCount).toBe(1);
 });
 
 test("no content helper when no active measure", async () => {
@@ -1250,7 +1233,7 @@ test("tries to restore previous state after domain change", async () => {
     await removeFacet();
 
     expect("table").toHaveCount(1);
-    expect(rpcCount).toBe(2);
+    expect(rpcCount).toBe(1);
     expect(".o_pivot_cell_value").toHaveCount(3);
     expect(".o_pivot_measure_row:contains(Foo)").toHaveCount(1);
 });
@@ -1306,7 +1289,7 @@ test("can sort data in a column by clicking on header", async () => {
 
 test("can expand all rows", async () => {
     let nbReadGroups = 0;
-    onRpc("read_group", () => {
+    onRpc("formatted_read_grouping_sets", () => {
         nbReadGroups++;
     });
     await mountView({
@@ -1324,7 +1307,7 @@ test("can expand all rows", async () => {
 			</search>`,
     });
 
-    expect(nbReadGroups).toBe(2);
+    expect(nbReadGroups).toBe(1);
     expect(getCurrentValues()).toBe("32,12,20");
 
     // expand on date:days, product
@@ -1334,7 +1317,7 @@ test("can expand all rows", async () => {
     nbReadGroups = 0;
     await toggleMenuItem("Product");
 
-    expect(nbReadGroups).toBe(3);
+    expect(nbReadGroups).toBe(1);
     expect("tbody tr").toHaveCount(8);
 
     // collapse the first two rows
@@ -1347,13 +1330,13 @@ test("can expand all rows", async () => {
     nbReadGroups = 0;
     await contains(".o_pivot_expand_button").click();
 
-    expect(nbReadGroups).toBe(3);
+    expect(nbReadGroups).toBe(1);
     expect("tbody tr").toHaveCount(8);
 });
 
 test("expand all with a delay", async () => {
     let def;
-    onRpc("read_group", () => def);
+    onRpc("formatted_read_grouping_sets", () => def);
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -1463,7 +1446,7 @@ test("correctly save measures and groupbys to favorite", async () => {
     expect.assertions(3);
 
     let expectedContext;
-    onRpc("create_or_replace", ({ args }) => {
+    onRpc("create_filter", ({ args }) => {
         expect(args[0].context).toEqual(expectedContext);
         return true;
     });
@@ -1529,7 +1512,7 @@ test("correctly remove pivot_ keys from the context", async () => {
 
     let expectedContext;
 
-    onRpc("create_or_replace", ({ args }) => {
+    onRpc("create_filter", ({ args }) => {
         expect(args[0].context).toEqual(expectedContext);
         return true;
     });
@@ -1630,10 +1613,10 @@ test("correctly remove pivot_ keys from the context", async () => {
 });
 
 test("Apply two groupby, and remove facet", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="customer" type="row"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 		<filter name="group_by_product" string="Product" domain="[]" context="{'group_by': 'product_id'}"/>
 		<filter name="group_by_bar" string="Bar" domain="[]" context="{'group_by': 'bar'}"/>
 	</search>`;
@@ -1662,8 +1645,7 @@ test("Apply two groupby, and remove facet", async () => {
 });
 
 test("Add a group by on the CP when a favorite already exists", async () => {
-    Partner._views["pivot,false"] = `<pivot></pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 		<filter name="groubybar" string="Bar" domain="[]" context="{'group_by': 'bar'}"/>
 	</search>`;
 
@@ -1675,7 +1657,7 @@ test("Add a group by on the CP when a favorite already exists", async () => {
             is_default: true,
             name: "My favorite",
             sort: "[]",
-            user_id: [2, "Mitchell Admin"],
+            user_ids: [2],
         },
     ];
 
@@ -1704,14 +1686,13 @@ test("Add a group by on the CP when a favorite already exists", async () => {
 });
 
 test("Adding a Favorite at anytime should modify the row/column groupby", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 			<field name="customer" type="row"/>
 			<field name="date" interval="month" type="col" />
 		</pivot>`;
-    Partner._views["search,false"] = `<search/>`;
     Partner._filters = [
         {
-            user_id: [2, "Mitchell Admin"],
+            user_ids: [2],
             name: "My favorite",
             id: 5,
             context: `{"pivot_row_groupby":["product_id"], "pivot_column_groupby": ["bar"]}`,
@@ -1847,7 +1828,7 @@ test("Reload, group by columns, reload", async () => {
 
     let expectedContext;
 
-    onRpc("create_or_replace", ({ args }) => {
+    onRpc("create_filter", ({ args }) => {
         expect(args[0].context).toEqual(expectedContext);
         return true;
     });
@@ -1977,7 +1958,7 @@ test("Empty results keep groupbys", async () => {
         pivot_row_groupby: [],
     };
 
-    onRpc("create_or_replace", ({ args }) => {
+    onRpc("create_filter", ({ args }) => {
         expect(args[0].context).toEqual(expectedContext);
         return true;
     });
@@ -2066,7 +2047,7 @@ test("clear table cells data after closeGroup", async () => {
     await contains(".o-overlay-item:nth-child(2) .o-dropdown--menu .dropdown-item:eq(3)").click();
 
     // close and reopen row groupings after changing value
-    Partner._records.find((r) => r.product_id === 37).date = "2016-10-27";
+    MockServer.env["partner"].find((r) => r.product_id === 37).date = "2016-10-27";
 
     await contains("tbody .o_pivot_header_cell_opened").click();
     await contains("tbody .o_pivot_header_cell_closed").click();
@@ -2082,12 +2063,11 @@ test("clear table cells data after closeGroup", async () => {
 });
 
 test("correctly group data after flip (1)", async () => {
-    Partner._views["pivot,false"] = `<pivot/>`;
     Partner._views[
-        "search,false"
+        "search"
     ] = `<search><filter name="bayou" string="Bayou" domain="[(1,'=',1)]"/></search>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
-    Partner._views["form,false"] = `<form><field name="foo"/></form>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
+    Partner._views["form"] = `<form><field name="foo"/></form>`;
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -2111,12 +2091,11 @@ test("correctly group data after flip (1)", async () => {
 });
 
 test("correctly group data after flip (2)", async () => {
-    Partner._views["pivot,false"] = `<pivot/>`;
     Partner._views[
-        "search,false"
+        "search"
     ] = `<search><filter name="bayou" string="Bayou" domain="[(1,'=',1)]"/></search>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
-    Partner._views["form,false"] = `<form><field name="foo"/></form>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
+    Partner._views["form"] = `<form><field name="foo"/></form>`;
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -2253,8 +2232,8 @@ test("pivot still handles __count__ measure", async () => {
     // for retro-compatibility reasons, the pivot view still handles
     // '__count__' measure.
 
-    onRpc("read_group", ({ kwargs }) => {
-        expect(kwargs.fields).toEqual(["__count"]);
+    onRpc("formatted_read_grouping_sets", ({ kwargs }) => {
+        expect(kwargs.aggregates).toEqual(["__count"]);
     });
 
     await mountView({
@@ -2358,7 +2337,7 @@ test("Row and column groupbys plus a domain", async () => {
         pivot_row_groupby: ["product_id"],
     };
 
-    onRpc("create_or_replace", ({ args }) => {
+    onRpc("create_filter", ({ args }) => {
         expect(args[0].context).toEqual(expectedContext);
         return true;
     });
@@ -2399,7 +2378,7 @@ test("Row and column groupbys plus a domain", async () => {
 
 test("parallel data loading should discard all but the last one", async () => {
     let def;
-    onRpc("read_group", () => def);
+    onRpc("formatted_read_grouping_sets", () => def);
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -2482,7 +2461,7 @@ test("pivot view should use default order for auto sorting", async () => {
 });
 
 test("pivot view can be flipped", async () => {
-    var rpcCount = 0;
+    let rpcCount = 0;
     onRpc(() => {
         rpcCount++;
     });
@@ -2508,518 +2487,6 @@ test("pivot view can be flipped", async () => {
     });
 
     values = ["1", "3", "4"];
-    expect(getCurrentValues()).toBe(values.join());
-});
-
-test("rendering of pivot view with comparison", async () => {
-    Partner._fields.computed_field = fields.Integer({
-        string: "Computed and not stored",
-        aggregator: null,
-        compute: () => 1,
-        groupable: false,
-    });
-    Partner._records[0].date = "2016-12-15";
-    Partner._records[1].date = "2016-12-17";
-    Partner._records[2].date = "2016-11-22";
-    Partner._records[3].date = "2016-11-03";
-
-    mockDate("2016-12-20T1:00:00");
-
-    onRpc("create_or_replace", ({ args }) => {
-        expect(args[0].context).toEqual({
-            pivot_measures: ["__count"],
-            pivot_column_groupby: [],
-            pivot_row_groupby: ["product_id"],
-            group_by: [],
-            comparison: {
-                comparisonId: "previous_period",
-                comparisonRange: ["&", ["date", ">=", "2016-11-01"], ["date", "<=", "2016-11-30"]],
-                comparisonRangeDescription: "November 2016",
-                fieldDescription: "Date",
-                fieldName: "date",
-                range: ["&", ["date", ">=", "2016-12-01"], ["date", "<=", "2016-12-31"]],
-                rangeDescription: "December 2016",
-            },
-        });
-        return true;
-    });
-
-    await mountView({
-        type: "pivot",
-        resModel: "partner",
-        arch: `
-			<pivot>
-				<field name="date" interval="month" type="col"/>
-				<field name="foo" type="measure"/>
-			</pivot>`,
-        searchViewArch: `
-			<search>
-				<filter name="date_filter" date="date" domain="[]" default_period='year-1'/>
-			</search>`,
-        context: { search_default_date_filter: 1 },
-    });
-
-    // with no data
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date: Previous period");
-
-    expect("p.o_view_nocontent_empty_folder").toHaveCount(1);
-
-    await toggleMenuItem("Date");
-    await toggleMenuItemOption("Date", "December");
-    await toggleMenuItemOption("Date", "2016");
-    await toggleMenuItemOption("Date", "2015");
-
-    expect(".o_pivot thead tr:last th").toHaveCount(9);
-    let values = ["19", "0", "-100%", "0", "13", "100%", "19", "13", "-31.58%"];
-    expect(getCurrentValues()).toBe(values.join());
-
-    // with data, with row groupby
-    await contains("tbody .o_pivot_header_cell_closed").click();
-    await contains(".o-dropdown--menu .dropdown-item:eq(4)").click();
-    values = [
-        "19",
-        "0",
-        "-100%",
-        "0",
-        "13",
-        "100%",
-        "19",
-        "13",
-        "-31.58%",
-        "19",
-        "0",
-        "-100%",
-        "0",
-        "1",
-        "100%",
-        "19",
-        "1",
-        "-94.74%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "12",
-        "100%",
-    ];
-    expect(getCurrentValues()).toBe(values.join());
-
-    await contains(".o_pivot_buttons button.dropdown-toggle").click();
-
-    await contains(".o-dropdown--menu .dropdown-item:eq(0)").click();
-    await contains(".o-dropdown--menu .dropdown-item:eq(1)").click();
-    values = ["2,0,-100%,0,2,100%,2,2,0%,2,0,-100%,0,1,100%,2,1,-50%,0,1,100%,0,1,100%"];
-    expect(getCurrentValues()).toBe(values.join());
-
-    await contains("thead .o_pivot_header_cell_opened").click();
-    values = ["2", "2", "0%", "2", "1", "-50%", "0", "1", "100%"];
-    expect(getCurrentValues()).toBe(values.join());
-
-    await toggleSearchBarMenu();
-    await toggleSaveFavorite();
-    await editFavoriteName("Fav");
-    await saveFavorite();
-});
-
-test("export data in excel with comparison", async () => {
-    expect.assertions(5);
-
-    Partner._records[0].date = "2016-12-15";
-    Partner._records[1].date = "2016-12-17";
-    Partner._records[2].date = "2016-11-22";
-    Partner._records[3].date = "2016-11-03";
-
-    mockDate("2016-12-20T1:00:00");
-
-    const downloadDef = new Deferred();
-    patchWithCleanup(download, {
-        _download: async ({ url, data }) => {
-            data = JSON.parse(await data.data.text());
-            for (const l of data.col_group_headers) {
-                const titles = l.map((o) => o.title);
-                expect.step(titles);
-            }
-            const measures = data.measure_headers.map((o) => o.title);
-            expect.step(measures);
-            const origins = data.origin_headers.map((o) => o.title);
-            expect.step(origins);
-            expect.step(data.measure_count);
-            expect.step(data.origin_count);
-            const valuesLength = data.rows.map((o) => o.values.length);
-            expect.step(valuesLength);
-            expect(url).toBe("/web/pivot/export_xlsx");
-            downloadDef.resolve();
-            return Promise.resolve();
-        },
-    });
-
-    await mountView({
-        type: "pivot",
-        resModel: "partner",
-        arch: `
-			<pivot>
-				<field name="date" interval="month" type="col"/>
-				<field name="foo" type="measure"/>
-			</pivot>`,
-        searchViewArch: `
-			<search>
-				<filter name="date_filter" date="date" domain="[]" default_period='month-2'/>
-			</search>`,
-        context: { search_default_date_filter: 1 },
-    });
-
-    // open comparison menu
-    await toggleSearchBarMenu();
-    // compare October 2016 to September 2016
-    await toggleMenuItem("Date: Previous period");
-
-    // With the data above, the time ranges contain no record.
-    expect("p.o_view_nocontent_empty_folder").toHaveCount(1);
-    // export data should be impossible since the pivot buttons
-    // are deactivated (exception: the 'Measures' button).
-    expect(".o_pivot_buttons button.o_pivot_download").not.toBeEnabled();
-
-    await toggleMenuItem("Date");
-    await toggleMenuItemOption("Date", "December");
-    await toggleMenuItemOption("Date", "October");
-    expect(".o_pivot_buttons button.o_pivot_download").toBeEnabled();
-
-    // With the data above, the time ranges contain some records.
-    // export data. Should execute 'get_file'
-    await contains(".o_pivot_buttons button.o_pivot_download").click();
-    await downloadDef;
-
-    expect.verifySteps([
-        // col group headers
-        ["Total", ""],
-        ["November 2016", "December 2016"],
-        // measure headers
-        ["Foo", "Foo", "Foo"],
-        // origin headers
-        [
-            "November 2016",
-            "December 2016",
-            "Variation",
-            "November 2016",
-            "December 2016",
-            "Variation",
-            "November 2016",
-            "December 2016",
-            "Variation",
-        ],
-        // number of 'measures'
-        1,
-        // number of 'origins'
-        2,
-        // rows values length
-        [9],
-    ]);
-});
-
-test("rendering pivot view with comparison and count measure", async () => {
-    let mockMock = false;
-    let nbReadGroup = 0;
-
-    Partner._records[0].date = "2016-12-15";
-    Partner._records[1].date = "2016-12-17";
-    Partner._records[2].date = "2016-12-22";
-    Partner._records[3].date = "2016-12-03";
-
-    mockDate("2016-12-20T1:00:00");
-
-    onRpc("read_group", () => {
-        if (mockMock) {
-            nbReadGroup++;
-            if (nbReadGroup === 4) {
-                // this modification is necessary because mockReadGroup does not
-                // properly reflect the server response when there is no record
-                // and a groupby list of length at least one.
-                return [{}];
-            }
-        }
-    });
-
-    await mountView({
-        type: "pivot",
-        resModel: "partner",
-        arch: '<pivot><field name="customer" type="row"/></pivot>',
-        searchViewArch: `
-			<search>
-				<filter name="date_filter" date="date" domain="[]" default_period='month'/>
-			</search>`,
-        context: { search_default_date_filter: 1 },
-    });
-
-    mockMock = true;
-
-    // compare December 2016 to November 2016
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date: Previous period");
-
-    const values = ["0", "4", "100%", "0", "2", "100%", "0", "2", "100%"];
-    expect(getCurrentValues()).toBe(values.join(","));
-    expect(".o_pivot_header_cell_closed").toHaveCount(3);
-});
-
-test("can sort a pivot view with comparison by clicking on header", async () => {
-    Partner._records[0].date = "2016-12-15";
-    Partner._records[1].date = "2016-12-17";
-    Partner._records[2].date = "2016-11-22";
-    Partner._records[3].date = "2016-11-03";
-
-    mockDate("2016-12-20T1:00:00");
-    await mountView({
-        type: "pivot",
-        resModel: "partner",
-        arch: `
-				<pivot>
-					<field name="date" interval="day" type="row"/>
-					<field name="company_type" type="col"/>
-					<field name="foo" type="measure"/>
-				</pivot>`,
-        searchViewArch: `
-				<search>
-					<filter name="date_filter" date="date" domain="[]" default_period='month'/>
-				</search>`,
-        context: { search_default_date_filter: 1 },
-    });
-
-    // compare December 2016 to November 2016
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date: Previous period");
-
-    // initial sanity check
-    let values = [
-        "17",
-        "12",
-        "-29.41%",
-        "2",
-        "1",
-        "-50%",
-        "19",
-        "13",
-        "-31.58%",
-        "2",
-        "0",
-        "-100%",
-        "2",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "1",
-        "100%",
-        "0",
-        "1",
-        "100%",
-    ];
-    expect(getCurrentValues()).toBe(values.join());
-
-    // click on 'Foo' in column Total/Company (should sort by the period of interest, ASC)
-    await contains(".o_pivot_measure_row").click();
-    values = [
-        "17",
-        "12",
-        "-29.41%",
-        "2",
-        "1",
-        "-50%",
-        "19",
-        "13",
-        "-31.58%",
-        "2",
-        "0",
-        "-100%",
-        "2",
-        "0",
-        "-100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "1",
-        "100%",
-        "0",
-        "1",
-        "100%",
-        "17",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-    ];
-    expect(getCurrentValues()).toBe(values.join());
-
-    // click again on 'Foo' in column Total/Company (should sort by the period of interest, DESC)
-    await contains(".o_pivot_measure_row").click();
-    values = [
-        "17",
-        "12",
-        "-29.41%",
-        "2",
-        "1",
-        "-50%",
-        "19",
-        "13",
-        "-31.58%",
-        "17",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "2",
-        "0",
-        "-100%",
-        "2",
-        "0",
-        "-100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "1",
-        "100%",
-        "0",
-        "1",
-        "100%",
-    ];
-    expect(getCurrentValues()).toBe(values.join());
-
-    // click on 'This Month' in column Total/Individual/Foo
-    await contains(".o_pivot_origin_row:eq(3)").click();
-    values = [
-        "17",
-        "12",
-        "-29.41%",
-        "2",
-        "1",
-        "-50%",
-        "19",
-        "13",
-        "-31.58%",
-        "17",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "1",
-        "100%",
-        "0",
-        "1",
-        "100%",
-        "2",
-        "0",
-        "-100%",
-        "2",
-        "0",
-        "-100%",
-    ];
-    expect(getCurrentValues()).toBe(values.join());
-
-    // click on 'Previous Period' in column Total/Individual/Foo
-    await contains(".o_pivot_origin_row:eq(4)").click();
-    values = [
-        "17",
-        "12",
-        "-29.41%",
-        "2",
-        "1",
-        "-50%",
-        "19",
-        "13",
-        "-31.58%",
-        "2",
-        "0",
-        "-100%",
-        "2",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "1",
-        "100%",
-        "0",
-        "1",
-        "100%",
-    ];
-    expect(getCurrentValues()).toBe(values.join());
-
-    // click on 'Variation' in column Total/Foo
-    await contains(".o_pivot_origin_row:eq(8)").click();
-    values = [
-        "17",
-        "12",
-        "-29.41%",
-        "2",
-        "1",
-        "-50%",
-        "19",
-        "13",
-        "-31.58%",
-        "2",
-        "0",
-        "-100%",
-        "2",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "1",
-        "100%",
-        "0",
-        "1",
-        "100%",
-    ];
     expect(getCurrentValues()).toBe(values.join());
 });
 
@@ -3054,24 +2521,24 @@ test("Click on the measure list but not on a menu item", async () => {
 
 test.tags("desktop");
 test("Navigation list view for a group and back with breadcrumbs", async () => {
-    expect.assertions(9);
+    expect.assertions(6);
 
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 			<field name="customer" type="row"/>
 		</pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 			<filter name="bayou" string="Bayou" domain="[('foo','=', 12)]"/>
 		</search>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
-    Partner._views["form,false"] = `<form><field name="foo"/></form>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
+    Partner._views["form"] = `<form><field name="foo"/></form>`;
 
     let readGroupCount = 0;
-    onRpc("read_group", ({ kwargs }) => {
-        expect.step("read_group");
+    onRpc("formatted_read_grouping_sets", ({ kwargs }) => {
+        expect.step("formatted_read_grouping_sets");
         const domain = kwargs.domain;
-        if ([0, 1].indexOf(readGroupCount) !== -1) {
+        if ([0].indexOf(readGroupCount) !== -1) {
             expect(domain).toEqual([]);
-        } else if ([2, 3, 4, 5].indexOf(readGroupCount) !== -1) {
+        } else if ([1, 2].indexOf(readGroupCount) !== -1) {
             expect(domain).toEqual([["foo", "=", 12]]);
         }
         readGroupCount++;
@@ -3079,7 +2546,7 @@ test("Navigation list view for a group and back with breadcrumbs", async () => {
     onRpc("web_search_read", ({ kwargs }) => {
         expect.step("web_search_read");
         const domain = kwargs.domain;
-        expect(domain).toEqual(["&", ["customer", "=", 1], ["foo", "=", 12]]);
+        expect(domain).toEqual(["&", ["foo", "=", 12], ["customer", "=", 1]]);
     });
 
     await mountWithCleanup(WebClient);
@@ -3100,216 +2567,11 @@ test("Navigation list view for a group and back with breadcrumbs", async () => {
     await contains(".o_control_panel ol.breadcrumb li.breadcrumb-item").click();
 
     expect.verifySteps([
-        "read_group",
-        "read_group",
-        "read_group",
-        "read_group",
+        "formatted_read_grouping_sets",
+        "formatted_read_grouping_sets",
         "web_search_read",
-        "read_group",
-        "read_group",
+        "formatted_read_grouping_sets",
     ]);
-});
-
-test("Cell values are kept when flippin a pivot view in comparison mode", async () => {
-    Partner._records[0].date = "2016-12-15";
-    Partner._records[1].date = "2016-12-17";
-    Partner._records[2].date = "2016-11-22";
-    Partner._records[3].date = "2016-11-03";
-
-    mockDate("2016-12-20T1:00:00");
-    await mountView({
-        type: "pivot",
-        resModel: "partner",
-        arch: `
-				<pivot>
-					<field name="date" interval="day" type="row"/>
-					<field name="company_type" type="col"/>
-					<field name="foo" type="measure"/>
-				</pivot>`,
-        searchViewArch: `
-				<search>
-					<filter name="date_filter" date="date" domain="[]" default_period='month'/>
-				</search>`,
-        context: { search_default_date_filter: 1 },
-    });
-
-    // compare December 2016 to November 2016
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date: Previous period");
-
-    // initial sanity check
-    let values = [
-        "17",
-        "12",
-        "-29.41%",
-        "2",
-        "1",
-        "-50%",
-        "19",
-        "13",
-        "-31.58%",
-        "2",
-        "0",
-        "-100%",
-        "2",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "1",
-        "100%",
-        "0",
-        "1",
-        "100%",
-    ];
-    expect(getCurrentValues()).toBe(values.join());
-
-    // flip table
-    await contains(".o_pivot_flip_button").click();
-
-    values = [
-        "2",
-        "0",
-        "-100%",
-        "17",
-        "0",
-        "-100%",
-        "0",
-        "12",
-        "100%",
-        "0",
-        "1",
-        "100%",
-        "19",
-        "13",
-        "-31.58%",
-        "17",
-        "0",
-        "-100%",
-        "0",
-        "12",
-        "100%",
-        "17",
-        "12",
-        "-29.41%",
-        "2",
-        "0",
-        "-100%",
-        "0",
-        "1",
-        "100%",
-        "2",
-        "1",
-        "-50%",
-    ];
-    expect(getCurrentValues()).toBe(values.join());
-});
-
-test("Flip then compare, table col groupbys are kept", async () => {
-    Partner._records[0].date = "2016-12-15";
-    Partner._records[1].date = "2016-12-17";
-    Partner._records[2].date = "2016-11-22";
-    Partner._records[3].date = "2016-11-03";
-
-    mockDate("2016-12-20T1:00:00");
-    await mountView({
-        type: "pivot",
-        resModel: "partner",
-        arch: `
-			<pivot>
-				<field name="date" interval="day" type="row"/>
-				<field name="company_type" type="col"/>
-				<field name="foo" type="measure"/>
-			</pivot>`,
-        searchViewArch: `
-			<search>
-				<filter name="date_filter" date="date" domain="[]" default_period='month'/>
-			</search>`,
-    });
-
-    expect(queryAllTexts("thead th")).toEqual([
-        "",
-        "Total",
-        "",
-        "Company",
-        "individual",
-        "Foo",
-        "Foo",
-        "Foo",
-    ]);
-    expect(queryAllTexts("tbody th")).toEqual([
-        "Total",
-        "2016-11-03",
-        "2016-11-22",
-        "2016-12-15",
-        "2016-12-17",
-    ]);
-    // flip
-    await contains(".o_pivot_flip_button").click();
-    expect(queryAllTexts("thead th")).toEqual([
-        "",
-        "Total",
-        "",
-        "2016-11-03",
-        "2016-11-22",
-        "2016-12-15",
-        "2016-12-17",
-        "Foo",
-        "Foo",
-        "Foo",
-        "Foo",
-        "Foo",
-    ]);
-    expect(queryAllTexts("tbody th")).toEqual(["Total", "Company", "individual"]);
-
-    // Filter on December 2016
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date");
-    await toggleMenuItemOption("Date", "December");
-
-    // compare December 2016 to November 2016
-    await toggleMenuItem("Date: Previous period");
-    expect(queryAllTexts("thead th")).toEqual([
-        "",
-        "Total",
-        "",
-        "2016-11-03",
-        "2016-11-22",
-        "2016-12-15",
-        "2016-12-17",
-        "Foo",
-        "Foo",
-        "Foo",
-        "Foo",
-        "Foo",
-        "November 2016",
-        "December 2016",
-        "Variation",
-        "November 2016",
-        "December 2016",
-        "Variation",
-        "November 2016",
-        "December 2016",
-        "Variation",
-        "November 2016",
-        "December 2016",
-        "Variation",
-        "November 2016",
-        "December 2016",
-        "Variation",
-    ]);
-    expect(queryAllTexts("tbody th")).toEqual(["Total", "Company", "individual"]);
 });
 
 test("correctly compute group domain when a date field has false value", async () => {
@@ -3400,6 +2662,7 @@ test("group bys added via control panel and expand Header do not stack", async (
     ]);
 });
 
+test.tags("desktop");
 test("display only one dropdown menu", async () => {
     await mountView({
         type: "pivot",
@@ -3422,26 +2685,29 @@ test("display only one dropdown menu", async () => {
 });
 
 test("Server order is kept by default", async () => {
-    let isSecondReadGroup = false;
-    onRpc("read_group", () => {
-        if (isSecondReadGroup) {
-            return [
-                {
-                    customer: [2, "Second"],
-                    foo: 18,
-                    __count: 2,
-                    __domain: [["customer", "=", 2]],
-                },
-                {
-                    customer: [1, "First"],
-                    foo: 14,
-                    __count: 2,
-                    __domain: [["customer", "=", 1]],
-                },
-            ];
-        }
-        isSecondReadGroup = true;
-    });
+    onRpc("formatted_read_grouping_sets", () => [
+        [
+            {
+                "foo:sum": 32,
+                __extra_domain: [],
+                __count: 4,
+            },
+        ],
+        [
+            {
+                customer: [2, "Second"],
+                "foo:sum": 18,
+                __count: 2,
+                __extra_domain: [["customer", "=", 2]],
+            },
+            {
+                customer: [1, "First"],
+                "foo:sum": 14,
+                __count: 2,
+                __extra_domain: [["customer", "=", 1]],
+            },
+        ],
+    ]);
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -3488,11 +2754,11 @@ test("pivot rendering with boolean field", async () => {
 
 test.tags("desktop");
 test("empty pivot view with action helper", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="product_id" type="measure"/>
 		<field name="date" interval="month" type="col"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 		<filter name="small_than_0" string="Small Than 0" domain="[('id', '&lt;', 0)]"/>
 	</search>`;
 
@@ -3500,7 +2766,7 @@ test("empty pivot view with action helper", async () => {
         type: "pivot",
         resModel: "partner",
         context: { search_default_small_than_0: true },
-        noContentHelp: markup(`<p class="abc">click to add a foo</p>`),
+        noContentHelp: markup`<p class="abc">click to add a foo</p>`,
         config: {
             views: [[false, "search"]],
         },
@@ -3515,11 +2781,11 @@ test("empty pivot view with action helper", async () => {
 
 test.tags("desktop");
 test("empty pivot view with sample data", async () => {
-    Partner._views["pivot,false"] = `<pivot sample="1">
+    Partner._views["pivot"] = `<pivot sample="1">
 		<field name="product_id" type="measure"/>
 		<field name="date" interval="month" type="col"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 		<filter name="small_than_0" string="Small Than 0" domain="[('id', '&lt;', 0)]"/>
 	</search>`;
 
@@ -3527,7 +2793,7 @@ test("empty pivot view with sample data", async () => {
         type: "pivot",
         resModel: "partner",
         context: { search_default_small_than_0: true },
-        noContentHelp: markup('<p class="abc">click to add a foo</p>'),
+        noContentHelp: markup`<p class="abc">click to add a foo</p>`,
         config: {
             views: [[false, "search"]],
         },
@@ -3542,45 +2808,44 @@ test("empty pivot view with sample data", async () => {
 });
 
 test("non empty pivot view with sample data", async () => {
-    Partner._views["pivot,false"] = `<pivot sample="1">
+    Partner._views["pivot"] = `<pivot sample="1">
 		<field name="product_id" type="measure"/>
 		<field name="date" interval="month" type="col"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search>
+    Partner._views["search"] = `<search>
 		<filter name="small_than_0" string="Small Than 0" domain="[('id', '&lt;', 0)]"/>
 	</search>`;
 
     await mountView({
         type: "pivot",
         resModel: "partner",
-        noContentHelp: markup('<p class="abc">click to add a foo</p>'),
+        noContentHelp: markup`<p class="abc">click to add a foo</p>`,
         config: {
             views: [[false, "search"]],
         },
     });
 
-    expect("document").not.toHaveClass("o_view_sample_data");
+    expect(".o_content").not.toHaveClass("o_view_sample_data");
     expect(".o_view_nocontent .abc").toHaveCount(0);
     expect("table").toHaveCount(1);
     await toggleSearchBarMenu();
     await toggleMenuItem("Small Than 0");
-    expect("document").not.toHaveClass("o_view_sample_data");
+    expect(".o_content").not.toHaveClass("o_view_sample_data");
     expect(".o_view_nocontent .abc").toHaveCount(1);
     expect("table").toHaveCount(0);
 });
 
 test.tags("desktop");
 test("pivot is reloaded when leaving and coming back", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="customer" type="row"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search/>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
 
     onRpc("partner", "*", ({ method }) => {
         expect.step(method);
     });
-    onRpc("/web/webclient/load_menus/*", () => {
+    onRpc("/web/webclient/load_menus", () => {
         expect.step("/web/webclient/load_menus");
     });
 
@@ -3597,7 +2862,7 @@ test("pivot is reloaded when leaving and coming back", async () => {
     expect(".o_pivot_view").toHaveCount(1);
     expect(getCurrentValues()).toBe(["4", "2", "2"].join(","));
 
-    expect.verifySteps(["/web/webclient/load_menus", "get_views", "read_group", "read_group"]);
+    expect.verifySteps(["/web/webclient/load_menus", "get_views", "formatted_read_grouping_sets"]);
 
     // switch to list view
     await contains(".o_control_panel .o_switch_view.o_list").click();
@@ -3611,16 +2876,15 @@ test("pivot is reloaded when leaving and coming back", async () => {
     expect(".o_pivot_view").toHaveCount(1);
     expect(getCurrentValues()).toBe(["4", "2", "2"].join(","));
 
-    expect.verifySteps(["read_group", "read_group"]);
+    expect.verifySteps(["formatted_read_grouping_sets"]);
 });
 
 test.tags("desktop");
 test("expanded groups are kept when leaving and coming back", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="customer" type="row"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search/>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -3655,12 +2919,11 @@ test("expanded groups are kept when leaving and coming back", async () => {
 
 test.tags("desktop");
 test("sorted rows are kept when leaving and coming back", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="foo" type="measure"/>
 		<field name="product_id" type="row"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search/>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -3695,20 +2958,19 @@ test("sorted rows are kept when leaving and coming back", async () => {
 
 test.tags("desktop");
 test("correctly handle concurrent reloads", async () => {
-    Partner._views["pivot,false"] = `<pivot>
+    Partner._views["pivot"] = `<pivot>
 		<field name="foo" type="measure"/>
 		<field name="product_id" type="row"/>
 	</pivot>`;
-    Partner._views["search,false"] = `<search/>`;
-    Partner._views["list,false"] = `<list><field name="foo"/></list>`;
+    Partner._views["list"] = `<list><field name="foo"/></list>`;
 
     let def;
     let readGroupCount = 0;
-    onRpc("read_group", () => {
+    onRpc("formatted_read_grouping_sets", () => {
         if (def) {
             readGroupCount++;
             if (readGroupCount === 2) {
-                // slow down last read_group of first reload
+                // slow down last formatted_read_grouping_sets of first reload
                 return def;
             }
         }
@@ -3749,7 +3011,7 @@ test("consecutively toggle several measures", async () => {
     Partner._fields.foo2 = fields.Integer({
         groupable: false,
     });
-    onRpc("read_group", () => def);
+    onRpc("formatted_read_grouping_sets", () => def);
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -3780,7 +3042,7 @@ test("consecutively toggle several measures", async () => {
 
 test("flip axis while loading a filter", async () => {
     let def;
-    onRpc("read_group", () => def);
+    onRpc("formatted_read_grouping_sets", () => def);
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -3817,7 +3079,7 @@ test("flip axis while loading a filter", async () => {
 
 test("sort rows while loading a filter", async () => {
     let def;
-    onRpc("read_group", () => def);
+    onRpc("formatted_read_grouping_sets", () => def);
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -3853,7 +3115,7 @@ test("sort rows while loading a filter", async () => {
 
 test("close a group while loading a filter", async () => {
     let def;
-    onRpc("read_group", () => def);
+    onRpc("formatted_read_grouping_sets", () => def);
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -3890,7 +3152,7 @@ test("close a group while loading a filter", async () => {
 
 test("add a groupby while loading a filter", async () => {
     let def;
-    onRpc("read_group", () => def);
+    onRpc("formatted_read_grouping_sets", () => def);
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -3927,7 +3189,7 @@ test("add a groupby while loading a filter", async () => {
 
 test("expand a group while loading a filter", async () => {
     let def;
-    onRpc("read_group", () => def);
+    onRpc("formatted_read_grouping_sets", () => def);
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -3968,7 +3230,7 @@ test("expand a group while loading a filter", async () => {
 
 test("concurrent reloads: add a filter, and directly toggle a measure", async () => {
     let def;
-    onRpc("read_group", () => def);
+    onRpc("formatted_read_grouping_sets", () => def);
     await mountView({
         type: "pivot",
         resModel: "partner",
@@ -4079,9 +3341,9 @@ test("pivot_row_groupby should be also used after first load", async () => {
         },
     ];
 
-    onRpc("create_or_replace", ({ args }) => {
+    onRpc("create_filter", ({ args }) => {
         expect(args[0].context).toEqual(expectedContexts.shift());
-        return ids.shift();
+        return [ids.shift()];
     });
 
     await mountView({
@@ -4141,7 +3403,7 @@ test("pivot_row_groupby should be also used after first load (2)", async () => {
         arch: `<pivot/>`,
         irFilters: [
             {
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
                 name: "Favorite",
                 id: 1,
                 context: `
@@ -4180,7 +3442,7 @@ test("specific pivot keys in action context must have less importance than in fa
         },
         irFilters: [
             {
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
                 name: "My favorite",
                 id: 1,
                 context: `{
@@ -4195,7 +3457,7 @@ test("specific pivot keys in action context must have less importance than in fa
                 action_id: false,
             },
             {
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
                 name: "My favorite 2",
                 id: 2,
                 context: `{
@@ -4244,14 +3506,14 @@ test("favorite pivot_measures should be used even if found also in global contex
         groupable: false,
     });
 
-    onRpc("create_or_replace", ({ args }) => {
+    onRpc("create_filter", ({ args }) => {
         expect(args[0].context).toEqual({
             group_by: [],
             pivot_column_groupby: [],
             pivot_measures: ["computed_field"],
             pivot_row_groupby: [],
         });
-        return 1;
+        return [1];
     });
 
     await mountView({
@@ -4330,32 +3592,32 @@ test("no class 'o_view_sample_data' when real data are presented", async () => {
 });
 
 test("group by properties in pivot view", async () => {
-    onRpc("/web/dataset/call_kw/partner/web_search_read", async (request) => {
-        const { params } = await request.json();
-        if (params.kwargs.specification?.properties_definition) {
+    onRpc("partner", "web_search_read", ({ kwargs }) => {
+        if (kwargs.specification?.properties_definition) {
             expect.step("fetch_definition");
         }
     });
-    onRpc("/web/dataset/call_kw/partner/read_group", async (request) => {
-        const { params } = await request.json();
-        if (params.kwargs.groupby?.includes("properties.my_char")) {
-            expect.step("read_group");
+    onRpc("partner", "formatted_read_grouping_sets", ({ kwargs, method }) => {
+        if (kwargs.grouping_sets[0].includes("properties.my_char")) {
+            expect.step(method);
             return [
-                {
-                    "properties.my_char": false,
-                    __domain: [["properties.my_char", "=", false]],
-                    __count: 2,
-                },
-                {
-                    "properties.my_char": "aaa",
-                    __domain: [["properties.my_char", "=", "aaa"]],
-                    __count: 1,
-                },
-                {
-                    "properties.my_char": "bbb",
-                    __domain: [["properties.my_char", "=", "bbb"]],
-                    __count: 1,
-                },
+                [
+                    {
+                        "properties.my_char": false,
+                        __extra_domain: [["properties.my_char", "=", false]],
+                        __count: 2,
+                    },
+                    {
+                        "properties.my_char": "aaa",
+                        __extra_domain: [["properties.my_char", "=", "aaa"]],
+                        __count: 1,
+                    },
+                    {
+                        "properties.my_char": "bbb",
+                        __extra_domain: [["properties.my_char", "=", "bbb"]],
+                        __count: 1,
+                    },
+                ],
             ];
         }
     });
@@ -4386,7 +3648,7 @@ test("group by properties in pivot view", async () => {
     await contains(".o_accordion_values .o_menu_item").click();
 
     await animationFrame();
-    expect.verifySteps(["read_group"]);
+    expect.verifySteps(["formatted_read_grouping_sets"]);
 
     const cells = queryAll(".o_value");
     expect(cells).toHaveLength(4);
@@ -4402,21 +3664,22 @@ test("group by properties in pivot view", async () => {
     expect(columns[2]).toHaveText("bbb");
 });
 
-test("avoid duplicates in read_group parameter 'groupby'", async () => {
-    onRpc("read_group", ({ kwargs }) => {
-        expect.step(kwargs.groupby);
+test("avoid duplicates grouping_sets in formatted_read_grouping_sets", async () => {
+    onRpc("formatted_read_grouping_sets", ({ kwargs }) => {
+        expect(kwargs.grouping_sets).toEqual([[], ["bar"], ["bar", "date:month"], ["date:month"]]);
     });
     await mountView({
         type: "pivot",
         resModel: "partner",
         arch: `
 				<pivot sample="1">
-					<field name="date" type="row"/>
+					<field name="date" type="row" interval="month"/>
+					<field name="bar" type="row"/>
+					<field name="bar" type="col"/>
 					<field name="date" type="col" interval="month"/>
 				</pivot>
 			`,
     });
-    expect.verifySteps([[], ["date:month"]]);
 });
 
 test("Close header dropdown when a simple groupby is selected", async function (assert) {
@@ -4480,19 +3743,27 @@ test("Close header dropdown when a simple date groupby option is selected", asyn
 
 test("missing property field definition is fetched", async function () {
     onRpc(({ method, kwargs }) => {
-        if (method === "read_group" && kwargs.groupby?.includes("properties.my_char")) {
-            expect.step(JSON.stringify(kwargs.groupby));
+        if (method === "formatted_read_grouping_sets") {
+            expect.step(JSON.stringify(kwargs.grouping_sets));
             return [
-                {
-                    "properties.my_char": false,
-                    __domain: [["properties.my_char", "=", false]],
-                    __count: 2,
-                },
-                {
-                    "properties.my_char": "aaa",
-                    __domain: [["properties.my_char", "=", "aaa"]],
-                    __count: 1,
-                },
+                [
+                    {
+                        __extra_domain: [],
+                        __count: 3,
+                    },
+                ],
+                [
+                    {
+                        "properties.my_char": false,
+                        __extra_domain: [["properties.my_char", "=", false]],
+                        __count: 2,
+                    },
+                    {
+                        "properties.my_char": "aaa",
+                        __extra_domain: [["properties.my_char", "=", "aaa"]],
+                        __count: 1,
+                    },
+                ],
             ];
         } else if (method === "get_property_definition") {
             return {
@@ -4507,7 +3778,7 @@ test("missing property field definition is fetched", async function () {
         arch: `<pivot/>`,
         irFilters: [
             {
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
                 name: "My Filter",
                 id: 5,
                 context: `{"group_by": ['properties.my_char']}`,
@@ -4519,25 +3790,33 @@ test("missing property field definition is fetched", async function () {
             },
         ],
     });
-    expect.verifySteps([`["properties.my_char"]`]);
-    expect(getCurrentValues()).toBe("4,2,1");
+    expect.verifySteps([`[[],["properties.my_char"]]`]);
+    expect(getCurrentValues()).toBe("3,2,1");
 });
 
 test("missing deleted property field definition is created", async function (assert) {
     onRpc(({ method, kwargs }) => {
-        if (method === "read_group" && kwargs.groupby?.includes("properties.my_char")) {
-            expect.step(JSON.stringify(kwargs.groupby));
+        if (method === "formatted_read_grouping_sets") {
+            expect.step(JSON.stringify(kwargs.grouping_sets));
             return [
-                {
-                    "properties.my_char": false,
-                    __domain: [["properties.my_char", "=", false]],
-                    __count: 2,
-                },
-                {
-                    "properties.my_char": "aaa",
-                    __domain: [["properties.my_char", "=", "aaa"]],
-                    __count: 1,
-                },
+                [
+                    {
+                        __extra_domain: [],
+                        __count: 3,
+                    },
+                ],
+                [
+                    {
+                        "properties.my_char": false,
+                        __extra_domain: [["properties.my_char", "=", false]],
+                        __count: 2,
+                    },
+                    {
+                        "properties.my_char": "aaa",
+                        __extra_domain: [["properties.my_char", "=", "aaa"]],
+                        __count: 1,
+                    },
+                ],
             ];
         } else if (method === "get_property_definition") {
             return {};
@@ -4549,7 +3828,7 @@ test("missing deleted property field definition is created", async function (ass
         arch: `<pivot/>`,
         irFilters: [
             {
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
                 name: "My Filter",
                 id: 5,
                 context: `{"group_by": ['properties.my_char']}`,
@@ -4561,6 +3840,255 @@ test("missing deleted property field definition is created", async function (ass
             },
         ],
     });
-    expect.verifySteps([`["properties.my_char"]`]);
-    expect(getCurrentValues()).toBe("4,2,1");
+    expect.verifySteps([`[[],["properties.my_char"]]`]);
+    expect(getCurrentValues()).toBe("3,2,1");
+});
+
+test("middle clicking on a cell triggers a doAction", async () => {
+    expect.assertions(3);
+    Partner._views["form,2"] = `<form/>`;
+    Partner._views["kanban,5"] = `<kanban/>`;
+
+    mockService("action", {
+        doAction(action, options) {
+            expect(action).toEqual({
+                context: {
+                    lang: "en",
+                    tz: "taht",
+                    someKey: true,
+                    uid: 7,
+                    allowed_company_ids: [1],
+                },
+                domain: [["product_id", "=", 37]],
+                name: "Partners",
+                res_model: "partner",
+                search_view_id: [67, "search"],
+                target: "current",
+                type: "ir.actions.act_window",
+                view_mode: "list",
+                views: [
+                    [false, "list"],
+                    [2, "form"],
+                ],
+            });
+            expect(options).toEqual({
+                newWindow: true,
+            });
+            return Promise.resolve(true);
+        },
+    });
+
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        searchViewId: 67,
+        arch: `
+			<pivot string="Partners">
+				<field name="product_id" type="row"/>
+				<field name="foo" type="measure"/>
+			</pivot>`,
+        context: { someKey: true, search_default_test: 3 },
+        config: {
+            views: [
+                [2, "form"],
+                [5, "kanban"],
+                [false, "list"],
+                [false, "pivot"],
+            ],
+        },
+    });
+
+    expect("table").toHaveClass("o_enable_linking");
+    await contains(".o_pivot_cell_value:eq(1)").click({ ctrlKey: true }); // should trigger a do_action
+});
+
+test("display '0' for false group, when grouped by int field", async () => {
+    Partner._records[0].foo = false;
+
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `
+            <pivot>
+                <field name="foo" type="row"/>
+            </pivot>`,
+        groupBy: ["foo"],
+    });
+
+    expect(queryAllTexts("tbody th")).toEqual(["Total", "1", "2", "17", "0"]);
+});
+
+test("display the field's falsy_value_label for false group, if defined", async () => {
+    Partner._fields.product_id.falsy_value_label = "I'm the false group";
+    Partner._records[0].product_id = false;
+
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `
+            <pivot>
+                <field name="foo" type="row"/>
+            </pivot>`,
+        groupBy: ["product_id"],
+    });
+
+    expect(queryAllTexts("tbody th")).toEqual(["Total", "xpad", "I'm the false group"]);
+});
+
+test.tags("desktop");
+test("pivot views make their control panel available directly", async () => {
+    const def = new Deferred();
+    onRpc("formatted_read_grouping_sets", () => def);
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `
+            <pivot>
+                <field name="foo" type="row"/>
+            </pivot>`,
+        groupBy: ["product_id"],
+    });
+
+    expect(".o_pivot_view").toHaveCount(1);
+    expect(".o_pivot_view .o_control_panel .o_searchview").toHaveCount(1);
+    expect(".o_pivot_view .o_pivot").toHaveCount(0);
+
+    def.resolve();
+    await animationFrame();
+    expect(".o_pivot_view .o_pivot").toHaveCount(1);
+});
+
+test("pivot view with monetary with multiple currencies", async () => {
+    Partner._fields.amount = fields.Monetary({ currency_field: "currency_id" });
+    Partner._fields.currency_id = fields.Many2one({ relation: "res.currency", default: 1 });
+    Partner._records[0].amount = 500;
+    Partner._records[1].amount = 300;
+    Partner._records[2].amount = 200;
+    Partner._records[3].amount = 400;
+    Partner._records[3].currency_id = 2;
+    await mountView({
+        type: "pivot",
+        resModel: "partner",
+        arch: `
+			<pivot>
+				<field name="amount" type="measure"/>
+			</pivot>`,
+        groupBy: ["currency_id"],
+    });
+    expect(".o_pivot table tbody tr").toHaveCount(3);
+    expect(".o_pivot table tbody tr:first").toHaveText("Total \n$ 1,400.00?");
+    expect(".o_pivot table tbody tr:eq(1)").toHaveText("USD \n$ 1,000.00");
+    expect(".o_pivot table tbody tr:last").toHaveText("EUR \n400.00 €");
+
+    // multi currencies popover
+    await toggleMultiCurrencyPopover(".o_pivot table tbody tr:first .o_value sup");
+    expect(".o_multi_currency_popover").toHaveCount(1);
+    expect(".o_multi_currency_popover").toHaveText("2,800.00 € at $ 0.50");
+
+    // test sorting
+    await contains("th.o_pivot_measure_row").click();
+    expect(".o_pivot table tbody tr:eq(1)").toHaveText("EUR \n400.00 €");
+    expect(".o_pivot table tbody tr:last").toHaveText("USD \n$ 1,000.00");
+    await contains("th.o_pivot_measure_row").click();
+    expect(".o_pivot table tbody tr:eq(1)").toHaveText("USD \n$ 1,000.00");
+    expect(".o_pivot table tbody tr:last").toHaveText("EUR \n400.00 €");
+});
+
+test.tags("desktop");
+test("scroll position is restored when coming back to pivot view", async () => {
+    Partner._views = {
+        kanban: `
+            <pivot>
+                <field name="foo" type="row"/>
+            </pivot>`,
+        list: `<list><field name="foo"/></list>`,
+        search: `<search />`,
+    };
+
+    for (let i = 1; i < 20; i++) {
+        Partner._records.push({ id: 100 + i, foo: 100 + i });
+    }
+
+    let def;
+    onRpc("formatted_read_grouping_sets", () => def);
+    await resize({ width: 800, height: 300 });
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [
+            [false, "pivot"],
+            [false, "list"],
+        ],
+        context: {
+            group_by: ["foo"],
+        },
+    });
+
+    expect(".o_pivot_view").toHaveCount(1);
+    // simulate a scroll in the pivot view
+    queryOne(".o_content").scrollTop = 200;
+
+    await getService("action").switchView("list");
+    expect(".o_list_view").toHaveCount(1);
+
+    // the pivot is "lazy", so it displays the control panel directly, and the renderer later with
+    // the data => simulate this and check that the scroll position is correctly restored
+    def = new Deferred();
+    await getService("action").switchView("pivot");
+    expect(".o_pivot_view").toHaveCount(1);
+    expect(".o_content .o_pivot").toHaveCount(0);
+    def.resolve();
+    await animationFrame();
+    expect(".o_content .o_pivot").toHaveCount(1);
+    expect(".o_content").toHaveProperty("scrollTop", 200);
+});
+
+test.tags("mobile");
+test("scroll position is restored when coming back to pivot view (mobile)", async () => {
+    Partner._views = {
+        kanban: `
+            <pivot>
+                <field name="foo" type="row"/>
+            </pivot>`,
+        list: `<list><field name="foo"/></list>`,
+        search: `<search />`,
+    };
+
+    for (let i = 1; i < 20; i++) {
+        Partner._records.push({ id: 100 + i, foo: 100 + i });
+    }
+
+    let def;
+    onRpc("formatted_read_grouping_sets", () => def);
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [
+            [false, "pivot"],
+            [false, "list"],
+        ],
+        context: {
+            group_by: ["foo"],
+        },
+    });
+
+    expect(".o_pivot_view").toHaveCount(1);
+    // simulate a scroll in the pivot view
+    queryOne(".o_pivot_view").scrollTop = 200;
+
+    await getService("action").switchView("list");
+    expect(".o_list_view").toHaveCount(1);
+
+    // the pivot is "lazy", so it displays the control panel directly, and the renderer later with
+    // the data => simulate this and check that the scroll position is correctly restored
+    def = new Deferred();
+    await getService("action").switchView("pivot");
+    expect(".o_pivot_view").toHaveCount(1);
+    expect(".o_content .o_pivot").toHaveCount(0);
+    def.resolve();
+    await animationFrame();
+    expect(".o_content .o_pivot").toHaveCount(1);
+    expect(".o_pivot_view").toHaveProperty("scrollTop", 200);
 });

@@ -5,7 +5,8 @@ from odoo import _, api, models
 from odoo.exceptions import UserError
 from odoo.addons.hr_homeworking.models.hr_homeworking import DAYS
 
-class WorkLocation(models.Model):
+
+class HrWorkLocation(models.Model):
     _inherit = "hr.work.location"
 
     @api.ondelete(at_uninstall=False)

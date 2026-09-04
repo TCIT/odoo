@@ -4,8 +4,9 @@
         <field name="name">BAS Report</field>
         <field name="root_report_id" ref="account.generic_tax_report"/>
         <field name="country_id" ref="base.au"/>
-        <field name="filter_fiscal_position" eval="True"/>
+        <field name="allow_foreign_vat" eval="True"/>
         <field name="availability_condition">country</field>
+        <field name="integer_rounding">DOWN</field>
         <field name="column_ids">
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
@@ -24,7 +25,7 @@
                             <record id="account_tax_report_gstrpt_g1_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">G1</field>
+                                <field name="formula">-G1</field>
                             </record>
                         </field>
                         <field name="children_ids">
@@ -35,7 +36,7 @@
                                     <record id="account_tax_report_gstrpt_g2_tag" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">G2</field>
+                                        <field name="formula">-G2</field>
                                     </record>
                                 </field>
                             </record>
@@ -46,7 +47,7 @@
                                     <record id="account_tax_report_gstrpt_g3_tag" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">G3</field>
+                                        <field name="formula">-G3</field>
                                     </record>
                                 </field>
                             </record>
@@ -57,7 +58,7 @@
                                     <record id="account_tax_report_gstrpt_g4_tag" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">G4</field>
+                                        <field name="formula">-G4</field>
                                     </record>
                                 </field>
                             </record>
@@ -80,7 +81,7 @@
                                     <record id="account_tax_report_gstrpt_g7_tag" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">G7</field>
+                                        <field name="formula">-G7</field>
                                     </record>
                                 </field>
                             </record>
@@ -234,15 +235,10 @@
                         <field name="name">W2: Amounts withheld from salaries or wages and other payments shown at W1</field>
                         <field name="code">W2</field>
                         <field name="expression_ids">
-                            <record id="account_tax_report_payg_w2_tag" model="account.report.expression">
-                                <field name="label">sub_balance</field>
-                                <field name="engine">tax_tags</field>
-                                <field name="formula">W2</field>
-                            </record>
                             <record id="account_tax_report_payg_w2_balance" model="account.report.expression">
                                 <field name="label">balance</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">-W2.sub_balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-W2</field>
                             </record>
                         </field>
                     </record>
@@ -253,7 +249,7 @@
                             <record id="account_tax_report_payg_w4_tag" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">W4</field>
+                                <field name="formula">-W4</field>
                             </record>
                         </field>
                     </record>
@@ -306,7 +302,7 @@
                                     <record id="account_tax_report_gstrpt_summary_tag" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">7A</field>
+                                        <field name="formula">-7A</field>
                                     </record>
                                 </field>
                             </record>

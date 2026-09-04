@@ -41,6 +41,7 @@ L10N_ES_TBAI_LICENSE_DICT = {
     },
 }
 
+
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
@@ -134,7 +135,8 @@ class ResCompany(models.Model):
                 license_key = self.l10n_es_tbai_tax_agency
             else:  # production env: only one license
                 license_key = 'production'
-            return L10N_ES_TBAI_LICENSE_DICT[license_key]
+            license = L10N_ES_TBAI_LICENSE_DICT[license_key]
+            return dict(license, license_name=str(license["license_name"]))  # force translation
         else:
             return {}
 
@@ -163,4 +165,11 @@ class ResCompany(models.Model):
 
     def _l10n_es_freelancer(self):
         self.ensure_one()
-        return self.vat and re.fullmatch(r"(ES)?\d{8}[A-Z]", self.vat) or False
+        if not self.vat:
+            return False
+
+        vat = self.vat
+        if vat.startswith('ES'):
+            vat = vat[2:]
+
+        return re.fullmatch(r"(\d{8}[TRWAGMYFPDXBNJZSQVHLCKE]|[XYZ]\d{7}[TRWAGMYFPDXBNJZSQVHLCKE]|E\d{7}[A-J0-9])", vat) or False

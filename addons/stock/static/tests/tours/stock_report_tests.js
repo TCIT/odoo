@@ -1,8 +1,6 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 
-    registry.category("web_tour.tours").add('test_stock_route_diagram_report', {
+registry.category("web_tour.tours").add("test_stock_route_diagram_report", {
         steps: () => [
         {
             trigger: ".o_breadcrumb",
@@ -23,7 +21,7 @@ import { registry } from "@web/core/registry";
         trigger: ':iframe .o_report_stock_rule',
     },
     ],
-    });
+});
 
 registry.category("web_tour.tours").add("test_context_from_warehouse_filter", {
     steps: () => [
@@ -37,7 +35,7 @@ registry.category("web_tour.tours").add("test_context_from_warehouse_filter", {
             run: "edit foo",
         },
         {
-            trigger: ".o_menu_item.dropdown-item:contains(Warehouse):contains(foo)",
+            trigger: ".o-dropdown-item:contains(Warehouse):contains(foo)",
             run: "click",
         },
         // Add warehouse A's id to the warehouse context key
@@ -50,11 +48,11 @@ registry.category("web_tour.tours").add("test_context_from_warehouse_filter", {
             run: "edit warehouse",
         },
         {
-            trigger: ".o_menu_item.dropdown-item:contains(Search Warehouse for:) a.o_expand > i",
+            trigger: ".o-dropdown-item:contains(Search Warehouse for:) a.o_expand > i",
             run: "click",
         },
         {
-            trigger: ".o_menu_item.dropdown-item.o_indent:contains(Warehouse A) a",
+            trigger: ".o-dropdown-item.o_indent:contains(Warehouse A) a",
             run: "click",
         },
         // Add warehouse B's id to the warehouse context key
@@ -63,11 +61,11 @@ registry.category("web_tour.tours").add("test_context_from_warehouse_filter", {
             run: "edit warehouse",
         },
         {
-            trigger: ".o_menu_item.dropdown-item:contains(Search Warehouse for:) a.o_expand > i",
+            trigger: ".o-dropdown-item:contains(Search Warehouse for:) a.o_expand > i",
             run: "click",
         },
         {
-            trigger: ".o_menu_item.dropdown-item.o_indent:contains(Warehouse B) a",
+            trigger: ".o-dropdown-item.o_indent:contains(Warehouse B) a",
             run: "click",
         },
         {
@@ -95,6 +93,45 @@ registry.category("web_tour.tours").add("test_context_from_warehouse_filter", {
         },
         {
             trigger: ".o_graph_view",
+        },
+    ],
+});
+
+registry.category("web_tour.tours").add("test_forecast_replenishment", {
+    steps: () => [
+        {
+            trigger: ".o_kanban_record:contains(Lovely product)",
+            run: "click",
+        },
+        {
+            trigger: "button[name=action_product_tmpl_forecast_report]",
+            run: "click",
+        },
+        {
+            trigger: "button.o_forecasted_replenish_btn",
+            run: "click",
+        },
+        {
+            trigger: ".modal-dialog .btn-close",
+            run: "click",
+        },
+        {
+            trigger: ".o_web_client:not(:has(.modal-dialog))",
+        },
+        {
+            trigger: "button.o_forecasted_replenish_btn",
+            run: "click",
+        },
+        {
+            trigger: "button[name=launch_replenishment]",
+            run: "click",
+        },
+        {
+            trigger: ".o_web_client:not(:has(.modal-dialog))",
+        },
+        {
+            trigger:
+                ".o_notification:contains(The following replenishment order have been generated)",
         },
     ],
 });

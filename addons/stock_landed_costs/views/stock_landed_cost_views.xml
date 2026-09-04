@@ -8,23 +8,12 @@
             <field name="arch" type="xml">
                 <form string="Landed Costs">
                     <field name="company_id" invisible="1"/>
-                    <field name="stock_valuation_layer_ids" invisible="1"/>
                     <header>
                         <button name="button_validate" string="Validate" invisible="state != 'draft'" class="oe_highlight" type="object"/>
                         <button name="button_cancel" string="Cancel" invisible="state != 'draft'" type="object"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
                     </header>
                     <sheet>
-                        <div class="oe_button_box" name="button_box">
-                            <button type="object"
-                                name="action_view_stock_valuation_layers"
-                                class="oe_stat_button" icon="fa-dollar" groups="account.group_account_invoice"
-                                invisible="state != 'done' or not stock_valuation_layer_ids">
-                                <div class="o_stat_info">
-                                    <span class="o_stat_text">Valuation</span>
-                                </div>
-                            </button>
-                        </div>
                         <div class="oe_title">
                             <label for="name" string="Landed Cost"/>
                             <h1>
@@ -37,7 +26,7 @@
                                 <field name="target_model" widget="radio" invisible="1" readonly="state == 'done'"/>
                                 <field name="picking_ids" widget="many2many_tags" 
                                     options="{'no_create_edit': True}" invisible="target_model != 'picking'" readonly="state == 'done'"
-                                    domain="[('company_id', '=', company_id), ('move_ids.stock_valuation_layer_ids', '!=', False)]"/>
+                                    domain="[('company_id', '=', company_id), '|', ('move_ids.is_in', '!=', False), ('move_ids.is_out', '!=', False)]"/>
                             </group>
                             <group>
                                 <label for="account_journal_id" string="Journal"/>
@@ -187,14 +176,17 @@
                     <separator/>
                     <filter string="Date" name="date" date="date"/>
                     <separator/>
+                    <filter invisible="1" string="My Activities" name="filter_activities_my"
+                        domain="[('activity_user_id', '=', uid)]"/>
+                    <separator invisible="1"/>
                     <filter invisible="1" string="Late Activities" name="activities_overdue"
-                        domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
-                        help="Show all records which has next action date is before today"/>
+                        domain="[('my_activity_date_deadline', '&lt;', 'today')]"
+                        help="Show all records whose next activity date is past"/>
                     <filter invisible="1" string="Today Activities" name="activities_today"
-                        domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                        domain="[('my_activity_date_deadline', '=', 'today')]"/>
                     <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
-                        domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
-                    <group expand="0" string="Group By">
+                        domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
+                    <group>
                         <filter string="Status" name="status" context="{'group_by': 'state'}"/>
                         <filter string="Date" name="group_by_month" context="{'group_by': 'date'}"/>
                     </group>
@@ -205,6 +197,7 @@
         <record id='action_stock_landed_cost' model='ir.actions.act_window'>
             <field name="name">Landed Costs</field>
             <field name="res_model">stock.landed.cost</field>
+            <field name="path">landed-costs</field>
             <field name="view_mode">list,form,kanban</field>
             <field name="context">{}</field>
             <field name="help" type="html">

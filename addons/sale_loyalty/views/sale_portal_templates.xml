@@ -2,7 +2,7 @@
 <odoo>
 
     <template id="used_gift_card">
-        <div class="text-muted d-md-block small"
+        <div class="d-md-block mb-2 small text-muted"
             t-if="line.coupon_id and line.order_id != line.coupon_id.order_id and not line.coupon_id.program_id.is_nominative">
             <span>
                 Code:
@@ -75,7 +75,7 @@
     <template id="sale_order_portal_content_inherit"
               name="Gift Card Products Portal"
               inherit_id="sale.sale_order_portal_content">
-        <xpath expr="//section[@id='details']//td[@id='product_name']/*[last()]" position="after">
+        <xpath expr="//section[@id='details']//td[@name='td_product_name']/*[last()]" position="after">
             <t t-if="line.coupon_id and line.coupon_id.program_id.program_type == 'gift_card'"
                t-call="sale_loyalty.used_gift_card"/>
         </xpath>

@@ -169,7 +169,7 @@ $-seen-urls: ();
 }
 
 @mixin body-image-bg-style() {
-    background-image: url("/#{str-slice(o-website-value('body-image'), 2)}");
+    background-image: url("#{str-slice(o-website-value('body-image'), 1)}");
     background-position: center;
     background-attachment: fixed;
     @if o-website-value('body-image-type') == 'pattern' {
@@ -181,12 +181,38 @@ $-seen-urls: ();
     }
 };
 
+// Manage custom offcanvas such as the one used for mobile mega menu nav
+// where a dropdown behaves as offcanvas.
+$o-mega-menu-nav-height: 3rem !default;
+$o-mega-menu-zindex: $zindex-offcanvas !default;
+$o-mega-menu-btn-close-zindex: $o-mega-menu-zindex + 1 !default;
+
+@mixin force-opaque-bg-color($color, $if-necessary, $background: white) {
+    $alpha: alpha($color);
+    @if not $if-necessary or $alpha < 0.999 {
+        background-color: mix(change-color($color, $alpha: 1), $background, percentage($alpha));
+    }
+}
+
 body {
     // The color behind the boxed layout is forced by Odoo. The box background
     // color uses the `$body-bg` variable.
     // grep: BOXED_BODY_BG_ODOO
+    //
+    // In any case, remove the transparency of the background color to apply as
+    // body background color to prevent the fallback iframe used for navigation
+    // in the backend to be visible once the top iframe is loaded (see the
+    // /website/iframefallback route). Indeed, if the website <body> uses a
+    // transparent background color, the fallback iframe would be visible on
+    // some // browsers (e.g. Chrome).
     @if o-website-value('layout') != 'full' {
-        background-color: o-color('body');
+        @include force-opaque-bg-color(o-color('body'), $if-necessary: false);
+    } @else {
+        // Only if necessary as, if already opaque, the background color of the
+        // body is already set by Bootstrap. We don't change $body-bg directly
+        // as it would impact other Bootstrap components that could take profit
+        // of the transparency.
+        @include force-opaque-bg-color($body-bg, $if-necessary: true);
     }
 }
 
@@ -225,13 +251,28 @@ body {
                 max-width: 100% !important;
             }
 
-            // Vertical alignment when top-menu has visually "no background"
+            // Remove the left/right padding of the header navbar when the
+            // header has no visible separation from the body:
+            // - The header has no background color (transparent)
+            // - The header background color matches the body
+            // - The header has no shadow defined
             $-menu-color: o-color('menu-custom') or o-color('menu');
-            @if (not $-menu-color or $-menu-color == o-color('body')) {
-                > header {
-                    .navbar, .container {
-                        padding-left: 0;
-                        padding-right: 0;
+            $-header-template: o-website-value('header-template');
+            @if (
+                (not $-menu-color or ($-menu-color == o-color('body') and o-website-value('body-image') == null))
+                and (o-website-value('menu-box-shadow') == none)
+                and (index(("default", "hamburger", "stretch", "vertical", "search"), $-header-template) != null)
+            ) {
+                > header #o_main_nav {
+                    padding-left: 0;
+                    padding-right: 0;
+
+                    @if ($-header-template == "search") {
+                        & > div,
+                        & > .o_header_hide_on_scroll > .container {
+                            padding-left: 0;
+                            padding-right: 0;
+                        }
                     }
                 }
             }
@@ -285,6 +326,10 @@ body {
     &:empty {
         display: none;
     }
+}
+
+.o_navlink_no_background .navbar-light {
+    --NavLinkWithBackground-bg-color: transparent;
 }
 
 .navbar {
@@ -350,28 +395,36 @@ body {
     @include o-add-gradient('menu-gradient');
 }
 
+@function format-color($color) {
+    // Check if the value is wrapped in quotes (initially it wasn't, and it
+    // didn't work) because we don't want the text color of the navbar to
+    // change once the fix is applied for users who tried the option when it
+    // wasn't working.
+    @return if(str-index(inspect($color), '"') == 1 or str-index(inspect($color), "'") == 1, o-color($color), $color);
+}
+
 // TODO this should be reviewed. While it allowed to choose a color for the
 // navbar text, there is no :hover effect, the active item is not visible and
 // the selector is probably too specific and should rather be about extending
 // bootstrap if possible.
 #wrapwrap:not(.o_header_overlay) header, header.o_header_is_scrolled, header .o_navbar_mobile {
-    .nav-item > .nav-link > *, .nav-item > .nav-link::after, .js_language_selector span, .badge {
+    .nav-item > .nav-link > *, .nav-item > .nav-link::after, .js_language_selector span, .badge, .nav-item > .accordion-item * {
         $header-text-color: o-website-value('header-text-color');
-        // Check if the value is wrapped in quotes (initially it wasn't, and it
-        // didn't work) because we don't want the text color of the navbar to
-        // change once the fix is applied for users who tried the option when it
-        // wasn't working.
-        color: if(str-index(inspect($header-text-color), '"') == 1 or str-index(inspect($header-text-color), "'") == 1,
-            o-color($header-text-color),
-            $header-text-color) !important;
+        color: format-color($header-text-color) !important;
     }
 }
 
 .o_navlink_background {
     background: var(--NavLinkWithBackground-bg-color, rgba(var(--#{$variable-prefix}emphasis-color-rgb), .05));
 
-    &:hover {
+    &:hover, .o_navlink_trigger_hover:hover & {
         background: var(--NavLinkWithBackground-bg-color--hover, rgba(var(--#{$variable-prefix}emphasis-color-rgb), .1));
+    }
+}
+
+.o_navlink_background, .o_navlink_trigger_hover {
+    &:focus-visible {
+        --#{$prefix}btn-focus-box-shadow: #{$nav-link-focus-box-shadow};
     }
 }
 
@@ -379,10 +432,80 @@ body {
     background: var(--NavLinkWithBackground-bg-color, rgba(var(--#{$variable-prefix}emphasis-color-rgb), .05));
 }
 
+$-navbar-mobile-bg-color: o-color('menu-custom') or o-color('menu');
+
+// Mixin for accordion style in vertical menu (e.g. mobile menu, sidebar header)
+@mixin accordion-style-vertical-menu {
+    .top_menu > .accordion {
+        ul > li > a.nav-link {
+            background-color: inherit;
+
+            &.active {
+                color: var(--navbar-active-color);
+            }
+
+            &:hover {
+                color: var(--nav-link-hover-color);
+            }
+        }
+
+        .accordion-button {
+            font-size: inherit;
+
+            &:not(.collapsed) {
+                @if $-navbar-mobile-bg-color != null {
+                    background-color: shade-color($-navbar-mobile-bg-color, 5%);
+                }
+            }
+
+            // Replace the default chevron with our Odoo UI icon so it adapts to
+            // the theme colors.
+            &:after {
+                height: 100%;
+                background: none;
+                font-family: 'odoo_ui_icons';
+                content: '\e839';
+            }
+        }
+    }
+
+    .top_menu {
+        &.text-end > .accordion .accordion-button {
+            flex-direction: row-reverse;
+
+            &::after {
+                margin-left: 0;
+                margin-right: auto;
+            }
+        }
+
+        &.text-center > .accordion .accordion-button > span {
+            text-align: center;
+            flex-grow: 1;
+        }
+    }
+}
+
 // Apply background color to the offcanvas menu
 .o_navbar_mobile {
     height: 100dvh;
-    background-color: o-color('menu-custom') or o-color('menu');
+    background-color: $-navbar-mobile-bg-color;
+
+    // Make offcanvas close btn above mega menu
+    .btn-close {
+        z-index: $o-mega-menu-btn-close-zindex;
+    }
+
+    @include accordion-style-vertical-menu;
+}
+
+@if o-website-value('header-template') == 'sidebar' {
+    @include media-breakpoint-up(lg) {
+        @include accordion-style-vertical-menu;
+    }
+    .o_header_sidebar > nav:not(.o_header_mobile) {
+        overflow-y: auto;
+    }
 }
 
 $-header-nav-link-height: $nav-link-height;
@@ -416,7 +539,7 @@ $-header-nav-link-height: $nav-link-height;
     @include o-add-gradient('footer-gradient');
 
     .o_footer_copyright {
-        $-footer-color: o-color('footer-custom') or o-color('footer');
+        $-footer-color: o-color('footer-custom') or o-color('footer') or rgba(0, 0, 0, 0);
         @include o-apply-colors('copyright', $background: $-footer-color);
         @include o-apply-colors('copyright-custom', $background: $-footer-color);
         @include o-add-gradient('copyright-gradient');
@@ -529,6 +652,13 @@ p {
     margin-top: $paragraph-margin-top;
 }
 
+.o_line_clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: var(--lines-clamp, 2);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 font[style*='background']:not(.text-gradient),
 font[class*='bg-'] {
     // Not adding any horizontal padding is important as it ensures that several
@@ -620,41 +750,47 @@ font[class*='bg-'] {
     }
 }
 
+.btn-close {
+    // Most components with an integrated .btn-close (o_notification, modals, offcanvas)
+    // use $body-bg by default, which is why we check it here.
+    @if (lightness($body-bg) < 50) {
+        @include btn-close-white();
+    }
+}
+
 // Badges
 .badge, .o_filter_tag {
-    background: var(--background-color, var(--bg-light)) !important;
-    color: var(--color, var(--color-light)) !important;
-    border: $border-width solid var(--bg-solid) !important;
+    --badge-color: var(--color);
+
+    background: var(--badge-bg, var(--background-color)) !important;
+    color: var(--badge-color, var(--color)) !important;
+    border: $border-width solid var(--badge-border-color) !important;
+    font-size: var(--badge-font-size);
 
     // Similarly to list-group-item-x and alert-* classes, override text-bg-*
     // classes behavior when used on badges.
     @each $-color, $-value in $theme-colors {
         &.text-bg-#{$-color} {
-            --bg-light: #{tint-color($-value, 90%)};
-            --color-light: #{increase-contrast($-value, tint-color($-value, 90%))};
-            --bg-solid: #{$-value};
-            --bg-solid-contrast: #{color-contrast($-value, $min-contrast-ratio: 3)};
+            --badge-bg: #{tint-color($-value, 90%)};
+            --badge-color: #{increase-contrast($-value, tint-color($-value, 90%))};
+            --badge-color-hover: #{color-contrast($-value, $min-contrast-ratio: 3)};
+            --badge-border-color: #{$-value};
         }
 
         // Restore old badge design (needed as an exit door for some contexts)
         //(e.g cart_quantity, dropdown toggle.badge)
         &.bg-#{$-color} {
-            --bg-light: #{$-value};
-            --color-light: #{color-contrast($-value, $min-contrast-ratio: 3)};
-            --bg-solid: var(--bg-light);
-            --bg-solid-contrast: var(--color-light);
+            --badge-bg: #{$-value};
+            --badge-color: #{color-contrast($-value, $min-contrast-ratio: 3)};
+            --badge-border-color: #{$-value};
+            --badge-color-hover: #{color-contrast($-value, $min-contrast-ratio: 3)};
         }
     }
 
     @at-root a.badge:hover, a:not(.dropdown-item):hover > .badge, .o_badge_clickable.badge:hover {
-        --background-color: var(--bg-solid);
-        --color: var(--bg-solid-contrast);
-
+        --badge-bg: var(--badge-border-color);
+        --badge-color: var(--badge-color-hover);
         text-decoration: none;
-    }
-
-    .btn {
-        --btn-color: var(--color, var(--color-light));
     }
 }
 
@@ -669,38 +805,18 @@ font[class*='bg-'] {
         $-is-website-palette-dark: color-contrast($body-color) == $color-contrast-dark;
         $-bg-lightness-adjusted: if($-is-website-palette-dark, -40%, 0%);
 
-        $-bg-solid: $-color;
-        $-bg-solid-contrast: color-contrast($-bg-solid, $min-contrast-ratio: 3);
+        $-background-color: if($-is-website-palette-dark, adjust-color($-color, $lightness: $-bg-lightness-adjusted, $saturation: 5%), tint-color($-color, 90%));
 
-        $-bg-light: if($-is-website-palette-dark, adjust-color($-color, $lightness: $-bg-lightness-adjusted, $saturation: 5%), tint-color($-bg-solid, 90%));
-        $-color-light: increase-contrast($-bg-solid, $-bg-light);
-
-        $-bg-light-contrast: color-contrast($-bg-light, $min-contrast-ratio: 3);
-
-        // Print CSS variables.
-        --bg-solid: #{$-bg-solid};
-        --bg-solid-contrast: #{$-bg-solid-contrast};
-
-        --bg-light: #{$-bg-light};
-        --color-light: #{$-color-light};
-
-        --bg-light-contrast: #{$-bg-light-contrast};
+        --background-color: #{$-background-color};
+        --color: #{increase-contrast($-color, $-background-color)};
+        --background-color-contrast: #{color-contrast($-background-color, $min-contrast-ratio: 3)};
+        --badge-color-hover: #{color-contrast($-color, $min-contrast-ratio: 3)};
+        --badge-border-color: #{$-color};
     }
 }
 
 // Background Images
 .oe_img_bg {
-    background-size: cover;
-    background-repeat: no-repeat;
-
-    &.o_bg_img_opt_repeat {
-        background-size: auto;
-        background-repeat: repeat;
-    }
-    &.o_bg_img_center {
-        background-position: center;
-    }
-
     // Compatibility <= 13.0, TODO remove?
     // -----------------------------------
     &.o_bg_img_opt_contain {
@@ -786,6 +902,9 @@ table.table_desc tr td {
     flex-direction: column;
     justify-content: space-around;
     min-height: 100vh !important;
+    // See JS: this is overridden for multiple reasons, including the fact that
+    // Arc browser does not support this correctly at the moment.
+    min-height: 100svh !important;
 }
 .o_half_screen_height {
     @extend .o_full_screen_height;
@@ -810,6 +929,7 @@ table.table_desc tr td {
     width: var(--o-timeline-dot-size, 24px);
     height: var(--o-timeline-dot-size, 24px);
     left: var(--o-dot-left);
+    color: $primary;
 
     &:before, &:after {
         position: absolute;
@@ -828,6 +948,12 @@ table.table_desc tr td {
     }
 }
 
+@for $index from 1 through 5 {
+    .o_cc#{$index} .o_dot {
+        color: var(--o-cc#{$index}-btn-primary);
+    }
+}
+
 .o_dot_line {
     margin-top: calc(var(--o-timeline-dot-size, 24px) + #{map-get($spacers, 1)});
     left: var(--o-dot-line-left);
@@ -839,7 +965,33 @@ table.table_desc tr td {
 
 // Variables shared between carousel snippets and s_image_gallery
 $-o-carousel-indicators-dots-size: .75rem;
-$-o-carousel-controllers-size: map-get($spacers, 5);
+$-o-carousel-controllers-size: var(--CarouselControllers-size, #{map-get($spacers, 5)});
+
+%o_horizontal_controllers {
+    pointer-events: none;
+
+    @include media-breakpoint-up(md) {
+        .carousel-indicators {
+            position: relative;
+            min-width: 0;
+            margin: 0;
+        }
+        .carousel-control-prev, .carousel-control-next {
+            position: relative;
+            width: auto;
+        }
+    }
+
+    // Allow clicks to pass through the carousel control's wrapper, while
+    // keeping the control buttons/indicators clickable.
+    .carousel-indicators > *, .carousel-control-prev, .carousel-control-next {
+        pointer-events: auto;
+    }
+
+    .o_arrows_wrapper {
+        display: flex;
+    }
+}
 
 // This style is shared by old versions of carousels
 // 000 for s_carousel & 000 and 001 for s_quotes_carousel
@@ -1016,7 +1168,7 @@ $-o-carousel-controllers-size: map-get($spacers, 5);
         }
 
         &:not(.s_carousel_arrows_hidden) .carousel-indicators {
-            $-margin-x: map-get($spacers, 3) * 2 + $-o-carousel-controllers-size;
+            $-margin-x: calc(#{map-get($spacers, 3)} * 2 + #{$-o-carousel-controllers-size});
 
             min-height: $-o-carousel-controllers-size;
             margin: 0 $-margin-x map-get($spacers, 3);
@@ -1027,6 +1179,23 @@ $-o-carousel-controllers-size: map-get($spacers, 5);
     .carousel-control-next,
     .carousel-indicators {
         position: absolute;
+    }
+
+    .carousel-control-prev, .carousel-control-next {
+        &:focus-visible {
+            .carousel-control-prev-icon, .carousel-control-next-icon {
+                box-shadow: inset 0 0 0 2px white, inset 0 0 0 4px black;
+            }
+        }
+    }
+
+    // Allow clicks to pass through the carousel control's wrapper, while
+    // keeping the control indicators clickable.
+    .carousel-indicators {
+        pointer-events: none;
+        > * {
+            pointer-events: auto;
+        }
     }
 
     .carousel-control-prev-icon, .carousel-control-next-icon {
@@ -1076,6 +1245,14 @@ $-o-carousel-controllers-size: map-get($spacers, 5);
         .carousel-control-prev, .carousel-control-next {
             display: none;
         }
+    }
+
+    .o_horizontal_controllers {
+        @extend %o_horizontal_controllers;
+    }
+
+    &.s_carousel_arrows_hidden .o_horizontal_controllers .o_arrows_wrapper {
+        display: none;
     }
 
     // Content
@@ -1128,17 +1305,38 @@ $-o-carousel-controllers-size: map-get($spacers, 5);
         }
 
         &.s_carousel_indicators_numbers {
-            flex-wrap: wrap;
+            justify-content: start;
             height: auto;
             counter-reset: numberList;
+            overflow: auto;
+            transition: scrollbar-color .2s ease-in-out; // $transition-base duration & bezier
+            scrollbar-color: var(--IndicatorsNumbers__Scrollbar-color, #{rgba($carousel-indicator-active-bg, .15)}) transparent;
+            scrollbar-width: thin;
 
+            &::-webkit-scrollbar {
+                height: 6px;
+            }
+            &::-webkit-scrollbar-thumb {
+                border-radius: $btn-border-radius-sm;
+                background: var(--IndicatorsNumbers__Scrollbar-color, #{rgba($carousel-indicator-active-bg, .15)});
+            }
+            &::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            &:hover {
+                scrollbar-color: var(--IndicatorsNumbers__Scrollbar-color, #{$carousel-indicator-active-bg}) transparent;
+
+                &::-webkit-scrollbar-thumb {
+                    background: var(--IndicatorsNumbers__Scrollbar-color, $carousel-indicator-active-bg);
+                }
+            }
             button {
                 display: flex;
                 align-items: center;
-                gap: map-get($spacers, 1);
                 width: auto;
                 height: auto;
                 margin: 0;
+                border: 0;
                 padding: 0 map-get($spacers, 2) 0;
                 background: none;
                 color: $carousel-indicator-active-bg;
@@ -1147,24 +1345,30 @@ $-o-carousel-controllers-size: map-get($spacers, 5);
                 &:hover {
                     opacity: 1;
                 }
-
                 &:before {
                     content: counter(numberList);
                     counter-increment: numberList;
                 }
+                &:after {
+                    display: block;
+                    width: 0;
+                    margin-left: map-get($spacers, 1);
+                    border-top: $border-width * 2 solid $carousel-indicator-active-bg;
+                    transition: width .2s ease-in-out; // $transition-base duration & bezier
+                    content: '';
+                }
+                &.active:after {
+                    width: map-get($spacers, 4);
+                }
 
-                @include media-breakpoint-up(md) {
-                    &:after {
-                        display: block;
-                        width: 0;
-                        border-top: $border-width * 2 solid $carousel-indicator-active-bg;
-                        transition: width .2s ease-in-out; // $transition-base duration & bezier
-                        content: '';
-                    }
-
-                    &.active:after {
-                        width: map-get($spacers, 4);
-                    }
+                // As flexbox's "safe" property (e.g. justify-content: safe center;) is not yet
+                // fully supported, this will maintain centered alignment with overflowing
+                // elements.
+                &:first-child {
+                    margin-left: auto;
+                }
+                &:last-child {
+                    margin-right: auto;
                 }
             }
         }
@@ -1182,26 +1386,53 @@ $-o-carousel-controllers-size: map-get($spacers, 5);
                 border-color: $carousel-dark-indicator-active-bg;
             }
         }
+
+        --IndicatorsNumbers__Scrollbar-color: #{rgba($carousel-dark-indicator-active-bg, .15)};
+
+        &:hover {
+            --IndicatorsNumbers__Scrollbar-color: #{$carousel-dark-indicator-active-bg};
+        }
     }
 
     // Style - Indicators outside
     &.s_carousel_controllers_indicators_outside {
-        .carousel-control-prev, .carousel-control-next {
-            margin-bottom: $-o-carousel-controllers-size;
+        &:not(:has(.s_carousel_indicators_hidden)) {
+            .carousel-control-prev, .carousel-control-next {
+                margin-bottom: $-o-carousel-controllers-size;
+            }
         }
 
         .carousel-indicators {
             position: relative;
             margin-bottom: 0;
 
-            button {
+            &:not(.s_carousel_indicators_numbers) button {
                 background-color: currentColor;
+            }
+
+            button {
                 color: inherit;
+            }
+
+            &.s_carousel_indicators_numbers {
+                // For large screen, use the same size as the margin-bottom of
+                // the prev/next buttons (like other indicators; instead of
+                // "auto"), so that the bottom of the buttons is aligned with
+                // the bottom of the slides. For smaller screen, the buttons do
+                // not have the same appearance and their bottoms do not need
+                // to align, and also the numbers may need to go on a second
+                // line if there is many slides, so we keep "auto"
+                @include media-breakpoint-up(md) {
+                    height: $-o-carousel-controllers-size;
+                }
+
+                button:after {
+                    border-top-color: currentColor;
+                }
             }
         }
     }
 }
-
 
 .carousel .container {
     .carousel-img img {
@@ -1267,6 +1498,52 @@ $-o-carousel-controllers-size: map-get($spacers, 5);
         }
         > .carousel-image {
             display: none !important;
+        }
+    }
+}
+
+// Multiple visible items configuration for carousels
+.carousel.o_carousel_multi_items {
+    --o-carousel-item-width-percentage: 25%;
+
+    @include media-breakpoint-up(md) {
+        .carousel-inner {
+            // Display the carousel items in a row
+            display: flex;
+            flex-wrap: nowrap;
+
+            // Slide right animation
+            .carousel-item.active,
+            .carousel-item-end:not(.active),
+            .carousel-item-prev:not(.active) {
+                &, ~ .carousel-item {
+                    display: block;
+                    flex: 0 0 var(--o-carousel-item-width-percentage);
+                    margin-right: 0;
+                }
+            }
+            .active.carousel-item-end + .carousel-item-prev.carousel-item-end,
+            .carousel-item-prev.carousel-item-end ~ .carousel-item {
+                right: var(--o-carousel-item-width-percentage);
+                transform: translateX(100%);
+                display: block;
+                margin-right: 0;
+            }
+
+            // Slide left animation
+            .carousel-item-start.active,
+            .carousel-item-start:not(.active),
+            .carousel-item-start:not(.active) ~ .carousel-item {
+                transform: translateX(-100%);
+            }
+            .carousel-item.active:not(.carousel-item-start):not(.carousel-item-end),
+            .carousel-item.active:not(.carousel-item-start):not(.carousel-item-end) ~ .carousel-item {
+                transition: none;
+                margin-right: initial;
+            }
+            .carousel-item-next:not(.carousel-item-start) {
+                transform: translateX(0%);
+            }
         }
     }
 }
@@ -1343,14 +1620,21 @@ $-transition-duration: 200ms;
 .navbar .o_extra_menu_items > .show {
     > li {
         + li {
-            border-top: 1px solid map-get($grays, '200');
+            border-top: $border-width solid $border-color;
         }
         > a.dropdown-toggle {
-            color: inherit; // Useful when the toggle is active
+            background-color: $body-tertiary-bg;
             pointer-events: none; // hack to prevent clicking on it because dropdown always opened
-            
-            &:not(.active) {
-                background-color: map-get($grays, '200');
+
+            &.active {
+                color: inherit !important;
+            }
+        }
+        > .dropdown-menu {
+            border-radius: 0;
+
+            .dropdown-item {
+                padding-left: $dropdown-item-padding-x + map-get($spacers, 2);
             }
         }
         > ul, > .o_mega_menu { // remove dropdown-menu default style as it is nested in another one
@@ -1435,15 +1719,20 @@ header {
     }
 
     nav.navbar {
-        @if o-website-value('menu-border-width') {
+        $-menu-border-width: o-website-value('menu-border-width');
+        @if $-menu-border-width {
+            // When the header should only have a bottom border, only take the
+            // first value of the variable 'menu-border-width' to behave as if
+            // the input only accepted one number.
+            $-menu-border-bottom-width: nth($-menu-border-width, 1);
             border: o-website-value('menu-border-style') o-color('menu-border-color') !important;
-            border-width: 0 0 o-website-value('menu-border-width') 0 !important;
+            border-width: 0 0 $-menu-border-bottom-width 0 !important;
 
             &.o_border_right_only {
-                border-width: 0 o-website-value('menu-border-width') 0 0 !important;
+                border-width: 0 $-menu-border-bottom-width 0 0 !important;
             }
             &.o_full_border {
-                border-width: o-website-value('menu-border-width') !important;
+                border-width: $-menu-border-width !important;
             }
         }
         border-radius: o-website-value('menu-border-radius') !important;
@@ -1471,24 +1760,39 @@ header {
             display: none;
         }
     }
+
+    .hidden_mega_menu_li {
+        display: none;
+    }
 }
 
 @if o-website-value('header-template') == 'sidebar' {
     @include media-breakpoint-up(lg) {
-        #wrapwrap {
+        #wrapwrap:has(> header) {
             // Two different website options might add padding:
             // - The sidebar header template
             // - The website layout template when different than 'full'
             // We need to combine both using `calc`. The `border` solution does
             // not work on Safari.
             $padding-size: o-website-value('sidebar-width');
+            $-hamburger-right: o-website-value("hamburger-position") == "right";
             @if o-website-value('layout') != 'full' {
                 $padding-size: calc(#{$grid-gutter-width} * 2 + #{$padding-size});
             }
-            padding-left: $padding-size;
+            @if $-hamburger-right {
+                padding-right: $padding-size;
+            } @else {
+                padding-left: $padding-size;
+            }
 
             > header {
-                inset: 0 auto 0 0;
+                --Offcanvas-horizontal-width: #{o-website-value('sidebar-width')};
+
+                @if $-hamburger-right {
+                    inset: 0 0 0 auto;
+                } @else {
+                    inset: 0 auto 0 0;
+                }
                 position: fixed;
                 z-index: $zindex-fixed;
                 display: flex;
@@ -1555,9 +1859,15 @@ header {
         @include o-apply-colors('header-sales_three-custom');
         @include o-add-gradient('menu-secondary-gradient');
     }
-    #wrapwrap header .o_header_sales_three_small_links {
-        // Force small links to be proportional to header font size
-        --nav-link-font-size: MAX(12px, .75em);
+    #wrapwrap header {
+        .o_header_sales_three_small_links {
+            // Force small links to be proportional to header font size
+            --nav-link-font-size: MAX(12px, .75em);
+        }
+        .ms-auto:has(> .o_header_sales_three_small_links + .top_menu.o_menu_loading) {
+            // Fix menu auto hide by preventing parent overflow
+            overflow: hidden !important;
+        }
     }
 } @else if o-website-value('header-template') == 'sales_four' {
     #wrapwrap .o_header_sales_four_bot {
@@ -1599,13 +1909,79 @@ header {
     border-radius: 0;
     background-clip: unset; // Remove the 1px gap introduced by BS4
     background-color: transparent; // In order to allow the mega menu to be transparent
-    border: 1px solid $gray-200; // Prevent to see the color of the block behind.
+    border: $border-width solid $border-color; // Prevent to see the color of the block behind.
+
+    // Needed to space the megamenu on this specific header
+    @if o-website-value('header-template') == 'boxed' {
+        margin-top: $navbar-padding-y !important;
+    }
 
     .container, .container-fluid {
         // Need to reforce those because they are removed since its a container
         // inside another container (the one in the navbar)
         padding-left: $grid-gutter-width / 2;
         padding-right: $grid-gutter-width / 2;
+    }
+}
+
+// Offcanvas mega menu on mobile or in sidebar/hamburger header
+.o_mega_menu_is_offcanvas {
+    .o_mega_nav, .o_mega_menu {
+        @include transition(opacity $offcanvas-transition-duration ease-in-out, visibility $offcanvas-transition-duration ease-in-out);
+        z-index: $o-mega-menu-zindex;
+        max-width: $offcanvas-horizontal-width !important;
+        opacity: 0;
+        pointer-events: none;
+
+        section {
+            @include transition(transform $offcanvas-transition-duration ease-in-out, visibility $offcanvas-transition-duration ease-in-out);
+            transform: translateX(5%);
+        }
+    }
+    .o_mega_menu_left .o_mega_menu section {
+        transform: translateX(-5%);
+    }
+
+    .o_mega_menu.show, .o_mega_menu.show ~ .o_mega_nav {
+        @include transition(opacity $offcanvas-transition-duration ease-in-out, visibility $offcanvas-transition-duration ease-in-out);
+        visibility: visible !important;
+        opacity: 1;
+        pointer-events: auto;
+
+        section {
+            @include transition(transform $offcanvas-transition-duration ease-in-out, visibility $offcanvas-transition-duration ease-in-out);
+            transform: translateX(0);
+        }
+    }
+
+    .o_mega_nav {
+        padding-left: $grid-gutter-width * .5;
+        height: $o-mega-menu-nav-height;
+        background-color: o-color('menu-custom') or o-color('menu');
+    }
+
+    // Div needed for selector specificity to apply mh
+    div.o_mega_menu {
+        position: fixed !important;
+        inset: 0 0 0 auto !important;
+        display: block;
+        visibility: hidden;
+        margin-top: $o-mega-menu-nav-height !important;
+        border: none;
+        height: calc(100dvh - #{$o-mega-menu-nav-height});
+        max-height: 100vh;
+        background-color: o-color('menu-custom') or o-color('menu');
+        overflow-x: hidden;
+    }
+
+    .o_mega_menu_toggle::after {
+        content: '\e83b';
+        border: none;
+        font-family: 'odoo_ui_icons';
+    }
+
+    .o_mega_menu_left .o_mega_menu {
+        inset: 0 auto 0 0 !important;
     }
 }
 
@@ -1631,20 +2007,29 @@ header {
 // The design of some of the new mega menu templates required a column with
 // an overlay that would overflow until the end of the container. For
 // technical reasons, this overlay has to be hardcoded here.
-%s_mega_menu_gray_area {
+.s_mega_menu_gray_area {
     z-index: 1;
 
     &:before {
+        @include o-position-absolute($top: 0, $left: 0);
         content: '';
         display: block;
-        width: 100vw;
+        width: 100%;
         height: 100%;
-        position: absolute;
-        left: 0;
-        top: 0;
         z-index: -1;
         pointer-events: none;
         background: rgba(0, 0, 0, .05);
+    }
+}
+
+// For the "hamburger" and "sidebar" header, we set the mega menu columns to
+// 100% width when the breakpoint is above lg, because the menu keeps its mobile
+// width when displayed on desktop.
+@if index(("sidebar", "hamburger"), o-website-value("header-template")) {
+    @include media-breakpoint-up(lg) {
+        .o_mega_menu [class*="col-"] {
+            width: 100%;
+        }
     }
 }
 
@@ -1690,6 +2075,18 @@ header {
 }
 
 // Navbar Links Styles
+@mixin active-link-border-color {
+    $header-text-color: o-website-value('header-text-color');
+    @if $header-text-color {
+        border-color: format-color($header-text-color);
+    } @else {
+        border-color: var(--#{$variable-prefix}nav-active-color);
+        &:hover {
+            border-color: var(--#{$variable-prefix}nav-link-color);
+        }
+    }
+}
+
 @if index(('block', 'border-bottom'), o-website-value('header-links-style')) {
     @include media-breakpoint-up(md) {
         .navbar,
@@ -1699,41 +2096,55 @@ header {
         }
     }
 }
-.navbar-nav {
+:where(header#top) .navbar-nav:where([role="menu"]) {
     .nav-link:not(.o_nav-link_secondary) {
-        @if o-website-value('header-links-style') == 'outline' {
-            // Need to force the padding in this case so that it stays in mobile
-            padding-right: $navbar-nav-link-padding-x;
-            padding-left: $navbar-nav-link-padding-x;
-            border: $border-width solid transparent;
-            @include border-radius($nav-pills-border-radius);
-        } @else if o-website-value('header-links-style') == 'block' {
-            // There is no way to control navbar links vertical padding in BS4
-            // independently from nav ones, just double them here instead
-            padding-top: $nav-link-padding-y * 2;
-            padding-bottom: $nav-link-padding-y * 2;
-            @include border-radius(0);
-        } @else if o-website-value('header-links-style') == 'border-bottom' {
-            // There is no way to control navbar links vertical padding in BS4
-            // independently from nav ones, just double them here instead
-            padding-top: ($nav-link-padding-y * 2);
-            padding-bottom: ($nav-link-padding-y * 2);
-            border-bottom: $nav-link-padding-y solid transparent;
-
-            // Replace horizontal paddings by margins (do this with an extra
-            // class to override .navbar-expand-* paddings priority).
-            .navbar & {
-                padding-left: 0;
-                padding-right: 0;
-                margin: 0 $navbar-nav-link-padding-x;
+        // Desktop Only
+        @include media-breakpoint-up(lg) {
+            @if o-website-value('header-links-style') == 'outline' {
+                // Need to force the padding in this case so that it stays in mobile
+                padding-right: $navbar-nav-link-padding-x;
+                padding-left: $navbar-nav-link-padding-x;
+                border: $border-width solid transparent;
+                @include border-radius($nav-pills-border-radius);
+            } @else if o-website-value('header-links-style') == 'block' {
+                // There is no way to control navbar links vertical padding in BS4
+                // independently from nav ones, just double them here instead
+                padding-top: $nav-link-padding-y * 2;
+                padding-bottom: $nav-link-padding-y * 2;
+                @include border-radius(0);
+            } @else if o-website-value('header-links-style') == 'border-bottom' {
+                // There is no way to control navbar links vertical padding in BS4
+                // independently from nav ones, just double them here instead
+                padding-top: $nav-link-padding-y * 2;
+                padding-bottom: $nav-link-padding-y * 2;
+                border-bottom: $nav-link-padding-y solid transparent;
+                // Replace horizontal paddings by margins (do this with an extra
+                // class to override .navbar-expand-* paddings priority).
+                .navbar & {
+                    padding-left: 0;
+                    padding-right: 0;
+                    margin: 0 $navbar-nav-link-padding-x;
+                }
             }
         }
     }
 
-    @if index(('outline', 'border-bottom'), o-website-value('header-links-style')) {
-        .nav-link.active,
-        .show > .nav-link {
-            border-color: currentColor;
+    .nav-link.active, .show > .nav-link {
+        // Desktop Only
+        @include media-breakpoint-up(lg) {
+            @if index(('outline', 'border-bottom'), o-website-value('header-links-style')) {
+                @include active-link-border-color;
+            }
+        }
+        // Available in Mobile
+        @if o-website-value('header-links-style') == 'underline' {
+            @include active-link-border-color;
+            span {
+                border-bottom: 0.125em solid;
+            }
+        }
+        @if o-website-value('header-links-style') == 'bold' {
+            font-weight: bold !important;
         }
     }
 }
@@ -1761,45 +2172,6 @@ header {
                 z-index: -1;
             }
         }
-    }
-}
-
-// Step wizard used in /shop, /event, appointment
-.o_wizard {
-    $o_wizard_circle_progress_size: 64px;
-
-    .o_wizard_step_active {
-        @include media-breakpoint-up(md) {
-            color: $body-color;
-        }
-    }
-
-    .o_wizard_circle_progress {
-        &, &:before {
-            width: $o_wizard_circle_progress_size;
-            height: $o_wizard_circle_progress_size;
-            line-height: $o_wizard_circle_progress_size;
-        }
-
-        &:before {
-            position: absolute;
-            border-radius: 50%;
-            box-shadow: inset 0 0 0 map-get($border-widths, 5) currentColor;
-            opacity: .2;
-            content: "";
-        }
-    }
-
-    .o_wizard_circle_progress_left .progress-bar {
-        border-radius: 0 ($o_wizard_circle_progress_size * .5) ($o_wizard_circle_progress_size * .5) 0;
-        transform-origin: center left;
-        transform: rotate(var(--leftProgress));
-    }
-
-    .o_wizard_circle_progress_right .progress-bar {
-        border-radius: ($o_wizard_circle_progress_size * .5) 0 0 ($o_wizard_circle_progress_size * .5);
-        transform-origin: center right;
-        transform: rotate(var(--rightProgress));
     }
 }
 
@@ -1979,12 +2351,6 @@ $ribbon-padding: 100px;
     height: 0px;
 }
 
-// Search results
-.o_search_result_item_detail {
-    flex: 1;
-    word-break: normal !important;
-}
-
 .o_cookies_bar_toggle {
     inset-inline-end: 1rem;
     inset-block-end: var(--cookies-bar-toggle-inset-block-end, 1rem);
@@ -1994,6 +2360,10 @@ $ribbon-padding: 100px;
 // Search results
 .o_search_result_item_detail {
     flex: 1;
+
+    button:disabled {
+        color: inherit;
+    }
 }
 
 ul.o_checklist > li.o_checked::after {
@@ -2090,9 +2460,10 @@ input[value*="data-oe-translation-source-sha"] {
     visibility: visible;
 }
 .o_wanim_overflow_xy_hidden {
-    // "overflow-x: clip" is added to the "body" and not to "html" because if
-    // it's added to "html", when a popup opens, the page scrolls to the top.
-    > body {
+    // "overflow-x: clip" is added to the "#wrapwrap" and not to "html" because
+    // if it's added to "html", when a popup opens, the page scrolls to the top.
+    // It's not added on body because mobile browser ignore overflow-x on it.
+    #wrapwrap {
         // We use clip instead of hidden to prevent scroll animations to an
         // anchor from stopping working.
         overflow-x: clip !important;
@@ -2100,9 +2471,6 @@ input[value*="data-oe-translation-source-sha"] {
         @supports not (overflow-x: clip) {
             overflow-x: hidden !important;
         }
-        // Create a new formatting context. Without this, elements inside <body>
-        // may still overflow (e.g. animated elements in Firefox).
-        display: flow-root;
     }
     &.o_rtl, .o_rtl {
         // Fix for Chrome and Edge bug: resolves slow/stuck scrolling during
@@ -2790,35 +3158,6 @@ input[value*="data-oe-translation-source-sha"] {
     transition-timing-function: ease-out;
 }
 
-//------------------------------------------------------------------------------
-// Website Text Highlight Effects
-//------------------------------------------------------------------------------
-
-.o_text_highlight {
-    --text-highlight-color: currentColor;
-
-    // Default style for irregular text highlights.
-    &.o_text_highlight_fill {
-        --text-highlight-color: var(--primary);
-        --text-highlight-width: 0px !important;
-    }
-    // Text highlight SVG container.
-    > .o_text_highlight_item {
-        position: relative;
-        display: inline-block;
-        line-height: normal;
-        white-space: pre-wrap;
-        isolation: isolate;
-
-        > * {
-            text-decoration: none;
-        }
-        svg {
-            z-index: -1;
-        }
-    }
-}
-
 // Compatibility <= 13.0
 .o_anim_dur500 {
     animation-duration: 500ms;
@@ -2895,7 +3234,14 @@ input[value*="data-oe-translation-source-sha"] {
     &:has(~ .form-control), &:has(~ .form-select) {
         padding-right: $input-group-addon-padding-x * .5;
     }
-    .form-control:disabled ~ &, .form-control[readonly] ~ &, &:has(~ .form-select:disabled), &:has(~ .form-select[readonly]) {
+    .form-control:disabled ~ &,
+    .form-control[readonly] ~ &,
+    &:has(~ .form-control:disabled),
+    &:has(~ .form-control[readonly]),
+    .form-select:disabled ~ &,
+    .form-select[readonly] ~ &,
+    &:has(~ .form-select:disabled),
+    &:has(~ .form-select[readonly]) {
         background-color: $input-disabled-bg;
         border-color: $input-disabled-border-color;
     }
@@ -2920,4 +3266,15 @@ input[value*="data-oe-translation-source-sha"] {
 .o_nav_link_btn {
     border-radius: $btn-border-radius;
     padding: $btn-padding-y $btn-padding-x;
+}
+
+// Some snippets need flex column for their columns so this will share the rule
+%flex-column-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    div.media_iframe_video {
+      width: 100%;
+    }
 }

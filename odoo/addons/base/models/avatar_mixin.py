@@ -5,6 +5,7 @@ from base64 import b64encode
 from hashlib import sha512
 from odoo import models, fields, api
 from odoo.tools import html_escape, file_open
+from odoo.tools.misc import limited_field_access_token
 
 
 def get_hsl_from_seed(seed):
@@ -65,10 +66,10 @@ class AvatarMixin(models.AbstractModel):
         initial = html_escape(self[self._avatar_name_field][0].upper())
         bgcolor = get_hsl_from_seed(self[self._avatar_name_field] + str(self.create_date.timestamp() if self.create_date else ""))
         return b64encode((
-            "<?xml version='1.0' encoding='UTF-8' ?>"
-            "<svg height='180' width='180' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"
-            f"<rect fill='{bgcolor}' height='180' width='180'/>"
-            f"<text fill='#ffffff' font-size='96' text-anchor='middle' x='90' y='125' font-family='sans-serif'>{initial}</text>"
+            '<?xml version="1.0" encoding="UTF-8" ?>'
+            '<svg height="180" width="180" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
+            f'<rect fill="{bgcolor}" height="180" width="180"/>'
+            f'<text fill="#ffffff" font-size="96" text-anchor="middle" x="90" y="125" font-family="sans-serif">{initial}</text>'
             "</svg>"
         ).encode())
 
@@ -76,4 +77,14 @@ class AvatarMixin(models.AbstractModel):
         return "base/static/img/avatar_grey.png"
 
     def _avatar_get_placeholder(self):
-        return file_open(self._avatar_get_placeholder_path(), 'rb').read()
+        with file_open(self._avatar_get_placeholder_path(), 'rb') as f:
+            return f.read()
+
+    def _get_avatar_128_access_token(self):
+        """Return a scoped access token for the `avatar_128` field. The token can be
+        used with `ir_binary._find_record` to bypass access rights.
+
+        :rtype: str
+        """
+        self.ensure_one()
+        return limited_field_access_token(self, "avatar_128", scope="binary")

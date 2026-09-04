@@ -1,36 +1,34 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_worldline
-# 
-# Translators:
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
-# 
+# * payment_worldline
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 16:54+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"payment_worldline/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_worldline
 #: model_terms:ir.ui.view,arch_db:payment_worldline.payment_provider_form
 msgid "API Key"
-msgstr "API Avain"
+msgstr "API-avain"
 
 #. module: payment_worldline
 #: model_terms:ir.ui.view,arch_db:payment_worldline.payment_provider_form
 msgid "API Secret"
-msgstr "API-salaisuus"
+msgstr "API-salaus"
 
 #. module: payment_worldline
 #: model:ir.model.fields,field_description:payment_worldline.field_payment_provider__code
@@ -38,16 +36,16 @@ msgid "Code"
 msgstr "Koodi"
 
 #. module: payment_worldline
-#. odoo-python
-#: code:addons/payment_worldline/models/payment_provider.py:0
-msgid "Could not establish the connection to the API."
-msgstr "Yhteyttä API:han ei saatu muodostettua."
+#: model:ir.model.fields,field_description:payment_worldline.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_worldline.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "Näyttönimi"
 
 #. module: payment_worldline
-#. odoo-python
-#: code:addons/payment_worldline/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "Viitettä %s vastaavaa tapahtumaa ei löytynyt."
+#: model:ir.model.fields,field_description:payment_worldline.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_worldline.field_payment_transaction__id
+msgid "ID"
+msgstr "Tunnus"
 
 #. module: payment_worldline
 #: model_terms:ir.ui.view,arch_db:payment_worldline.payment_provider_form
@@ -73,22 +71,12 @@ msgstr "Vastaanotetut tiedot, joista puuttuu maksutila."
 #. module: payment_worldline
 #. odoo-python
 #: code:addons/payment_worldline/models/payment_transaction.py:0
-msgid "Received data with missing reference %(ref)s."
-msgstr "Vastaanotetut tiedot, joista puuttuu viite %(ref)s."
-
-#. module: payment_worldline
-#. odoo-python
-#: code:addons/payment_worldline/models/payment_transaction.py:0
 msgid ""
-"Received invalid transaction status %(status)s with error code "
-"%(error_code)s."
+"Received invalid transaction status %(status)s with error code %"
+"(error_code)s."
 msgstr ""
-
-#. module: payment_worldline
-#. odoo-python
-#: code:addons/payment_worldline/models/payment_provider.py:0
-msgid "The communication with the API failed. Details: %s"
-msgstr "Yhteys API:n kanssa epäonnistui. Yksityiskohdat: %s"
+"Vastaanotettu virheellinen maksutapahtuman tila %(status)s, jonka virhekoodi "
+"%(error_code)s."
 
 #. module: payment_worldline
 #: model:ir.model.fields,help:payment_worldline.field_payment_provider__code
@@ -98,20 +86,14 @@ msgstr "Tämän maksupalveluntarjoajan tekninen koodi."
 #. module: payment_worldline
 #. odoo-python
 #: code:addons/payment_worldline/models/payment_transaction.py:0
-msgid "The transaction is not linked to a token."
-msgstr "Transaktio ei ole sidottu valtuutuskoodiin."
-
-#. module: payment_worldline
-#. odoo-python
-#: code:addons/payment_worldline/models/payment_transaction.py:0
 msgid "Transaction cancelled with error code %(error_code)s."
-msgstr ""
+msgstr "Maksutapahtuma peruutettiin virhekoodin %(error_code)s vuoksi."
 
 #. module: payment_worldline
 #. odoo-python
 #: code:addons/payment_worldline/models/payment_transaction.py:0
 msgid "Transaction declined with error code %(error_code)s."
-msgstr ""
+msgstr "Tapahtuma hylätty virhekoodilla %(error_code)s."
 
 #. module: payment_worldline
 #: model_terms:ir.ui.view,arch_db:payment_worldline.payment_provider_form
@@ -136,7 +118,7 @@ msgstr "Worldline API-avain"
 #. module: payment_worldline
 #: model:ir.model.fields,field_description:payment_worldline.field_payment_provider__worldline_api_secret
 msgid "Worldline API Secret"
-msgstr "Worldline API Salaisuus"
+msgstr "Worldline API-salaus"
 
 #. module: payment_worldline
 #: model:ir.model.fields,field_description:payment_worldline.field_payment_provider__worldline_pspid
@@ -152,3 +134,18 @@ msgstr "Worldline Webhook-avain"
 #: model:ir.model.fields,field_description:payment_worldline.field_payment_provider__worldline_webhook_secret
 msgid "Worldline Webhook Secret"
 msgstr "Worldline Webhook Secret"
+
+#~ msgid "Could not establish the connection to the API."
+#~ msgstr "Yhteyttä API:in ei voitu muodostaa."
+
+#~ msgid "No transaction found matching reference %s."
+#~ msgstr "Viitettä %s vastaavaa tapahtumaa ei löytynyt."
+
+#~ msgid "Received data with missing reference %(ref)s."
+#~ msgstr "Vastaanotetut tiedot, joista puuttuu viite %(ref)s."
+
+#~ msgid "The communication with the API failed. Details: %s"
+#~ msgstr "Yhteyden muodostaminen API:in epäonnistui. Virhetiedot: %s"
+
+#~ msgid "The transaction is not linked to a token."
+#~ msgstr "Transaktio ei ole sidottu valtuutuskoodiin."

@@ -3,11 +3,30 @@
 from odoo import models
 from odoo.http import request
 from odoo.tools import format_datetime, groupby
-from odoo.addons.portal.utils import get_portal_partner
 
 
 class MailMessage(models.Model):
     _inherit = 'mail.message'
+
+    def _compute_is_current_user_or_guest_author(self):
+        super()._compute_is_current_user_or_guest_author()
+        portal_data = self.env.context.get("portal_data", {})
+        portal_partner = portal_data.get("portal_partner")
+        portal_thread = portal_data.get("portal_thread")
+        if (
+            not portal_partner
+            or not portal_thread
+            or not isinstance(portal_partner, self.pool["res.partner"])
+            or not isinstance(portal_thread, self.pool["mail.thread"])
+        ):
+            return
+        for message in self:
+            if (
+                message.author_id == portal_partner
+                and message.model == portal_thread._name
+                and message.res_id == portal_thread.id
+            ):
+                message.is_current_user_or_guest_author = True
 
     def portal_message_format(self, options=None):
         """ Simpler and portal-oriented version of 'message_format'. Purpose
@@ -20,8 +39,9 @@ class MailMessage(models.Model):
         :param dict options: options, used notably for inheritance and adding
           specific fields or properties to compute;
 
-        :return list: list of dict, one per message in self. Each dict contains
+        :returns: list of dict, one per message in self. Each dict contains
           values for either fields, either properties derived from fields.
+        :rtype: list[dict]
         """
         self.check_access('read')
         return self._portal_message_format(
@@ -35,7 +55,8 @@ class MailMessage(models.Model):
         :param dict options: options, used notably for inheritance and adding
           specific fields or properties to compute;
 
-        :return set: fields or properties derived from fields
+        :returns: fields or properties derived from fields
+        :rtype: set
         """
         return {
             'attachment_ids',
@@ -66,23 +87,23 @@ class MailMessage(models.Model):
         :param set properties_names: fields or properties derived from fields
           for which we are going to compute values;
 
-        :return list: list of dict, one per message in self. Each dict contains
+        :returns: list of dict, one per message in self. Each dict contains
           values for either fields, either properties derived from fields.
+        :rtype: list[dict]
         """
         message_to_attachments = {}
         if 'attachment_ids' in properties_names:
             properties_names.remove('attachment_ids')
             attachments_sudo = self.sudo().attachment_ids
-            attachments_sudo.generate_access_token()
             related_attachments = {
                 att_read_values['id']: att_read_values
                 for att_read_values in attachments_sudo.read(
-                    ["access_token", "checksum", "id", "mimetype", "name", "res_id", "res_model"]
+                    ["checksum", "has_thumbnail", "id", "mimetype", "name", "res_id", "res_model"],
                 )
             }
             message_to_attachments = {
                 message.id: [
-                    self._portal_message_format_attachments(related_attachments[att_id])
+                    message._portal_message_format_attachments(related_attachments[att_id])
                     for att_id in message.attachment_ids.ids
                 ]
                 for message in self.sudo()
@@ -96,6 +117,7 @@ class MailMessage(models.Model):
 
         note_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
         for message, values in zip(self, vals_list):
+            values["body"] = ["markup", values["body"]]
             if message_to_attachments:
                 values['attachment_ids'] = message_to_attachments.get(message.id, {})
             if 'author_avatar_url' in properties_names:
@@ -116,29 +138,40 @@ class MailMessage(models.Model):
                     {
                         "content": content,
                         "count": len(reactions),
-                        "personas": [
-                                        {"id": guest.id, "name": guest.name, "type": "guest"}
-                                        for guest in reactions.guest_id
-                                    ]
-                                    + [
-                                        # sudo: res.partner - reading partners of reaction on accessible message is allowed
-                                        {"id": partner.id, "name": partner.name, "type": "partner"}
-                                        for partner in reactions.partner_id.sudo()
-                                    ],
+                        "guests": [
+                            {"id": guest.id, "name": guest.name}
+                            for guest in reactions.guest_id
+                        ],
                         "message": message.id,
-                    }
+                        "partners": [
+                            # sudo: res.partner - reading partners of reaction on accessible message is allowed
+                            {"id": partner.id, "name": partner.name}
+                            for partner in reactions.partner_id.sudo()
+                        ],
+                    },
                 )
             values.update(
                 {
                     "reactions": reaction_groups,
-                    "author": {
+                    "author_id": {
                         "id": message.author_id.id,
                         "name": message.author_id.name,
-                        "type": "partner",
-                    },
-                    "thread": {"model": values["model"], "id": values["res_id"]},
-                }
+                    } if message.author_id else False,
+                    "thread": {
+                       "has_mail_thread": isinstance(self.env[values["model"]], self.pool["mail.thread"]),
+                       "id": values["res_id"],
+                       "model": values["model"],
+                   },
+                },
             )
+        linked_messages = self.linked_message_ids - self
+        linked_messages_vals_list = linked_messages._read_format({"id", "model", "res_id"})
+        record_by_linked_message = linked_messages._record_by_message()
+        for message, values in zip(linked_messages, linked_messages_vals_list):
+            record = record_by_linked_message.get(message)
+            # sudo: mail.thread - reading display_name of accessed thread is acceptable
+            values["thread"] = {"display_name": record.sudo().display_name if record else False}
+        vals_list.extend(linked_messages_vals_list)
         return vals_list
 
     def _portal_message_format_attachments(self, attachment_values):
@@ -148,7 +181,8 @@ class MailMessage(models.Model):
         :param dict attachment_values: values coming from reading attachments
           in database;
 
-        :return dict: updated attachment_values
+        :returns: updated attachment_values
+        :rtype: dict
         """
         safari = request and request.httprequest.user_agent and request.httprequest.user_agent.browser == 'safari'
         attachment_values['filename'] = attachment_values['name']
@@ -156,15 +190,9 @@ class MailMessage(models.Model):
             'application/octet-stream' if safari and
             'video' in (attachment_values["mimetype"] or "")
             else attachment_values["mimetype"])
+        attachment = self.env['ir.attachment'].browse(attachment_values['id'])
+        attachment_values["raw_access_token"] = attachment._get_raw_access_token()
+        attachment_values["thumbnail_access_token"] = attachment._get_thumbnail_token()
+        if self.is_current_user_or_guest_author:
+            attachment_values["ownership_token"] = attachment._get_ownership_token()
         return attachment_values
-
-    def _is_editable_in_portal(self, **kwargs):
-        self.ensure_one()
-        if self.model and self.res_id and self.env.user._is_public():
-            thread = request.env[self.model].browse(self.res_id)
-            partner = get_portal_partner(
-                thread, kwargs.get("hash"), kwargs.get("pid"), kwargs.get("token")
-            )
-            if partner and self.author_id == partner:
-                return True
-        return False

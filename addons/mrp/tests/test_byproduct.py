@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import Command
+from odoo.fields import Command
 from odoo.tests import Form
 from odoo.tests import common
 from odoo.exceptions import ValidationError
@@ -183,9 +183,9 @@ class TestMrpByProduct(common.TransactionCase):
             are included in the `move_finished_ids`. `move_byproduct_ids` is a subset of `move_finished_ids`.
 
             So, when creating a manufacturing order, whether:
-            - Only `move_finished_ids` is passed, containing both the finished product and the by-products of the BOM,
-            - Only `move_byproduct_ids` is passed, only containing the by-products of the BOM,
-            - Both `move_finished_ids` and `move_byproduct_ids` are passed,
+            - Only `move_finished_ids`(A + B) is passed, containing both the finished product and the by-products of the BOM,
+            - Both `move_finished_ids`(A + B) and `move_byproduct_ids`(B) are passed,
+            - Both `move_finished_ids`(A) and `move_byproduct_ids`(B) are passed,
               holding the product finished and the byproducts respectively
             At the end, in the created manufacturing order
             `move_finished_ids` must contain both the finished product, and the by-products,
@@ -229,8 +229,22 @@ class TestMrpByProduct(common.TransactionCase):
                     }),
                 ],
             }),
-            # Only `move_byproduct_ids` passed, containing the by-product move only
+            # Both `move_finished_ids`(A + B) and `move_byproduct_ids`(B) passed,
             (2.0, 4.0, {
+                'move_finished_ids': [
+                    (0, 0, {
+                        'product_id': self.product_a.id,
+                        'product_uom_qty': 2.0,
+                        'location_id': self.product_a.property_stock_production,
+                        'location_dest_id': self.warehouse.lot_stock_id.id,
+                    }),
+                    (0, 0, {
+                        'product_id': self.product_b.id,
+                        'product_uom_qty': 4.0,
+                        'location_id': self.product_a.property_stock_production,
+                        'location_dest_id': self.warehouse.lot_stock_id.id,
+                    }),
+                ],
                 'move_byproduct_ids': [
                     (0, 0, {
                         'product_id': self.product_b.id,
@@ -240,7 +254,7 @@ class TestMrpByProduct(common.TransactionCase):
                     }),
                 ],
             }),
-            # Both `move_finished_ids` and `move_byproduct_ids` passed,
+            # Both `move_finished_ids`(A) and `move_byproduct_ids`(B) passed,
             # containing respectively the finished product and the by-product
             (3.0, 4.0, {
                 'move_finished_ids': [
@@ -345,6 +359,20 @@ class TestMrpByProduct(common.TransactionCase):
         self.assertEqual(byproduct_move_line.location_dest_id, shelf2_location)
         self.assertEqual(finished_move_line.location_dest_id, shelf2_location)
 
+    def test_mrp_byproduct_unreserve(self):
+        """ Verify that unreserving the components on a mo,
+        do not affect the byproducts quantity.
+        """
+        mo = self.env['mrp.production'].create({
+            'product_id': self.product_a.id,
+            'product_qty': 2,
+            'bom_id': self.bom_byproduct.id
+        })
+        mo.action_confirm()
+        mo.qty_producing = 2
+        mo.do_unreserve()
+        self.assertEqual(mo.move_byproduct_ids.quantity, 2)
+
     def test_check_byproducts_cost_share(self):
         """
         Test that byproducts with total cost_share > 100% or a cost_share < 0%
@@ -366,7 +394,6 @@ class TestMrpByProduct(common.TransactionCase):
 
         # Create byproduct
         byproduct_1 = self.env['stock.move'].create({
-            'name': 'By Product 1',
             'product_id': self.product_d.id,
             'product_uom': self.ref('uom.product_uom_unit'),
             'production_id': mo.id,
@@ -374,7 +401,6 @@ class TestMrpByProduct(common.TransactionCase):
             'location_dest_id': self.ref('stock.stock_location_output'),
             })
         byproduct_2 = self.env['stock.move'].create({
-            'name': 'By Product 2',
             'product_id': self.product_e.id,
             'product_uom': self.ref('uom.product_uom_unit'),
             'production_id': mo.id,
@@ -383,17 +409,17 @@ class TestMrpByProduct(common.TransactionCase):
             })
 
         # Update byproduct has cost share > 100%
-        with self.assertRaises(ValidationError), self.cr.savepoint():
+        with self.assertRaises(ValidationError):
             byproduct_1.cost_share = 120
             mo.write({'move_byproduct_ids': [(4, byproduct_1.id)]})
 
         # Update byproduct has cost share < 0%
-        with self.assertRaises(ValidationError), self.cr.savepoint():
+        with self.assertRaises(ValidationError):
             byproduct_1.cost_share = -10
             mo.write({'move_byproduct_ids': [(4, byproduct_1.id)]})
 
         # Update byproducts have total cost share > 100%
-        with self.assertRaises(ValidationError), self.cr.savepoint():
+        with self.assertRaises(ValidationError):
             byproduct_1.cost_share = 60
             byproduct_2.cost_share = 70
             mo.write({'move_byproduct_ids': [(6, 0, [byproduct_1.id, byproduct_2.id])]})
@@ -501,7 +527,7 @@ class TestMrpByProduct(common.TransactionCase):
         self.assertEqual(byproduct_move.product_qty, 1.0)
 
     def test_byproducts_bom_document(self):
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_byproducts')
+        self.env.user.group_ids += self.env.ref('mrp.group_mrp_byproducts')
         doc_product_bom = self.env['product.document'].create({
             'name': 'doc_product_bom',
             'attached_on_mrp': 'bom',
@@ -542,3 +568,59 @@ class TestMrpByProduct(common.TransactionCase):
 
         # the two docs linked to the byproduct should be in the chatter
         self.assertEqual(bom._get_extra_attachments(), attachments)
+
+    def test_3_steps_byproduct(self):
+        """ Test that non-bom byproducts are correctly pushed from
+        post-production to the stock location in 3-steps manufacture. """
+        self.warehouse.manufacture_steps = 'pbm_sam'
+        self.env.user.group_ids += self.env.ref('mrp.group_mrp_byproducts')
+        component, final_product, byproduct = self.env['product.product'].create([{
+            'name': name,
+            'is_storable': True,
+        } for name in ['Old Blood', 'Insight', 'Eyes on the Inside']])
+        self.env['stock.quant']._update_available_quantity(component, self.warehouse.lot_stock_id, 1)
+        mo = self.env["mrp.production"].create({
+            'product_id': final_product.id,
+            'product_qty': 1.0,
+        })
+        mo_form = Form(mo)
+        with mo_form.move_raw_ids.new() as line:
+            line.product_id = component
+            line.product_uom_qty = 1
+        with mo_form.move_byproduct_ids.new() as line:
+            line.product_id = byproduct
+            line.product_uom_qty = 1
+        mo = mo_form.save()
+        mo.action_confirm()
+        preprod_picking = mo.picking_ids.filtered(lambda p: p.state == 'assigned')
+        preprod_picking.button_validate()
+        mo.button_mark_done()
+        postprod_picking = mo.picking_ids.filtered(lambda p: p.state == 'assigned')
+
+        self.assertEqual(len(postprod_picking.move_ids), 2)
+        self.assertEqual(postprod_picking.move_ids.product_id, final_product + byproduct)
+        self.assertEqual(postprod_picking.location_dest_id, self.warehouse.lot_stock_id)
+
+    def test_over_produce_by_products_with_cost_share(self):
+        """
+        Tests that overproducing by-products with a set cost share
+        behaves as expected (as it should rely on the merge move) for
+        the extra move.
+        """
+        # Create new MO
+        self.env.user.group_ids = [Command.link(self.ref('mrp.group_mrp_byproducts'))]
+        self.bom_byproduct.byproduct_ids.cost_share = 3.3
+        mo = self.env['mrp.production'].create({
+            'product_id': self.product_a.id,
+            'product_qty': 1.0,
+        })
+        mo.action_confirm()
+
+        with Form(mo) as mo_form:
+            mo_form.qty_producing = 1.0
+            with mo_form.move_byproduct_ids.edit(0) as by_product_move:
+                by_product_move.quantity = 10.0
+        mo.button_mark_done()
+        self.assertRecordValues(mo.move_byproduct_ids, [
+            {'quantity': 10.0, 'state': 'done'},
+        ])

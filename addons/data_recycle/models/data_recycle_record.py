@@ -6,15 +6,15 @@ from collections import defaultdict
 from odoo import models, api, fields, _
 
 
-class DataRecycleRecord(models.Model):
+class Data_RecycleRecord(models.Model):
     _name = 'data_recycle.record'
     _description = 'Recycling Record'
 
     active = fields.Boolean('Active', default=True)
     name = fields.Char('Record Name', compute='_compute_name', compute_sudo=True)
-    recycle_model_id = fields.Many2one('data_recycle.model', string='Recycle Model', ondelete='cascade')
+    recycle_model_id = fields.Many2one('data_recycle.model', string='Recycle Model', index='btree_not_null', ondelete='cascade')
 
-    res_id = fields.Integer('Record ID', index=True)
+    res_id = fields.Integer('Record ID', aggregator=None, index=True)
     res_model_id = fields.Many2one(related='recycle_model_id.res_model_id', store=True, readonly=True)
     res_model_name = fields.Char(related='recycle_model_id.res_model_name', store=True, readonly=True)
 
@@ -78,7 +78,7 @@ class DataRecycleRecord(models.Model):
             elif record.recycle_model_id.recycle_action == "unlink":
                 record_ids_to_unlink[original_record._name].append(original_record.id)
         for model_name, ids in record_ids_to_archive.items():
-            self.env[model_name].sudo().browse(ids).toggle_active()
+            self.env[model_name].sudo().browse(ids).action_archive()
         for model_name, ids in record_ids_to_unlink.items():
             self.env[model_name].sudo().browse(ids).unlink()
         records_done.unlink()

@@ -1,12 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+
 from unittest.mock import patch
 
 from lxml import objectify
 
-from odoo.fields import Command
-from odoo.osv.expression import AND
+from odoo.fields import Command, Domain
 from odoo.tools.misc import hmac as hmac_tool
 
 from odoo.addons.base.tests.common import BaseCommon
@@ -20,21 +20,17 @@ class PaymentCommon(BaseCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.currency_euro = cls._prepare_currency('EUR')
-        cls.currency_usd = cls._prepare_currency('USD')
+        cls.currency_euro = cls._enable_currency('EUR')
+        cls.currency_usd = cls._enable_currency('USD')
 
-        cls.country_belgium = cls.env.ref('base.be')
-        cls.country_france = cls.env.ref('base.fr')
-        cls.europe = cls.env.ref('base.europe')
+        cls.country_belgium = cls.quick_ref('base.be')
+        cls.country_france = cls.quick_ref('base.fr')
+        cls.europe = cls.quick_ref('base.europe')
 
-        cls.group_user = cls.env.ref('base.group_user')
-        cls.group_portal = cls.env.ref('base.group_portal')
-        cls.group_public = cls.env.ref('base.group_public')
-
-        cls.admin_user = cls.env.ref('base.user_admin')
+        cls.admin_user = cls.quick_ref('base.user_admin')
         cls.internal_user = cls._create_new_internal_user()
         cls.portal_user = cls._create_new_portal_user()
-        cls.public_user = cls.env.ref('base.public_user')
+        cls.public_user = cls.quick_ref('base.public_user')
 
         cls.admin_partner = cls.admin_user.partner_id
         cls.internal_partner = cls.internal_user.partner_id
@@ -64,12 +60,13 @@ class PaymentCommon(BaseCommon):
             'arch': arch,
         })
 
+        cls.pm_unknown = cls.quick_ref('payment.payment_method_unknown')
         cls.dummy_provider = cls.env['payment.provider'].create({
             'name': "Dummy Provider",
             'code': 'none',
             'state': 'test',
             'is_published': True,
-            'payment_method_ids': [Command.set([cls.env.ref('payment.payment_method_unknown').id])],
+            'payment_method_ids': [Command.set([cls.pm_unknown.id])],
             'allow_tokenization': True,
             'redirect_form_view_id': redirect_form.id,
             'available_currency_ids': [Command.set(
@@ -77,7 +74,7 @@ class PaymentCommon(BaseCommon):
             )],
         })
         # Activate pm
-        cls.env.ref('payment.payment_method_unknown').write({
+        cls.pm_unknown.write({
             'active': True,
             'support_tokenization': True,
         })
@@ -111,56 +108,42 @@ class PaymentCommon(BaseCommon):
     #=== Utils ===#
 
     @classmethod
-    def _prepare_currency(cls, currency_code):
-        currency = cls.env['res.currency'].with_context(active_test=False).search(
-            [('name', '=', currency_code.upper())]
-        )
-        currency.action_unarchive()
-        return currency
-
-    @classmethod
-    def _prepare_provider(cls, code='none', company=None, update_values=None):
-        """ Prepare and return the first provider matching the given provider and company.
-
-        If no provider is found in the given company, we duplicate the one from the base company.
+    def _prepare_provider(cls, code, company=None, update_values=None, **kwargs):
+        """ Prepare and return the first active provider matching the given code and company.
 
         All other providers belonging to the same company are disabled to avoid any interferences.
 
         :param str code: The code of the provider to prepare
         :param recordset company: The company of the provider to prepare, as a `res.company` record
         :param dict update_values: The values used to update the provider
+        :param dict kwargs: The keyword arguments passed as-is to the called function.
         :return: The provider to prepare, if found
         :rtype: recordset of `payment.provider`
         """
+        assert code != 'none', "Code 'none' should not be passed to _prepare_provider"
+
         company = company or cls.env.company
         update_values = update_values or {}
-        provider_domain = cls._get_provider_domain(code)
+        provider_domain = cls._get_provider_domain(code, **kwargs)
 
         provider = cls.env['payment.provider'].sudo().search(
-            AND([provider_domain, [('company_id', '=', company.id)]]), limit=1
+            Domain.AND([provider_domain, [('company_id', '=', company.id)]]), limit=1
         )
         if not provider:
-            if code != 'none':
-                base_provider = cls.env['payment.provider'].sudo().search(provider_domain, limit=1)
-            else:
-                base_provider = cls.provider
-            if not base_provider:
-                _logger.error("no payment.provider found for code %s", code)
-                return cls.env['payment.provider']
-            else:
-                provider = base_provider.copy({'company_id': company.id})
+            _logger.error("No payment.provider found for code %s in company %s", code, company.name)
+            return cls.env['payment.provider']
 
         update_values['state'] = 'test'
         provider.write(update_values)
         return provider
 
     @classmethod
-    def _get_provider_domain(cls, code):
+    def _get_provider_domain(cls, code, **kwargs):
         return [('code', '=', code)]
 
     @classmethod
     def _prepare_user(cls, user, group_xmlid):
-        user.groups_id = [Command.link(cls.env.ref(group_xmlid).id)]
+        user.group_ids = [Command.link(cls.env.ref(group_xmlid).id)]
         # Flush and invalidate the cache to allow checking access rights.
         user.flush_recordset()
         user.invalidate_recordset()

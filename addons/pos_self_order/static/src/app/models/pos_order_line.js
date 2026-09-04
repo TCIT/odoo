@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { PosOrderline } from "@point_of_sale/app/models/pos_order_line";
 import { patch } from "@web/core/utils/patch";
 
@@ -39,5 +37,15 @@ patch(PosOrderline.prototype, {
     },
     isLotTracked() {
         return false;
+    },
+    getDisplayPriceWithQty(qty) {
+        const prices = this.order_id._constructPriceData({ baseLineOpts: { quantity: qty } })
+            .baseLineByLineUuids[this.uuid].tax_details;
+
+        if (this.config.iface_tax_included === "total") {
+            return prices.total_included;
+        } else {
+            return prices.total_excluded;
+        }
     },
 });

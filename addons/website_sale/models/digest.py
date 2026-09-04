@@ -4,7 +4,7 @@ from odoo import _, fields, models
 from odoo.exceptions import AccessError
 
 
-class Digest(models.Model):
+class DigestDigest(models.Model):
     _inherit = 'digest.digest'
 
     kpi_website_sale_total = fields.Boolean(string="eCommerce Sales")

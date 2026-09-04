@@ -1,9 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import ast
 import json
 
 from odoo import api, fields, models
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools import SQL
 from odoo.exceptions import ValidationError, UserError
 from odoo.tools.translate import _
@@ -92,45 +93,23 @@ class ProjectProject(models.Model):
     def _search_pricing_type(self, operator, value):
         """ Search method for pricing_type field.
 
-            This method returns a domain based on the operator and the value given in parameter:
-            - operator = '=':
-                - value = 'task_rate': [('sale_line_employee_ids', '=', False), ('sale_line_id', '=', False), ('allow_billable', '=', True)]
-                - value = 'fixed_rate': [('sale_line_employee_ids', '=', False), ('sale_line_id', '!=', False), ('allow_billable', '=', True)]
-                - value = 'employee_rate': [('sale_line_employee_ids', '!=', False), ('allow_billable', '=', True)]
-                - value is False: [('allow_billable', '=', False)]
-            - operator = '!=':
-                - value = 'task_rate': ['|', '|', ('sale_line_employee_ids', '!=', False), ('sale_line_id', '!=', False), ('allow_billable', '=', False)]
-                - value = 'fixed_rate': ['|', '|', ('sale_line_employee_ids', '!=', False), ('sale_line_id', '=', False), ('allow_billable', '=', False)]
-                - value = 'employee_rate': ['|', ('sale_line_employee_ids', '=', False), ('allow_billable', '=', False)]
-                - value is False: [('allow_billable', '!=', False)]
-
             :param operator: the supported operator is either '=' or '!='.
             :param value: the value than the field should be is among these values into the following tuple: (False, 'task_rate', 'fixed_rate', 'employee_rate').
 
             :returns: the domain to find the expected projects.
         """
-        if operator not in ('=', '!='):
-            raise UserError(_('Operation not supported'))
-        if not ((isinstance(value, bool) and value is False) or (isinstance(value, str) and value in ('task_rate', 'fixed_rate', 'employee_rate'))):
-            raise UserError(_('Value does not exist in the pricing type'))
-        if value is False:
-            return [('allow_billable', operator, value)]
-
-        sol_cond = ('sale_line_id', '!=', False)
-        mapping_cond = ('sale_line_employee_ids', '!=', False)
-        if value == 'task_rate':
-            domain = [expression.NOT_OPERATOR, sol_cond, expression.NOT_OPERATOR, mapping_cond]
-        elif value == 'fixed_rate':
-            domain = [sol_cond, expression.NOT_OPERATOR, mapping_cond]
-        else:  # value == 'employee_rate'
-            domain = [mapping_cond]
-
-        domain = expression.AND([domain, [('allow_billable', '=', True)]])
-        domain = expression.normalize_domain(domain)
-        if operator != '=':
-            domain.insert(0, expression.NOT_OPERATOR)
-        domain = expression.distribute_not(domain)
-        return domain
+        if operator != 'in':
+            return NotImplemented
+        domains = []
+        if 'task_rate' in value:
+            domains.append([('sale_line_employee_ids', '=', False), ('sale_line_id', '=', False), ('allow_billable', '=', True)])
+        if 'fixed_rate' in value:
+            domains.append([('sale_line_employee_ids', '=', False), ('sale_line_id', '!=', False), ('allow_billable', '=', True)])
+        if 'employee_rate' in value:
+            domains.append([('sale_line_employee_ids', '!=', False), ('allow_billable', '=', True)])
+        if False in value:
+            domains.append([('allow_billable', '=', False)])
+        return Domain.OR(domains)
 
     @api.depends('allow_timesheets', 'allow_billable')
     def _compute_timesheet_product_id(self):
@@ -141,22 +120,8 @@ class ProjectProject(models.Model):
             elif not project.timesheet_product_id:
                 project.timesheet_product_id = default_product
 
-    @api.depends('pricing_type', 'allow_timesheets', 'allow_billable', 'sale_line_employee_ids', 'sale_line_employee_ids.employee_id')
     def _compute_warning_employee_rate(self):
-        projects = self.filtered(lambda p: p.allow_billable and p.allow_timesheets and p.pricing_type == 'employee_rate')
-        employees = self.env['account.analytic.line']._read_group(
-            [('task_id', 'in', projects.task_ids.ids), ('employee_id', '!=', False)],
-            ['project_id'],
-            ['employee_id:array_agg'],
-        )
-        dict_project_employee = {project.id: employee_ids for project, employee_ids in employees}
-        for project in projects:
-            project.warning_employee_rate = any(
-                x not in project.sale_line_employee_ids.employee_id.ids
-                for x in dict_project_employee.get(project.id, ())
-            )
-
-        (self - projects).warning_employee_rate = False
+        self.warning_employee_rate = False
 
     @api.depends('sale_line_employee_ids.sale_line_id', 'sale_line_id')
     def _compute_partner_id(self):
@@ -175,7 +140,7 @@ class ProjectProject(models.Model):
         for project in self.filtered(lambda p: not p.sale_line_id and p.partner_id and p.pricing_type == 'employee_rate'):
             # Give a SOL by default either the last SOL with service product and remaining_hours > 0
             SaleOrderLine = self.env['sale.order.line']
-            sol = SaleOrderLine.search(expression.AND([
+            sol = SaleOrderLine.search(Domain.AND([
                 SaleOrderLine._domain_sale_line_service(),
                 [('order_partner_id', 'child_of', project.partner_id.commercial_partner_id.id), ('remaining_hours', '>', 0)],
             ]), limit=1)
@@ -201,9 +166,9 @@ class ProjectProject(models.Model):
             if project.sale_line_id.is_expense:
                 raise ValidationError(_("You cannot link a billable project to a sales order item that comes from an expense or a vendor bill."))
 
-    def write(self, values):
-        res = super().write(values)
-        if 'allow_billable' in values and not values.get('allow_billable'):
+    def write(self, vals):
+        res = super().write(vals)
+        if 'allow_billable' in vals and not vals.get('allow_billable'):
             self.task_ids._get_timesheet().write({
                 'so_line': False,
             })
@@ -260,7 +225,7 @@ class ProjectProject(models.Model):
         if section_name in ['billable_fixed', 'billable_time', 'billable_milestones', 'billable_manual', 'non_billable']:
             action = self.action_billable_time_button()
             if domain:
-                action['domain'] = expression.AND([[('project_id', '=', self.id)], domain])
+                action['domain'] = Domain.AND([[('project_id', '=', self.id)], domain])
             action['context'].update(search_default_groupby_timesheet_invoice_type=False, **self.env.context)
             graph_view = False
             if section_name == 'billable_time':
@@ -280,6 +245,16 @@ class ProjectProject(models.Model):
                 action['res_id'] = res_id
             return action
         return super().action_profitability_items(section_name, domain, res_id)
+
+    def action_project_timesheets(self):
+        action = super().action_project_timesheets()
+        if not self.allow_billable:
+            context = action['context'].replace('active_id', str(self.id))
+            action['context'] = {
+                **ast.literal_eval(context),
+                'hide_so_line': True,
+            }
+        return action
 
     # ----------------------------
     #  Project Updates
@@ -305,7 +280,7 @@ class ProjectProject(models.Model):
         if domain_per_model is None:
             domain_per_model = {'project.task': [('allow_billable', '=', True)]}
         else:
-            domain_per_model['project.task'] = expression.AND([
+            domain_per_model['project.task'] = Domain.AND([
                 domain_per_model.get('project.task', []),
                 [('allow_billable', '=', True)],
             ])
@@ -314,12 +289,11 @@ class ProjectProject(models.Model):
         Timesheet = self.env['account.analytic.line']
         timesheet_domain = [('project_id', 'in', self.ids), ('so_line', '!=', False), ('project_id.allow_billable', '=', True)]
         if Timesheet._name in domain_per_model:
-            timesheet_domain = expression.AND([
+            timesheet_domain = Domain.AND([
                 domain_per_model.get(Timesheet._name, []),
                 timesheet_domain,
             ])
-        timesheet_query = Timesheet._where_calc(timesheet_domain)
-        Timesheet._apply_ir_rules(timesheet_query, 'read')
+        timesheet_query = Timesheet._search(timesheet_domain)
         timesheet_sql = timesheet_query.select(
             f'{Timesheet._table}.project_id AS id',
             f'{Timesheet._table}.so_line AS sale_line_id',
@@ -328,12 +302,11 @@ class ProjectProject(models.Model):
         EmployeeMapping = self.env['project.sale.line.employee.map']
         employee_mapping_domain = [('project_id', 'in', self.ids), ('project_id.allow_billable', '=', True), ('sale_line_id', '!=', False)]
         if EmployeeMapping._name in domain_per_model:
-            employee_mapping_domain = expression.AND([
+            employee_mapping_domain = Domain.AND([
                 domain_per_model[EmployeeMapping._name],
                 employee_mapping_domain,
             ])
-        employee_mapping_query = EmployeeMapping._where_calc(employee_mapping_domain)
-        EmployeeMapping._apply_ir_rules(employee_mapping_query, 'read')
+        employee_mapping_query = EmployeeMapping._search(employee_mapping_domain)
         employee_mapping_sql = employee_mapping_query.select(
             f'{EmployeeMapping._table}.project_id AS id',
             f'{EmployeeMapping._table}.sale_line_id',
@@ -400,7 +373,7 @@ class ProjectProject(models.Model):
 
     def _get_profitability_aal_domain(self):
         domain = ['|', ('project_id', 'in', self.ids), ('so_line', 'in', self._fetch_sale_order_item_ids())]
-        return expression.AND([
+        return Domain.AND([
             super()._get_profitability_aal_domain(),
             domain,
         ])
@@ -431,7 +404,7 @@ class ProjectProject(models.Model):
         total_revenues = {'invoiced': 0.0, 'to_invoice': 0.0}
         total_costs = {'billed': 0.0, 'to_bill': 0.0}
         convert_company = self.company_id or self.env.company
-        for timesheet_invoice_type, dummy, currency, category, amount, ids in aa_line_read_group:
+        for timesheet_invoice_type, _dummy, currency, category, amount, ids in aa_line_read_group:
             if category == 'vendor_bill':
                 continue  # This is done to prevent expense duplication with product re-invoice policies
             amount = currency._convert(amount, self.currency_id, convert_company)
@@ -511,7 +484,7 @@ class ProjectProject(models.Model):
 
     def _get_domain_aal_with_no_move_line(self):
         # we add the tuple 'project_id = False' in the domain to remove the timesheets from the search.
-        return expression.AND([
+        return Domain.AND([
             super()._get_domain_aal_with_no_move_line(),
             [('project_id', '=', False)]
         ])
@@ -530,3 +503,27 @@ class ProjectProject(models.Model):
             super()._get_profitability_items(with_action),
             with_action
         )
+
+    def _get_project_to_template_warnings(self):
+        res = super()._get_project_to_template_warnings()
+        timesheet_linked_count = self.env['account.analytic.line'].search_count([('project_id', '=', self.id)], limit=1)
+        if timesheet_linked_count:
+            res.append(self.env._("This project is current linked to timesheet."))
+        return res
+
+    def _get_template_default_context_whitelist(self):
+        return [
+            *super()._get_template_default_context_whitelist(),
+            "allow_timesheets",
+        ]
+
+    def _get_processed_analytic_account_vals(self, vals_list):
+        analytic_accounts_vals = super()._get_processed_analytic_account_vals(vals_list)
+        for vals in analytic_accounts_vals:
+            if (
+                (partner_id := self.env['res.partner'].browse(vals.get('partner_id')))
+                and partner_id.company_id
+                and vals.get('company_id') != partner_id.company_id.id
+            ):
+                vals['company_id'] = partner_id.company_id.id
+        return analytic_accounts_vals

@@ -1,31 +1,38 @@
-import { browser } from "@web/core/browser/browser";
-import { user } from "@web/core/user";
-import { regenerateAssets, becomeSuperuser } from "@web/core/debug/debug_menu_items";
-import { openViewItem } from "@web/webclient/debug/debug_items";
-import { describe, test, expect, beforeEach } from "@odoo/hoot";
-import { animationFrame } from "@odoo/hoot-mock";
-import { DebugMenu } from "@web/core/debug/debug_menu";
-import { ActionDialog } from "@web/webclient/actions/action_dialog";
-import { WebClient } from "@web/webclient/webclient";
-import { registry } from "@web/core/registry";
-import { useDebugCategory, useOwnDebugContext } from "@web/core/debug/debug_context";
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import {
-    mountWithCleanup,
+    click,
+    queryAll,
+    queryAllProperties,
+    queryAllTexts,
+    queryOne,
+    queryText,
+} from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
+import { Component, xml } from "@odoo/owl";
+import {
+    clearRegistry,
     contains,
+    defineModels,
+    defineWebModels,
+    fields,
+    getService,
+    makeDialogMockEnv,
+    models,
+    mountWithCleanup,
     onRpc,
     patchWithCleanup,
-    fields,
-    models,
-    webModels,
-    defineWebModels,
-    getService,
-    defineModels,
-    clearRegistry,
     serverState,
-    makeDialogMockEnv,
+    webModels,
 } from "@web/../tests/web_test_helpers";
-import { Component, xml } from "@odoo/owl";
-import { queryOne, queryAll, queryAllTexts, click } from "@odoo/hoot-dom";
+import { browser } from "@web/core/browser/browser";
+import { useDebugCategory, useOwnDebugContext } from "@web/core/debug/debug_context";
+import { DebugMenu } from "@web/core/debug/debug_menu";
+import { becomeSuperuser, regenerateAssets } from "@web/core/debug/debug_menu_items";
+import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
+import { ActionDialog } from "@web/webclient/actions/action_dialog";
+import { openViewItem } from "@web/webclient/debug/debug_items";
+import { WebClient } from "@web/webclient/webclient";
 
 class DebugMenuParent extends Component {
     static template = xml`<DebugMenu/>`;
@@ -38,16 +45,11 @@ class DebugMenuParent extends Component {
 
 const debugRegistry = registry.category("debug");
 
-onRpc(async (args) => {
-    if (args.method === "has_access") {
-        return true;
-    }
-    if (args.route === "/web/dataset/call_kw/ir.attachment/regenerate_assets_bundles") {
-        expect.step("ir.attachment/regenerate_assets_bundles");
-        return true;
-    }
+onRpc("has_access", () => true);
+onRpc("ir.attachment", "regenerate_assets_bundles", () => {
+    expect.step("ir.attachment/regenerate_assets_bundles");
+    return true;
 });
-
 beforeEach(() => {
     // Remove this service to clear the debug menu from anything else than what the test insert into
     registry.category("services").remove("profiling");
@@ -60,41 +62,33 @@ describe("DebugMenu", () => {
     test("can be rendered", async () => {
         debugRegistry
             .category("default")
-            .add("item_1", () => {
-                return {
-                    type: "item",
-                    description: "Item 1",
-                    callback: () => {
-                        expect.step("callback item_1");
-                    },
-                    sequence: 10,
-                    section: "a",
-                };
-            })
-            .add("item_2", () => {
-                return {
-                    type: "item",
-                    description: "Item 2",
-                    callback: () => {
-                        expect.step("callback item_2");
-                    },
-                    sequence: 5,
-                    section: "a",
-                };
-            })
-            .add("item_3", () => {
-                return {
-                    type: "item",
-                    description: "Item 3",
-                    callback: () => {
-                        expect.step("callback item_3");
-                    },
-                    section: "b",
-                };
-            })
-            .add("item_4", () => {
-                return null;
-            });
+            .add("item_1", () => ({
+                type: "item",
+                description: "Item 1",
+                callback: () => {
+                    expect.step("callback item_1");
+                },
+                sequence: 10,
+                section: "a",
+            }))
+            .add("item_2", () => ({
+                type: "item",
+                description: "Item 2",
+                callback: () => {
+                    expect.step("callback item_2");
+                },
+                sequence: 5,
+                section: "a",
+            }))
+            .add("item_3", () => ({
+                type: "item",
+                description: "Item 3",
+                callback: () => {
+                    expect.step("callback item_3");
+                },
+                section: "b",
+            }))
+            .add("item_4", () => null);
         await mountWithCleanup(DebugMenuParent);
         await contains("button.dropdown-toggle").click();
         expect(".dropdown-menu .dropdown-item").toHaveCount(3);
@@ -103,8 +97,7 @@ describe("DebugMenu", () => {
         expect(children.map((el) => el.tagName)).toEqual(["DIV", "SPAN", "SPAN", "DIV", "SPAN"]);
         expect(queryAllTexts(children)).toEqual(["a", "Item 2", "Item 1", "b", "Item 3"]);
 
-        const items = [...queryAll(".dropdown-menu .dropdown-item")] || [];
-        for (const item of items) {
+        for (const item of queryAll(".dropdown-menu .dropdown-item")) {
             await click(item);
         }
 
@@ -114,40 +107,36 @@ describe("DebugMenu", () => {
     test("items are sorted by sequence regardless of category", async () => {
         debugRegistry
             .category("default")
-            .add("item_1", () => {
-                return {
-                    type: "item",
-                    description: "Item 4",
-                    sequence: 4,
-                };
-            })
-            .add("item_2", () => {
-                return {
-                    type: "item",
-                    description: "Item 1",
-                    sequence: 1,
-                };
-            });
+            .add("item_1", () => ({
+                type: "item",
+                description: "Item 4",
+                sequence: 4,
+            }))
+            .add("item_2", () => ({
+                type: "item",
+                description: "Item 1",
+                sequence: 1,
+            }));
         debugRegistry
             .category("custom")
-            .add("item_1", () => {
-                return {
-                    type: "item",
-                    description: "Item 3",
-                    sequence: 3,
-                };
-            })
-            .add("item_2", () => {
-                return {
-                    type: "item",
-                    description: "Item 2",
-                    sequence: 2,
-                };
-            });
+            .add("item_1", () => ({
+                type: "item",
+                description: "Item 3",
+                sequence: 3,
+            }))
+            .add("item_2", () => ({
+                type: "item",
+                description: "Item 2",
+                sequence: 2,
+            }));
         await mountWithCleanup(DebugMenuParent);
         await contains("button.dropdown-toggle").click();
-        const items = [...queryAll(".dropdown-menu .dropdown-item")];
-        expect(items.map((el) => el.textContent)).toEqual(["Item 1", "Item 2", "Item 3", "Item 4"]);
+        expect(queryAllTexts(".dropdown-menu .dropdown-item")).toEqual([
+            "Item 1",
+            "Item 2",
+            "Item 3",
+            "Item 4",
+        ]);
     });
 
     test("Don't display the DebugMenu if debug mode is disabled", async () => {
@@ -161,39 +150,33 @@ describe("DebugMenu", () => {
     });
 
     test("Display the DebugMenu correctly in a ActionDialog if debug mode is enabled", async () => {
-        debugRegistry.category("default").add("global", () => {
-            return {
-                type: "item",
-                description: "Global 1",
-                callback: () => {
-                    expect.step("callback global_1");
-                },
-                sequence: 0,
-            };
-        });
+        debugRegistry.category("default").add("global", () => ({
+            type: "item",
+            description: "Global 1",
+            callback: () => {
+                expect.step("callback global_1");
+            },
+            sequence: 0,
+        }));
         debugRegistry
             .category("custom")
-            .add("item1", () => {
-                return {
-                    type: "item",
-                    description: "Item 1",
-                    callback: () => {
-                        expect.step("callback item_1");
-                    },
-                    sequence: 10,
-                };
-            })
-            .add("item2", ({ customKey }) => {
-                return {
-                    type: "item",
-                    description: "Item 2",
-                    callback: () => {
-                        expect.step("callback item_2");
-                        expect(customKey).toBe("abc");
-                    },
-                    sequence: 20,
-                };
-            });
+            .add("item1", () => ({
+                type: "item",
+                description: "Item 1",
+                callback: () => {
+                    expect.step("callback item_1");
+                },
+                sequence: 10,
+            }))
+            .add("item2", ({ customKey }) => ({
+                type: "item",
+                description: "Item 2",
+                callback: () => {
+                    expect.step("callback item_2");
+                    expect(customKey).toBe("abc");
+                },
+                sequence: 20,
+            }));
         class WithCustom extends ActionDialog {
             setup() {
                 super.setup(...arguments);
@@ -211,8 +194,8 @@ describe("DebugMenu", () => {
         await contains(".o_dialog .o_debug_manager button").click();
         expect(".dropdown-menu .dropdown-item").toHaveCount(2);
         // Check that global debugManager elements are not displayed (global_1)
-        const items = [...queryAll(".dropdown-menu .dropdown-item")] || [];
-        expect(items.map((el) => el.textContent)).toEqual(["Item 1", "Item 2"]);
+        const items = queryAll(".dropdown-menu .dropdown-item");
+        expect(queryAllTexts(items)).toEqual(["Item 1", "Item 2"]);
         for (const item of items) {
             await click(item);
         }
@@ -246,9 +229,7 @@ describe("DebugMenu", () => {
         serverState.debug = "1";
 
         webModels.IrUiView._views.list = `<list><field name="name"/><field name="type"/></list>`;
-        webModels.IrUiView._views.search = `<search/>`;
         webModels.ResPartner._views["form,1"] = `<form><div class="some_view"/></form>`;
-        webModels.ResPartner._views.search = `<search/>`;
 
         webModels.IrUiView._records.push({
             id: 1,
@@ -274,7 +255,6 @@ describe("DebugMenu", () => {
         serverState.debug = "1";
 
         webModels.ResPartner._views.list = `<list><field name="name"/></list>`;
-        webModels.ResPartner._views.search = `<search/>`;
 
         defineWebModels();
 
@@ -296,10 +276,8 @@ describe("DebugMenu", () => {
         serverState.debug = "1";
 
         webModels.ResPartner._views["pivot,18"] = "<pivot></pivot>";
-        webModels.ResPartner._views.search = `<search/>`;
         webModels.IrUiView._records.push({ id: 18, name: "Edit View" });
         webModels.IrUiView._views.form = `<form><field name="id"/></form>`;
-        webModels.IrUiView._views.search = `<search/>`;
 
         defineWebModels();
         await mountWithCleanup(WebClient);
@@ -329,7 +307,6 @@ describe("DebugMenu", () => {
         webModels.ResPartner._views["search,293"] = "<search></search>";
         webModels.IrUiView._records.push({ id: 293, name: "Edit View" });
         webModels.IrUiView._views.form = `<form><field name="id"/></form>`;
-        webModels.IrUiView._views.search = `<search/>`;
 
         defineWebModels();
         await mountWithCleanup(WebClient);
@@ -355,7 +332,6 @@ describe("DebugMenu", () => {
         webModels.ResPartner._views["search,293"] = "<search></search>";
         webModels.IrUiView._records.push({ id: 293, name: "Edit View" });
         webModels.IrUiView._views.form = `<form><field name="id"/></form>`;
-        webModels.IrUiView._views.search = `<search/>`;
 
         defineWebModels();
         await mountWithCleanup(WebClient);
@@ -378,7 +354,6 @@ describe("DebugMenu", () => {
         serverState.debug = "1";
 
         webModels.ResPartner._views.form = `<form><field name="id"/></form>`;
-        webModels.ResPartner._views.search = `<search/>`;
 
         defineWebModels();
         await mountWithCleanup(WebClient);
@@ -401,7 +376,6 @@ describe("DebugMenu", () => {
             <form>
                 <field name="name"/>
             </form>`;
-        webModels.ResPartner._views.search = "<search/>";
         webModels.ResPartner._records.push({ id: 1000, name: "p1" });
         webModels.IrUiView._records.push({ id: 24 });
 
@@ -427,7 +401,7 @@ describe("DebugMenu", () => {
     test("set defaults: click close", async () => {
         serverState.debug = "1";
 
-        onRpc("ir.default", "set", async () => {
+        onRpc("ir.default", "set", () => {
             throw new Error("should not create a default");
         });
 
@@ -435,7 +409,6 @@ describe("DebugMenu", () => {
             <form>
                 <field name="name"/>
             </form>`;
-        webModels.ResPartner._views.search = "<search/>";
         webModels.ResPartner._records.push({ id: 1001, name: "p1" });
         webModels.IrUiView._records.push({ id: 25 });
 
@@ -459,8 +432,8 @@ describe("DebugMenu", () => {
         expect.assertions(3);
         serverState.debug = "1";
 
-        onRpc("ir.default", "set", async (args) => {
-            expect(args.args).toEqual(["res.partner", "name", "p1", true, true, false]);
+        onRpc("ir.default", "set", ({ args }) => {
+            expect(args).toEqual(["res.partner", "name", "p1", true, true, false]);
             return true;
         });
 
@@ -468,7 +441,6 @@ describe("DebugMenu", () => {
             <form>
                 <field name="name"/>
             </form>`;
-        webModels.ResPartner._views.search = "<search/>";
         webModels.ResPartner._records.push({ id: 1002, name: "p1" });
         webModels.IrUiView._records.push({ id: 26 });
 
@@ -497,19 +469,28 @@ describe("DebugMenu", () => {
             _name = "custom";
 
             name = fields.Char();
+            raw = fields.Binary();
+            parent_id = fields.Many2one({ relation: "custom" });
+            properties = fields.Properties({
+                string: "Properties",
+                definition_record: "parent_id",
+                definition_record_field: "definitions",
+            });
+            definitions = fields.PropertiesDefinition({
+                string: "Definitions",
+            });
 
             _records = [
                 {
                     id: 1,
                     name: "custom1",
+                    raw: "<raw>",
+                    definitions: [{ name: "xphone_prop_1", string: "P1", type: "boolean" }],
                 },
             ];
-
-            _views = {
-                form: "<form></form>",
-                search: "<search/>",
-            };
         }
+        const fnames = Object.keys(Custom._fields).map((fname) => `<field name="${fname}"/>`);
+        Custom._views.form = `<form>\n${fnames.join("\n")}\n</form>`;
 
         defineWebModels();
         defineModels([Custom]);
@@ -524,31 +505,43 @@ describe("DebugMenu", () => {
         await contains(".o_debug_manager button").click();
         await contains(".dropdown-menu .dropdown-item:contains(/^Data/)").click();
         expect(".modal").toHaveCount(1);
-        expect(".modal-body pre").toHaveText(
-            '{\n "create_date": "2019-03-11 09:30:00",\n "display_name": "custom1",\n "id": 1,\n "name": "custom1",\n "write_date": "2019-03-11 09:30:00"\n}'
-        );
+        const data = queryText(".modal-body pre");
+        const modalObj = JSON.parse(data);
+        expect(modalObj).toInclude("create_date");
+        expect(modalObj).toInclude("write_date");
+        expect(modalObj).not.toInclude("raw");
+        const expectedObj = {
+            display_name: "custom1",
+            id: 1,
+            name: "custom1",
+            properties: false,
+            definitions: [
+                {
+                    name: "xphone_prop_1",
+                    string: "P1",
+                    type: "boolean",
+                },
+            ],
+        };
+        expect(modalObj).toMatchObject(expectedObj);
     });
 
     test("view metadata: basic rendering", async () => {
         serverState.debug = "1";
 
-        onRpc("get_metadata", async () => {
-            return [
-                {
-                    create_date: "2023-01-26 14:12:10",
-                    create_uid: [4, "Some user"],
-                    id: 1003,
-                    noupdate: false,
-                    write_date: "2023-01-26 14:13:31",
-                    write_uid: [6, "Another User"],
-                    xmlid: "abc.partner_16",
-                    xmlids: [{ xmlid: "abc.partner_16", noupdate: false }],
-                },
-            ];
-        });
+        onRpc("get_metadata", () => [
+            {
+                create_date: "2023-01-26 14:12:10",
+                create_uid: [4, "Some user"],
+                id: 1003,
+                noupdate: false,
+                write_date: "2023-01-26 14:13:31",
+                write_uid: [6, "Another User"],
+                xmlid: "abc.partner_16",
+                xmlids: [{ xmlid: "abc.partner_16", noupdate: false }],
+            },
+        ]);
 
-        webModels.ResPartner._views.form = `<form></form>`;
-        webModels.ResPartner._views.search = "<search/>";
         webModels.ResPartner._records.push({ id: 1003, name: "p1" });
 
         defineWebModels();
@@ -585,10 +578,8 @@ describe("DebugMenu", () => {
     test("set defaults: setting default value for datetime field", async () => {
         serverState.debug = "1";
 
-        const argSteps = [];
-
-        onRpc("ir.default", "set", async (args) => {
-            argSteps.push(args.args);
+        onRpc("ir.default", "set", ({ args }) => {
+            expect.step(args);
             return true;
         });
 
@@ -610,13 +601,13 @@ describe("DebugMenu", () => {
             ];
 
             _views = {
-                form: `
+                "form,18": /* xml */ `
                     <form>
                         <field name="datetime"/>
                         <field name="reference"/>
                         <field name="m2o"/>
-                    </form>`,
-                search: "<search/>",
+                    </form>
+                `,
             };
         }
 
@@ -655,7 +646,7 @@ describe("DebugMenu", () => {
             expect(".modal").toHaveCount(0);
         }
 
-        expect(argSteps).toEqual([
+        expect.verifySteps([
             ["partner", "datetime", "2024-01-24 16:46:16", true, true, false],
             [
                 "partner",
@@ -672,14 +663,12 @@ describe("DebugMenu", () => {
     test("display model view in developer tools", async () => {
         serverState.debug = "1";
         webModels.ResPartner._views.form = `<form><field name="name"/></form>`;
-        webModels.ResPartner._views.search = "<search/>";
         webModels.ResPartner._records.push({ id: 88, name: "p1" });
         webModels.IrModel._views.form = `
             <form>
                 <field name="name"/>
                 <field name="model"/>
             </form>`;
-        webModels.IrModel._views.search = "<search/>";
 
         defineWebModels();
         await mountWithCleanup(WebClient);
@@ -696,5 +685,84 @@ describe("DebugMenu", () => {
         expect(".breadcrumb-item").toHaveCount(1);
         expect(".o_breadcrumb .active").toHaveCount(1);
         expect(".o_breadcrumb .active").toHaveText("Partner");
+    });
+
+    test("set defaults: settings default value with a very long value", async () => {
+        serverState.debug = "1";
+
+        const fooValue = "12".repeat(250);
+
+        onRpc("ir.default", "set", ({ args }) => {
+            expect.step(args);
+            return true;
+        });
+
+        class Partner extends models.Model {
+            _name = "partner";
+
+            foo = fields.Char();
+            description = fields.Html();
+            bar = fields.Many2one({ relation: "ir.ui.view" });
+
+            _records = [
+                {
+                    id: 1,
+                    display_name: "p1",
+                    foo: fooValue,
+                    description: fooValue,
+                    bar: 18,
+                },
+            ];
+
+            _views = {
+                form: `
+                    <form>
+                        <field name="foo"/>
+                        <field name="description"/>
+                        <field name="bar" invisible="1"/>
+                    </form>`,
+            };
+        }
+
+        class IrUiView extends models.Model {
+            _name = "ir.ui.view";
+
+            name = fields.Char();
+            model = fields.Char();
+
+            _records = [{ id: 18 }];
+        }
+
+        defineModels([Partner, IrUiView]);
+
+        await mountWithCleanup(WebClient);
+
+        await getService("action").doAction({
+            name: "Partners",
+            res_model: "partner",
+            res_id: 1,
+            type: "ir.actions.act_window",
+            views: [[false, "form"]],
+        });
+        await contains(".o_debug_manager button").click();
+        await contains(".dropdown-menu .dropdown-item:contains('Set Default Values')").click();
+        expect(".modal").toHaveCount(1);
+
+        expect(queryAllTexts`.modal #formview_default_fields option`).toEqual([
+            "",
+            "Foo = 121212121212121212121212121212121212121212121212121212121...",
+            "Description = 121212121212121212121212121212121212121212121212121212121...",
+        ]);
+
+        expect(queryAllProperties(".modal #formview_default_fields option", "value")).toEqual([
+            "",
+            "foo",
+            "description",
+        ]);
+
+        await contains(".modal #formview_default_fields").select("foo");
+        await contains(".modal .modal-footer button:nth-child(2)").click();
+        expect(".modal").toHaveCount(0);
+        expect.verifySteps([["partner", "foo", fooValue, true, true, false]]);
     });
 });

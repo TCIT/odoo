@@ -1,19 +1,21 @@
-/** @odoo-module **/
-
 import {
     clickOnSave,
     clickOnEditAndWaitEditMode,
     clickOnExtraMenuItem,
     registerWebsitePreviewTour,
+    insertSnippet
 } from '@website/js/tours/tour_utils';
+import { stepUtils } from "@web_tour/tour_utils";
+
+const EDIT_BUTTON_SELECTOR = "body .o_menu_systray button.o-website-btn-custo-primary:contains(edit)";
 
 const checkNoTranslate = {
     content: "Check there is no translate button",
-    trigger: ".o_menu_systray:not(:has(.o_translate_website_container)):contains(edit)",
+    trigger: `${EDIT_BUTTON_SELECTOR}:not(.o-dropdown-toggle-custo)`,
 };
 const translate = [{
     content: "Open Edit menu",
-    trigger: ".o_menu_systray .o_edit_website_container button.o-dropdown-toggle-custo:contains(edit)",
+    trigger: `${EDIT_BUTTON_SELECTOR}.o-dropdown-toggle-custo`,
     run: "click",
 }, {
     content: "Click on translate button",
@@ -30,16 +32,18 @@ const closeErrorDialog = [{
 }, {
     trigger: "body:not(:has(.modal))",
 }];
-const switchTo = (lang) => {
-    return [{
+const switchTo = (lang) => [
+    {
         content: `Switch to ${lang}`,
         trigger: `:iframe .js_change_lang[data-url_code='${lang}']`,
         run: "click",
-    }, {
+    },
+    {
         content: `Wait until ${lang} is applied`,
         trigger: `:iframe html[lang*="${lang}"]`,
-    }];
-};
+    },
+    stepUtils.waitIframeIsReady(),
+];
 const goToMenuItem = [
     clickOnExtraMenuItem({}, true),
     {
@@ -47,6 +51,11 @@ const goToMenuItem = [
         trigger: ":iframe a[href='/test_website/model_item/1']",
         run: "click",
     },
+    {
+        content: "Wait to land on model item page",
+        trigger: ':iframe a[href="/test_website/model_item/1"].nav-link.active:not(:visible)',
+    },
+    stepUtils.waitIframeIsReady(),
 ];
 
 registerWebsitePreviewTour('test_restricted_editor_only', {
@@ -57,7 +66,14 @@ registerWebsitePreviewTour('test_restricted_editor_only', {
     ...clickOnEditAndWaitEditMode(),
     {
         content: "Check icons cannot be dragged",
-        trigger: "#oe_snippets .oe_snippet[name='Intro'].o_disabled",
+        trigger: "#snippet_groups .o_snippet[name='Intro'].o_disabled",
+        run: function () {
+            if (document.querySelector("button.o_snippet_thumbnail_area")) {
+                    console.error(
+                        "The button to open the add snippet dialog should not be display for restricted editor."
+                    );
+            }
+        },
     },
     ...clickOnSave(),
     ...switchTo('fr'),
@@ -73,7 +89,14 @@ registerWebsitePreviewTour('test_restricted_editor_only', {
     ...clickOnEditAndWaitEditMode(),
     {
         content: "Check icons cannot be dragged",
-        trigger: "#oe_snippets .oe_snippet[name='Intro'].o_disabled",
+        trigger: "#snippet_groups .o_snippet[name='Intro'].o_disabled",
+        run: function () {
+            if (document.querySelector("button.o_snippet_thumbnail_area")) {
+                    console.error(
+                        "The button to open the add snippet dialog should not be display for restricted editor."
+                    );
+            }
+        },
     },
     ...clickOnSave(),
     ...switchTo('fr'),
@@ -89,7 +112,7 @@ registerWebsitePreviewTour('test_restricted_editor_test_admin', {
     ...clickOnEditAndWaitEditMode(),
     {
         content: "Check icons cannot be dragged",
-        trigger: "#oe_snippets .oe_snippet[name='Intro'].o_disabled",
+        trigger: "#snippet_groups .o_snippet[name='Intro'].o_disabled",
     },
     ...clickOnSave(),
     ...switchTo('fr'),
@@ -102,18 +125,9 @@ registerWebsitePreviewTour('test_restricted_editor_test_admin', {
     ...clickOnEditAndWaitEditMode(),
     {
         content: "Check icons can be dragged",
-        trigger: "#oe_snippets .oe_snippet[name='Intro']:not(.o_disabled)",
+        trigger: "#snippet_groups .o_snippet[name='Intro']:not(.o_disabled)",
     },
-    {
-        content: "Drag the Intro snippet group",
-        trigger: '#oe_snippets .oe_snippet[name="Intro"] .oe_snippet_thumbnail:not(.o_we_ongoing_insertion)',
-        run: "drag_and_drop :iframe [data-oe-expression='record.website_description']",
-    },
-    {
-        content: "Click on the s_banner snippet in the dialog",
-        trigger: ':iframe .o_snippet_preview_wrap[data-snippet-id="s_banner"]',
-        run: "click",
-    },
+    ...insertSnippet({ id: "s_banner", name: "Banner", groupName: "Intro" }),
     {
         content: "Change name",
         trigger: ":iframe [data-oe-expression='record.name']",
@@ -132,14 +146,29 @@ registerWebsitePreviewTour('test_restricted_editor_test_admin', {
         trigger: "body:not(:has(.modal))",
     },
     {
+        content: "Check that html fields are not content editable when translating",
+        trigger: ":iframe [data-oe-expression='record.website_description']:not([contenteditable='true'])",
+    },
+    {
         content: "Translate name",
         trigger: ":iframe [data-oe-expression='record.name']",
         run: "editor Nouvelle valeur",
     },
     {
         content: "Translate some banner text",
-        trigger: ":iframe [data-oe-expression='record.website_description'] strong.o_default_snippet_text",
+        trigger: ":iframe [data-oe-expression='record.website_description'] strong",
         run: "editor potentiel.",
+    },
+    ...clickOnSave(),
+]);
+
+registerWebsitePreviewTour('test_restricted_editor_tester', {
+    url: '/test_model/1',
+}, () => [
+    ...clickOnEditAndWaitEditMode(),
+    {
+        content: "Footer should not be be editable for restricted user",
+        trigger: ":iframe :has(.o_editable) footer:not(.o_editable):not(:has(.o_editable))",
     },
     ...clickOnSave(),
 ]);

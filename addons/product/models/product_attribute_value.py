@@ -7,9 +7,9 @@ from odoo.exceptions import UserError
 
 
 class ProductAttributeValue(models.Model):
-    _name = 'product.attribute.value'
     # if you change this _order, keep it in sync with the method
     # `_sort_key_variant` in `product.template'
+    _name = 'product.attribute.value'
     _order = 'attribute_id, sequence, id'
     _description = "Attribute Value"
 
@@ -79,9 +79,17 @@ class ProductAttributeValue(models.Model):
 
     @api.depends('default_extra_price')
     def _compute_default_extra_price_changed(self):
+        company_domain = self.env['product.template']._check_company_domain(self.env.companies)
+        # `sudo` required to know which products we lack access to
+        ptavs_by_pav = self.env['product.template.attribute.value'].sudo().search_fetch([
+            ('product_attribute_value_id', 'in', self.ids),
+            ('product_tmpl_id', 'any', company_domain),
+        ], ['price_extra', 'product_attribute_value_id']).grouped('product_attribute_value_id')
         for pav in self:
+            ptavs = ptavs_by_pav.get(pav, [])
             pav.default_extra_price_changed = (
                 pav.default_extra_price != pav._origin.default_extra_price
+                or any(pav.default_extra_price != ptav.price_extra for ptav in ptavs)
             )
 
     # === CRUD METHODS === #
@@ -128,7 +136,7 @@ class ProductAttributeValue(models.Model):
                 [('product_attribute_value_id', '=', pav.id)]
             ).with_context(active_test=False).ptav_product_variant_ids
             active_linked_products = linked_products.filtered('active')
-            if not active_linked_products:
+            if not active_linked_products and linked_products:
                 # If product attribute value found on non-active product variants
                 # archive PAV instead of deleting
                 pavs_to_archive |= pav
@@ -141,6 +149,7 @@ class ProductAttributeValue(models.Model):
 
     # === ACTION METHODS === #
 
+    @api.readonly
     def action_add_to_products(self):
         return {
             'name': _("Add to all products"),
@@ -155,6 +164,7 @@ class ProductAttributeValue(models.Model):
             },
         }
 
+    @api.readonly
     def action_update_prices(self):
         return {
             'name': _("Update product extra prices"),

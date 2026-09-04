@@ -13,16 +13,13 @@ class HrManagerDepartmentReport(models.AbstractModel):
         compute="_compute_has_department_manager_access")
 
     def _search_has_department_manager_access(self, operator, value):
-        supported_operators = ["="]
-        if operator not in supported_operators or not isinstance(value, bool):
-            raise NotImplementedError()
-        if not value:
-            return [1, "=", 0]
+        if operator != 'in':
+            return NotImplemented
         department_ids = self.env['hr.department']._search([('manager_id', 'in', self.env.user.employee_ids.ids)])
         return [
             '|',
                 ('employee_id.user_id', '=', self.env.user.id),
-                ('employee_id.department_id', 'child_of', department_ids),
+                ('employee_id.department_id', 'child_of', tuple(department_ids)),
         ]
 
     def _compute_has_department_manager_access(self):
@@ -30,7 +27,7 @@ class HrManagerDepartmentReport(models.AbstractModel):
         employees = self.env['hr.employee'].search([
             '|',
                 ('user_id', '=', self.env.user.id),
-                ('department_id', 'child_of', department_ids),
+                ('department_id', 'child_of', tuple(department_ids)),
             ])
         for report in self:
             report.has_department_manager_access = report.employee_id in employees

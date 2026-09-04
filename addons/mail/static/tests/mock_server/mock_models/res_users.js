@@ -12,6 +12,7 @@ export class ResUsers extends webModels.ResUsers {
         ],
         default: "email",
     });
+    role_ids = fields.Many2many({ relation: "res.role", string: "Roles" });
 
     /** Simulates `_init_store_data` on `res.users`. */
     _init_store_data(store) {
@@ -23,27 +24,35 @@ export class ResUsers extends webModels.ResUsers {
         const ResPartner = this.env["res.partner"];
         /** @type {import("mock_models").ResUsersSettings} */
         const ResUsersSettings = this.env["res.users.settings"];
-
+        /** @type {import("mock_models").MailMessageSubtype} */
+        const MailMessageSubtype = this.env["mail.message.subtype"];
         store.add({
             action_discuss_id: DISCUSS_ACTION_ID,
             channel_types_with_seen_infos: DiscussChannel._types_allowing_seen_infos(),
             hasGifPickerFeature: true,
             hasLinkPreviewFeature: true,
             hasMessageTranslationFeature: true,
+            mt_comment: MailMessageSubtype._filter([["subtype_xmlid", "=", "mail.mt_comment"]])[0]
+                .id,
+            mt_note: MailMessageSubtype._filter([["subtype_xmlid", "=", "mail.mt_note"]])[0].id,
             odoobot: mailDataHelpers.Store.one(ResPartner.browse(serverState.odoobotId)),
         });
         if (!this._is_public(this.env.uid)) {
             const userSettings = ResUsersSettings._find_or_create_for_user(this.env.uid);
             store.add({
-                self: mailDataHelpers.Store.one(
+                self_partner: mailDataHelpers.Store.one(
                     ResPartner.browse(this.env.user.partner_id),
                     makeKwArgs({
                         fields: [
                             "active",
                             "avatar_128",
-                            "isAdmin",
+                            "im_status",
+                            "is_admin",
+                            mailDataHelpers.Store.one("main_user_id", ["notification_type"]),
+                            mailDataHelpers.Store.one("main_user_id", ["signature"]),
                             "name",
                             "notification_type",
+                            "signature",
                             "user",
                         ],
                     })
@@ -52,7 +61,7 @@ export class ResUsers extends webModels.ResUsers {
             });
         } else if (this.env.cookie.get("dgid")) {
             store.add({
-                self: mailDataHelpers.Store.one(
+                self_guest: mailDataHelpers.Store.one(
                     MailGuest.browse(this.env.cookie.get("dgid")),
                     makeKwArgs({ fields: ["avatar_128", "name"] })
                 ),
@@ -166,6 +175,10 @@ export class ResUsers extends webModels.ResUsers {
                     id: modelName, // for simplicity
                     model: modelName,
                     name: modelName,
+                    domain:
+                        modelName && "active" in this.env[modelName]._fields
+                            ? [["active", "in", [true, false]]]
+                            : [],
                     overdue_count: 0,
                     planned_count: 0,
                     today_count: 0,
@@ -183,5 +196,15 @@ export class ResUsers extends webModels.ResUsers {
             ];
         }
         return Object.values(userActivitiesByModelName);
+    }
+
+    _get_store_avatar_card_fields() {
+        return [
+            "share",
+            mailDataHelpers.Store.one(
+                "partner_id",
+                this.env["res.partner"]._get_store_avatar_card_fields()
+            ),
+        ];
     }
 }

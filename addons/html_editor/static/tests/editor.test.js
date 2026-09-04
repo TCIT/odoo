@@ -1,10 +1,24 @@
+import { Editor } from "@html_editor/editor";
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { expect, test } from "@odoo/hoot";
-import { setupEditor } from "./_helpers/editor";
+import { beforeEach, expect, test } from "@odoo/hoot";
+import { patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { setupEditor, testEditor } from "./_helpers/editor";
 import { insertText } from "./_helpers/user_actions";
 import { getContent } from "./_helpers/selection";
+import { unformat } from "./_helpers/format";
+
+beforeEach(() => {
+    patchWithCleanup(Editor.prototype, {
+        preparePlugins() {
+            this.config.Plugins = (this.config.Plugins || MAIN_PLUGINS).filter(
+                (plugin) => plugin.id !== "editorVersion"
+            );
+            super.preparePlugins();
+        },
+    });
+});
 
 test("can get content of an Editor", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});
@@ -15,7 +29,7 @@ test("can get content of an Editor", async () => {
 test("can get content of an empty paragraph", async () => {
     const { el, editor } = await setupEditor("<p>[]</p>", {});
     expect(el.innerHTML).toBe(
-        `<p placeholder="Type &quot;/&quot; for commands" class="o-we-hint"></p>`
+        `<p o-we-hint-text="Type &quot;/&quot; for commands" class="o-we-hint"></p>`
     );
     expect(editor.getContent()).toBe(`<p></p>`);
 });
@@ -69,6 +83,29 @@ test("Remove odoo-editor-editable class after every plugin is destroyed", async 
     expect.verifySteps(["operation"]);
 });
 
+test("Element is not editable if any plugin marks it non-editable", async () => {
+    class TestPlugin extends Plugin {
+        static id = "test";
+        resources = {
+            is_node_editable_predicates: (node) => {
+                if (node.classList.contains("o-will-break-if-edited")) {
+                    return false;
+                }
+            },
+        };
+    }
+    const Plugins = [...MAIN_PLUGINS, TestPlugin];
+    const { el, plugins } = await setupEditor(
+        `<div>[<img class="o-editable-media o-will-break-if-edited">]</div>`,
+        {
+            config: { Plugins },
+        }
+    );
+    const img = el.querySelector(".o-editable-media");
+    const selectionPlugin = plugins.get("selection");
+    await expect(selectionPlugin.isNodeEditable(img)).toBe(false);
+});
+
 test("clean_for_save_listeners is done last", async () => {
     // This test uses custom elements tag `c-div` to make sure they won't fall into
     // a case where they won't be merged anyway.
@@ -97,30 +134,59 @@ test("clean_for_save_listeners is done last", async () => {
     expect(getContent(el)).toBe(`<div><c-div>a</c-div><c-div>b</c-div></div>`);
 });
 
-test("Convert self closing a elements to opening/closing tags", async () => {
-    const { el, editor } = await setupEditor(`
-        <ul>
-            <li><a href="xyz" t-out="xyz"/></li>
-        </ul>
-    `);
-    expect(el.innerHTML.trim().replace(/\s+/g, " ")).toBe(
-        `<ul> <li> <a href="xyz" t-out="xyz"> </a> </li> </ul>`
-    );
-    expect(editor.getContent().trim().replace(/\s+/g, " ")).toBe(
-        '<ul> <li><a href="xyz" t-out="xyz"></a></li> </ul>'
-    );
+test("Convert self closing elements to opening/closing tags", async () => {
+    await testEditor({
+        contentBefore: unformat(`
+            <div>
+                <center t-if="ctx">
+                    <pre t-out="ctx"/>
+                </center>
+                <t t-else="">
+                    <b t-out="name"/>
+                    <span t-out="name"/>
+                    <a href="xyz" t-out="xyz"/>
+                    <t t-out="object.partner_id" data-oe-t-inline="true"/>
+                </t>
+                <i t-out="ctx"/>
+            </div>
+        `),
+        contentBeforeEdit: unformat(`
+            <p data-selection-placeholder=""><br></p>
+            <div>
+                <center t-if="ctx">
+                    <pre t-out="ctx"></pre>
+                </center>
+                <t t-else="">
+                    <b t-out="name"></b>
+                    <span t-out="name"></span>
+                    <a href="xyz" t-out="xyz"></a>
+                    <t t-out="object.partner_id" data-oe-t-inline="true"></t>
+                </t>
+                <i t-out="ctx"></i>
+            </div>
+            <p data-selection-placeholder=""><br></p>
+        `),
+    });
 });
 
-test("Convert self closing t elements to opening/closing tags", async () => {
-    const { el, editor } = await setupEditor(`
+test("Remove `width`, `height` attributes from image and apply them to style", async () => {
+    const { el } = await setupEditor(`
         <div>
-            <t t-out="object.partner_id" data-oe-t-inline="true" contenteditable="false"/>
+            <img src="#" width="50%" height="50%">
         </div>
     `);
     expect(el.innerHTML.trim().replace(/\s+/g, " ")).toBe(
-        `<div> <t t-out="object.partner_id" data-oe-t-inline="true" contenteditable="false"></t> </div>`
+        `<div class="o-paragraph"> <img src="#" style="width: 50%; height: 50%;"> </div>`
     );
-    expect(editor.getContent().trim().replace(/\s+/g, " ")).toBe(
-        '<div> <t t-out="object.partner_id" data-oe-t-inline="true" contenteditable="false"></t> </div>'
+});
+
+test("Remove `width`, `height` attributes from image and apply them to style with default unit (px)", async () => {
+    const { el } = await setupEditor(`
+        <div>
+            <img src="#" width="50" height="50">
+        </div>
+    `);
+    expect(el.innerHTML.trim().replace(/\s+/g, " ")).toBe(
+        `<div class="o-paragraph"> <img src="#" style="width: 50px; height: 50px;"> </div>`
     );
 });

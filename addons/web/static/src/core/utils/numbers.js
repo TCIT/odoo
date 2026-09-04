@@ -98,6 +98,13 @@ export function roundPrecision(value, precision, method = "HALF-UP") {
     return denormalize(roundedValue);
 }
 
+function formatFixedDecimals(value, decimals) {
+    const rounded = roundDecimals(value, decimals);
+    const [intPart, decPart = ""] = rounded.toString().split(".");
+    const paddedDecimals = decPart.padEnd(decimals, "0").slice(0, decimals);
+    return decimals === 0 ? intPart : `${intPart}.${paddedDecimals}`;
+}
+
 export function roundDecimals(value, decimals) {
     /**
      * The following decimals introduce numerical errors:
@@ -183,7 +190,7 @@ export function humanNumber(number, options = { decimals: 0, minDigits: 1 }) {
     // determine if we should keep the decimals (we don't want to display 1,020.02k for 1020020)
     const decimalsToKeep = number >= 1000 ? 0 : decimals;
     number = sign * number;
-    const [integerPart, decimalPart] = number.toFixed(decimalsToKeep).split(".");
+    const [integerPart, decimalPart] = formatFixedDecimals(number, decimalsToKeep).split(".");
     const int = insertThousandsSep(integerPart, thousandsSep, grouping);
     if (!decimalPart) {
         return int + symbol;
@@ -199,6 +206,8 @@ export function humanNumber(number, options = { decimals: 0, minDigits: 1 }) {
  * @param {Object} [options]
  * @param {number[]} [options.digits] the number of digits that should be used,
  *   instead of the default digits precision in the field.
+ * @param {number} [options.minDigits] the minimum number of decimal digits to display.
+ *   Displays maximum 6 decimal places if no precision is provided.
  * @param {boolean} [options.humanReadable] if true, large numbers are formatted
  *   to a human readable format.
  * @param {string} [options.decimalPoint] decimal separating character
@@ -211,33 +220,73 @@ export function humanNumber(number, options = { decimals: 0, minDigits: 1 }) {
  * @returns {string}
  */
 export function formatFloat(value, options = {}) {
+    let precision;
+    if (options.digits && options.digits[1] !== undefined) {
+        precision = options.digits[1];
+    } else if (options.minDigits) {
+        precision = 6;
+    } else {
+        precision = 2;
+    }
+    const intDigitsCount = (value !== 0) ? Math.floor(Math.log10(Math.abs(value))) + 1 : 1;
+    // Within 15 digits, we have a float with no parasite digits.
+    // 14 is chosen here, as roundPrecision will add a digit when performing its computations.
+    const maxDecDigits = Math.max(14 - intDigitsCount, 0);
+    // We display maximum 6 digits or the number of significant digits (if it's lower)
+    precision = Math.min(precision, maxDecDigits);
+
+    const minPrecision = options.minDigits || precision;
+    if (floatIsZero(value, precision)) {
+        value = 0.0;
+    }
     if (options.humanReadable) {
         return humanNumber(value, options);
     }
     const grouping = options.grouping || l10n.grouping;
     const thousandsSep = "thousandsSep" in options ? options.thousandsSep : l10n.thousandsSep;
     const decimalPoint = "decimalPoint" in options ? options.decimalPoint : l10n.decimalPoint;
-    let precision;
-    if (options.digits && options.digits[1] !== undefined) {
-        precision = options.digits[1];
-    } else {
-        precision = 2;
-    }
-    const formatted = value.toFixed(precision).split(".");
+    const formatted = formatFixedDecimals(value, precision).split(".");
     formatted[0] = insertThousandsSep(formatted[0], thousandsSep, grouping);
-    if (options.trailingZeros === false && formatted[1]) {
+    if (formatted[1]) {
         formatted[1] = formatted[1].replace(/0+$/, "");
+        if (options.trailingZeros !== false) {
+            formatted[1] = formatted[1].padEnd(minPrecision, "0");
+        }
     }
     return formatted[1] ? formatted.join(decimalPoint) : formatted[0];
 }
 
 const _INVERTDICT = Object.freeze({
-    1e-1: 1e+1, 1e-2: 1e+2, 1e-3: 1e+3, 1e-4: 1e+4, 1e-5: 1e+5,
-    1e-6: 1e+6, 1e-7: 1e+7, 1e-8: 1e+8, 1e-9: 1e+9, 1e-10: 1e+10,
-    2e-1: 5e+0, 2e-2: 5e+1, 2e-3: 5e+2, 2e-4: 5e+3, 2e-5: 5e+4,
-    2e-6: 5e+5, 2e-7: 5e+6, 2e-8: 5e+7, 2e-9: 5e+8, 2e-10: 5e+9,
-    5e-1: 2e+0, 5e-2: 2e+1, 5e-3: 2e+2, 5e-4: 2e+3, 5e-5: 2e+4,
-    5e-6: 2e+5, 5e-7: 2e+6, 5e-8: 2e+7, 5e-9: 2e+8, 5e-10: 2e+9,
+    1e-1: 1e1,
+    1e-2: 1e2,
+    1e-3: 1e3,
+    1e-4: 1e4,
+    1e-5: 1e5,
+    1e-6: 1e6,
+    1e-7: 1e7,
+    1e-8: 1e8,
+    1e-9: 1e9,
+    1e-10: 1e10,
+    2e-1: 5,
+    2e-2: 5e1,
+    2e-3: 5e2,
+    2e-4: 5e3,
+    2e-5: 5e4,
+    2e-6: 5e5,
+    2e-7: 5e6,
+    2e-8: 5e7,
+    2e-9: 5e8,
+    2e-10: 5e9,
+    5e-1: 2,
+    5e-2: 2e1,
+    5e-3: 2e2,
+    5e-4: 2e3,
+    5e-5: 2e4,
+    5e-6: 2e5,
+    5e-7: 2e6,
+    5e-8: 2e7,
+    5e-9: 2e8,
+    5e-10: 2e9,
 });
 
 /**

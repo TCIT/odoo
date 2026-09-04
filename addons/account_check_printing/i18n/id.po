@@ -1,30 +1,41 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_check_printing
-# 
+# * account_check_printing
+#
 # Translators:
-# Abe Manyo, 2024
-# Wil Odoo, 2025
-# 
+# Martin Trigaux, 2022
+# Abe Manyo, 2023
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Abe Manyo (abem)" <abem@odoo.com>, 2025, 2026.
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-08 07:14+0000\n"
+"Last-Translator: \"Nurul Aini Akrima Sabila (nuaas)\" <nuaas@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/"
+"account_check_printing/id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_check_printing
 #. odoo-python
 #: code:addons/account_check_printing/models/account_journal.py:0
 msgid "%(journal)s: Check Number Sequence"
 msgstr "%(journal)s: Periksa Urutan Angka"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "%(number)s in journal %(journal)s"
+msgstr "%(number)s di jurnal %(journal)s"
 
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.account_journal_dashboard_kanban_view_inherited
@@ -167,7 +178,12 @@ msgid "Default"
 msgstr "Default"
 
 #. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment_method__display_name
 #: model:ir.model.fields,field_description:account_check_printing.field_print_prenumbered_checks__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_res_company__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "Nama Tampilan"
 
@@ -178,7 +194,17 @@ msgid "Go to the configuration panel"
 msgstr "Ke panel konfigurasi"
 
 #. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__check_layout_available
+msgid "Has Check Layout"
+msgstr "Memiliki Check Layout"
+
+#. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_journal__id
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__id
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment_method__id
 #: model:ir.model.fields,field_description:account_check_printing.field_print_prenumbered_checks__id
+#: model:ir.model.fields,field_description:account_check_printing.field_res_company__id
+#: model:ir.model.fields,field_description:account_check_printing.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -186,8 +212,8 @@ msgstr "ID"
 #. odoo-python
 #: code:addons/account_check_printing/models/account_payment.py:0
 msgid ""
-"In order to print multiple checks at once, they must belong to the same bank"
-" journal."
+"In order to print multiple checks at once, they must belong to the same bank "
+"journal."
 msgstr ""
 "Untuk mencetak lebih dari satu cek dalam sekali cetak, cek-cek tersebut "
 "harus berada dalam jurnal bank yang sama."
@@ -217,18 +243,34 @@ msgstr "Penomoran Manual"
 #: model:ir.model.fields,help:account_check_printing.field_account_payment__payment_method_line_id
 msgid ""
 "Manual: Pay or Get paid by any method outside of Odoo.\n"
-"Payment Providers: Each payment provider has its own Payment Method. Request a transaction on/to a card thanks to a payment token saved by the partner when buying or subscribing online.\n"
+"Payment Providers: Each payment provider has its own Payment Method. Request "
+"a transaction on/to a card thanks to a payment token saved by the partner "
+"when buying or subscribing online.\n"
 "Check: Pay bills by check and print it from Odoo.\n"
-"Batch Deposit: Collect several customer checks at once generating and submitting a batch deposit to your bank. Module account_batch_payment is necessary.\n"
-"SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit Transfer file to your bank. Module account_sepa is necessary.\n"
-"SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your partner will have granted to you. Module account_sepa is necessary.\n"
+"Batch Deposit: Collect several customer checks at once generating and "
+"submitting a batch deposit to your bank. Module account_batch_payment is "
+"necessary.\n"
+"SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit "
+"Transfer file to your bank. Module account_iso20022 is necessary.\n"
+"SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your "
+"partner will have granted to you. Module account_iso20022 is necessary.\n"
+"U.S. ISO20022: Pay in the US by submitting an ISO20022 file to your bank. "
+"Module account_iso20022 is necessary.\n"
 msgstr ""
-"Manual: Dapatkan bayaran melalui metode apapun diluar Odoo.\n"
-"Penyedia Pembayaran: Setiap penyedia pembayaran memiliki Metode Pembayaran sendiri. Minta transaksi ke/atau kartu berkat token pembayaran yang disimpan oleh mitra saat membeli atau subscribe online.\n"
-"Cek: Bayar tagihan dengan cek dan cetak dari Odoo.\n"
-"Batch Deposit: Pilih beberapa cek pelanggan secara sekaligus untuk membuat dan mengirimkan batch deposit ke bank Anda. Anda membutuhkan modul account_batch_payment.\n"
-"SEPA Credit Transfer: Bayar di SEPA zone dengan mengirimkan file SEPA Credit Transfer ke bank Anda. Anda membutuhkan modul account_sepa.\n"
-"SEPA Direct Debit: Dapatkan bayaran di SEPA zone berkat mandat yang mitra Anda akan berikan ke Anda. Anda membutuhkan modul account_sepa.\n"
+"Manual: Bayar atau Dapatkan Bayaran dengan metode apa pun diluar Odoo.\n"
+"Provider Pembayaran: Setiap provider pembayaran memiliki Metode "
+"Pembayarannya sendiri. Minta transaksi pada/ke kartu berkat token pembayaran "
+"yang disimpan oleh partner saat membeli atau berlangganan online.\n"
+"Cek: Bayara tagihan menggunakan cek dan cetak dari Odoo.\n"
+"Batch Deposit: Kumpulkan beberapa cek pelanggan sekaligus membuat dan "
+"menyerahkan batch deposit ke bank Anda. Modul account_batch_payment "
+"diperlukan.\n"
+"SEPA Credit Transfer: Bayar dalam SEPA zone dengan menyerahkan file SEPA "
+"Credit Transfer ke bank Anda. Modul account_iso20022 diperlukan.\n"
+"SEPA Direct Debit: Dapatkan bayaran dalam SEPA zone berkat mandat yang "
+"partner Anda akan ebrikan ke Anda. Modul account_iso20022 diperlukan.\n"
+"U.S. ISO20022: Bayar di AS dengan menyerahkan file ISO20022 ke bank Anda. "
+"Modul account_iso20022 diperlukan.\n"
 
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_res_company__account_check_printing_multi_stub
@@ -262,7 +304,7 @@ msgstr "Metode Pembayaran"
 #. module: account_check_printing
 #: model:ir.model,name:account_check_printing.model_account_payment_method
 msgid "Payment Methods"
-msgstr "Metode-Metode Pembayaran"
+msgstr "Metode Pembayaran"
 
 #. module: account_check_printing
 #: model:ir.model,name:account_check_printing.model_account_payment
@@ -282,8 +324,8 @@ msgstr ""
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.print_pre_numbered_checks_view
 msgid ""
-"Please enter the number of the first pre-printed check that you are about to"
-" print on."
+"Please enter the number of the first pre-printed check that you are about to "
+"print on."
 msgstr "Mohon masukkan nomor cek belum tercetak yang ingin Anda cetak."
 
 #. module: account_check_printing
@@ -330,10 +372,12 @@ msgstr "Margin Kanan"
 #: model:ir.model.fields,help:account_check_printing.field_res_company__account_check_printing_layout
 #: model:ir.model.fields,help:account_check_printing.field_res_config_settings__account_check_printing_layout
 msgid ""
-"Select the format corresponding to the check paper you will be printing your checks on.\n"
+"Select the format corresponding to the check paper you will be printing your "
+"checks on.\n"
 "In order to disable the printing feature, select 'None'."
 msgstr ""
-"Pilih format yang sesuai dengan kertas cek yang akan digunakan untuk mencetak cek Anda.\n"
+"Pilih format yang sesuai dengan kertas cek yang akan digunakan untuk "
+"mencetak cek Anda.\n"
 "Untuk menonaktifkan fitur cetak, pilih 'Tidak Ada'."
 
 #. module: account_check_printing
@@ -360,6 +404,16 @@ msgid ""
 msgstr ""
 "Terjadi kesalahan dengan Tata Letak Cek, mohon pilih Tata Letak lain dalam "
 "Pengaturan Faktur/Akuntansi dan coba lagi."
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_journal.py:0
+msgid ""
+"The check number you entered (%(num)s) exceeds the maximum allowed value of %"
+"(max)d. Please enter a smaller number."
+msgstr ""
+"Nomor pemeriksaan yang Anda masukan (%(num)s) melampaui jumlah value "
+"maksimum yang diizinkan dari %(max)d. Silakan masukkan nomor lebih kecil."
 
 #. module: account_check_printing
 #. odoo-python
@@ -409,7 +463,8 @@ msgid ""
 "This option allows you to print the date label on the check as per CPA.\n"
 "Disable this if your pre-printed check includes the date label."
 msgstr ""
-"Opsi ini memungkinkan Anda untuk mencetak label tanggal pada cek sesuai CPA.\n"
+"Opsi ini memungkinkan Anda untuk mencetak label tanggal pada cek sesuai "
+"CPA.\n"
 "Nonaktifkan opsi ini bila cek pre-printed Anda sudah memiliki label tanggal."
 
 #. module: account_check_printing
@@ -439,3 +494,57 @@ msgid ""
 msgstr ""
 "Anda harus memilih tata letak cek. Untuk melakukan ini, pergi ke Pengaturan "
 "Faktur/Akuntansi, cari 'tata letak Cek' dan pilih satu."
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "check_number"
+msgstr "check_number"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "out_refund"
+msgstr "out_refund"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "sep"
+msgstr "sep"
+
+#~ msgid "Contact"
+#~ msgstr "Kontak"
+
+#~ msgid "Journal Entry"
+#~ msgstr "Entri Jurnal"
+
+#~ msgid ""
+#~ "Manual: Pay or Get paid by any method outside of Odoo.\n"
+#~ "Payment Providers: Each payment provider has its own Payment Method. "
+#~ "Request a transaction on/to a card thanks to a payment token saved by the "
+#~ "partner when buying or subscribing online.\n"
+#~ "Check: Pay bills by check and print it from Odoo.\n"
+#~ "Batch Deposit: Collect several customer checks at once generating and "
+#~ "submitting a batch deposit to your bank. Module account_batch_payment is "
+#~ "necessary.\n"
+#~ "SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit "
+#~ "Transfer file to your bank. Module account_sepa is necessary.\n"
+#~ "SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your "
+#~ "partner will have granted to you. Module account_sepa is necessary.\n"
+#~ msgstr ""
+#~ "Manual: Dapatkan bayaran melalui metode apapun diluar Odoo.\n"
+#~ "Penyedia Pembayaran: Setiap penyedia pembayaran memiliki Metode "
+#~ "Pembayaran sendiri. Minta transaksi ke/atau kartu berkat token pembayaran "
+#~ "yang disimpan oleh mitra saat membeli atau subscribe online.\n"
+#~ "Cek: Bayar tagihan dengan cek dan cetak dari Odoo.\n"
+#~ "Batch Deposit: Pilih beberapa cek pelanggan secara sekaligus untuk "
+#~ "membuat dan mengirimkan batch deposit ke bank Anda. Anda membutuhkan "
+#~ "modul account_batch_payment.\n"
+#~ "SEPA Credit Transfer: Bayar di SEPA zone dengan mengirimkan file SEPA "
+#~ "Credit Transfer ke bank Anda. Anda membutuhkan modul account_sepa.\n"
+#~ "SEPA Direct Debit: Dapatkan bayaran di SEPA zone berkat mandat yang mitra "
+#~ "Anda akan berikan ke Anda. Anda membutuhkan modul account_sepa.\n"
+
+#~ msgid "Register Payment"
+#~ msgstr "Buat Pembayaran"

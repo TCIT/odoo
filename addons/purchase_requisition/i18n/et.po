@@ -1,64 +1,44 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* purchase_requisition
-# 
+# * purchase_requisition
+#
 # Translators:
-# Arma Gedonsky <armagedonsky@hot.ee>, 2024
-# Anna, 2024
-# Patrick-Jordan Kiudorv, 2024
-# Leaanika Randmets, 2024
-# Stevin Lilla, 2024
-# Martin Trigaux, 2024
-# Siim Raasuke, 2024
-# Katrin Kampura, 2024
-# Tairi Tiimann, 2024
-# Eneli Õigus <enelioigus@gmail.com>, 2024
-# JanaAvalah, 2024
-# Mihkel avalah, 2024
-# 
+# Marek Pontus, 2022
+# Andre Roomet <andreroomet@gmail.com>, 2022
+# Ants Peetsalu <ants@avalah.ee>, 2022
+# Algo Kärp <algokarp@gmail.com>, 2022
+# Egon Raamat <egon@avalah.ee>, 2022
+# Martin Aavastik <martin@avalah.ee>, 2022
+# Rivo Zängov <eraser@eraser.ee>, 2022
+# Triine Aavik <triine@avalah.ee>, 2022
+# Arma Gedonsky <armagedonsky@hot.ee>, 2022
+# Piia Paurson <piia@avalah.ee>, 2022
+# Martin Trigaux, 2022
+# Eneli Õigus <enelioigus@gmail.com>, 2022
+# Leaanika Randmets, 2022
+# JanaAvalah, 2022
+# Anna, 2023
+# Kristina Pešehodko <kristina@avalah.ee>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Mihkel avalah, 2024\n"
-"Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-08-06 21:23+0000\n"
+"Last-Translator: Kristina Pešehodko <kristina@avalah.ee>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-19/"
+"purchase_requisition/et/>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: et\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "$50"
-msgstr "$50"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "$500"
-msgstr "$500"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: purchase_requisition
 #: model:ir.actions.report,print_report_name:purchase_requisition.action_report_purchase_requisitions
 msgid "'Purchase Agreement - %s' % (object.name)"
 msgstr "'Ostuleping - %s' % (object.name)"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "02/16/2024"
-msgstr "02/16/2024"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "12/25/2024"
-msgstr "12/25/2024"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
-msgid "2023-09-15"
-msgstr "2023-09-15"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
@@ -68,12 +48,12 @@ msgstr "<span><strong>Alates </strong></span>"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "<span><strong>to</strong></span>"
-msgstr "<span><strong>kuni </strong></span>"
+msgstr "<span><strong>kuni</strong></span>"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "<strong>Contact:</strong><br/>"
-msgstr "<strong>Kontakt: </strong><br/>"
+msgstr "<strong>Kontakt:</strong><br/>"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
@@ -88,7 +68,7 @@ msgstr "Vajalik toiming"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__active
 msgid "Active"
-msgstr "Aktiivne"
+msgstr "Tegev"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_ids
@@ -114,6 +94,7 @@ msgstr "Tegevustüübi ikoon"
 #: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__purchase_requisition_id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__requisition_id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__name
+#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
 msgid "Agreement"
 msgstr "Leping"
 
@@ -131,7 +112,7 @@ msgstr "Lepingu kehtivus"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Agreement Validity:"
-msgstr "Lepingu kehtivus"
+msgstr "Lepingu kehtivus:"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__alternative_po_ids
@@ -142,6 +123,12 @@ msgstr "Alternatiivsed ostutellimused"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 msgid "Alternative Purchase Order"
+msgstr "Alternatiivne ostutellimus"
+
+#. module: purchase_requisition
+#. odoo-python
+#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
+msgid "Alternative Purchase Orders"
 msgstr "Alternatiivne ostutellimus"
 
 #. module: purchase_requisition
@@ -193,7 +180,7 @@ msgstr "Üldine ostukokkulepe"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
 msgid "Blanket Orders"
-msgstr "Üldised ostukokkulepped"
+msgstr "Üldised ostukokkuleped"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
@@ -210,7 +197,7 @@ msgstr "Tühista"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_requisition_alternative_warning_form
 msgid "Cancel Alternatives"
-msgstr "Tühista alternatiivid"
+msgstr "Tühista valikud"
 
 #. module: purchase_requisition
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition__state__cancel
@@ -224,17 +211,12 @@ msgid "Cancelled by the agreement associated to this quotation."
 msgstr "Selle hinnapakkumisega seotud leping on tühistatud."
 
 #. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_category_id
-msgid "Category"
-msgstr "Kategooria"
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_line_compare_tree
 msgid "Choose"
 msgstr "Vali"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__partner_id
+#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__partner_ids
 msgid "Choose a vendor for alternative PO"
 msgstr "Vali alternatiivse ostutellimuse tarnija"
 
@@ -256,7 +238,7 @@ msgstr "Sulge"
 #. module: purchase_requisition
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition__state__done
 msgid "Closed"
-msgstr "Lõpetatud"
+msgstr "Kinnitatud"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
@@ -288,12 +270,12 @@ msgstr "Ettevõtte summa"
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase.py:0
 msgid "Compare Order Lines"
-msgstr "Võrdle tellimuste ridasid"
+msgstr "Võrrelge tellimuste ridasid"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 msgid "Compare Product Lines"
-msgstr "Võrdle toodete ridasid"
+msgstr "Võrrelge toodete ridasid"
 
 #. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_res_config_settings
@@ -303,21 +285,12 @@ msgstr "Seadistused"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Confirm"
-msgstr "Kinnitage"
+msgstr "Kinnita"
 
 #. module: purchase_requisition
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition__state__confirmed
 msgid "Confirmed"
 msgstr "Kinnitatud"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_line__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr ""
-"Ühikute vaheline konversioon on võimalik ainult siis, kui ühikud kuuluvad "
-"samasse kategooriasse. Konverteerimine toimub määrade alusel."
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__copy_products
@@ -333,13 +306,18 @@ msgstr "Loo alternatiiv"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 msgid ""
-"Create a call for tender by adding alternative requests for quotation to different vendors.\n"
-"                            Make your choice by selecting the best combination of lead time, OTD and/or total amount.\n"
-"                            By comparing product lines you can also decide to order some products from one vendor and others from another vendor."
+"Create a call for tender by adding alternative requests for quotation to "
+"different vendors.                                 Make your choice by "
+"selecting the best combination of lead time, OTD and/or total "
+"amount.                                 By comparing product lines you can "
+"also decide to order some products from one vendor and others from another "
+"vendor."
 msgstr ""
-"Loo hankekutse, lisades erinevatele müüjatele alternatiivseid hinnapäringuid.\n"
-"Vali parim kombinatsioon tarneaja, OTD ja/või kogusumma alusel.\n"
-"Võrreldes toote ridu võid otsustada tellida mõned tooted ühelt müüjalt ja teised teiselt."
+"Loo hankekutse, lisades erinevatele müüjatele alternatiivseid "
+"hinnapäringuid.                                                        Vali "
+"parim kombinatsioon tarneaja, OTD ja/või kogusumma "
+"alusel.                                       Võrreldes toote ridu võid "
+"otsustada tellida mõned tooted ühelt müüjalt ja teised teiselt."
 
 #. module: purchase_requisition
 #. odoo-python
@@ -363,12 +341,7 @@ msgstr "Loonud"
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__create_date
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__create_date
 msgid "Created on"
-msgstr "Loodud"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__creation_blocked
-msgid "Creation Blocked"
-msgstr "Loomine on blokeeritud"
+msgstr "Loomise kuupäev"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__currency_id
@@ -383,7 +356,7 @@ msgstr "Kuupäev"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Demo Reference"
-msgstr ""
+msgstr "Näidise viide"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__description
@@ -397,13 +370,18 @@ msgid "Discard"
 msgstr "Loobu"
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_product__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_group__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_line__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_alternative_warning__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__display_name
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__display_name
+#: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__display_name
 msgid "Display Name"
-msgstr "Kuvatav nimi"
+msgstr "Kuva nimi"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__distribution_analytic_account_ids
@@ -433,11 +411,13 @@ msgid ""
 "End date cannot be earlier than start date. Please check dates for "
 "agreements: %s"
 msgstr ""
+"Lõppkuupäev peab olema pärast alguskuupäeva. Palun vaata üle lepingute "
+"kuupäevad: %s"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Expected on"
-msgstr ""
+msgstr "Eeldatav saabumine"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_follower_ids
@@ -447,7 +427,7 @@ msgstr "Jälgijad"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Jälgijad(Partnerid)"
+msgstr "Jälgijad (partnerid)"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__activity_type_icon
@@ -458,11 +438,13 @@ msgstr "Font awesome icon nt. fa-tasks"
 #: model_terms:ir.actions.act_window,help:purchase_requisition.action_purchase_requisition
 msgid ""
 "For a blanket order, you can record an agreement for a specific period\n"
-"            (e.g. a year) and you order products within this agreement to benefit\n"
+"            (e.g. a year) and you order products within this agreement to "
+"benefit\n"
 "            from the negotiated prices."
 msgstr ""
 "Üldine ostukokkulepe võimaldab teha lepingut kindlaks ajaperioodiks\n"
-"            (nt. aastaks) ja võimaldab tellida tooteid selle lepingu raames \n"
+"            (nt. aastaks) ja võimaldab tellida tooteid selle lepingu raames "
+"\n"
 "            kokkulepitud hindadega."
 
 #. module: purchase_requisition
@@ -471,35 +453,28 @@ msgid "Future Activities"
 msgstr "Tulevased tegevused"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
-msgid "Group By"
-msgstr "Rühmitamine"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__has_alternatives
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_kpis_tree_inherit_purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_tree_inherit_purchase_requisition
-msgid "Has Alternatives"
-msgstr "On alternatiive"
-
-#. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__has_message
 msgid "Has Message"
 msgstr "On sõnum"
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_product__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_group__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_line__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_alternative_warning__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__id
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__id
+#: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_exception_icon
 msgid "Icon"
-msgstr "sümbolit."
+msgstr "Ikoon"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__activity_exception_icon
@@ -509,26 +484,13 @@ msgstr "Ikoon, mis näitab erandi tegevust."
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Kui kontrollitud, siis uued sõnumid nõuavad Teie tähelepanu."
+msgstr "Kui kontrollitud, siis uued sõnumid nõuavad Su tähelepanu."
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_has_error
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Kui valitud, on mõningate sõnumitel saatmiserror"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__creation_blocked
-msgid ""
-"If the chosen vendor or if any of the products in the original PO have a "
-"blocking warning then we prevent creation of alternative PO. This is because"
-" normally these fields are cleared w/warning message within form view, but "
-"we cannot recreate that in this case."
-msgstr ""
-"Kui valitud tarnijal või mõnel tootel on ostutellimusel blokeerimishoiatus, "
-"siis süsteem ei võimalda alternatiivset ostutellimust luua. Selle põhjuseks "
-"on asjaolu, et tavaliselt tühjendatakse need väljad vormivaates "
-"hoiatusteadetega, kuid antud juhul ei saa me seda uuesti luua."
+msgstr "Kui valitud, on mõningatel sõnumitel saatmiserror."
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__copy_products
@@ -539,7 +501,7 @@ msgstr "Kui on märgitud, kopeeritakse algse ostutellimuse tootekogused"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_is_follower
 msgid "Is Follower"
-msgstr "On jälgija"
+msgstr "Jälgija"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_requisition_alternative_warning_form
@@ -553,7 +515,7 @@ msgstr "Hoia alternatiivsed hinnapäringud alles"
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__write_uid
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendatud"
+msgstr "Viimati uuendatud (kelle poolt)"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_group__write_date
@@ -582,22 +544,27 @@ msgstr "Vali olemasolevate hinnapäringute hulgast"
 #. module: purchase_requisition
 #: model:res.groups,name:purchase_requisition.group_purchase_alternatives
 msgid "Manage Purchase Alternatives"
-msgstr ""
+msgstr "Halda ostu alternatiive"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_has_error
 msgid "Message Delivery error"
-msgstr "Sõnumi saatmise veateade"
+msgstr "Sõnumi edastamise veateade"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_ids
 msgid "Messages"
-msgstr "Sõnum"
+msgstr "Sõnumid"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Mitchell Admin"
 msgstr "Mitchell Admin"
+
+#. module: purchase_requisition
+#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
+msgid "My Activities"
+msgstr "Minu tegevused"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__my_activity_date_deadline
@@ -628,7 +595,7 @@ msgstr "Uued lepingud"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "New Quotation"
-msgstr "Uus pakkumine"
+msgstr "Loo hinnapakkumine"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_calendar_event_id
@@ -638,7 +605,7 @@ msgstr "Järgmine tegevus kalendris"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Järgmise tegevuse tähtaeg"
+msgstr "Järgmise tegevuse kuupäev"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__activity_summary
@@ -659,7 +626,7 @@ msgstr "Pole midagi tühjendada"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Tegevuste arv"
+msgstr "Toimingute arv"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__order_count
@@ -679,12 +646,12 @@ msgstr "Tegevust nõudvate sõnumite arv"
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Veateatega sõnumite arv"
+msgstr "Kohaletoimetamise veateatega sõnumite arv"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_group__order_ids
 msgid "Order"
-msgstr "Ost"
+msgstr "Tellimus"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__qty_ordered
@@ -710,7 +677,7 @@ msgstr "Algne ostutellimus"
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_order__alternative_po_ids
 msgid "Other potential purchase orders for purchasing products"
-msgstr "Muud potentsiaalsed ostutellimused toodete ostmiseks"
+msgstr "Teised võimalused toodete ostmiseks"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_alternative_warning__po_ids
@@ -723,11 +690,6 @@ msgstr "Ostutellimused kinnitamiseks"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Product"
 msgstr "Toode"
-
-#. module: purchase_requisition
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_id
-msgid "Product Unit of Measure"
-msgstr "Toote mõõtühik"
 
 #. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_product_product
@@ -767,7 +729,7 @@ msgstr "Ostulepingud"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_res_config_settings__group_purchase_alternatives
 msgid "Purchase Alternatives"
-msgstr ""
+msgstr "Ostu alternatiivid"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order__purchase_group_id
@@ -795,11 +757,6 @@ msgid "Purchase Orders"
 msgstr "Ostutellimused"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
-msgid "Purchase Orders with requisition"
-msgstr "Ostutellimused koos ostupäringuga"
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Purchase Reference"
 msgstr "Ostu viide"
@@ -824,12 +781,12 @@ msgstr "Ostupäringu rida"
 #. module: purchase_requisition
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition__requisition_type__purchase_template
 msgid "Purchase Template"
-msgstr "Ostu mall"
+msgstr "Ostumall"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
 msgid "Purchase Templates"
-msgstr "Ostu mallid"
+msgstr "Ostumallid"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_qty
@@ -873,11 +830,6 @@ msgid "Request for Quotations"
 msgstr "Hinnapäringud"
 
 #. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
-msgid "Requisition"
-msgstr "Päring"
-
-#. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Reset to Draft"
 msgstr "Lähtesta mustandiks"
@@ -890,7 +842,7 @@ msgstr "Vastutav kasutaja"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr "Sõnumi kohaletoimetamise viga"
+msgstr "Sõnumi kohaletoimetamise veateade"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
@@ -899,10 +851,9 @@ msgstr "Otsi ostulepingut"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
-msgid "Show all records which has next action date is before today"
+msgid "Show all records whose next activity date is past"
 msgstr ""
-"Näita kõiki andmeid, mille järgmise tegevuse kuupäev on ennem tänast "
-"kuupäeva"
+"Näita kõiki andmeid, mille järgmise tegevuse kuupäev on enne tänast kuupäeva"
 
 #. module: purchase_requisition
 #. odoo-python
@@ -926,14 +877,14 @@ msgstr "Alguskuupäev"
 #. module: purchase_requisition
 #: model_terms:ir.actions.act_window,help:purchase_requisition.action_purchase_requisition
 msgid "Start a new purchase agreement"
-msgstr "Alusta uut ostulepingut"
+msgstr "Alusta uue ostulepinguga"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__state
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
 msgid "Status"
-msgstr "Olek"
+msgstr "Staatus"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__activity_state
@@ -971,25 +922,13 @@ msgstr "Tingimused"
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_create_alternative__origin_po_id
 msgid "The original PO that this alternative PO is being created for."
-msgstr "Algne ostutellimus, millele see alternatiivne ostutellimus luuakse"
-
-#. module: purchase_requisition
-#. odoo-python
-#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
-msgid ""
-"The vendor you have selected or at least one of the products you are copying"
-" from the original order has a blocking warning on it and cannot be selected"
-" to create an alternative."
-msgstr ""
-"Valitud tarnija või vähemalt üks valitud toodetest, mille oled algselt "
-"hinnapäringult valinud, sisaldab blokeerivat hoiatust ning selle tarnija või"
-" tootega ei saa alternatiivset hinnapakkumist luua."
+msgstr "Algne ostutellimus, millele see alternatiivne ostutellimus luuakse."
 
 #. module: purchase_requisition
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase.py:0
 msgid "There are no quantities to clear."
-msgstr "Kogused kustutamiseks puuduvad"
+msgstr "Ühikud kustutamiseks puuduvad."
 
 #. module: purchase_requisition
 #. odoo-python
@@ -999,13 +938,7 @@ msgid ""
 "complete this open blanket order, instead of creating a new one."
 msgstr ""
 "Selle tarnija jaoks on juba avatud üldine ostukokkulepe. Soovitame uue "
-"kokkuleppe loomise asemel lõpetada avatud kokkulepe."
-
-#. module: purchase_requisition
-#. odoo-python
-#: code:addons/purchase_requisition/wizard/purchase_requisition_create_alternative.py:0
-msgid "This is a blocking warning!\n"
-msgstr "See on blokeeriv hoiatus!\n"
+"tellimuse loomise asemel lõpetada avatud kokkulepe."
 
 #. module: purchase_requisition
 #. odoo-python
@@ -1013,11 +946,13 @@ msgstr "See on blokeeriv hoiatus!\n"
 msgid ""
 "To close this purchase requisition, cancel related Requests for Quotation.\n"
 "\n"
-"Imagine the mess if someone confirms these duplicates: double the order, double the trouble :)"
+"Imagine the mess if someone confirms these duplicates: double the order, "
+"double the trouble :)"
 msgstr ""
 "Selle ostutaotluse sulgemiseks tühistage seotud hinnapakkumised.\n"
 "\n"
-"Kujutage ette segadust, kui keegi kinnitab need dublikaadid: topelttellimus -> topeltprobleem :)"
+"Kujutage ette segadust, kui keegi kinnitab need dublikaadid: "
+"topelttellimus -> topeltprobleem :)"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
@@ -1036,6 +971,7 @@ msgid "Type of the exception activity on record."
 msgstr "Kirjel oleva erandtegevuse tüüp."
 
 #. module: purchase_requisition
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__product_uom_id
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Unit"
 msgstr "Ühik"
@@ -1044,16 +980,11 @@ msgstr "Ühik"
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_line__price_unit
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisition_document
 msgid "Unit Price"
-msgstr "Ühikhind"
-
-#. module: purchase_requisition
-#: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
-msgid "UoM"
-msgstr "Mõõtühikud"
+msgstr "Ühikuhind"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__vendor_id
-#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__partner_id
+#: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_create_alternative__partner_ids
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_line_compare_tree
 msgid "Vendor"
 msgstr "Tarnija"
@@ -1106,18 +1037,11 @@ msgid "What about the alternative Requests for Quotations?"
 msgstr "Mis on alternatiivsed hinnapäringud?"
 
 #. module: purchase_requisition
-#: model:ir.model.fields,help:purchase_requisition.field_purchase_order__has_alternatives
-msgid ""
-"Whether or not this purchase order is linked to another purchase order as an"
-" alternative."
-msgstr "See ostutellimus on teise ostutellimuse alternatiiv."
-
-#. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_purchase_requisition_alternative_warning
 msgid "Wizard in case PO still has open alternative requests for quotation"
 msgstr ""
-"Soovitus juhuks, kui ostutellimusel on veel avatud alternatiivseid pakkumise"
-" taotlusi"
+"Soovitus juhuks, kui ostutellimusel on veel avatud alternatiivseid pakkumise "
+"taotlusi"
 
 #. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_purchase_requisition_create_alternative
@@ -1128,7 +1052,7 @@ msgstr "Soovitused alternatiivse ostutellimuse eelseadistatud väärtustele"
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid "You can only delete draft or cancelled requisitions."
-msgstr "Saate kustutada ainult mustand või tühistatud päringuid"
+msgstr "Saate kustutada ainult kustutatud või tühistatud päringud."
 
 #. module: purchase_requisition
 #. odoo-python
@@ -1138,30 +1062,29 @@ msgid ""
 "agreement."
 msgstr ""
 "Te ei saa muuta lepingu tüüpi ega partnerit, kui leping ei ole mustand "
-"staatuses"
+"staatuses."
 
 #. module: purchase_requisition
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid "You cannot confirm a blanket order with lines missing a price."
-msgstr ""
-"Te ei saa kinnitada üldist ostukokkulepet, kui ridadel puuduvad hinnad"
+msgstr "Te ei saa kinnitada üldist ostukokkulepet, kui ridadel puuduvad hinnad."
 
 #. module: purchase_requisition
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid "You cannot confirm a blanket order with lines missing a quantity."
-msgstr "Te ei saa kinnitada üldist ostukokkulepet ilma koguseta"
+msgstr "Te ei saa kinnitada üldist ostukokkulepet ilma koguseta."
 
 #. module: purchase_requisition
 #. odoo-python
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 msgid ""
-"You cannot confirm agreement '%(agreement)s' because it does not contain any"
-" product lines."
+"You cannot confirm agreement '%(agreement)s' because it does not contain any "
+"product lines."
 msgstr ""
 "Te ei saa kinnitada üldist ostukokkulepet '%(agreement)s' kuna see ei "
-"sisalda ühtegi toote rida"
+"sisalda ühtegi tooterida."
 
 #. module: purchase_requisition
 #. odoo-python
@@ -1170,8 +1093,273 @@ msgid ""
 "You cannot have a negative or unit price of 0 for an already confirmed "
 "blanket order."
 msgstr ""
+"Ühikuhind ei saa olle negatiivne või 0 juba kinnitatud üldisele "
+"ostukokkuleppele."
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "e.g. PO0025"
 msgstr "nt PO0025"
+
+#~ msgid "$50"
+#~ msgstr "$50"
+
+#~ msgid "$500"
+#~ msgstr "$500"
+
+#~ msgid "02/16/2024"
+#~ msgstr "02/16/2024"
+
+#~ msgid "12/25/2024"
+#~ msgstr "12/25/2024"
+
+#~ msgid "2023-09-15"
+#~ msgstr "2023-09-15"
+
+#~ msgid "<strong>Agreement Deadline:</strong><br/>"
+#~ msgstr "<strong>Lepingu tähtaeg:</strong><br/>"
+
+#~ msgid "<strong>Date</strong>"
+#~ msgstr "<strong>Kuupäev</strong>"
+
+#~ msgid "<strong>Description</strong>"
+#~ msgstr "<strong>Kirjeldus</strong>"
+
+#~ msgid "<strong>Product UoM</strong>"
+#~ msgstr "<strong>Toote mõõtühik</strong>"
+
+#~ msgid "<strong>Qty</strong>"
+#~ msgstr "<strong>Kogus</strong>"
+
+#~ msgid "<strong>Reference </strong>"
+#~ msgstr "<strong>Viide </strong>"
+
+#~ msgid "<strong>Scheduled Date</strong>"
+#~ msgstr "<strong>Planeeritud kuupäev</strong>"
+
+#~ msgid "<strong>Scheduled Ordering Date:</strong><br/>"
+#~ msgstr "<strong>Ajasta tellimise kuupäev:</strong><br/>"
+
+#~ msgid "<strong>Source:</strong><br/>"
+#~ msgstr "<strong>Allikas:</strong><br/>"
+
+#~ msgid "<strong>Vendor </strong>"
+#~ msgstr "<strong>Tarnija </strong>"
+
+#~ msgid "Agreement Deadline"
+#~ msgstr "Lepingu lõpp"
+
+#~ msgid "Agreement Selection Type"
+#~ msgstr "Lepingu valimise tüüp"
+
+#~ msgid "Alternative Po Count"
+#~ msgstr "Alternatiivsete ostutellimuste arv"
+
+#~ msgid "Bid Selection"
+#~ msgstr "Pakkumise valimine"
+
+#~ msgid "Category"
+#~ msgstr "Kategooria"
+
+#~ msgid ""
+#~ "Conversion between Units of Measure can only occur if they belong to the "
+#~ "same category. The conversion will be made based on the ratios."
+#~ msgstr ""
+#~ "Ühikute vaheline konversioon on võimalik ainult siis, kui ühikud kuuluvad "
+#~ "samasse kategooriasse. Konverteerimist tehakse määrade järgi."
+
+#~ msgid ""
+#~ "Create a call for tender by adding alternative request for quotations to "
+#~ "different vendors.\n"
+#~ "                            Make your choice by selecting the best "
+#~ "combination of lead time, OTD and/or total amount.\n"
+#~ "                            By comparing product lines you can also "
+#~ "decide to order some products from one vendor and others from another "
+#~ "vendor."
+#~ msgstr ""
+#~ "Looge võrdlev hinnapakkumine ehk hange, lisades käesolevale "
+#~ "hinnapäringule alternatiivseid tarnijaid.\n"
+#~ "                            Valige parem pakkumine, arvestades "
+#~ "kohaletoimetamise aega, kauba maksumust jne.\n"
+#~ "                            Tooteid on võimalus tellida samal ajal ka "
+#~ "erinevatelt tarnijatelt."
+
+#~ msgid "Creation Blocked"
+#~ msgstr "Loomine on blokeeritud"
+
+#~ msgid "Custom Description"
+#~ msgstr "Kohandatud kirjeldus"
+
+#~ msgid "Data for new quotations"
+#~ msgstr "Uue pakkumise andmed"
+
+#~ msgid "Delivery Date"
+#~ msgstr "Tarnekuupäev"
+
+#~ msgid "Do not create RfQ lines automatically"
+#~ msgstr "Ära loo hinnapäringule ridasid automaatselt"
+
+#~ msgid "Group By"
+#~ msgstr "Rühmitamine"
+
+#~ msgid "Has Alternatives"
+#~ msgstr "On alternatiive"
+
+#~ msgid ""
+#~ "If the chosen vendor or if any of the products in the original PO have a "
+#~ "blocking warning then we prevent creation of alternative PO. This is "
+#~ "because normally these fields are cleared w/warning message within form "
+#~ "view, but we cannot recreate that in this case."
+#~ msgstr ""
+#~ "Kui valitud tarnijal või mõnel tootel on ostutellimusel "
+#~ "blokeerimishoiatus, siis süsteem ei võimalda alternatiivset ostutellimust "
+#~ "luua. Selle põhjuseks on asjaolu, et tavaliselt tühjendatakse need väljad "
+#~ "vormivaates hoiatusteadetega, kuid antud juhul ei saa me seda uuesti luua."
+
+#~ msgid "In negotiation"
+#~ msgstr "Läbirääkimistel"
+
+#~ msgid "Lines"
+#~ msgstr "Read"
+
+#~ msgid "Number of messages which requires an action"
+#~ msgstr "Tegutsemist nõudvate sõnumite arv"
+
+#~ msgid "Ongoing"
+#~ msgstr "Käimasolev"
+
+#~ msgid "Ordered Quantities"
+#~ msgstr "Tellitud kogused"
+
+#~ msgid "Price Unit"
+#~ msgstr "Hinnaühik"
+
+#~ msgid "Product Unit of Measure"
+#~ msgstr "Toote mõõtühik"
+
+#~ msgid "Purchase Agreement Types"
+#~ msgstr "Ostulepingu tüübid"
+
+#~ msgid "Purchase Orders with requisition"
+#~ msgstr "Ostutellimused koos hinnapäringuga"
+
+#~ msgid "Purchase Requisition Type"
+#~ msgstr "Ostupäringu tüüp"
+
+#~ msgid "Quantities"
+#~ msgstr "Kogused"
+
+#~ msgid "Reference:"
+#~ msgstr "Viide:"
+
+#~ msgid "Requests for Quotation Details"
+#~ msgstr "Hinnapäringu detailid"
+
+#~ msgid "Requisition"
+#~ msgstr "Päring"
+
+#~ msgid "Scheduled Date"
+#~ msgstr "Planeeritud kuupäev"
+
+#~ msgid "Select multiple RFQ (non-exclusive)"
+#~ msgstr "Vali mitu hinnapakkumist (ei ole välistav)"
+
+#~ msgid "Select only one RFQ (exclusive)"
+#~ msgstr "Vali ainult üks hinnapäring (välistav)"
+
+#~ msgid ""
+#~ "Select only one RFQ (exclusive):  when a purchase order is confirmed, "
+#~ "cancel the remaining purchase order.\n"
+#~ "\n"
+#~ "                    Select multiple RFQ (non-exclusive): allows multiple "
+#~ "purchase orders. On confirmation of a purchase order it does not cancel "
+#~ "the remaining orders"
+#~ msgstr ""
+#~ "Valige ainult üks hinnapäring(eksklusiivne): kui ostutellimus on "
+#~ "kinnitatud, tühistage ülejäänud ostutellimus.\n"
+#~ "\n"
+#~ "                    Valige mitu hinnapäringut(mitte-eksklusiivne): lubab "
+#~ "mitut ostutellimust. Ostutellimuse kinnitamisel ei tühista see ülejäänud "
+#~ "tellimusi"
+
+#~ msgid "Sequence"
+#~ msgstr "Järjestus"
+
+#~ msgid ""
+#~ "Set active to false to hide the Purchase Agreement Types without removing "
+#~ "it."
+#~ msgstr ""
+#~ "Ostulepingutüüpide peitmiseks ilma neid eemaldamata määrake aktiivse "
+#~ "väärtuseks väär."
+
+#~ msgid "Set quantities manually"
+#~ msgstr "Määra kogused käsitsi"
+
+#~ msgid "Show all records which has next action date is before today"
+#~ msgstr ""
+#~ "Näita kõiki andmeid, mille järgmise tegevuse kuupäev on enne tänast "
+#~ "kuupäeva"
+
+#~ msgid "Source Document"
+#~ msgstr "Alusdokument"
+
+#~ msgid "State Blanket Order"
+#~ msgstr "Üldise ostukokkuleppe staatus"
+
+#~ msgid ""
+#~ "The expected and scheduled delivery date where all the products are "
+#~ "received"
+#~ msgstr ""
+#~ "Eeldatav ja planeeritud kohaletoimetamise kuupäev, millal kõik tooted on "
+#~ "kätte saadud"
+
+#~ msgid ""
+#~ "The vendor you have selected or at least one of the products you are "
+#~ "copying from the original order has a blocking warning on it and cannot "
+#~ "be selected to create an alternative."
+#~ msgstr ""
+#~ "Valitud tarnija või vähemalt üks valitud toodetest, mille oled algselt "
+#~ "hinnapäringult valinud, sisaldab blokeerivat hoiatust ning selle tarnija "
+#~ "või tootega ei saa alternatiivset hinnapakkumist luua."
+
+#~ msgid "This is a blocking warning!\n"
+#~ msgstr "See on blokeeriv hoiatus!\n"
+
+#~ msgid "UoM"
+#~ msgstr "Mõõtühikud"
+
+#~ msgid "Use lines of agreement"
+#~ msgstr "Kasuta lepingu ridu"
+
+#~ msgid "Use quantities of agreement"
+#~ msgstr "Kasuta lepingul olevaid koguseid"
+
+#~ msgid "Validate"
+#~ msgstr "Kinnita"
+
+#~ msgid ""
+#~ "Whether or not this purchase order is linked to another purchase order as "
+#~ "an alternative."
+#~ msgstr "See ostutellimus on teise ostutellimuse alternatiiv."
+
+#~ msgid "You cannot confirm agreement '%s' because there is no product line."
+#~ msgstr "Te ei saa kinnitada lepingut '%s' kuna puudub toote rida. "
+
+#~ msgid "You cannot confirm the blanket order without price."
+#~ msgstr "Te ei saa kinnitada üldist ostukokkulepet ilma hinnata."
+
+#~ msgid "You cannot confirm the blanket order without quantity."
+#~ msgstr "Te ei saa kinnitada üldist ostukokkulepet ilma koguseta. "
+
+#~ msgid ""
+#~ "You have to cancel or validate every RfQ before closing the purchase "
+#~ "requisition."
+#~ msgstr ""
+#~ "Enne ostunõude sulgemist peate iga hinnapäringu tühistama või kinnitama."
+
+#~ msgid ""
+#~ "alternative request for quotations are still open, do you want to cancel "
+#~ "them?"
+#~ msgstr ""
+#~ "alternatiivsed ostutellimused on endiselt avatud, kas sa soovid need "
+#~ "tühistada?"

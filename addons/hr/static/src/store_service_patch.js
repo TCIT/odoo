@@ -1,11 +1,13 @@
 import { _t } from "@web/core/l10n/translation";
 import { Store } from "@mail/core/common/store_service";
 import { patch } from "@web/core/utils/patch";
+import { user } from "@web/core/user";
 
 /** @type {import("models").Store} */
 const storeServicePatch = {
     setup() {
         super.setup();
+        /** @type {{[key: number]: {id: number, user_id: number, hasCheckedUser: boolean}}} */
         this.employees = {};
     },
     async getChat(person) {
@@ -34,10 +36,9 @@ const storeServicePatch = {
                     user = this.users[employee.user_id];
                 }
                 user.partner_id = employeeData.user_partner_id[0];
-                this.Persona.insert({
-                    displayName: employeeData.user_partner_id[1],
+                this["res.partner"].insert({
+                    display_name: employeeData.user_partner_id[1],
                     id: employeeData.user_partner_id[0],
-                    type: "partner",
                 });
             }
         }
@@ -49,6 +50,18 @@ const storeServicePatch = {
             return;
         }
         return super.getChat({ userId: employee.user_id });
+    },
+    /** @param {import("models").HrEmployee[]} employees */
+    getRelevantEmployee(employees) {
+        const activeEmployees = (employees ?? []).filter((e) => e.active);
+        const activeCompanyId = user.activeCompany?.id;
+        const sortedEmployees = activeEmployees.sort(
+            (e1, e2) =>
+                (e2.company_id?.id === activeCompanyId) - (e1.company_id?.id === activeCompanyId) ||
+                (e1.user_id?.id ?? Infinity) - (e2.user_id?.id ?? Infinity) ||
+                e2.id - e1.id
+        );
+        return sortedEmployees[0];
     },
 };
 

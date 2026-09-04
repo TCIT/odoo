@@ -17,14 +17,19 @@
         <field name="name">IR Profile List</field>
         <field name="model">ir.profile</field>
         <field name="arch" type="xml">
-            <list string="Profile Session" default_order="session desc, id desc">
+            <list string="Profile Session" default_order="session desc, id desc" create="0">
+                <header>
+                    <button name="action_view_speedscope" type="object" string="View in speedscope"/>
+                </header>
                 <field name="create_date"/>
                 <field name="session"/>
                 <field name="name"/>
                 <field name="entry_count"/>
                 <field name="sql_count" optional="hide"/>
                 <field name="speedscope_url" widget="url"/>
+                <field name="config_url" widget="url"/>
                 <field name="duration"/>
+                <field name="cpu_duration" optional="hide"/>
             </list>
         </field>
     </record>
@@ -37,10 +42,12 @@
                 <group>
                     <field name="name"/>
                     <field name="session"/>
+                    <field name="cpu_duration"/>
                     <field name="entry_count"/>
                     <!-- Do not rely on sql field for the invisible attrs to avoid fetching whole trace from server. -->
                     <field name="sql_count" invisible="sql_count == 0"/>
                     <field name="speedscope_url" widget="url"/>
+                    <field name="config_url" widget="url"/>
                 </group>
                 <group invisible="not qweb">
                     <field name="qweb" widget="profiling_qweb_view" nolabel="1"/>

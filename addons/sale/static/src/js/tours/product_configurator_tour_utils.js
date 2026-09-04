@@ -1,5 +1,3 @@
-import { queryAttribute, queryValue, waitUntil } from '@odoo/hoot-dom';
-
 function productSelector(productName) {
     return `
         table.o_sale_product_configurator_table
@@ -16,10 +14,10 @@ function optionalProductSelector(productName) {
     `;
 }
 
-function optionalProductImageSrc(productName) {
-    return queryAttribute(
-        `${optionalProductSelector(productName)} td.o_sale_product_configurator_img>img`, 'src'
-    );
+function optionalProductImageSrc(queryOne, productName) {
+    return queryOne(
+        `${optionalProductSelector(productName)} td.o_sale_product_configurator_img>img`
+    ).getAttribute("src");
 }
 
 function addOptionalProduct(productName) {
@@ -46,13 +44,25 @@ function removeOptionalProduct(productName) {
     };
 }
 
+function decreaseProductQuantity(productName) {
+    return {
+        content: `Decrease the quantity of ${productName}`,
+        trigger: `
+            ${productSelector(productName)}
+            td.o_sale_product_configurator_qty
+            button:has(i.oi-minus)
+        `,
+        run: 'click',
+    };
+}
+
 function increaseProductQuantity(productName) {
     return {
         content: `Increase the quantity of ${productName}`,
         trigger: `
             ${productSelector(productName)}
             td.o_sale_product_configurator_qty
-            button:has(i.fa-plus)
+            button:has(i.oi-plus)
         `,
         run: 'click',
     };
@@ -70,17 +80,26 @@ function setProductQuantity(productName, quantity) {
     };
 }
 
+function setProductUoM(productName, uomName) {
+    // UoM must be enabled
+    return {
+        content: `Set the uom of ${productName} to ${uomName}`,
+        trigger: `
+            ${productSelector(productName)}
+            label:contains("${uomName}")
+        `,
+        run: `click && click .modal-body`,
+    };
+}
+
 function assertProductQuantity(productName, quantity) {
-    const quantitySelector = `
-        ${productSelector(productName)}
-        td.o_sale_product_configurator_qty
-        input[name="sale_quantity"]
-    `;
     return {
         content: `Assert that the quantity of ${productName} is ${quantity}`,
-        trigger: quantitySelector,
-        run: async () =>
-            await waitUntil(() => queryValue(quantitySelector) === quantity, { timeout: 1000 }),
+        trigger: `
+            ${productSelector(productName)}
+            td.o_sale_product_configurator_qty
+            input[name="sale_quantity"]:value(${quantity})
+        `,
     };
 }
 
@@ -98,6 +117,11 @@ function selectAttribute(productName, attributeName, attributeValue, attributeTy
                 run: 'click',
             };
         case 'multi':
+            return {
+                content: content,
+                trigger: `${ptalSelector}:has(label:text(${attributeValue})) input[type="checkbox"]`,
+                run: "click",
+            };
         case 'pills':
         case 'radio':
             return {
@@ -140,8 +164,9 @@ function selectAndSetCustomAttribute(
 function assertPriceTotal(total) {
     return {
         content: `Assert that the total is ${total}`,
-        trigger:
-            `table.o_sale_product_configurator_table tr>td[colspan="4"] span:contains("${total}")`,
+        trigger: `
+            .o_sale_product_configurator_dialog .o_configurator_price_total:contains("${total}"),
+        `,
     };
 }
 
@@ -150,7 +175,7 @@ function assertProductPrice(productName, price) {
         content: `Assert that ${productName} costs ${price}`,
         trigger: `
             ${productSelector(productName)}
-            td.o_sale_product_configurator_price
+            td.o_sale_product_configurator_qty
             span:contains("${price}")
         `,
     };
@@ -161,7 +186,7 @@ function assertOptionalProductPrice(productName, price) {
         content: `Assert that ${productName} costs ${price}`,
         trigger: `
             ${optionalProductSelector(productName)}
-            td.o_sale_product_configurator_qty
+            td.o_sale_product_configurator_price
             span:contains("${price}")
         `,
     };
@@ -172,7 +197,7 @@ function assertProductPriceInfo(productName, priceInfo) {
         content: `Assert that the price info of ${productName} is ${priceInfo}`,
         trigger: `
             ${productSelector(productName)}
-            td.o_sale_product_configurator_price
+            td.o_sale_product_configurator_qty
             div:contains("${priceInfo}")
         `,
     };
@@ -183,7 +208,7 @@ function assertOptionalProductPriceInfo(productName, priceInfo) {
         content: `Assert that the price info of ${productName} is ${priceInfo}`,
         trigger: `
             ${optionalProductSelector(productName)}
-            td.o_sale_product_configurator_qty
+            td.o_sale_product_configurator_price
             div:contains("${priceInfo}")
         `,
     };
@@ -222,7 +247,9 @@ export default {
     addOptionalProduct,
     removeOptionalProduct,
     increaseProductQuantity,
+    decreaseProductQuantity,
     setProductQuantity,
+    setProductUoM,
     assertProductQuantity,
     selectAttribute,
     setCustomAttribute,

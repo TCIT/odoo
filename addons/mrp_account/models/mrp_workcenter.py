@@ -21,7 +21,6 @@ class MrpWorkcenter(models.Model):
 
 
 class MrpWorkcenterProductivity(models.Model):
-    _name = 'mrp.workcenter.productivity'
     _inherit = 'mrp.workcenter.productivity'
 
     account_move_line_id = fields.Many2one('account.move.line')

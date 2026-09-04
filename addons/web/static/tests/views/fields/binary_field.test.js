@@ -46,7 +46,7 @@ test("BinaryField is correctly rendered (readonly)", async () => {
     onRpc("/web/content", async (request) => {
         expect.step("/web/content");
 
-        const body = await request.text();
+        const body = await request.formData();
         expect(body).toBeInstanceOf(FormData);
         expect(body.get("field")).toBe("document", {
             message: "we should download the field document",
@@ -103,7 +103,7 @@ test("BinaryField is correctly rendered", async () => {
     onRpc("/web/content", async (request) => {
         expect.step("/web/content");
 
-        const body = await request.text();
+        const body = await request.formData();
         expect(body).toBeInstanceOf(FormData);
         expect(body.get("field")).toBe("document", {
             message: "we should download the field document",
@@ -220,7 +220,7 @@ test("file name field is not defined", async () => {
     expect(`.o_field_binary`).toHaveText("", {
         message: "there should be no text since the name field is not in the view",
     });
-    expect(`.o_field_binary .fa-download`).toBeDisplayed({
+    expect(`.o_field_binary .fa-download`).toBeVisible({
         message: "download icon should be visible",
     });
 });
@@ -428,4 +428,101 @@ test("isUploading state should be set to false after upload", async () => {
     await animationFrame();
     expect.verifyErrors([/RPC_ERROR/]);
     expect(`.o_select_file_button`).toHaveText("Upload your file");
+});
+
+test("should accept file with allowed MIME type and reject others", async () => {
+    await mountView({
+        resModel: "res.partner",
+        resId: 1,
+        type: "form",
+        arch: `
+            <form>
+                <field name="document" filename="foo" widget="binary" options="{'allowed_mime_type' : 'application/pdf'}"/>
+            </form>
+        `,
+    });
+
+    await click(`.o_select_file_button`);
+    await animationFrame();
+    const pdfFile = new File(["test"], "fake_pdf.pdf", { type: "application/pdf" });
+    await setInputFiles([pdfFile]);
+
+    await waitFor(`.o_form_button_save:visible`);
+    expect(`.o_field_binary input[type=text]`).toHaveAttribute("readonly");
+    expect(`.o_field_binary input[type=text]`).toHaveValue("fake_pdf.pdf");
+
+    await click(`.o_clear_file_button`);
+    await animationFrame();
+
+    await click(`.o_select_file_button`);
+    await animationFrame();
+    const textFile = new File(["test"], "text_file.txt", { type: "text/plain" });
+    await setInputFiles([textFile]);
+    await animationFrame();
+
+    expect(".o_notification").toHaveCount(1);
+    expect(".o_notification_content").toHaveText(
+        "Oops! 'text_file.txt' didn’t upload since its format isn’t allowed."
+    );
+    expect(".o_notification_bar").toHaveClass("bg-danger");
+});
+
+test("doesn't crash if value is not a string", async () => {
+    class Dummy extends models.Model {
+        document = fields.Binary();
+        _applyComputesAndValidate() {}
+    }
+    defineModels([Dummy]);
+    Dummy._records.push({ id: 1, document: {} });
+    await mountView({
+        type: "form",
+        resModel: "dummy",
+        resId: 1,
+        arch: `
+            <form>
+                <field name="document"/>
+            </form>`,
+    });
+    expect(".o_field_binary input").toHaveValue("");
+});
+
+test("Binary field in list view doesn't open the record when clicked", async () => {
+    Partner._records[0]["document"] = BINARY_FILE;
+    onRpc("/web/content", async (request) => {
+        expect.step("/web/content");
+        const body = await request.formData();
+        return new Blob([body.get("data")], { type: "text/plain" });
+    });
+    await mountView({
+        resModel: "res.partner",
+        type: "list",
+        arch: `
+            <list>
+                <field name="document" filename="foo" widget="binary"/>
+                <field name="foo"/>
+            </list>
+        `,
+        selectRecord: () => {
+            expect.step("selectRecord");
+        },
+    });
+
+    expect(`.o_data_row .o_data_cell`).toHaveText("coucou.txt");
+    const deferred = new Deferred();
+    const downloadOnClick = (ev) => {
+        const target = ev.target;
+        if (target.tagName === "A" && "download" in target.attributes) {
+            ev.preventDefault();
+            document.removeEventListener("click", downloadOnClick);
+            deferred.resolve();
+        }
+    };
+    document.addEventListener("click", downloadOnClick);
+    after(() => document.removeEventListener("click", downloadOnClick));
+    await contains(".o_field_widget[name='document'] .o_form_uri").click();
+    await deferred;
+    expect.verifySteps(["/web/content"]);
+
+    await contains(`.o_data_row .o_data_cell:eq(1)`).click();
+    expect.verifySteps(["selectRecord"]);
 });

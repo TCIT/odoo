@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0+e\n"
+"Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-02 11:38+0000\n"
-"PO-Revision-Date: 2023-11-02 11:38+0000\n"
+"POT-Creation-Date: 2025-12-30 19:08+0000\n"
+"PO-Revision-Date: 2025-12-30 19:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,38 +16,12 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_taxable_per_rate
-msgid "11) Total Value of Tax Payable as Per Tax Rate"
-msgstr ""
-
-#. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_tax_payable_total_value
-msgid "12) Total Value of Tax Payable"
-msgstr ""
-
-#. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_tax_deduction
-msgid "13) Amount of Tax Deduction"
-msgstr ""
-
-#. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_tax_deduction_adjustment
-msgid "13A) Adjustment under Sales Tax Deduction"
-msgstr ""
-
-#. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_tax_payable_total_before_penalty
-msgid "14) Total Tax Payable Before Penalty Imposed"
-msgstr ""
-
-#. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_penalty_amount
-msgid "15) Penalty Rate / Penalty Amount"
-msgstr ""
-
-#. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_total_including_penalty
-msgid "16) Total of Tax Payable Inclusive Penalty"
+#: model:ir.model.fields,help:l10n_my.field_product_product__l10n_my_tax_classification_code
+#: model:ir.model.fields,help:l10n_my.field_product_template__l10n_my_tax_classification_code
+msgid ""
+"A unique identifier for classifying items for official declaration. It holds"
+" the Customs Tariff Code for physical goods or the Service Type Code for "
+"services."
 msgstr ""
 
 #. module: l10n_my
@@ -56,46 +30,59 @@ msgid "Account Chart Template"
 msgstr ""
 
 #. module: l10n_my
-#: model:account.report.column,name:l10n_my.l10n_my_tax_report_balance
-msgid "Balance"
+#: model:ir.model.fields,field_description:l10n_my.field_account_chart_template__display_name
+#: model:ir.model.fields,field_description:l10n_my.field_product_template__display_name
+msgid "Display Name"
 msgstr ""
 
 #. module: l10n_my
-#: model:account.report,name:l10n_my.tax_report_vat
-msgid "SST-02 (B2)"
+#: model:ir.model.fields,field_description:l10n_my.field_account_chart_template__id
+#: model:ir.model.fields,field_description:l10n_my.field_product_template__id
+msgid "ID"
 msgstr ""
 
 #. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_tax_deduction_from_cn
-msgid "a) Tax Deduction from Credit Note"
+#: model:ir.model.fields,field_description:l10n_my.field_product_product__l10n_my_tax_classification_code
+#: model:ir.model.fields,field_description:l10n_my.field_product_template__l10n_my_tax_classification_code
+msgid "Malaysian Customs Tariff Code"
 msgstr ""
 
 #. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_taxable_5
-msgid "a) Taxable Goods at 5% Rate"
+#: model_terms:ir.ui.view,arch_db:l10n_my.product_template_form_inherit_l10n_my
+msgid "Malaysian Service Type Code"
 msgstr ""
 
 #. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_sale_tax_deduction
-msgid "b) Sales Tax Deduction"
+#: model:ir.model,name:l10n_my.model_product_template
+msgid "Product"
 msgstr ""
 
 #. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_taxable_10
-msgid "b) Taxable Goods at 10% Rate"
+#: model:account.report,name:l10n_my.tax_report_sst_02_b2
+msgid "SST-02 (B2, C, D, E)"
 msgstr ""
 
 #. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_service_tax_deduction
-msgid "c) Service Tax Deduction"
+#: model:account.report,name:l10n_my.tax_report_sst_02_a_b
+msgid "SST-02A (B)"
 msgstr ""
 
 #. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_services_other_than_group_h
-msgid "c) Taxable Services other than from Group H"
+#: model:account.account.tag,name:l10n_my.l10n_my_sst02_10_in
+msgid "SST02_10"
 msgstr ""
 
 #. module: l10n_my
-#: model:account.report.line,name:l10n_my.l10n_my_sst_services_group_h
-msgid "d) Taxable Services from Group H"
+#: model:account.account.tag,name:l10n_my.l10n_my_sst02_8_in
+msgid "SST02_8"
+msgstr ""
+
+#. module: l10n_my
+#: model:account.account.tag,name:l10n_my.l10n_my_sst02_9_in
+msgid "SST02_9"
+msgstr ""
+
+#. module: l10n_my
+#: model:account.report.line,name:l10n_my.l10n_my_sst_services_group_h_25
+msgid "Units @ RM25"
 msgstr ""

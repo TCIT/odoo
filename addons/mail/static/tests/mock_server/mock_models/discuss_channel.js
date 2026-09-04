@@ -1,5 +1,5 @@
-import { convertBrToLineBreak } from "@mail/utils/common/format";
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
+import { convertBrToLineBreak } from "@mail/utils/common/format";
 
 import { markup } from "@odoo/owl";
 
@@ -14,7 +14,6 @@ import {
 import { serializeDateTime, today } from "@web/core/l10n/dates";
 import { ensureArray } from "@web/core/utils/arrays";
 import { uniqueId } from "@web/core/utils/functions";
-import { DEFAULT_MAIL_SEARCH_ID, DEFAULT_MAIL_VIEW_ID } from "./constants";
 
 const { DateTime } = luxon;
 
@@ -23,21 +22,20 @@ export class DiscussChannel extends models.ServerModel {
     _inherit = ["mail.thread"];
     _mail_post_access = "read";
 
-    _views = {
-        [`search,${DEFAULT_MAIL_SEARCH_ID}`]: `<search/>`,
-        [`form,${DEFAULT_MAIL_VIEW_ID}`]: `<form/>`,
-    };
-
     author_id = fields.Many2one({
         relation: "res.partner",
         default: () => serverState.partnerId,
     });
-    avatarCacheKey = fields.Char({ string: "Avatar Cache Key" });
+    avatar_cache_key = fields.Char({ string: "Avatar Cache Key" });
     channel_member_ids = fields.One2many({
         relation: "discuss.channel.member",
         relation_field: "channel_id",
         string: "Members",
         default: () => [Command.create({ partner_id: serverState.partnerId })],
+    });
+    channel_name_member_ids = fields.One2many({
+        relation: "discuss.channel.member",
+        compute: "_compute_channel_name_member_ids",
     });
     channel_type = fields.Generic({ default: "channel" });
     group_public_id = fields.Generic({
@@ -47,6 +45,14 @@ export class DiscussChannel extends models.ServerModel {
         default: () => uniqueId("discuss.channel_uuid-"),
     });
     last_interest_dt = fields.Datetime({ string: "Last Interest" });
+
+    _compute_channel_name_member_ids() {
+        for (const channel of this) {
+            const members = channel.channel_member_ids ?? [];
+            members.sort();
+            channel.channel_name_member_ids = members.slice(0, 3);
+        }
+    }
 
     /** @param {number[]} ids */
     action_unfollow(ids) {
@@ -63,7 +69,7 @@ export class DiscussChannel extends models.ServerModel {
 
         const [channel] = this.browse(ids);
         const custom_store = new mailDataHelpers.Store(this.browse(channel.id), {
-            is_pinned: false,
+            close_chat_window: true,
             isLocallyPinned: false,
         });
         const [partner] = ResPartner.read(this.env.user.partner_id);
@@ -71,8 +77,8 @@ export class DiscussChannel extends models.ServerModel {
             ["channel_id", "in", ids],
             ["partner_id", "=", this.env.user.partner_id],
         ]);
+        BusBus._sendone(partner, "mail.record/insert", custom_store.get_result());
         if (!channelMember) {
-            BusBus._sendone(partner, "discuss.channel/leave", custom_store.get_result());
             return true;
         }
         this.write([channel.id], {
@@ -86,15 +92,12 @@ export class DiscussChannel extends models.ServerModel {
                 subtype_xmlid: "mail.mt_comment",
             })
         );
-        // send custom store after message_post to avoid is_pinned reset to True
-        BusBus._sendone(partner, "discuss.channel/leave", custom_store.get_result());
         const store = new mailDataHelpers.Store(this.browse(channel.id), {
-            channelMembers: mailDataHelpers.Store.many(
+            channel_member_ids: mailDataHelpers.Store.many(
                 DiscussChannelMember.browse(channelMember.id),
-                "DELETE",
-                makeKwArgs({ only_id: true })
+                makeKwArgs({ only_id: true, mode: "DELETE" })
             ),
-            memberCount: DiscussChannelMember.search_count([["channel_id", "=", channel.id]]),
+            member_count: DiscussChannelMember.search_count([["channel_id", "=", channel.id]]),
         });
         BusBus._sendone(channel, "mail.record/insert", store.get_result());
         // limitation of mock server, partner already unsubscribed from channel
@@ -104,9 +107,10 @@ export class DiscussChannel extends models.ServerModel {
     /**
      * @param {number[]} ids
      * @param {number[]} partner_ids
+     * @param {boolean} [invite_to_rtc_call=undefined]
      */
-    add_members(ids, partner_ids) {
-        const kwargs = getKwArgs(arguments, "ids", "partner_ids");
+    add_members(ids, partner_ids, invite_to_rtc_call) {
+        const kwargs = getKwArgs(arguments, "ids", "partner_ids", "invite_to_rtc_call");
         ids = kwargs.ids;
         delete kwargs.ids;
         partner_ids = kwargs.partner_ids || [];
@@ -131,19 +135,20 @@ export class DiscussChannel extends models.ServerModel {
         }
         const insertedChannelMembers = [];
         for (const partner of partners) {
-            insertedChannelMembers.push(
-                DiscussChannelMember.create({
-                    channel_id: channel.id,
-                    partner_id: partner.id,
-                    create_uid: this.env.uid,
-                })
-            );
+            const channelMember = DiscussChannelMember.create({
+                channel_id: channel.id,
+                partner_id: partner.id,
+                create_uid: this.env.uid,
+            });
+            insertedChannelMembers.push(channelMember);
             BusBus._sendone(partner, "discuss.channel/joined", {
-                channel: {
+                channel_id: channel.id,
+                data: new mailDataHelpers.Store(this.browse(channel.id), {
                     ...this._channel_basic_info([channel.id]),
-                    is_pinned: true,
                     model: "discuss.channel",
-                },
+                })
+                    .add(DiscussChannelMember.browse(channelMember), "unpin_dt")
+                    .get_result(),
                 invited_by_user_id: this.env.uid,
             });
         }
@@ -165,7 +170,10 @@ export class DiscussChannel extends models.ServerModel {
                 channel,
                 "mail.record/insert",
                 new mailDataHelpers.Store(this.browse(channel.id), {
-                    memberCount: DiscussChannelMember.search_count([
+                    invited_member_ids: kwargs.invite_to_rtc_call
+                        ? [["ADD", insertedChannelMembers]]
+                        : false,
+                    member_count: DiscussChannelMember.search_count([
                         ["channel_id", "=", channel.id],
                     ]),
                 })
@@ -173,6 +181,7 @@ export class DiscussChannel extends models.ServerModel {
                     .get_result()
             );
         }
+        return DiscussChannelMember.browse(insertedChannelMembers);
     }
 
     /**
@@ -189,11 +198,22 @@ export class DiscussChannel extends models.ServerModel {
         this.write([channel.id], { description });
     }
 
+    unlink(ids) {
+        /** @type {import("mock_models").BusBus} */
+        const BusBus = this.env["bus.bus"];
+
+        const channels = this.browse(ids);
+        for (const channel of channels) {
+            BusBus._sendone(channel, "discuss.channel/delete", { id: channel.id });
+        }
+        return super.unlink(...arguments);
+    }
+
     /**
      * @param {string} name
      * @param {string} [group_id]
      */
-    channel_create(name, group_id) {
+    _create_channel(name, group_id) {
         const kwargs = getKwArgs(arguments, "name", "group_id");
         name = kwargs.name;
         group_id = kwargs.group_id;
@@ -219,7 +239,21 @@ export class DiscussChannel extends models.ServerModel {
         );
         const [partner] = ResPartner.read(this.env.user.partner_id);
         this._broadcast([id], [partner]);
-        return new mailDataHelpers.Store(DiscussChannel.browse(id)).get_result();
+        return DiscussChannel.browse(id);
+    }
+
+    _channel_basic_info_fields() {
+        return [
+            "avatar_cache_key",
+            "channel_type",
+            "create_uid",
+            "default_display_mode",
+            "description",
+            "group_public_id",
+            "last_interest_dt",
+            "name",
+            "uuid",
+        ];
     }
 
     /** @param {number[]} ids */
@@ -230,41 +264,23 @@ export class DiscussChannel extends models.ServerModel {
 
         /** @type {import("mock_models").DiscussChannelMember} */
         const DiscussChannelMember = this.env["discuss.channel.member"];
-        /** @type {import("mock_models").ResGroups} */
-        const ResGroups = this.env["res.groups"];
 
-        const [data] = this.read(
-            ids,
-            [
-                "allow_public_upload",
-                "avatarCacheKey", // mock server simplification
-                "channel_type",
-                "create_uid",
-                "description",
-                "last_interest_dt",
-                "name",
-                "uuid",
-            ],
-            makeKwArgs({ load: false })
-        );
+        const [data] = this._read_format(ids, this._channel_basic_info_fields(), false);
         const [channel] = this.browse(ids);
-        const [group_public_id] = ResGroups.browse(channel.group_public_id);
         const memberOfCurrentUser = this._find_or_create_member_for_self(channel.id);
         Object.assign(data, {
-            authorizedGroupFullName: group_public_id ? group_public_id.name : false,
-            defaultDisplayMode: channel.default_display_mode,
-            group_based_subscription: channel.group_ids.length > 0,
             is_editable: (() => {
                 if (channel.channel_type === "channel") {
                     // Match the ACL rules
                     return (
                         !channel.group_public_id ||
-                        this.env.user.groups_id.includes(channel.group_public_id)
+                        this.env.user.group_ids.includes(channel.group_public_id)
                     );
                 }
                 return Boolean(memberOfCurrentUser);
             })(),
-            memberCount: DiscussChannelMember.search_count([["channel_id", "=", channel.id]]),
+            group_ids: channel.group_ids,
+            member_count: DiscussChannelMember.search_count([["channel_id", "=", channel.id]]),
         });
         return data;
     }
@@ -317,7 +333,7 @@ export class DiscussChannel extends models.ServerModel {
      * @param {number[]} partners_to
      * @param {boolean} [pin=true]
      */
-    channel_get(partners_to, pin) {
+    _get_or_create_chat(partners_to, pin) {
         const kwargs = getKwArgs(arguments, "partners_to", "pin");
         partners_to = kwargs.partners_to || [];
         pin = kwargs.pin ?? true;
@@ -343,7 +359,7 @@ export class DiscussChannel extends models.ServerModel {
                 channelMemberIds.length === partners.length &&
                 channel.channel_member_ids.length === partners.length
             ) {
-                return new mailDataHelpers.Store(DiscussChannel.browse(channel.id)).get_result();
+                return DiscussChannel.browse(channel.id);
             }
         }
         const id = this.create({
@@ -361,89 +377,102 @@ export class DiscussChannel extends models.ServerModel {
             [id],
             partners.map(({ id }) => id)
         );
-        return new mailDataHelpers.Store(DiscussChannel.browse(id)).get_result();
+        return DiscussChannel.browse(id);
     }
 
     /** @param {number[]} ids */
-    _to_store(ids, store) {
-        const kwargs = getKwArgs(arguments, "ids", "store");
-        ids = kwargs.ids;
-        delete kwargs.ids;
+    _to_store(store, fields) {
+        const kwargs = getKwArgs(arguments, "store", "fields");
+        store = kwargs.store;
+        fields = kwargs.fields;
 
-        const bus_last_id = this.env["bus.bus"].lastBusNotificationId;
-        /** @type {import("mock_models").DiscussChannelMember} */
-        const DiscussChannelMember = this.env["discuss.channel.member"];
-        /** @type {import("mock_models").DiscussChannelRtcSession} */
-        const DiscussChannelRtcSession = this.env["discuss.channel.rtc.session"];
-        /** @type {import("mock_models").MailMessage} */
-        const MailMessage = this.env["mail.message"];
-        /** @type {import("mock_models").MailNotification} */
-        const MailNotification = this.env["mail.notification"];
+        if (fields && Array.isArray(fields) && fields.length) {
+            store._add_record_fields(this, fields);
+        } else {
+            const bus_last_id = this.env["bus.bus"].lastBusNotificationId;
+            /** @type {import("mock_models").DiscussChannelMember} */
+            const DiscussChannelMember = this.env["discuss.channel.member"];
+            /** @type {import("mock_models").DiscussChannelRtcSession} */
+            const DiscussChannelRtcSession = this.env["discuss.channel.rtc.session"];
+            /** @type {import("mock_models").MailMessage} */
+            const MailMessage = this.env["mail.message"];
+            /** @type {import("mock_models").MailNotification} */
+            const MailNotification = this.env["mail.notification"];
+            /** @type {import("mock_models").ResGroups}*/
+            const ResGroups = this.env["res.groups"];
 
-        const channels = this.browse(ids);
-        for (const channel of channels) {
-            const members = DiscussChannelMember.browse(channel.channel_member_ids);
-            const messages = MailMessage._filter([
-                ["model", "=", "discuss.channel"],
-                ["res_id", "=", channel.id],
-            ]);
-            const res = this._channel_basic_info([channel.id]);
-            res.fetchChannelInfoState = "fetched";
-            res.parent_channel_id = mailDataHelpers.Store.one(
-                this.browse(channel.parent_channel_id)
-            );
-            res.from_message_id = mailDataHelpers.Store.one(
-                MailMessage.browse(channel.from_message_id)
-            );
-            res.group_public_id = channel.group_public_id;
-            if (this.env.user) {
-                const message_needaction_counter = MailNotification._filter([
-                    ["res_partner_id", "=", this.env.user.partner_id],
-                    ["is_read", "=", false],
-                    ["mail_message_id", "in", messages.map((message) => message.id)],
-                ]).length;
-                Object.assign(res, {
-                    message_needaction_counter,
-                    message_needaction_counter_bus_id: bus_last_id,
-                });
-            }
-            const memberOfCurrentUser = this._find_or_create_member_for_self(channel.id);
-            if (memberOfCurrentUser) {
-                const message_unread_counter = this.env[
-                    "discuss.channel.member"
-                ]._compute_message_unread_counter([memberOfCurrentUser.id]);
-                DiscussChannelMember.write([memberOfCurrentUser.id], {
-                    message_unread_counter,
-                });
-                Object.assign(res, {
-                    custom_channel_name: memberOfCurrentUser.custom_channel_name,
-                    is_pinned: memberOfCurrentUser.is_pinned,
-                    state: memberOfCurrentUser.fold_state || "closed",
-                });
-                if (memberOfCurrentUser.rtc_inviting_session_id) {
-                    res.rtcInvitingSession = mailDataHelpers.Store.one(
-                        DiscussChannelMember.browse(memberOfCurrentUser.rtc_inviting_session_id)
+            for (const channel of this) {
+                const members = DiscussChannelMember.browse(channel.channel_member_ids);
+                const messages = MailMessage._filter([
+                    ["model", "=", "discuss.channel"],
+                    ["res_id", "=", channel.id],
+                ]);
+                const res = this._channel_basic_info([channel.id]);
+                res.fetchChannelInfoState = "fetched";
+                res.parent_channel_id = mailDataHelpers.Store.one(
+                    this.env["discuss.channel"].browse(channel.parent_channel_id)
+                );
+                res.from_message_id = mailDataHelpers.Store.one(
+                    MailMessage.browse(channel.from_message_id)
+                );
+                res.group_public_id = mailDataHelpers.Store.one(
+                    ResGroups.browse(channel.group_public_id),
+                    makeKwArgs({ fields: ["full_name"] })
+                );
+                if (this.env.user) {
+                    const message_needaction_counter = MailNotification._filter([
+                        ["res_partner_id", "=", this.env.user.partner_id],
+                        ["is_read", "=", false],
+                        ["mail_message_id", "in", messages.map((message) => message.id)],
+                    ]).length;
+                    Object.assign(res, {
+                        message_needaction_counter,
+                        message_needaction_counter_bus_id: bus_last_id,
+                    });
+                }
+                const memberOfCurrentUser = this._find_or_create_member_for_self(channel.id);
+                if (memberOfCurrentUser) {
+                    const message_unread_counter = this.env[
+                        "discuss.channel.member"
+                    ]._compute_message_unread_counter([memberOfCurrentUser.id]);
+                    DiscussChannelMember.write([memberOfCurrentUser.id], {
+                        message_unread_counter,
+                    });
+                    store.add(
+                        DiscussChannelMember.browse(memberOfCurrentUser.id),
+                        makeKwArgs({
+                            extra_fields: [
+                                "custom_channel_name",
+                                "last_interest_dt",
+                                "message_unread_counter",
+                                mailDataHelpers.Store.one("rtc_inviting_session_id"),
+                                "unpin_dt",
+                            ],
+                        })
                     );
                 }
-                store.add(
-                    DiscussChannelMember.browse(memberOfCurrentUser.id),
-                    makeKwArgs({ extra_fields: { message_unread_counter: true } })
+                if (channel.channel_type !== "channel") {
+                    const otherMembers = members.filter(
+                        (member) => member.id !== memberOfCurrentUser?.id
+                    );
+                    store.add(otherMembers);
+                }
+                if (this._member_based_naming_channel_types().includes(channel.channel_type)) {
+                    res.channel_name_member_ids = mailDataHelpers.Store.many(
+                        this.env["discuss.channel.member"].browse(channel.channel_name_member_ids)
+                    );
+                }
+                res.rtc_session_ids = mailDataHelpers.Store.many(
+                    DiscussChannelRtcSession.browse(channel.rtc_session_ids),
+                    makeKwArgs({ extra: true, mode: "ADD" })
                 );
+                store._add_record_fields(this.browse(channel.id), res);
             }
-            if (channel.channel_type !== "channel") {
-                const otherMembers = members.filter(
-                    (member) => member.id !== memberOfCurrentUser?.id
-                );
-                store.add(otherMembers.map((member) => member.id));
-            }
-            res.rtcSessions = mailDataHelpers.Store.many(
-                DiscussChannelRtcSession.browse(channel.rtc_session_ids),
-                "ADD",
-                makeKwArgs({ extra: true })
-            );
-            res.allow_public_upload = channel.allow_public_upload;
-            store.add(this.browse(channel.id), res);
         }
+    }
+
+    _member_based_naming_channel_types() {
+        return ["group"];
     }
 
     /**
@@ -474,9 +503,14 @@ export class DiscussChannel extends models.ServerModel {
         }
         const [partner] = ResPartner.read(this.env.user.partner_id);
         if (!pinned) {
-            BusBus._sendone(partner, "discuss.channel/unpin", {
-                id: channel.id,
-            });
+            BusBus._sendone(
+                partner,
+                "mail.record/insert",
+                new mailDataHelpers.Store(DiscussChannel.browse(channel.id), {
+                    close_chat_window: true,
+                    id: channel.id,
+                }).get_result()
+            );
         } else {
             BusBus._sendone(
                 partner,
@@ -498,6 +532,14 @@ export class DiscussChannel extends models.ServerModel {
 
         const [channel] = this.browse(ids);
         this.write([channel.id], { name });
+        this.message_post(
+            channel.id,
+            makeKwArgs({
+                body: `<div data-oe-type="channel_rename" class="o_mail_notification">${name}</div>`,
+                message_type: "notification",
+                subtype_xmlid: "mail.mt_comment",
+            })
+        );
     }
 
     /**
@@ -529,16 +571,22 @@ export class DiscussChannel extends models.ServerModel {
         BusBus._sendone(
             partner,
             "mail.record/insert",
-            new mailDataHelpers.Store(this.browse(channelId), {
+            new mailDataHelpers.Store(DiscussChannelMember.browse(memberIdOfCurrentUser), {
                 custom_channel_name: name,
             }).get_result()
         );
     }
 
-    /** @param {number[]} partners_to */
-    create_group(partners_to) {
-        const kwargs = getKwArgs(arguments, "partners_to");
+    /**
+     * @param {number[]} partners_to
+     * @param {string} [default_display_mode=undefined]
+     * @param {string} name
+     * */
+    _create_group(partners_to, default_display_mode, name) {
+        const kwargs = getKwArgs(arguments, "partners_to", "default_display_mode", "name");
         partners_to = kwargs.partners_to || [];
+        default_display_mode = kwargs.default_display_mode;
+        name = kwargs.name || "";
 
         /** @type {import("mock_models").DiscussChannel} */
         const DiscussChannel = this.env["discuss.channel"];
@@ -551,13 +599,14 @@ export class DiscussChannel extends models.ServerModel {
             channel_member_ids: partners.map((partner) =>
                 Command.create({ partner_id: partner.id })
             ),
-            name: "",
+            default_display_mode: default_display_mode,
+            name,
         });
         this._broadcast(
             [id],
             partners.map((partner) => partner.id)
         );
-        return new mailDataHelpers.Store(DiscussChannel.browse(id)).get_result();
+        return DiscussChannel.browse(id);
     }
 
     _create_sub_channel(ids, from_message_id, name) {
@@ -597,14 +646,14 @@ export class DiscussChannel extends models.ServerModel {
         this.message_post(
             self.id,
             makeKwArgs({
-                body: `${partner.display_name} started a thread: <a href='#' class='o_channel_redirect' data-oe-id='${subChannels[0].id}' data-oe-model='discuss.channel'>${subChannels[0].name}</a>. <a href='#' data-oe-type='sub-channels-menu'>See all threads</a>.`,
+                body: `${partner.display_name} started a thread: <a href='#' class='o_channel_redirect' data-oe-id='${subChannels[0].id}' data-oe-model='discuss.channel'>${subChannels[0].name}</a>.`,
                 message_type: "notification",
                 subtype_xmlid: "mail.mt_comment",
             })
         );
         return {
-            data: store.get_result(),
-            sub_channel: mailDataHelpers.Store.one_id(subChannels),
+            store_data: store.get_result(),
+            sub_channel: subChannels[0].id,
         };
     }
 
@@ -642,7 +691,7 @@ export class DiscussChannel extends models.ServerModel {
         const [partner] = ResPartner.read(this.env.user.partner_id);
         BusBus._sendone(partner, "discuss.channel/transient_message", {
             body: notifBody,
-            thread: { model: "discuss.channel", id: channel.id },
+            channel_id: channel.id,
         });
         return true;
     }
@@ -692,7 +741,7 @@ export class DiscussChannel extends models.ServerModel {
             const [partner] = ResPartner.read(this.env.user.partner_id);
             BusBus._sendone(partner, "discuss.channel/transient_message", {
                 body: `<span class="o_mail_notification">${message}</span>`,
-                thread: { model: "discuss.channel", id: channel.id },
+                channel_id: channel.id,
             });
         }
     }
@@ -741,40 +790,33 @@ export class DiscussChannel extends models.ServerModel {
          * @returns {Object[]}
          */
         const mentionSuggestionsFilter = (channels, search, limit) => {
-            const matchingChannels = channels
-                .filter((channel) => {
-                    // no search term is considered as return all
-                    if (!search) {
-                        return true;
-                    }
-                    // otherwise name or email must match search term
-                    if (channel.name && channel.name.includes(search)) {
-                        return true;
-                    }
-                    return false;
-                })
-                .map((channel) => {
-                    // expected format
-                    const parentChannel = this.browse(channel.parent_channel_id);
-                    return {
-                        authorizedGroupFullName: channel.group_public_id
-                            ? channel.group_public_id.name
-                            : false,
-                        channel_type: channel.channel_type,
-                        id: channel.id,
-                        model: "discuss.channel",
-                        name: channel.name,
-                        parent_channel_id: parentChannel.length
-                            ? { id: parentChannel[0].id, model: "discuss.channel" }
-                            : false,
-                    };
-                });
-            // reduce results to max limit
+            const matchingChannels = channels.filter((channel) => {
+                // no search term is considered as return all
+                if (!search) {
+                    return true;
+                }
+                // otherwise name or email must match search term
+                if (channel.name && channel.name.includes(search)) {
+                    return true;
+                }
+                return false;
+            });
             matchingChannels.length = Math.min(matchingChannels.length, limit);
             return matchingChannels;
         };
         const mentionSuggestions = mentionSuggestionsFilter(this, search, limit);
-        return mentionSuggestions;
+        const store = new mailDataHelpers.Store(
+            mentionSuggestions,
+            makeKwArgs({
+                fields: [
+                    "name",
+                    "channel_type",
+                    "group_public_id",
+                    mailDataHelpers.Store.one("parent_channel_id"),
+                ],
+            })
+        );
+        return store.get_result();
     }
 
     /**
@@ -797,9 +839,9 @@ export class DiscussChannel extends models.ServerModel {
             ],
             makeKwArgs({ limit: 100 })
         );
-        const memberCount = DiscussChannelMember.search_count([["channel_id", "in", ids]]);
-        return new mailDataHelpers.Store(this.browse(ids[0]), { memberCount })
-            .add(members)
+        const member_count = DiscussChannelMember.search_count([["channel_id", "in", ids]]);
+        return new mailDataHelpers.Store(this.browse(ids[0]), { member_count })
+            .add(DiscussChannelMember.browse(members))
             .get_result();
     }
 
@@ -817,7 +859,7 @@ export class DiscussChannel extends models.ServerModel {
         kwargs.message_type ||= "notification";
         const [channel] = this.browse(id);
         this.write([id], {
-            last_interest_dt: serializeDateTime(today()),
+            last_interest_dt: serializeDateTime(DateTime.now()),
         });
         if (kwargs.special_mentions?.includes("everyone")) {
             kwargs["partner_ids"] = DiscussChannelMember._filter([
@@ -825,7 +867,7 @@ export class DiscussChannel extends models.ServerModel {
             ]).map((member) => member.partner_id);
         }
         delete kwargs.special_mentions;
-        const messageId = MailThread.message_post.call(this, [id], kwargs);
+        const messageIds = MailThread.message_post.call(this, [id], kwargs);
         // simulate compute of message_unread_counter
         const memberOfCurrentUser = this._find_or_create_member_for_self(channel.id);
         const otherMembers = DiscussChannelMember._filter([
@@ -837,7 +879,7 @@ export class DiscussChannel extends models.ServerModel {
                 message_unread_counter: member.message_unread_counter + 1,
             });
         }
-        return messageId;
+        return messageIds;
     }
 
     /**
@@ -891,36 +933,39 @@ export class DiscussChannel extends models.ServerModel {
         /** @type {import("mock_models").BusBus} */
         const BusBus = this.env["bus.bus"];
 
-        const [firstId] = ensureArray(idOrIds);
-        if ("image_128" in values) {
-            super.write(firstId, {
-                avatarCacheKey: DateTime.utc().toFormat("yyyyMMddHHmmss"),
-            });
-            const channel = this.search_read([["id", "=", firstId]])[0];
-            return BusBus._sendone(
-                channel,
-                "mail.record/insert",
-                new mailDataHelpers.Store(this.browse(firstId), {
-                    avatarCacheKey: channel.avatarCacheKey,
-                }).get_result()
-            );
-        }
-        const notifications = [];
-        const [channel] = this.browse(firstId);
-        if (channel) {
-            const diff = {};
-            for (const key in values) {
-                if (channel[key] !== values[key] && key !== "image_128") {
-                    diff[key] = values[key];
-                }
+        const channels = this.browse(ensureArray(idOrIds));
+        const basicInfoByChannelId = Object.fromEntries(
+            channels.map((channel) => [channel.id, this._channel_basic_info(channel.id)])
+        );
+        for (const channel of channels) {
+            if ("image_128" in values) {
+                super.write(channel.id, {
+                    avatar_cache_key: DateTime.utc().toFormat("yyyyMMddHHmmss"),
+                });
             }
-            notifications.push([
-                channel,
-                "mail.record/insert",
-                new mailDataHelpers.Store(this.browse(channel.id), diff).get_result(),
-            ]);
         }
         const result = super.write(...arguments);
+        const notifications = [];
+        for (const channel of channels) {
+            const basicInfo = this._channel_basic_info(channel.id);
+            const previousBasicInfo = basicInfoByChannelId[channel.id];
+            const changes = [];
+            for (const key of Object.keys(basicInfo)) {
+                if (basicInfo[key] !== previousBasicInfo[key]) {
+                    changes.push([key, basicInfo[key]]);
+                }
+            }
+            if (changes.length) {
+                notifications.push([
+                    channel,
+                    "mail.record/insert",
+                    new mailDataHelpers.Store(
+                        this.browse(channel.id),
+                        Object.fromEntries(changes)
+                    ).get_result(),
+                ]);
+            }
+        }
         if (notifications.length) {
             BusBus._sendmany(notifications);
         }

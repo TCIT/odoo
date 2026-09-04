@@ -8,9 +8,11 @@ from odoo.addons.base.tests.common import HttpCaseWithUserPortal
 
 @tagged('post_install', '-at_install')
 class TestWebsiteSaleCartRecovery(HttpCaseWithUserPortal):
-
     def test_01_shop_cart_recovery_tour(self):
         """The goal of this test is to make sure cart recovery works."""
+        self.env.ref('base.user_admin').write({
+            'email': 'mitchell.admin@example.com',
+        })
         self.env['product.product'].create({
             'name': 'Acoustic Bloc Screens',
             'list_price': 2950.0,
@@ -112,7 +114,7 @@ class TestWebsiteSaleCartRecoveryServer(TransactionCase):
         sent_mail = {}
         for order in orders:
             mail = self.env["mail.mail"].search([
-                ('record_name', '=', order['name'])
+                ('res_id', '=', order['id'])
             ])
             sent_mail.update({order: mail})
 

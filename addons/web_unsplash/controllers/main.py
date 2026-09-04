@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
@@ -7,8 +6,9 @@ import requests
 import werkzeug.utils
 from werkzeug.urls import url_encode
 
-from odoo import http, tools, _
+from odoo import http, modules, _
 from odoo.http import request
+from odoo.tools.image import image_process
 from odoo.tools.mimetypes import guess_mimetype
 
 from odoo.addons.html_editor.controllers.main import HTML_Editor
@@ -31,7 +31,7 @@ class Web_Unsplash(http.Controller):
             view counter.
         '''
         try:
-            if not url.startswith('https://api.unsplash.com/photos/') and not request.env.registry.in_test_mode():
+            if not url.startswith('https://api.unsplash.com/photos/') and not modules.module.current_test:
                 raise Exception(_("ERROR: Unknown Unsplash notify URL!"))
             access_key = self._get_access_key()
             requests.get(url, params=url_encode({'client_id': access_key}))
@@ -41,7 +41,7 @@ class Web_Unsplash(http.Controller):
     # ------------------------------------------------------
     # add unsplash image url
     # ------------------------------------------------------
-    @http.route('/web_unsplash/attachment/add', type='json', auth='user', methods=['POST'])
+    @http.route('/web_unsplash/attachment/add', type='jsonrpc', auth='user', methods=['POST'])
     def save_unsplash_url(self, unsplashurls=None, **kwargs):
         """
             unsplashurls = {
@@ -81,7 +81,7 @@ class Web_Unsplash(http.Controller):
         for key, value in unsplashurls.items():
             url = value.get('url')
             try:
-                if not url.startswith(('https://images.unsplash.com/', 'https://plus.unsplash.com/')) and not request.env.registry.in_test_mode():
+                if not url.startswith(('https://images.unsplash.com/', 'https://plus.unsplash.com/')) and not modules.module.current_test:
                     logger.exception("ERROR: Unknown Unsplash URL!: " + url)
                     raise Exception(_("ERROR: Unknown Unsplash URL!"))
 
@@ -98,7 +98,7 @@ class Web_Unsplash(http.Controller):
                 logger.exception("Timeout: " + str(e))
                 continue
 
-            image = tools.image_process(image, verify_resolution=True)
+            image = image_process(image, verify_resolution=True)
             mimetype = guess_mimetype(image)
             # append image extension in name
             query += mimetypes.guess_extension(mimetype) or ''
@@ -108,12 +108,15 @@ class Web_Unsplash(http.Controller):
 
             attachment_data = {
                 'name': '_'.join(url_frags),
-                'url': '/' + '/'.join(url_frags),
                 'data': image,
                 'res_id': res_id,
                 'res_model': res_model,
             }
             attachment = HTML_Editor._attachment_create(self, **attachment_data)
+            # Creating an attachment with binary type and URL is normally forbidden
+            # See `_check_serving_attachments`
+            # However, we want to bypass this protection for unsplash images
+            attachment.sudo().url = '/' + '/'.join(url_frags)
             if value.get('description'):
                 attachment.description = value.get('description')
             attachment.generate_access_token()
@@ -124,7 +127,7 @@ class Web_Unsplash(http.Controller):
 
         return uploads
 
-    @http.route("/web_unsplash/fetch_images", type='json', auth="user")
+    @http.route("/web_unsplash/fetch_images", type='jsonrpc', auth="user")
     def fetch_unsplash_images(self, **post):
         access_key = self._get_access_key()
         app_id = self.get_unsplash_app_id()
@@ -141,11 +144,11 @@ class Web_Unsplash(http.Controller):
                 return {'error': 'no_access'}
             return {'error': response.status_code}
 
-    @http.route("/web_unsplash/get_app_id", type='json', auth="public")
+    @http.route("/web_unsplash/get_app_id", type='jsonrpc', auth="public")
     def get_unsplash_app_id(self, **post):
         return request.env['ir.config_parameter'].sudo().get_param('unsplash.app_id')
 
-    @http.route("/web_unsplash/save_unsplash", type='json', auth="user")
+    @http.route("/web_unsplash/save_unsplash", type='jsonrpc', auth="user")
     def save_unsplash(self, **post):
         if request.env.user._can_manage_unsplash_settings():
             request.env['ir.config_parameter'].sudo().set_param('unsplash.app_id', post.get('appId'))

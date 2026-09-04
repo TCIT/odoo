@@ -1,5 +1,9 @@
 import { DynamicList } from "./dynamic_list";
 
+/**
+ * @typedef {import("./record").Record} RelationalRecord
+ */
+
 export class DynamicRecordList extends DynamicList {
     static type = "DynamicRecordList";
 
@@ -13,7 +17,7 @@ export class DynamicRecordList extends DynamicList {
     }
 
     _setData(data) {
-        /** @type {import("./record").Record[]} */
+        /** @type {RelationalRecord[]} */
         this.records = data.records.map((r) => this._createRecordDatapoint(r));
         this._updateCount(data);
         this._selectDomain(this.isDomainSelected);
@@ -123,7 +127,6 @@ export class DynamicRecordList extends DynamicList {
                 resId: data.id || false,
                 resIds: data.id ? [data.id] : [],
                 isMonoRecord: true,
-                currentCompanyId: this.currentCompanyId,
                 mode,
             },
             data,

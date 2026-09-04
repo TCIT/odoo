@@ -3,9 +3,9 @@
     'name': 'Poland - Accounting',
     'icon': '/account/static/description/l10n.png',
     'countries': ['pl'],
-    'version': '2.0',
+    'version': '2.1',
     'author': 'Odoo S.A., Grzegorz Grzelak (OpenGLOBE) (http://www.openglobe.pl)',
-    'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations.html',
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations.html',
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 This is the module to manage the accounting chart and taxes for Poland in Odoo.
@@ -22,12 +22,12 @@ Wewnętrzny numer wersji OpenGLOBE 1.02
         'base_iban',
         'base_vat',
         'account',
+        'account_edi_ubl_cii',
     ],
     'auto_install': ['account'],
     'data': [
         'security/ir.model.access.csv',
         'data/l10n_pl.l10n_pl_tax_office.csv',
-        'data/res.country.state.csv',
         'data/account.account.tag.csv',
         'data/account_tax_report_data.xml',
         'views/account_move_views.xml',

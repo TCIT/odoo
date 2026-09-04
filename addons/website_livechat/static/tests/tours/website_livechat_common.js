@@ -1,5 +1,3 @@
-import { queryAll } from "@odoo/hoot-dom";
-
 /*******************************
  *         Common Steps
  *******************************/
@@ -9,6 +7,10 @@ export const start = [
         content: "click on livechat widget",
         trigger: ".o-livechat-root:shadow .o-livechat-LivechatButton",
         run: "click",
+    },
+    {
+        trigger:
+            ".o-livechat-root:shadow .o-mail-ChatWindow:contains(El Deboulonnator) .o-mail-Thread[data-transient]",
     },
     {
         content: "Say hello!",
@@ -21,30 +23,23 @@ export const start = [
         run: "press Enter",
     },
     {
-        content: "Verify your message has been typed",
-        trigger: ".o-livechat-root:shadow .o-mail-Message:contains('Hello Sir!')",
-        run: "click",
-    },
-    {
-        content: "Verify there is no duplicates",
-        trigger: ".o-livechat-root:shadow .o-mail-Thread",
-        run() {
-            const el = queryAll(".o-mail-Message:contains('Hello Sir!')", { root: this.anchor });
-            if (el.length === 1) {
-                document.querySelector("body").classList.add("no_duplicated_message");
-            }
+        content: "Verify the message has been sent",
+        trigger:
+            ".o-livechat-root:shadow .o-mail-ChatWindow:contains(El Deboulonnator) .o-mail-Thread:not([data-transient])",
+        async run({ waitFor }) {
+            await waitFor(".o-mail-Message:contains('Hello Sir!')", {
+                root: this.anchor,
+                only: true,
+                timeout: 5000,
+            });
         },
-    },
-    {
-        content: "Is your message correctly sent ?",
-        trigger: "body.no_duplicated_message",
     },
 ];
 
 export const closeChat = [
     {
         content: "Close the chat window",
-        trigger: ".o-livechat-root:shadow .o-mail-ChatWindow-command[title*=Close]",
+        trigger: ".o-livechat-root:shadow .o-mail-ChatWindow-header [title*=Close]",
         run: "click",
     },
 ];
@@ -81,11 +76,10 @@ export const feedback = [
     },
 ];
 
-export const transcript = [
+export const emailTranscript = [
     {
-        content: "Type your email",
-        trigger: ".o-livechat-root:shadow input[placeholder='mail@example.com']",
-        run: "edit deboul@onner.com",
+        content: "Check email field",
+        trigger: ".o-livechat-root:shadow input:value(e.e@example.com)",
     },
     {
         content: "Send the conversation to your email address",
@@ -99,10 +93,18 @@ export const transcript = [
     },
 ];
 
+export const downloadTranscript = [
+    {
+        content: "Download transcript",
+        trigger: ".o-livechat-root:shadow .btn[title='Download a copy of this conversation']",
+        run: "click",
+    },
+];
+
 export const close = [
     {
         content: "Close the conversation with the x button",
-        trigger: ".o-livechat-root:shadow .o-mail-ChatWindow-command[title*=Close]",
+        trigger: ".o-livechat-root:shadow .o-mail-ChatWindow-header [title*=Close]",
         run: "click",
     },
     {

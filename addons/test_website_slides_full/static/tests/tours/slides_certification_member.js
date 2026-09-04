@@ -1,66 +1,31 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import * as tourUtils from '@website_sale/js/tours/tour_utils';
-import { clickOnExtraMenuItem } from "@website/js/tours/tour_utils";
 
 /**
- * The purpose of this tour is to check the whole certification flow:
+ * This tour validates the complete certification flow for a student (= portal user).
  *
- * -> student (= demo user) checks 'on payment' course content
- * -> clicks on "buy course"
- * -> is redirected to webshop on the product page
- * -> buys the course
- * -> fails 3 times, exhausting their attempts
- * -> is removed to the members of the course
- * -> buys the course again
- * -> succeeds the certification
- * -> has the course marked as completed
- * -> has the certification in their user profile
+ * The tour consists of two main scenarios:
  *
+ * 1. **Failure Attempts**
+ *    - The student is redirected to the "All Courses" page.
+ *    - Navigates to the certification course.
+ *    - Starts the certification process.
+ *    - Fails the test 3 times, exhausting all attempts.
+ *    - Is removed from the course members.
+ *
+ * 2. **Successful Attempt**
+ *    - The student is redirected to the "All Courses" page.
+ *    - Navigates to the certification course.
+ *    - Starts the certification process.
+ *    - Successfully completes the certification.
+ *    - The course is marked as completed.
+ *    - The certification is added to their user profile.
  */
 
-var initTourSteps = [{
+var startCertificationSurvey = [{
     content: 'eLearning: go to certification course',
     trigger: 'a:contains("DIY Furniture - TEST")',
     run: "click",
-}, {
-    content: 'eLearning: does not have access to certification',
-    trigger: '.o_wslides_course_main',
-    run() {
-        // check that user doesn't have access to course content
-        if (
-            document.querySelectorAll(
-                ".o_wslides_slides_list_slide .o_wslides_js_slides_list_slide_link"
-            ).length === 0
-        ) {
-            document
-                .querySelector(".o_wslides_course_main")
-                .classList.add("empty-content-success");
-        }
-    }
-}, {
-    content: 'eLearning: previous step check',
-    trigger: '.o_wslides_course_main.empty-content-success',
-}];
-
-var buyCertificationSteps = [{
-    content: 'eLearning: try to buy course',
-    trigger: 'a:contains("Add to Cart")',
-    run: "click",
-},
-    tourUtils.goToCart(),
-    tourUtils.goToCheckout(),
-    ...tourUtils.payWithDemo(),
-    clickOnExtraMenuItem({}),
-{
-    content: 'eCommerce: go back to e-learning home page',
-    trigger: '.nav-item a:contains("Courses")',
-    run: "click",
-}, {
-    content: 'eLearning: go into bought course',
-    trigger: 'a:contains("DIY Furniture")',
-    run: "click",
+    expectUnloadPage: true,
 }, {
     content: 'eLearning: user should be enrolled',
     trigger: '.o_wslides_js_course_join:contains("You\'re enrolled")',
@@ -68,6 +33,7 @@ var buyCertificationSteps = [{
     content: 'eLearning: start course',
     trigger: '.o_wslides_js_slides_list_slide_link',
     run: "click",
+    expectUnloadPage: true,
 }];
 
 var failCertificationSteps = [{
@@ -90,12 +56,17 @@ var failCertificationSteps = [{
     content: 'Survey: submitting the certification with wrong answers',
     trigger: 'button:contains("Submit")',
     run: "click",
+}, {
+    content: "Click on Submit",
+    trigger: 'button.btn-primary:contains("Submit")',
+    run: "click",
 }];
 
 var retrySteps = [{
     content: 'Survey: retry certification',
     trigger: 'a:contains("Retry")',
     run: "click",
+    expectUnloadPage: true,
 }];
 
 var succeedCertificationSteps = [{
@@ -122,6 +93,10 @@ var succeedCertificationSteps = [{
     content: 'Survey: submitting the certification with correct answers',
     trigger: 'button:contains("Submit")',
     run: "click",
+}, {
+    content: "Click on Submit",
+    trigger: 'button.btn-primary:contains("Submit")',
+    run: "click",
 }];
 
 var certificationCompletionSteps = [{
@@ -145,41 +120,43 @@ var certificationCompletionSteps = [{
     content: 'Survey: back to course home page',
     trigger: 'a:contains("Go back to course")',
     run: "click",
-},
-    clickOnExtraMenuItem({}),
-{
-    content: 'eLearning: back to e-learning home page',
-    trigger: '.nav-item a:contains("Courses")',
-    run: "click",
+    expectUnloadPage: true,
 }, {
     content: 'eLearning: course should be completed',
-    trigger: '.o_wslides_course_card:contains("DIY Furniture") .badge:contains("Completed")',
+    trigger: '.o_wslides_channel_completion_completed',
 }];
 
 var profileSteps = [{
+    content: 'eLearning: back to e-learning home page',
+    trigger: 'a:contains("Courses")',
+    run: "click",
+    expectUnloadPage: true,
+}, {
     content: 'eLearning: access user profile',
     trigger: '.o_wslides_home_aside_loggedin a:contains("View")',
     run: "click",
+    expectUnloadPage: true,
 }, {
     content: 'eLearning: check that the user profile certifications include the new certification',
     trigger: '.o_wprofile_slides_course_card_body:contains("Furniture Creation Certification")',
 }];
 
-registry.category("web_tour.tours").add('certification_member', {
+registry.category("web_tour.tours").add('certification_member_failure', {
     url: '/slides',
     steps: () => [].concat(
-        initTourSteps,
-        buyCertificationSteps,
+        startCertificationSurvey,
         failCertificationSteps,
         retrySteps,
         failCertificationSteps,
         retrySteps,
-        failCertificationSteps,
-        [{
-            trigger: 'a:contains("Go back to course")',
-            run: "click",
-        }],
-        buyCertificationSteps,
+        failCertificationSteps
+    )
+});
+
+registry.category("web_tour.tours").add('certification_member_success', {
+    url: '/slides',
+    steps: () => [].concat(
+        startCertificationSurvey,
         succeedCertificationSteps,
         certificationCompletionSteps,
         profileSteps

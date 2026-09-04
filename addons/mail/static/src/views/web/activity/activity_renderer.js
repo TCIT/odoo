@@ -96,6 +96,7 @@ export class ActivityRenderer extends Component {
         const progressBar = {
             bars: [],
             activeBar: isColumnFiltered ? this.activeFilter.progressValue.active : null,
+            isReady: true,
         };
         for (const [value, count] of Object.entries(types)) {
             if (count.inProgressBar) {
@@ -111,13 +112,12 @@ export class ActivityRenderer extends Component {
         const ongoingActivityCount = types.overdue.value + types.today.value + types.planned.value;
         const ongoingAndDoneCount = ongoingActivityCount + types.done.value;
         const labelAggregate = `${types.overdue.label} + ${types.today.label} + ${types.planned.label}`;
-        const aggregateOn =
-            ongoingAndDoneCount && this.isTypeDisplayDone(typeId)
-                ? {
-                      title: `${types.done.label} + ${labelAggregate}`,
-                      value: ongoingAndDoneCount,
-                  }
-                : undefined;
+        const aggregateOn = ongoingAndDoneCount
+            ? {
+                  title: `${types.done.label} + ${labelAggregate}`,
+                  value: ongoingAndDoneCount,
+              }
+            : undefined;
         return {
             aggregate: {
                 title: labelAggregate,
@@ -135,10 +135,6 @@ export class ActivityRenderer extends Component {
 
     getRecord(resId) {
         return this.props.records.find((r) => r.resId === resId);
-    }
-
-    isTypeDisplayDone(typeId) {
-        return this.props.activityTypes.find((a) => a.id === typeId).keep_done;
     }
 
     onSetProgressBarState(typeId, bar) {

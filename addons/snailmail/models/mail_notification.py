@@ -3,7 +3,7 @@
 from odoo import fields, models
 
 
-class Notification(models.Model):
+class MailNotification(models.Model):
     _inherit = 'mail.notification'
 
     notification_type = fields.Selection(selection_add=[('snail', 'Snailmail')], ondelete={'snail': 'cascade'})

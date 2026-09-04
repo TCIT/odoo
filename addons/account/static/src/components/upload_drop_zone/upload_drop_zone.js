@@ -11,6 +11,10 @@ export class UploadDropZone extends Component {
         dragIcon: { type: String, optional: true },
         dragText: { type: String, optional: true },
         dragTitle: { type: String, optional: true },
+        dragCompany: { type: String, optional: true },
+        dragShowCompany: { type: Boolean, optional: true },
+        dropZoneTitle: { type: String, optional: true },
+        dropZoneDescription: { type: String, optional: true },
     };
     static defaultProps = {
         hideZone: () => {},

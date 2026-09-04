@@ -1,5 +1,5 @@
 import { registry } from '@web/core/registry';
-import { stepUtils } from '@web_tour/tour_service/tour_utils';
+import { stepUtils } from '@web_tour/tour_utils';
 import comboConfiguratorTourUtils from '@sale/js/tours/combo_configurator_tour_utils';
 import productConfiguratorTourUtils from '@sale/js/tours/product_configurator_tour_utils';
 import tourUtils from '@sale/js/tours/tour_utils';
@@ -14,9 +14,9 @@ registry
             ...tourUtils.selectCustomer("Test Partner"),
             ...tourUtils.addProduct("Combo product"),
             // Assert that only single unconfigurable items are preselected.
-            comboConfiguratorTourUtils.assertSelectedComboItemCount(2),
-            comboConfiguratorTourUtils.assertComboItemSelected("Product A"),
-            comboConfiguratorTourUtils.assertComboItemSelected("Product C"),
+            comboConfiguratorTourUtils.assertPreselectedComboItemCount(2),
+            comboConfiguratorTourUtils.assertComboItemPreselected("Product A"),
+            comboConfiguratorTourUtils.assertComboItemPreselected("Product C"),
             comboConfiguratorTourUtils.assertConfirmButtonDisabled(),
             // Configure the remaining combos.
             comboConfiguratorTourUtils.selectComboItem("Product B"),

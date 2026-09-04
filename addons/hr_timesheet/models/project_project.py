@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from collections import defaultdict
 
 from odoo import api, fields, models
 from odoo.exceptions import RedirectWarning, ValidationError
-from odoo.tools import SQL
+from odoo.tools import SQL, float_round
 from odoo.tools.translate import _
 
 
-class Project(models.Model):
+class ProjectProject(models.Model):
     _inherit = "project.project"
 
     allow_timesheets = fields.Boolean(
@@ -25,15 +24,14 @@ class Project(models.Model):
 
     timesheet_ids = fields.One2many('account.analytic.line', 'project_id', 'Associated Timesheets', export_string_translation=False)
     timesheet_encode_uom_id = fields.Many2one('uom.uom', compute='_compute_timesheet_encode_uom_id', export_string_translation=False)
-    total_timesheet_time = fields.Integer(
+    total_timesheet_time = fields.Float(
         compute='_compute_total_timesheet_time', groups='hr_timesheet.group_hr_timesheet_user',
-        string="Total number of time (in the proper UoM) recorded in the project, rounded to the unit.",
-        compute_sudo=True, export_string_translation=False)
+        string="Total amount of time (in the proper unit) recorded in the project, rounded to the unit.", export_string_translation=False)
     encode_uom_in_days = fields.Boolean(compute='_compute_encode_uom_in_days', export_string_translation=False)
     is_internal_project = fields.Boolean(compute='_compute_is_internal_project', search='_search_is_internal_project', export_string_translation=False)
     remaining_hours = fields.Float(compute='_compute_remaining_hours', string='Time Remaining', compute_sudo=True)
     is_project_overtime = fields.Boolean('Project in Overtime', compute='_compute_remaining_hours', search='_search_is_project_overtime', compute_sudo=True, export_string_translation=False)
-    allocated_hours = fields.Float(string='Allocated Time')
+    allocated_hours = fields.Float(string='Allocated Time', tracking=True)
     effective_hours = fields.Float(string='Time Spent', compute='_compute_remaining_hours', compute_sudo=True)
 
     def _compute_encode_uom_in_days(self):
@@ -57,20 +55,15 @@ class Project(models.Model):
 
     @api.model
     def _search_is_internal_project(self, operator, value):
-        if not isinstance(value, bool):
-            raise ValueError(_('Invalid value: %s', value))
-        if operator not in ['=', '!=']:
-            raise ValueError(_('Invalid operator: %s', operator))
+        if operator not in ('in', 'not in'):
+            return NotImplemented
 
         Company = self.env['res.company']
-        sql = Company._where_calc(
-            [('internal_project_id', '!=', False)], active_test=False
+        sql = Company._search(
+            [('internal_project_id', '!=', False)],
+            active_test=False, bypass_access=True,
         ).subselect("internal_project_id")
-        if (operator == '=' and value is True) or (operator == '!=' and value is False):
-            operator_new = 'in'
-        else:
-            operator_new = 'not in'
-        return [('id', operator_new, sql)]
+        return [('id', operator, sql)]
 
     @api.depends('allow_timesheets', 'timesheet_ids.unit_amount', 'allocated_hours')
     def _compute_remaining_hours(self):
@@ -87,33 +80,25 @@ class Project(models.Model):
 
     @api.model
     def _search_is_project_overtime(self, operator, value):
-        if not isinstance(value, bool):
-            raise ValueError(_('Invalid value: %s', value))
-        if operator not in ['=', '!=']:
-            raise ValueError(_('Invalid operator: %s', operator))
+        if operator not in ('in', 'not in'):
+            return NotImplemented
 
         sql = SQL("""(
             SELECT Project.id
               FROM project_project AS Project
-              JOIN project_task AS Task
-                ON Project.id = Task.project_id
+              JOIN account_analytic_line AS aal
+                ON Project.id = aal.project_id
              WHERE Project.allocated_hours > 0
                AND Project.allow_timesheets = TRUE
-               AND Task.parent_id IS NULL
-               AND Task.state IN ('01_in_progress', '02_changes_requested', '03_approved', '04_waiting_normal')
           GROUP BY Project.id
-            HAVING Project.allocated_hours - SUM(Task.effective_hours) < 0
+            HAVING Project.allocated_hours - SUM(aal.unit_amount) < 0
         )""")
-        if (operator == '=' and value is True) or (operator == '!=' and value is False):
-            operator_new = 'in'
-        else:
-            operator_new = 'not in'
-        return [('id', operator_new, sql)]
+        return [('id', operator, sql)]
 
     @api.constrains('allow_timesheets', 'account_id')
     def _check_allow_timesheet(self):
         for project in self:
-            if project.allow_timesheets and not project.account_id:
+            if project.allow_timesheets and not project.account_id and not project.is_template:
                 project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
                 raise ValidationError(_(
                     "To use the timesheets feature, you need an analytic account for your project. Please set one up in the plan '%(plan_name)s' or turn off the timesheets feature.",
@@ -137,39 +122,30 @@ class Project(models.Model):
             # if the timesheet has no product_uom_id then we take the one of the project
             total_time = 0.0
             for product_uom, unit_amount in timesheet_time_dict[project.id]:
-                factor = (product_uom or project.timesheet_encode_uom_id).factor_inv
+                factor = (product_uom or project.timesheet_encode_uom_id).factor
                 total_time += unit_amount * (1.0 if project.encode_uom_in_days else factor)
             # Now convert to the proper unit of measure set in the settings
-            total_time *= project.timesheet_encode_uom_id.factor
-            project.total_timesheet_time = int(round(total_time))
+            total_time /= project.timesheet_encode_uom_id.factor
+            project.total_timesheet_time = float_round(total_time, precision_digits=2)
 
     @api.model_create_multi
     def create(self, vals_list):
         """ Create an analytic account if project allow timesheet and don't provide one
             Note: create it before calling super() to avoid raising the ValidationError from _check_allow_timesheet
         """
-        defaults = self.default_get(['allow_timesheets', 'account_id'])
-        analytic_accounts_vals = [
-            vals for vals in vals_list
-            if (
-                vals.get('allow_timesheets', defaults.get('allow_timesheets')) and
-                not vals.get('account_id', defaults.get('account_id'))
-            )
-        ]
-
-        if analytic_accounts_vals:
+        if analytic_accounts_vals := self._get_processed_analytic_account_vals(vals_list):
             analytic_accounts = self.env['account.analytic.account'].create(self._get_values_analytic_account_batch(analytic_accounts_vals))
             for vals, analytic_account in zip(analytic_accounts_vals, analytic_accounts):
                 vals['account_id'] = analytic_account.id
         return super().create(vals_list)
 
-    def write(self, values):
+    def write(self, vals):
         # create the AA for project still allowing timesheet
-        if values.get('allow_timesheets') and not values.get('account_id'):
-            project_wo_account = self.filtered(lambda project: not project.account_id)
+        if vals.get('allow_timesheets') and not vals.get('account_id'):
+            project_wo_account = self.filtered(lambda project: not project.account_id and not project.is_template)
             if project_wo_account:
                 project_wo_account._create_analytic_account()
-        return super(Project, self).write(values)
+        return super().write(vals)
 
     @api.depends('is_internal_project', 'company_id')
     @api.depends_context('allowed_company_ids')
@@ -184,7 +160,7 @@ class Project(models.Model):
 
     @api.model
     def _init_data_analytic_account(self):
-        self.search([('account_id', '=', False), ('allow_timesheets', '=', True)])._create_analytic_account()
+        self.search([('account_id', '=', False), ('allow_timesheets', '=', True), ('is_template', '=', False)])._create_analytic_account()
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_contains_entries(self):
@@ -215,23 +191,40 @@ class Project(models.Model):
 
     def action_project_timesheets(self):
         action = self.env['ir.actions.act_window']._for_xml_id('hr_timesheet.act_hr_timesheet_line_by_project')
-        action['display_name'] = _("%(name)s's Timesheets", name=self.name)
+        if not self.env.context.get('from_embedded_action'):
+            action['display_name'] = _("%(name)s's Timesheets", name=self.name)
         return action
+
+    def _get_processed_analytic_account_vals(self, vals_list):
+        """
+        Filters the values list to return the values for analytic accounts creation.
+        Allows values modifications through overrides.
+        """
+        defaults = self.default_get(['allow_timesheets', 'account_id', 'is_template'])
+        analytic_accounts_vals = []
+        for vals in vals_list:
+            if (
+                vals.get('allow_timesheets', defaults.get('allow_timesheets'))
+                and not vals.get('account_id', defaults.get('account_id'))
+                and not vals.get('is_template', defaults.get('is_template'))
+            ):
+                analytic_accounts_vals.append(vals)
+        return analytic_accounts_vals
 
     # ----------------------------
     #  Project Updates
     # ----------------------------
 
     def _get_stat_buttons(self):
-        buttons = super(Project, self)._get_stat_buttons()
+        buttons = super()._get_stat_buttons()
         if not self.allow_timesheets or not self.env.user.has_group("hr_timesheet.group_hr_timesheet_user"):
             return buttons
 
         encode_uom = self.env.company.timesheet_encode_uom_id
         uom_ratio = self.env.ref('uom.product_uom_hour').factor / encode_uom.factor
 
-        allocated = self.allocated_hours / uom_ratio
-        effective = self.total_timesheet_time / uom_ratio
+        allocated = self.allocated_hours * uom_ratio
+        effective = self.total_timesheet_time
         color = ""
         if allocated:
             number = f"{round(effective)} / {round(allocated)} {encode_uom.name}"
@@ -295,3 +288,8 @@ class Project(models.Model):
         action = super().action_view_tasks()
         action['context']['allow_timesheets'] = self.allow_timesheets
         return action
+
+    def _toggle_template_mode(self, is_template):
+        if not is_template and self.allow_timesheets and not self.account_id:
+            self._create_analytic_account()
+        super()._toggle_template_mode(is_template)

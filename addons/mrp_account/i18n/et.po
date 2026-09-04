@@ -1,44 +1,41 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* mrp_account
-# 
+# * mrp_account
+#
 # Translators:
-# Martin Trigaux, 2024
-# Triine Aavik <triine@avalah.ee>, 2024
-# Egon Raamat <egon@avalah.ee>, 2024
-# Martin Aavastik <martin@avalah.ee>, 2024
-# JanaAvalah, 2024
-# Patrick-Jordan Kiudorv, 2024
-# Piia Paurson <piia@avalah.ee>, 2024
-# Gert Valdek <gert@airobot.ee>, 2024
-# Katrin Kampura, 2024
-# Stevin Lilla, 2024
-# Eneli Õigus <enelioigus@gmail.com>, 2024
-# Siim Raasuke, 2024
-# 
+# Arma Gedonsky <armagedonsky@hot.ee>, 2022
+# Gert Valdek <gert@airobot.ee>, 2022
+# Triine Aavik <triine@avalah.ee>, 2022
+# Eneli Õigus <enelioigus@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Martin Aavastik <martin@avalah.ee>, 2022
+# Patrick-Jordan Kiudorv, 2022
+# Algo Kärp <algokarp@gmail.com>, 2022
+# Anna, 2023
+# JanaAvalah, 2023
+# Piia Paurson <piia@avalah.ee>, 2023
+# Kristina Pešehodko <kristina@avalah.ee>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Siim Raasuke, 2024\n"
-"Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
+"POT-Creation-Date: 2026-06-05 19:29+0000\n"
+"PO-Revision-Date: 2026-08-02 12:52+0000\n"
+"Last-Translator: Kristina Pešehodko <kristina@avalah.ee>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-19/"
+"mrp_account/et/>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: et\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "$1000"
-msgstr "$1000"
-
-#. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "$5000"
-msgstr "$5000"
+#. odoo-python
+#: code:addons/mrp_account/models/stock_move.py:0
+msgid "%(value)s for %(quantity)s %(unit)s from %(production)s"
+msgstr ""
 
 #. module: mrp_account
 #. odoo-python
@@ -47,19 +44,14 @@ msgid "%s - Labour"
 msgstr "%s - Tööjõud"
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "2023-08-15"
-msgstr "2023-08-15"
-
-#. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.view_move_form_inherit_mrp_account
 msgid "<span class=\"o_stat_text\">Manufacturing</span>"
 msgstr "<span class=\"o_stat_text\">Tootmine</span>"
 
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.mrp_production_form_view_inherited
-msgid "<span class=\"o_stat_text\">Valuation</span>"
-msgstr "<span class=\"o_stat_text\">Hinnang</span>"
+msgid "<span class=\"o_stat_text\">WIP</span>"
+msgstr "<span class=\"o_stat_text\">Lõpetamata toodang</span>"
 
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
@@ -89,7 +81,7 @@ msgstr "<span>Kogus</span>"
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
 msgid "<span>Ref.</span>"
-msgstr "<span>Ref.</span>"
+msgstr "<span>Viide</span>"
 
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
@@ -115,13 +107,8 @@ msgstr "Konto teisaldamise rida"
 #: model:ir.model,name:mrp_account.model_mrp_account_wip_accounting_line
 msgid "Account move line to be created when posting WIP account move"
 msgstr ""
-"Kontode liikumise rida, mis luuakse tööprotsessi konto liikumise "
-"postitamisel."
-
-#. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "Acme Corp."
-msgstr "Acme Corp."
+"Kontode liikumise rida, mis luuakse lõpetamata toodangu konto liikumise "
+"postitamisel"
 
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_account_analytic_account
@@ -163,12 +150,17 @@ msgstr "Retseptide arv"
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_account_analytic_account__bom_ids
 msgid "Bom"
-msgstr "Bom"
+msgstr "Retsept"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_account_analytic_line__category
 msgid "Category"
 msgstr "Kategooria"
+
+#. module: mrp_account
+#: model:ir.model,name:mrp_account.model_res_company
+msgid "Companies"
+msgstr ""
 
 #. module: mrp_account
 #: model:ir.actions.server,name:mrp_account.action_compute_price_bom_product
@@ -187,8 +179,17 @@ msgid ""
 "Compute the price of the product using products and operations of related "
 "bill of materials, for manufactured products only."
 msgstr ""
-"Arvutage tootehind, kasutades retseptiga seotud tooteid ning tegevusi, "
-"ainult toodetavatele toodetele."
+"Arvutage toodetavate toodete tootehind, kasutades retseptiga seotud tooteid "
+"ning tegevusi."
+
+#. module: mrp_account
+#. odoo-javascript
+#. odoo-python
+#: code:addons/mrp_account/report/stock_valuation_report.py:0
+#: code:addons/mrp_account/static/src/stock_valuation/stock_valuation_report.js:0
+#: code:addons/mrp_account/static/src/stock_valuation/stock_valuation_report.xml:0
+msgid "Cost of Production"
+msgstr "Tootmiskulu"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter__costs_hour_account_ids
@@ -199,7 +200,7 @@ msgstr "Tunnihinna konto"
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__create_uid
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting_line__create_uid
 msgid "Created by"
-msgstr "Loodud (kelle poolt?)"
+msgstr "Loonud"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__create_date
@@ -233,10 +234,26 @@ msgid "Discard"
 msgstr "Loobu"
 
 #. module: mrp_account
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_account__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_applicability__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_line__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_account_move__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_account_move_line__display_name
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__display_name
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting_line__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_production__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter_productivity__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workorder__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_product_category__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_product_product__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_product_template__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_report_mrp_report_mo_overview__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_res_company__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_stock_account_stock_valuation_report__display_name
+#: model:ir.model.fields,field_description:mrp_account.field_stock_move__display_name
 msgid "Display Name"
-msgstr "Kuvatav nimi"
+msgstr "Kuva nimi"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter__distribution_analytic_account_ids
@@ -259,8 +276,24 @@ msgid "Extra Unit Cost"
 msgstr "Täiendav ühiku hind"
 
 #. module: mrp_account
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_account__id
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_applicability__id
+#: model:ir.model.fields,field_description:mrp_account.field_account_analytic_line__id
+#: model:ir.model.fields,field_description:mrp_account.field_account_move__id
+#: model:ir.model.fields,field_description:mrp_account.field_account_move_line__id
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__id
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting_line__id
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_production__id
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter__id
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter_productivity__id
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_workorder__id
+#: model:ir.model.fields,field_description:mrp_account.field_product_category__id
+#: model:ir.model.fields,field_description:mrp_account.field_product_product__id
+#: model:ir.model.fields,field_description:mrp_account.field_product_template__id
+#: model:ir.model.fields,field_description:mrp_account.field_report_mrp_report_mo_overview__id
+#: model:ir.model.fields,field_description:mrp_account.field_res_company__id
+#: model:ir.model.fields,field_description:mrp_account.field_stock_account_stock_valuation_report__id
+#: model:ir.model.fields,field_description:mrp_account.field_stock_move__id
 msgid "ID"
 msgstr "ID"
 
@@ -285,11 +318,6 @@ msgid "Label"
 msgstr "Silt"
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "Laptop"
-msgstr "Sülearvuti"
-
-#. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__write_uid
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting_line__write_uid
 msgid "Last Updated by"
@@ -304,7 +332,7 @@ msgstr "Viimati uuendatud"
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_report_mrp_report_mo_overview
 msgid "MO Overview Report"
-msgstr "Tootmistellimuse koondraport "
+msgstr "Tootmistellimuse koondraport"
 
 #. module: mrp_account
 #. odoo-python
@@ -337,12 +365,12 @@ msgstr "Tootmistellimuste arv"
 #. odoo-python
 #: code:addons/mrp_account/wizard/mrp_wip_accounting.py:0
 msgid "Manufacturing WIP - %(orders_list)s"
-msgstr "Tootmise tööprotsess - %(orders_list)s"
+msgstr "Tootmise lõpetamata toodang - %(orders_list)s"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__mo_ids
 msgid "Mo"
-msgstr "E"
+msgstr "Tootmistellimus"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_workorder__mo_analytic_account_line_ids
@@ -352,25 +380,23 @@ msgstr "MO analüütilise konto rida"
 #. module: mrp_account
 #. odoo-python
 #: code:addons/mrp_account/wizard/mrp_wip_accounting.py:0
-msgid ""
-"Please make sure the total credit amount equals the total debit amount."
-msgstr ""
-"Palun veenduge, et kogukrediidi summa oleks võrdne kogudeebeti summaga."
+msgid "Please make sure the total credit amount equals the total debit amount."
+msgstr "Palun veenduge, et kogukrediidi summa oleks võrdne kogudeebeti summaga."
 
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.view_wip_accounting_form
 msgid "Post Manufacturing WIP"
-msgstr ""
+msgstr "Tootmisjärgne lõpetamata toodang"
 
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.view_wip_accounting_form
 msgid "Post WIP"
-msgstr ""
+msgstr "Poolelioleva töö postitamine"
 
 #. module: mrp_account
 #: model:ir.actions.act_window,name:mrp_account.action_wip_accounting
 msgid "Post WIP Accounting Entry"
-msgstr ""
+msgstr "Poolelioleva töö kande postitamine"
 
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_product_template
@@ -380,7 +406,7 @@ msgstr "Toode"
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_product_category
 msgid "Product Category"
-msgstr "Toote kategooria"
+msgstr "Tootekategooria"
 
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_product_product
@@ -398,11 +424,6 @@ msgid "Production Account"
 msgstr "Tootmise konto"
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "REF123"
-msgstr "REF123"
-
-#. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__reference
 msgid "Reference"
 msgstr "Viide"
@@ -411,7 +432,7 @@ msgstr "Viide"
 #: model:ir.model.fields,field_description:mrp_account.field_account_bank_statement_line__wip_production_ids
 #: model:ir.model.fields,field_description:mrp_account.field_account_move__wip_production_ids
 msgid "Relevant WIP MOs"
-msgstr ""
+msgstr "Seotud pooleliolevad tootmistellimused"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__reversal_date
@@ -422,7 +443,7 @@ msgstr "Tagasipööramise kuupäev"
 #. odoo-python
 #: code:addons/mrp_account/wizard/mrp_wip_accounting.py:0
 msgid "Reversal date must be after the posting date."
-msgstr ""
+msgstr "Tagasivõtmise kuupäev peab olema pärast postitamise kuupäeva."
 
 #. module: mrp_account
 #. odoo-python
@@ -441,22 +462,26 @@ msgid "Stock Move"
 msgstr "Laoliikumine"
 
 #. module: mrp_account
+#: model:ir.model,name:mrp_account.model_stock_account_stock_valuation_report
+msgid "Stock Valuation"
+msgstr "Laovarude hindamine"
+
+#. module: mrp_account
 #: model:ir.model.fields,help:mrp_account.field_account_bank_statement_line__wip_production_ids
 #: model:ir.model.fields,help:mrp_account.field_account_move__wip_production_ids
 msgid ""
 "The MOs that this WIP entry was based on. Expected to be set at time of WIP "
 "entry creation."
 msgstr ""
-"Tootmistellimused (MO), mille alusel see tööprotsessi (WIP) sissekanne "
-"tehti. Eeldatakse, et need seadistatakse tööprotsessi sissekande loomise "
-"ajal."
+"Tootmistellimused, mille alusel see poolelioleva töö kanne loodi. "
+"Eeldatakse, et need määratakse poolelioleva töö kande loomisel."
 
 #. module: mrp_account
 #: model:ir.model.fields,help:mrp_account.field_mrp_workcenter__expense_account_id
 msgid ""
-"The expense is accounted for when the manufacturing order is marked as done."
-" If not set, it is the expense account of the final product that will be "
-"used instead."
+"The expense is accounted for when the manufacturing order is marked as done. "
+"If not set, it is the expense account of the final product that will be used "
+"instead."
 msgstr ""
 "Kulu arvestatakse, kui tootmistellimus on märgitud lõpetatuks. Kui see pole "
 "seadistatud, kasutatakse selle asemel lõpptoote kulu arvestust."
@@ -464,11 +489,15 @@ msgstr ""
 #. module: mrp_account
 #: model:ir.model.fields,help:mrp_account.field_product_category__property_stock_account_production_cost_id
 msgid ""
-"This account will be used as a valuation counterpart for both components and final products for manufacturing orders.\n"
-"                If there are any workcenter/employee costs, this value will remain on the account once the production is completed."
+"This account will be used as a valuation counterpart for both components and "
+"final products for manufacturing orders.\n"
+"                If there are any workcenter/employee costs, this value will "
+"remain on the account once the production is completed."
 msgstr ""
-"Seda kontot kasutatakse tootmistellimuste komponentide ja lõpptoodete väärtuse vastandina.\n"
-"                Kui töökeskkonna/tugeva töötaja kulud on olemas, jääb see summa kontole tootmise lõpetamisel."
+"Seda kontot kasutatakse tootmistellimuste komponentide ja lõpptoodete "
+"väärtuse vastandina.\n"
+"                Kui töökeskkonna/tugeva töötaja kulud on olemas, jääb see "
+"summa kontole tootmise lõpetamisel."
 
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.view_wip_accounting_form
@@ -481,47 +510,53 @@ msgid "Total Debit"
 msgstr "Kogu deebet"
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "Units"
-msgstr "tk"
-
-#. module: mrp_account
 #. odoo-python
 #: code:addons/mrp_account/wizard/mrp_wip_accounting.py:0
 msgid "WIP - Component Value"
-msgstr ""
+msgstr "Pooleliolev toodang - komponentide väärtus"
 
 #. module: mrp_account
 #. odoo-python
 #: code:addons/mrp_account/wizard/mrp_wip_accounting.py:0
 msgid "WIP - Overhead"
-msgstr ""
+msgstr "Pooleliolev toodang - üldkulud"
+
+#. module: mrp_account
+#. odoo-python
+#: code:addons/mrp_account/models/mrp_production.py:0
+msgid "WIP Entries of %s"
+msgstr "Poolelioleva toodangu kanne %s"
+
+#. module: mrp_account
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_production__wip_move_count
+msgid "WIP Journal Entry Count"
+msgstr "Poolelioleva toodangu andmiku kannete arv"
 
 #. module: mrp_account
 #. odoo-python
 #: code:addons/mrp_account/models/account_move.py:0
 msgid "WIP MOs of %s"
-msgstr ""
+msgstr "Poolelioleva toodangu tootmistellimused %s"
 
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
 msgid "WIP Report for"
-msgstr ""
+msgstr "Poolelioleva toodangu aruanne"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__line_ids
 msgid "WIP accounting lines"
-msgstr ""
+msgstr "Poolelioleva töö raamatupidamiskanded"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting_line__wip_accounting_id
 msgid "WIP accounting wizard"
-msgstr ""
+msgstr "Poolelioleva töö raamatupidamise viisard"
 
 #. module: mrp_account
 #: model:ir.actions.report,name:mrp_account.wip_report
 msgid "WIP report"
-msgstr "Töös aruanne"
+msgstr "Poolelioleva toodangu aruanne"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_workorder__wc_analytic_account_line_ids
@@ -529,19 +564,19 @@ msgid "Wc Analytic Account Line"
 msgstr "Töökeskuse analüütilise konto rida"
 
 #. module: mrp_account
+#: model:ir.model.fields,field_description:mrp_account.field_mrp_production__wip_move_ids
+msgid "Wip Move"
+msgstr "Poolelioleva toodangu liikumine"
+
+#. module: mrp_account
 #: model:ir.model,name:mrp_account.model_mrp_account_wip_accounting
 msgid "Wizard to post Manufacturing WIP account move"
-msgstr ""
+msgstr "Abivahend tootmise poolelioleva töö kande postitamiseks"
 
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_mrp_workcenter
 msgid "Work Center"
 msgstr "Töökeskus"
-
-#. module: mrp_account
-#: model:ir.model,name:mrp_account.model_mrp_routing_workcenter
-msgid "Work Center Usage"
-msgstr "Töökeskuse kasutamine"
 
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_mrp_workorder
@@ -575,3 +610,66 @@ msgstr "Töökoha tootlikkuse logi"
 #: code:addons/mrp_account/models/mrp_workorder.py:0
 msgid "[WC] %s"
 msgstr "[WC] %s"
+
+#~ msgid "Acme Corp."
+#~ msgstr "Acme Corp."
+
+#~ msgid "Laptop"
+#~ msgstr "Sülearvuti"
+
+#~ msgid "REF123"
+#~ msgstr "REF123"
+
+#~ msgid "Units"
+#~ msgstr "Ühikud"
+
+#~ msgid "$1000"
+#~ msgstr "$1000"
+
+#~ msgid "$5000"
+#~ msgstr "$5000"
+
+#~ msgid "2023-08-15"
+#~ msgstr "2023-08-15"
+
+#~ msgid "From Production Order %(reference)s"
+#~ msgstr "Tootmistellimuselt %(reference)s"
+
+#~ msgid ""
+#~ "Analytic account in which cost and revenue entries will take        place "
+#~ "for financial management of the manufacturing order."
+#~ msgstr ""
+#~ "Analüütiline konto, kuhu tehakse tootmistellimuse finantsjuhtimiseks "
+#~ "kulu- ja tulukanded."
+
+#~ msgid ""
+#~ "Analytic account in which cost and revenue entries will take place for "
+#~ "financial management of the manufacturing order."
+#~ msgstr ""
+#~ "Analüütiline konto, kuhu tehakse tootmistellimuse finantsjuhtimiseks "
+#~ "kulu- ja tulukanded."
+
+#~ msgid "Bill of Material"
+#~ msgstr "Retsept"
+
+#~ msgid ""
+#~ "Posts analytical accounting entries in real time for both component and "
+#~ "operational costs."
+#~ msgstr ""
+#~ "Postitab reaalajas analüütilised raamatupidamiskanded nii komponentide "
+#~ "kui ka tegevuskulude kohta."
+
+#~ msgid "Production Order"
+#~ msgstr "Tootmiskäsk"
+
+#~ msgid "Stock Rule"
+#~ msgstr "Laoreegel"
+
+#~ msgid "Work Center Usage"
+#~ msgstr "Töökeskuse kasutamine"
+
+#~ msgid "Workcenters"
+#~ msgstr "Töökeskused"
+
+#~ msgid "[Raw] %s"
+#~ msgstr "[Raw] %s"

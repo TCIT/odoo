@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, models, fields
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
 class StockRule(models.Model):
@@ -16,21 +15,24 @@ class StockRule(models.Model):
         return procurement.values.get('sale_line_id'), super(StockRule, self)._get_procurements_to_merge_groupby(procurement)
 
     def _get_partner_id(self, values, rule):
-        route = self.env.ref('stock_dropshipping.route_drop_shipping', raise_if_not_found=False)
-        if route and rule.route_id == route:
+        route_id = self.env['ir.model.data']._xmlid_to_res_id('stock_dropshipping.route_drop_shipping')
+        if route_id and rule.route_id.id == route_id:
             return False
         return super()._get_partner_id(values, rule)
 
-
-class ProcurementGroup(models.Model):
-    _inherit = "procurement.group"
+    def _compute_picking_type_code_domain(self):
+        super()._compute_picking_type_code_domain()
+        for rule in self:
+            if rule.action == 'buy':
+                rule.picking_type_code_domain += ['dropship']
 
     @api.model
     def _get_rule_domain(self, location, values):
         domain = super()._get_rule_domain(location, values)
         if 'sale_line_id' in values and values.get('company_id'):
-            domain = expression.AND([domain, [('company_id', '=', values['company_id'].id)]])
+            domain = Domain.AND([domain, [('company_id', '=', values['company_id'].id)]])
         return domain
+
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
@@ -47,6 +49,7 @@ class StockPicking(models.Model):
     def _is_to_external_location(self):
         self.ensure_one()
         return super()._is_to_external_location() or self.is_dropship
+
 
 class StockPickingType(models.Model):
     _inherit = 'stock.picking.type'
@@ -70,7 +73,7 @@ class StockPickingType(models.Model):
     def _compute_warehouse_id(self):
         super()._compute_warehouse_id()
         for picking_type in self:
-            if picking_type.default_location_src_id.usage == 'supplier' and picking_type.default_location_dest_id.usage == 'customer':
+            if picking_type.code == 'dropship':
                 picking_type.warehouse_id = False
 
     @api.depends('code')
@@ -84,17 +87,18 @@ class StockPickingType(models.Model):
 class StockLot(models.Model):
     _inherit = 'stock.lot'
 
-    def _compute_last_delivery_partner_id(self):
-        super()._compute_last_delivery_partner_id()
+    def _compute_partner_ids(self):
+        delivery_ids_by_lot = self._find_delivery_ids_by_lot()
         for lot in self:
-            if lot.delivery_count > 0:
-                last_delivery = max(lot.delivery_ids, key=lambda d: d.date_done)
-                if last_delivery.is_dropship:
-                    lot.last_delivery_partner_id = last_delivery.sale_id.partner_id
+            if delivery_ids_by_lot[lot.id]:
+                picking_ids = self.env['stock.picking'].browse(delivery_ids_by_lot[lot.id]).sorted(key='date_done', reverse=True)
+                lot.partner_ids = list(p.sale_id.partner_shipping_id.id if p.is_dropship else p.partner_id.id for p in picking_ids)
+            else:
+                lot.partner_ids = False
 
     def _get_outgoing_domain(self):
         res = super()._get_outgoing_domain()
-        return expression.OR([res, [
+        return Domain.OR([res, [
             ('location_dest_id.usage', '=', 'customer'),
             ('location_id.usage', '=', 'supplier'),
         ]])

@@ -1,11 +1,14 @@
-import json
+import logging
+
+from markupsafe import Markup
 from hashlib import sha256
 from base64 import b64decode, b64encode
 from lxml import etree
 from datetime import datetime
 from odoo import models, fields, _, api
 from odoo.exceptions import UserError
-from odoo.tools import format_list
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountEdiFormat(models.Model):
@@ -154,24 +157,26 @@ class AccountEdiFormat(models.Model):
                 -   B. Reporting API: Submit a simplified Invoice to ZATCA for validation
         """
         clearance_data = invoice.journal_id._l10n_sa_api_clearance(invoice, signed_xml.decode(), PCSID_data)
-        if clearance_data.get('json_errors'):
-            errors = [json.loads(j).get('validationResults', {}) for j in clearance_data['json_errors']]
+        if error := clearance_data.get('json_errors'):
             error_msg = ''
+            if status_code := error.get('status_code'):
+                error_msg = Markup("<b>[%s] </b>") % status_code
+
             is_warning = True
-            for error in errors:
-                validation_results = error.get('validationResults', {})
-                for err in validation_results.get('warningMessages', []):
-                    error_msg += '\n - %s | %s' % (err['code'], err['message'])
-                for err in validation_results.get('errorMessages', []):
-                    is_warning = False
-                    error_msg += '\n - %s | %s' % (err['code'], err['message'])
+            validation_results = error.get('validationResults', {})
+            for err in validation_results.get('warningMessages', []):
+                error_msg += Markup('<b>%s</b> : %s <br/>') % (err['code'], err['message'])
+            for err in validation_results.get('errorMessages', []):
+                is_warning = False
+                error_msg += Markup('<b>%s</b> : %s <br/>') % (err['code'], err['message'])
             return {
                 'error': error_msg,
                 'rejected': not is_warning,
                 'response': signed_xml.decode(),
-                'blocking_level': 'warning' if is_warning else 'error'
+                'blocking_level': 'warning' if is_warning else 'error',
+                'status_code': status_code,
             }
-        if not clearance_data.get('error'):
+        if not clearance_data.get('error') and clearance_data.get("status_code") != 409:
             return self._l10n_sa_assert_clearance_status(invoice, clearance_data)
         return clearance_data
 
@@ -224,7 +229,7 @@ class AccountEdiFormat(models.Model):
             PCSID_data, certificate = invoice.journal_id._l10n_sa_api_get_pcsid()
         except UserError as e:
             return ({
-                'error': _("Could not generate PCSID values:\n%(error)s", error=e.args[0]),
+                'error': e.args[0],
                 'blocking_level': 'error',
                 'response': unsigned_xml
             }, unsigned_xml)
@@ -234,9 +239,17 @@ class AccountEdiFormat(models.Model):
         # Apply Signature/QR code on the generated XML document
         try:
             signed_xml = self._l10n_sa_get_signed_xml(invoice, unsigned_xml, certificate_sudo)
-        except UserError as e:
+        except UserError:
+            _logger.warning(
+                "ZATCA_ERROR: ZATCA signing failed for move=%s (id=%s, journal_id=%s, company_id=%s, api_mode=%s)",
+                invoice.name,
+                invoice.id,
+                invoice.journal_id.id,
+                invoice.company_id.id,
+                invoice.company_id.l10n_sa_api_mode,
+            )
             return ({
-                'error': _("Could not generate signed XML values:\n%(error)s", error=e.args[0]),
+                'error': _("Something went wrong. Please retry, and if that does not work, then onboard the journal again."),
                 'blocking_level': 'error',
                 'response': unsigned_xml
             }, unsigned_xml)
@@ -244,65 +257,44 @@ class AccountEdiFormat(models.Model):
         # Once the XML content has been generated and signed, we submit it to ZATCA
         return self._l10n_sa_submit_einvoice(invoice, signed_xml, PCSID_data), signed_xml
 
-    def _l10n_sa_check_partner_missing_info(self, partner_id, fields_to_check):
-        """
-            Helper function to check if ZATCA mandated partner fields are missing for a specified partner record
-        """
-        missing = []
-        for field in fields_to_check:
-            field_value = partner_id[field[0]]
-            if not field_value or (len(field) == 3 and not field[2](partner_id, field_value)):
-                missing.append(field[1])
-        return missing
-
     def _l10n_sa_check_seller_missing_info(self, invoice):
         """
             Helper function to check if ZATCA mandated partner fields are missing for the seller
         """
         partner_id = invoice.company_id.partner_id.commercial_partner_id
-        fields_to_check = [
-            ('l10n_sa_edi_building_number', _('Building Number for the Buyer is required on Standard Invoices')),
-            ('street2', _('Neighborhood for the Seller is required on Standard Invoices')),
-            ('l10n_sa_additional_identification_scheme',
-             _('Additional Identification Scheme is required for the Seller, and must be one of CRN, MOM, MLS, SAG or OTH'),
-             lambda p, v: v in ('CRN', 'MOM', 'MLS', 'SAG', 'OTH')
-             ),
-            ('vat',
-             _('VAT is required when Identification Scheme is set to Tax Identification Number'),
-             lambda p, v: p.l10n_sa_additional_identification_scheme != 'TIN'
-             ),
-            ('state_id', _('State / Country subdivision'))
-        ]
-        return self._l10n_sa_check_partner_missing_info(partner_id, fields_to_check)
+        missing_fields = []
+        if not partner_id.state_id:
+            missing_fields.append(_('State'))
+        if not partner_id.city:
+            missing_fields.append(_('City'))
+        return missing_fields
 
     def _l10n_sa_check_buyer_missing_info(self, invoice):
         """
             Helper function to check if ZATCA mandated partner fields are missing for the buyer
         """
-        fields_to_check = []
-        if any(tax.l10n_sa_exemption_reason_code in ('VATEX-SA-HEA', 'VATEX-SA-EDU') for tax in
-               invoice.invoice_line_ids.filtered(
-                   lambda line: line.display_type == 'product').tax_ids):
-            fields_to_check += [
-                ('l10n_sa_additional_identification_scheme',
-                 _('Additional Identification Scheme is required for the Buyer if tax exemption reason is either '
-                   'VATEX-SA-HEA or VATEX-SA-EDU, and its value must be NAT'), lambda p, v: v == 'NAT'),
-                ('l10n_sa_additional_identification_number',
-                 _('Additional Identification Number is required for commercial partners'),
-                 lambda p, v: p.l10n_sa_additional_identification_scheme != 'TIN'
-                 ),
-            ]
-        elif invoice.commercial_partner_id.l10n_sa_additional_identification_scheme == 'TIN':
-            fields_to_check += [
-                ('vat', _('VAT is required when Identification Scheme is set to Tax Identification Number'))
-            ]
-        if not invoice._l10n_sa_is_simplified() and invoice.partner_id.country_id.code == 'SA':
-            # If the invoice is a non-foreign, Standard (B2B), the Building Number and Neighborhood are required
-            fields_to_check += [
-                ('l10n_sa_edi_building_number', _('Building Number for the Buyer is required on Standard Invoices')),
-                ('street2', _('Neighborhood for the Buyer is required on Standard Invoices')),
-            ]
-        return self._l10n_sa_check_partner_missing_info(invoice.commercial_partner_id, fields_to_check)
+        partner_id = invoice.commercial_partner_id
+        missing = []
+        identification_scheme = partner_id.l10n_sa_edi_additional_identification_scheme
+        if (
+            any(
+                tax.l10n_sa_exemption_reason_code in ('VATEX-SA-HEA', 'VATEX-SA-EDU')
+                for tax in invoice.invoice_line_ids.filtered(
+                    lambda line: line.display_type == 'product'
+                ).tax_ids
+            )
+            and (
+                identification_scheme != 'NAT'
+                or not partner_id.l10n_sa_edi_additional_identification_number
+            )
+        ):
+            missing.append(_(
+                "Please set the Identification Scheme as National ID and Identification Number as the respective "
+                "number on the Customer as the Tax Exemption Reason is set either as VATEX-SA-HEA or VATEX-SA-EDU"
+            ))
+        if identification_scheme == 'TIN' and not partner_id.vat:
+            missing.append(_("Please set the VAT Number as the Identification Scheme is Tax Identification Number"))
+        return missing
 
     def _l10n_sa_post_zatca_edi(self, invoice):  # no batch ensure that there is only one invoice
         """
@@ -315,8 +307,9 @@ class AccountEdiFormat(models.Model):
         # to the taxpayer for clarifications
         chain_head = invoice.journal_id._l10n_sa_get_last_posted_invoice()
         if chain_head and chain_head != invoice and not chain_head._l10n_sa_is_in_chain():
+            invoice.l10n_sa_edi_chain_head_id = chain_head
             return {invoice: {
-                'error': f"ZATCA: Cannot post invoice while chain head ({chain_head.name}) has not been posted",
+                'error': _("Error: This invoice is blocked due to %s. Please check it.", chain_head.name),
                 'blocking_level': 'error',
                 'response': None,
             }}
@@ -339,8 +332,8 @@ class AccountEdiFormat(models.Model):
         if response_data.get('error'):
 
             # If the request was rejected, we save the signed xml content as an attachment
-            if response_data.get('rejected'):
-                invoice._l10n_sa_log_results(submitted_xml, response_data, error=True)
+            # If request timedout, just log note a warning message
+            invoice._l10n_sa_log_results(submitted_xml, response_data, error=response_data.get('rejected'))
 
             # If the request returned an exception (Timeout, ValueError... etc.) it means we're not sure if the
             # invoice was successfully cleared/reported, and thus we keep the Index Chain.
@@ -358,8 +351,13 @@ class AccountEdiFormat(models.Model):
         # Once submission is done with no errors, check submission status
         cleared_xml = self._l10n_sa_postprocess_einvoice_submission(invoice, submitted_xml, response_data)
 
+        # Set 'l10n_sa_edi_is_production' to True upon the first invoice submission in Production mode
+        if not invoice.company_id.l10n_sa_edi_is_production:
+            invoice.company_id.sudo().l10n_sa_edi_is_production = invoice.company_id.l10n_sa_api_mode == 'prod'
+
         # Save the submitted/returned invoice XML content once the submission has been completed successfully
         invoice._l10n_sa_log_results(cleared_xml.encode(), response_data)
+        invoice.journal_id._l10n_sa_reset_chain_head_error()
         return {
             invoice: {
                 'success': True,
@@ -396,28 +394,24 @@ class AccountEdiFormat(models.Model):
         company = invoice.company_id
 
         errors = super()._check_move_configuration(invoice)
-        if self.code != 'sa_zatca' or company.country_id.code != 'SA':
+        if self.code != 'sa_zatca' or company.country_id and company.country_id.code != 'SA':
             return errors
 
         if invoice.commercial_partner_id == invoice.company_id.partner_id.commercial_partner_id:
-            errors.append(_("- You cannot post invoices where the Seller is the Buyer"))
+            errors.append(_("- Invoice cannot be posted as the Supplier and Buyer are the same."))
 
         if not all(line.tax_ids for line in invoice.invoice_line_ids.filtered(lambda line: line.display_type == 'product' and line._check_edi_line_tax_required())):
-            errors.append(_("- Invoice lines should have at least one Tax applied."))
+            errors.append(_("- Invoice lines need at least one tax. Please input it and try again."))
 
         if not journal._l10n_sa_ready_to_submit_einvoices():
-            errors.append(
-                _("- Finish the Onboarding procees for journal %s by requesting the CSIDs and completing the checks.", journal.name))
+            errors.append(_("- The Journal (%s) is not onboarded yet. Please onboard it and try again.", journal.name))
 
         if not company._l10n_sa_check_organization_unit():
             errors.append(
                 _("- The company VAT identification must contain 15 digits, with the first and last digits being '3' as per the BR-KSA-39 and BR-KSA-40 of ZATCA KSA business rule."))
-        if not company.sudo().l10n_sa_private_key_id:
+        if not journal.company_id.sudo().l10n_sa_private_key_id:
             errors.append(
                 _("- No Private Key was generated for company %s. A Private Key is mandatory in order to generate Certificate Signing Requests (CSR).", company.name))
-        if not journal.l10n_sa_serial_number:
-            errors.append(
-                _("- No Serial Number was assigned for journal %s. A Serial Number is mandatory in order to generate Certificate Signing Requests (CSR).", journal.name))
 
         supplier_missing_info = self._l10n_sa_check_seller_missing_info(invoice)
         customer_missing_info = self._l10n_sa_check_buyer_missing_info(invoice)
@@ -425,22 +419,25 @@ class AccountEdiFormat(models.Model):
         if supplier_missing_info:
             errors.append(
                 _(
-                    "- Please, set the following fields on the Supplier: %(missing_fields)s",
-                    missing_fields=format_list(self.env, supplier_missing_info),
+                    "- Please set the following fields on the %(company_name)s: %(missing_fields)s",
+                    company_name=company.name,
+                    missing_fields=", ".join(supplier_missing_info),
                 )
             )
         if customer_missing_info:
             errors.append(
                 _(
-                    "- Please, set the following fields on the Customer: %(missing_fields)s",
-                    missing_fields=format_list(self.env, customer_missing_info),
+                    "- %(missing_info)s",
+                    missing_info=", ".join(customer_missing_info),
                 )
             )
         if invoice.invoice_date > fields.Date.context_today(self.with_context(tz='Asia/Riyadh')):
-            errors.append(_("- Please, make sure the invoice date is set to either the same as or before Today."))
-        if invoice.move_type in ('in_refund', 'out_refund') and not invoice._l10n_sa_check_refund_reason():
-            errors.append(
-                _("- Please, make sure either the Reversed Entry or the Reversal Reason are specified when confirming a Credit/Debit note"))
+            errors.append(_("- Please set the Invoice Date to be either less than or equal to today as per the Asia/Riyadh time zone, since ZATCA does not allow future-dated invoicing."))
+
+        if invoice.l10n_sa_show_reason and not invoice.l10n_sa_reason:
+            errors.append(_("- Please make sure the 'ZATCA Reason' for the issuance of the Credit/Debit Note is specified."))
+        if invoice.l10n_sa_show_reason and not invoice._l10n_sa_check_billing_reference():
+            errors.append(_("- Please make sure the 'Customer Reference' contains the sequential number of the original invoice(s) that the Credit/Debit Note is related to."))
         return errors
 
     def _needs_web_services(self):
@@ -476,3 +473,39 @@ class AccountEdiFormat(models.Model):
             'post': self._l10n_sa_post_zatca_edi,
             'edi_content': self._l10n_sa_get_invoice_content_edi,
         }
+
+    def _prepare_invoice_report(self, pdf_writer, edi_document):
+        """
+        Prepare invoice report to be printed.
+        :param pdf_writer: The pdf writer with the invoice pdf content loaded.
+        :param edi_document: The edi document to be added to the pdf file.
+        """
+        self.ensure_one()
+        super()._prepare_invoice_report(pdf_writer, edi_document)
+        if self.code != 'sa_zatca' or edi_document.move_id.country_code != 'SA':
+            return
+
+        attachment = edi_document.sudo().attachment_id
+        if not attachment or not attachment.datas:
+            _logger.warning("No attachment found for invoice %s", edi_document.move_id.name)
+            return
+
+        xml_content = attachment.raw
+        file_name = attachment.name
+
+        pdf_writer.addAttachment(file_name, xml_content, subtype='text/xml')
+        if not pdf_writer.is_pdfa:
+            try:
+                pdf_writer.convert_to_pdfa()
+            except Exception:
+                _logger.exception("Error while converting to PDF/A")
+            content = self.env['ir.qweb']._render(
+                'account_edi_ubl_cii.account_invoice_pdfa_3_facturx_metadata',
+                {
+                    'title': edi_document.move_id.name,
+                    'date': fields.Date.context_today(self),
+                },
+            )
+            if "<pdfaid:conformance>B</pdfaid:conformance>" in content:
+                content.replace("<pdfaid:conformance>B</pdfaid:conformance>", "<pdfaid:conformance>A</pdfaid:conformance>")
+            pdf_writer.add_file_metadata(content.encode())

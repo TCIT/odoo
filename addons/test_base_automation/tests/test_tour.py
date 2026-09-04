@@ -17,7 +17,7 @@ class BaseAutomationTestUi(HttpCase):
         self.env["base.automation"].with_context(active_test=False).search([]).write({"active": False})
         if neutralize_action:
             context = ast.literal_eval(self.env.ref("base_automation.base_automation_act").context)
-            del context["active_test"]
+            del context["search_default_inactive"]
             self.env.ref("base_automation.base_automation_act").context = str(context)
 
     def test_01_base_automation_tour(self):
@@ -158,7 +158,7 @@ class BaseAutomationTestUi(HttpCase):
         })
 
         action = {
-            "name": "This name should not survive :)",
+            "name": "Create Contact with name NameX",
             "base_automation_id": automation.id,
             "state": "object_create",
             "value": "NameX",
@@ -233,13 +233,13 @@ class BaseAutomationTestUi(HttpCase):
             onchange_link_passes += 1
             res = origin_link_onchange(self_model, *args)
             if onchange_link_passes == 1:
-                default_keys = {k: v for k, v in self_model._context.items() if k.startswith("default_")}
+                default_keys = {k: v for k, v in self_model.env.context.items() if k.startswith("default_")}
                 self.assertEqual(
                     default_keys,
                     {"default_model_id": model.id, "default_usage": "base_automation"},
                 )
             if onchange_link_passes == 2:
-                self.assertEqual(res["value"]["name"], "Add followers: ")
+                self.assertEqual(res["value"]["name"], "Add Followers")
 
             return res
 

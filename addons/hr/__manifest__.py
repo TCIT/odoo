@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
@@ -24,8 +23,13 @@
         'data/digest_data.xml',
         'data/report_paperformat.xml',
         'wizard/hr_departure_wizard_views.xml',
+        'wizard/hr_contract_template_wizard.views.xml',
         'wizard/mail_activity_schedule_views.xml',
+        'wizard/hr_bank_account_allocation_wizard.xml',
+        'wizard/hr_bank_account_allocation_wizard_line.xml',
         'views/mail_activity_plan_views.xml',
+        'views/hr_version_views.xml',
+        'views/hr_contract_template_views.xml',
         'views/hr_departure_reason_views.xml',
         'views/hr_contract_type_views.xml',
         'views/hr_job_views.xml',
@@ -38,6 +42,7 @@
         'views/hr_views.xml',
         'views/res_config_settings_views.xml',
         'views/res_partner_views.xml',
+        'views/res_partner_bank_views.xml',
         'views/discuss_channel_views.xml',
         'views/res_users.xml',
         'views/hr_templates.xml',
@@ -48,26 +53,22 @@
     ],
     'installable': True,
     'application': True,
-    'post_init_hook': '_install_hr_localization',
     'assets': {
         'web.assets_backend': [
             'hr/static/src/**/*',
-            ('remove', 'hr/static/src/views/hr_graph_view.js'),
-            ('remove', 'hr/static/src/views/hr_graph_controller.xml'),
-            ('remove', 'hr/static/src/views/hr_pivot_view.js'),
-            ('remove', 'hr/static/src/views/hr_pivot_controller.xml'),
         ],
-        'web.assets_backend_lazy': [
-            'hr/static/src/views/hr_graph_view.js',
-            'hr/static/src/views/hr_graph_controller.xml',
-            'hr/static/src/views/hr_pivot_view.js',
-            'hr/static/src/views/hr_pivot_controller.xml',
+        'im_livechat.assets_embed_core': [
+            'hr/static/src/core/common/**/*',
+        ],
+        'mail.assets_public': [
+            'hr/static/src/core/common/**/*',
         ],
         'web.qunit_suite_tests': [
             'hr/static/tests/legacy/**/*',
         ],
         'web.assets_unit_tests': [
             'hr/static/tests/**/*',
+            'hr/static/tests/mock_server/mock_server.js',
             ('remove', 'hr/static/tests/tours/**/*'),
             ('remove', 'hr/static/tests/legacy/**/*'),
         ],
@@ -75,5 +76,6 @@
             'hr/static/tests/tours/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

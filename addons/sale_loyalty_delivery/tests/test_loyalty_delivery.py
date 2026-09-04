@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.exceptions import ValidationError
 from odoo.fields import Command
-from odoo.tests import common, Form
+from odoo.tests import Form, common
+
 
 @common.tagged('post_install', '-at_install')
 class TestLoyaltyDeliveryCost(common.TransactionCase):
@@ -11,12 +11,16 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.SaleOrder = cls.env['sale.order']
+
         cls.partner_1 = cls.env['res.partner'].create({'name': 'My Test Customer'})
         cls.pricelist = cls.env['product.pricelist'].create({
             'name': 'Test Pricelist',
         })
-        cls.product_4 = cls.env['product.product'].create({'name': 'A product to deliver'})
+        cls.product_4 = cls.env['product.product'].create({
+            'name': "A product to deliver",
+            'type': 'consu',
+            'list_price': 200.0,
+        })
         cls.product_uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.product_delivery = cls.env['product.product'].create({
             'name': 'Delivery Charges',
@@ -31,6 +35,27 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
             'product_id': cls.product_delivery.id,
             'free_over': True,
             'amount': 100,
+        })
+        # Create a 50% discount on order code
+        cls.env['loyalty.program'].create({
+            'name': "50% discount code",
+            'program_type': 'promo_code',
+            'trigger': 'with_code',
+            'applies_on': 'current',
+            'rule_ids': [Command.create({
+                'code': "test-50pc",
+            })],
+            'reward_ids': [Command.create({
+                'reward_type': 'discount',
+                'discount': 50.0,
+                'discount_mode': 'percent',
+                'discount_applicability': 'order',
+            })],
+        })
+        cls.order = cls.env['sale.order'].create({
+            'partner_id': cls.partner_1.id,
+            'pricelist_id': cls.pricelist.id,
+            'order_line': [Command.create({'product_id': cls.product_4.id})],
         })
 
     def test_delivery_cost_gift_card(self):
@@ -56,11 +81,7 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
         }).generate_coupons()
         gift_card = program_gift_card.coupon_ids[0]
 
-        order = self.SaleOrder.create({
-            'partner_id': self.partner_1.id,
-            'pricelist_id': self.pricelist.id,
-            'order_line': [Command.create({'product_id': self.product_4.id, 'price_unit': 200.00})]
-        })
+        order = self.order
         self._apply_promo_code(order, gift_card.code)
         order.action_confirm()
 
@@ -100,11 +121,7 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
         ewallet = program_ewallet.coupon_ids[0]
 
         # Create an order and pay with the ewallet.
-        order = self.SaleOrder.create({
-            'partner_id': self.partner_1.id,
-            'pricelist_id': self.pricelist.id,
-            'order_line': [Command.create({'product_id': self.product_4.id, 'price_unit': 200.00})]
-        })
+        order = self.order
         order._apply_program_reward(reward_ewallet, ewallet)
 
         delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
@@ -133,11 +150,7 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
         })
 
         # Create an order and apply discount.
-        order = self.SaleOrder.create({
-            'partner_id': self.partner_1.id,
-            'pricelist_id': self.pricelist.id,
-            'order_line': [Command.create({'product_id': self.product_4.id, 'price_unit': 200.00,})]
-        })
+        order = self.order
         order._update_programs_and_rewards()
         coupon = order.coupon_point_ids.coupon_id.filtered(lambda c: c.program_id == discount90)
         order._apply_program_reward(discount90.reward_ids, coupon)
@@ -151,6 +164,28 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
         self.assertEqual(
             order.order_line.filtered('is_delivery').price_unit,
             self.product_delivery.list_price
+        )
+
+    def test_discount_percentage_ignores_delivery_lines(self):
+        """Check that percentage discounts ignore shipping costs."""
+        self.delivery_carrier.free_over = False
+        self._apply_promo_code(self.order, 'test-50pc')
+
+        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context(
+            default_order_id=self.order.id,
+            default_carrier_id=self.delivery_carrier.id,
+        ))
+        delivery_wizard.save().button_confirm()
+
+        self.assertEqual(
+            self.order.order_line.filtered('is_reward_line').price_unit,
+            -self.product_4.list_price / 2,
+            "Reward line should be half of the product's price",
+        )
+        self.assertAlmostEqual(
+            self.order.amount_untaxed,
+            self.product_4.list_price / 2 + self.delivery_carrier.fixed_price,
+            msg="Subtotal should be half of product's list price plus full delivery cost",
         )
 
     def _apply_promo_code(self, order, code, no_reward_fail=True):
@@ -169,3 +204,46 @@ class TestLoyaltyDeliveryCost(common.TransactionCase):
             status = order._apply_program_reward(rewards, coupons)
             if 'error' in status:
                 raise ValidationError(status['error'])
+
+    def test_ewallet_is_excluded_from_delivery_pricing(self):
+        program_ewallet = self.env["loyalty.program"].create({
+            "name": "eWallet",
+            "program_type": "ewallet",
+            "reward_ids": [
+                Command.create({
+                    "reward_type": "discount",
+                    "discount_mode": "per_point",
+                    "discount": 1,
+                    "discount_applicability": "order",
+                    "required_points": 1,
+                })
+            ],
+        })
+        self.env["loyalty.generate.wizard"].with_context(active_id=program_ewallet.id).create({
+            "coupon_qty": 1,
+            "points_granted": 200,
+        }).generate_coupons()
+        reward_ewallet = program_ewallet.reward_ids[0]
+        ewallet = program_ewallet.coupon_ids[0]
+
+        self.delivery_carrier.delivery_type = "base_on_rule"
+        self.delivery_carrier.price_rule_ids = [
+            Command.create({
+                "list_base_price": 30,
+                "operator": "<",
+                "variable": "price",
+                "max_value": 99,
+            }),
+            Command.create({
+                "list_base_price": 50,
+                "operator": ">=",
+                "variable": "price",
+                "max_value": 100,
+            }),
+        ]
+
+        order = self.order
+        order.order_line.price_unit = 100
+        order._apply_program_reward(reward_ewallet, ewallet)
+
+        self.assertEqual(self.delivery_carrier._get_price_available(order), 50)

@@ -2,7 +2,7 @@ import { addToBoardItem } from "@board/add_to_board/add_to_board";
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { hover, press, queryOne } from "@odoo/hoot-dom";
-import { animationFrame, mockDate } from "@odoo/hoot-mock";
+import { animationFrame } from "@odoo/hoot-mock";
 import * as dsHelpers from "@web/../tests/core/domain_selector/domain_selector_helpers";
 import {
     contains,
@@ -19,7 +19,6 @@ import {
     serverState,
     switchView,
     toggleMenuItem,
-    toggleMenuItemOption,
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
 import { registry } from "@web/core/registry";
@@ -81,7 +80,6 @@ test("save actions to dashboard", async () => {
 
     Partner._views = {
         list: '<list><field name="foo"/></list>',
-        search: "<search></search>",
     };
 
     onRpc("/board/add_to_dashboard", async (request) => {
@@ -173,7 +171,7 @@ test("save two searches to dashboard", async () => {
         views: [[false, "list"]],
     });
 
-    var filter_count = 0;
+    let filter_count = 0;
     // Add a first filter
     await toggleSearchBarMenu();
     await toggleMenuItem("Filter on a");
@@ -200,10 +198,10 @@ test("save an action domain to dashboard", async () => {
     // View domains are to be added to the dashboard domain
     expect.assertions(1);
 
-    var view_domain = ["name", "ilike", "a"];
-    var filter_domain = ["name", "ilike", "b"];
+    const viewDomain = ["name", "ilike", "a"];
+    const filterDomain = ["name", "ilike", "b"];
 
-    var expected_domain = ["&", view_domain, filter_domain];
+    const expectedDomain = ["&", viewDomain, filterDomain];
 
     Partner._views = {
         list: '<list><field name="foo"/></list>',
@@ -216,7 +214,7 @@ test("save an action domain to dashboard", async () => {
 
     onRpc("/board/add_to_dashboard", async (request) => {
         const { params: args } = await request.json();
-        expect(args.domain).toEqual(expected_domain, {
+        expect(args.domain).toEqual(expectedDomain, {
             message: "the correct domain should be sent",
         });
         return true;
@@ -229,7 +227,7 @@ test("save an action domain to dashboard", async () => {
         res_model: "partner",
         type: "ir.actions.act_window",
         views: [[false, "list"]],
-        domain: [view_domain],
+        domain: [viewDomain],
     });
 
     // Add a filter
@@ -248,7 +246,6 @@ test("add to dashboard with no action id", async () => {
 
     Partner._views = {
         pivot: '<pivot><field name="foo"/></pivot>',
-        search: "<search/>",
     };
     await mountWithCleanup(WebClient);
 
@@ -272,69 +269,9 @@ test("add to dashboard with no action id", async () => {
     expect(".o_add_to_board").toHaveCount(1);
 });
 
-test("correctly save the time ranges of a reporting view in comparison mode", async () => {
-    expect.assertions(1);
-
-    mockDate("2020-07-01 11:00:00");
-
-    Partner._fields.date = fields.Date();
-
-    Partner._views = {
-        pivot: '<pivot><field name="foo"/></pivot>',
-        search: '<search><filter name="Date" date="date"/></search>',
-    };
-
-    onRpc("/board/add_to_dashboard", async (request) => {
-        const { params: args } = await request.json();
-        expect(args.context_to_save.comparison).toEqual({
-            domains: [
-                {
-                    arrayRepr: ["&", ["date", ">=", "2020-07-01"], ["date", "<=", "2020-07-31"]],
-                    description: "July 2020",
-                },
-                {
-                    arrayRepr: ["&", ["date", ">=", "2020-06-01"], ["date", "<=", "2020-06-30"]],
-                    description: "June 2020",
-                },
-            ],
-            fieldName: "date",
-        });
-        return true;
-    });
-
-    // makes mouseEnter work
-
-    await mountWithCleanup(WebClient);
-
-    await getService("action").doAction({
-        id: 1,
-        res_model: "partner",
-        type: "ir.actions.act_window",
-        views: [[false, "pivot"]],
-    });
-
-    // filter on July 2020
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date");
-    await toggleMenuItemOption("Date", "July");
-
-    // compare July 2020 to June 2020
-    await toggleMenuItem("Date: Previous Period");
-
-    // add the view to the dashboard
-
-    await hover(".o_add_to_board button.dropdown-toggle");
-    await animationFrame();
-    await contains(queryOne("input", { root: getAddToDashboardMenu() })).edit("Pipeline", {
-        confirm: false,
-    });
-    await contains(queryOne("button", { root: getAddToDashboardMenu() })).click();
-});
-
 test("Add a view to dashboard (keynav)", async () => {
     Partner._views = {
         pivot: '<pivot><field name="foo"/></pivot>',
-        search: "<search/>",
     };
 
     // makes mouseEnter work
@@ -413,7 +350,7 @@ test("Add a view to dashboard doesn't save default filters", async () => {
     };
 
     // makes mouseEnter work
-    serverState.debug = true;
+    serverState.debug = "1";
 
     onRpc("/board/add_to_dashboard", async (request) => {
         const { params: args } = await request.json();
@@ -467,7 +404,6 @@ test("Add to my dashboard is not available in form views", async () => {
     Partner._views = {
         list: '<list><field name="foo"/></list>',
         form: '<form><field name="foo"/></form>',
-        search: "<search></search>",
     };
 
     await mountWithCleanup(WebClient);

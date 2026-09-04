@@ -1,113 +1,309 @@
-import { Component, onWillUnmount, useState, useSubEnv } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/self_order_service";
-import { ComboSelection } from "@pos_self_order/app/components/combo_selection/combo_selection";
+import { Component, onWillUnmount, useState, useSubEnv, useRef, onMounted } from "@odoo/owl";
+import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { useService } from "@web/core/utils/hooks";
+import { AttributeSelection } from "@pos_self_order/app/components/attribute_selection/attribute_selection";
+import { ProductNameWidget } from "@pos_self_order/app/components/product_name_widget/product_name_widget";
+import { ComboStepper } from "@pos_self_order/app/components/combo_stepper/combo_stepper";
+import { computeTotalComboPrice } from "../../services/card_utils";
+import { useScrollShadow } from "../../utils/scroll_shadow_hook";
+import { formatProductName, shouldShowMissingDetails } from "../../utils";
 
 export class ComboPage extends Component {
     static template = "pos_self_order.ComboPage";
-    static props = ["product"];
-    static components = { ComboSelection };
+    static props = ["productTemplate"];
+    static components = {
+        AttributeSelection,
+        ComboStepper,
+        ProductNameWidget,
+    };
 
     setup() {
-        this.selfOrder = useSelfOrder();
-        this.selfOrder.lastEditedProductId = this.props.product.id;
         this.router = useService("router");
-        useSubEnv({
-            selectedValues: {},
-            customValues: {},
-            editable: this.editableProductLine,
-            currentComboItemId: {
-                value: null,
-            },
-        });
-
-        if (!this.props.product) {
-            this.router.navigate("product_list");
+        if (!this.props.productTemplate) {
+            this.goBack();
             return;
         }
-
+        useSubEnv({ selectedValues: {} });
+        this.selfOrder = useSelfOrder();
         this.state = useState({
-            currentComboIndex: 0,
-            selectedCombos: [],
+            selectedChoiceIndex: 0,
+            choices: [],
             showResume: false,
-            selectedProduct: null,
-            showQtyButtons: false,
-            editMode: false,
             qty: 1,
+            selectedValues: this.env.selectedValues,
+            comboPrice: 0,
+            topShadowOpacity: 0,
+            bottomShadowOpacity: 1,
+        });
+        this.onAttributeSelection = this.onAttributeSelection.bind(this);
+
+        this.productNameRef = useRef("productName");
+        this.scrollContainerRef = useRef("scrollContainer");
+        this.scrollShadow = useScrollShadow(this.scrollContainerRef);
+
+        onMounted(() => {
+            const productNameEl = this.productNameRef.el;
+            if (productNameEl) {
+                this.observer = new IntersectionObserver(
+                    ([entry]) => {
+                        this.state.showStickyTitle = !entry.isIntersecting;
+                    },
+                    {
+                        root: null,
+                        threshold: 0,
+                    }
+                );
+                this.observer.observe(productNameEl);
+            }
+            this.resetScrollPosition();
         });
 
         onWillUnmount(() => {
-            this.selfOrder.editedLine = null;
+            if (this.observer) {
+                this.observer.unobserve(this.productNameRef.el);
+            }
         });
     }
 
-    get editableProductLine() {
-        const order = this.selfOrder.currentOrder;
-        return !(
-            this.selfOrder.editedLine &&
-            this.selfOrder.editedLine.uuid &&
-            order.lastChangesSent[this.selfOrder.editedLine.uuid]
-        );
-    }
-
     get currentCombo() {
-        return this.comboIds[this.state.currentComboIndex];
+        return this.props.productTemplate;
     }
 
-    getSelectedValues(attrValIds) {
-        return this.selfOrder.models["product.template.attribute.value"].filter((c) =>
-            attrValIds.includes(c.id)
+    get selectedChoice() {
+        return this.comboChoices[this.state.selectedChoiceIndex];
+    }
+
+    get comboChoices() {
+        const combo = this.props.productTemplate.combo_ids;
+        return combo.filter(
+            (c) =>
+                c.qty_max > 1 ||
+                c.combo_item_ids.length > 1 ||
+                (c.combo_item_ids.some((c) => c.product_id.attribute_line_ids.length !== 0) &&
+                    !c.combo_item_ids.every((c) => c.product_id.isCombo()))
         );
     }
 
-    resetState() {
-        this.state.selectedProduct = null;
-        this.state.showQtyButtons = false;
-
-        // Cannot assign to read only property
-        for (const key in this.env.selectedValues) {
-            delete this.env.selectedValues[key];
-        }
-
-        for (const key in this.env.customValues) {
-            delete this.env.customValues[key];
-        }
+    get comboItems() {
+        return this.selectedChoice.combo_item_ids;
     }
 
-    next() {
-        const combo = this.currentCombo;
-        const index = this.state.selectedCombos.findIndex((c) => c.id === combo.id);
-        const comboItem = this.selfOrder.models["product.combo.item"].get(
-            this.env.currentComboItemId.value
+    get currentChoiceState() {
+        return (this.state.choices[this.state.selectedChoiceIndex] ??= {});
+    }
+
+    shouldShowMissingDetails() {
+        const product = this.currentChoiceState.displayAttributesOfItem?.product_id;
+        return shouldShowMissingDetails(
+            product,
+            this.state.selectedValues,
+            this.scrollContainerRef
         );
-        const selectedCombo = {
-            combo_item_id: comboItem,
-            configuration: {
-                attribute_custom_values: Object.values(this.env.customValues),
-                attribute_value_ids: Object.values(this.env.selectedValues).map((s) => parseInt(s)),
-                price_extra: 0,
-            },
-        };
-        if (index !== -1) {
-            this.state.selectedCombos[index] = selectedCombo;
-        } else {
-            this.state.selectedCombos.push(selectedCombo);
-        }
-        this.resetState();
-        if (this.state.editMode) {
-            this.state.editMode = false;
-            this.state.showResume = true;
-            this.state.showQtyButtons = true;
+    }
+
+    selectItem(item) {
+        const product = item.product_id;
+        if (!product.self_order_available) {
             return;
         }
-        this.state.currentComboIndex++;
-        if (this.state.currentComboIndex == this.comboIds.length) {
-            this.state.showResume = true;
+
+        if (!this.hasMultiItemSelection) {
+            this.currentChoiceState.selectedItems = {};
+            this.currentChoiceState.selectedItemsOrder = [];
+        } else if (!this.canAddMoreItems()) {
+            return;
+        }
+
+        const selectedItems = (this.currentChoiceState.selectedItems ||= {});
+        const selectedItemsOrder = (this.currentChoiceState.selectedItemsOrder ||= []);
+
+        if (selectedItems[item.id]) {
+            this.changeItemQuantity(null, item, +1);
+            return;
+        }
+
+        const selection = (selectedItems[item.id] ||= { item });
+        selection.item = item;
+        selection.qty = 1;
+        selectedItemsOrder.push(item.id);
+        if (this.hasAttribute(product)) {
+            this.currentChoiceState.displayAttributesOfItem = item;
+        } else if (!this.hasMultiItemSelection) {
+            this.next();
         }
     }
 
-    back() {
-        this.router.navigate("product_list");
+    hasAttribute(product) {
+        const isKiosk = this.selfOrder.kioskMode;
+        return product.attribute_line_ids.some((line) => {
+            if (line.attribute_id?.create_variant !== "no_variant") {
+                return false;
+            }
+            return line.product_template_value_ids.some((a) => !(isKiosk && a.is_custom));
+        });
+    }
+
+    getSelectedItems(choiceState = undefined) {
+        if (!choiceState) {
+            choiceState = this.currentChoiceState;
+        }
+        return Object.values((choiceState.selectedItems ||= {}));
+    }
+
+    getItemState(item) {
+        const selection = this.currentChoiceState.selectedItems?.[item.id];
+        if (!selection) {
+            return { selected: false };
+        }
+        return { selected: true, qty: selection.qty };
+    }
+
+    get hasMultiItemSelection() {
+        return this.selectedChoice.qty_max > 1;
+    }
+
+    canAddMoreItems() {
+        return this.getSelectedItemCount() < this.selectedChoice.qty_max;
+    }
+
+    getSelectedItemCount() {
+        return this.getSelectedItems().reduce((sum, item) => sum + item.qty, 0);
+    }
+
+    get hasSelectedItems() {
+        return this.getSelectedItems().some((item) => item.qty > 0);
+    }
+
+    getExtraQtyForItem(item, comboIndex = null, showZero = false) {
+        const choice = comboIndex !== null ? this.comboChoices[comboIndex] : this.selectedChoice;
+        const choiceState =
+            comboIndex !== null ? this.state.choices[comboIndex] : this.currentChoiceState;
+        if (choice.qty_free === 0) {
+            return showZero ? choiceState.selectedItems?.[item.id]?.qty || 0 : 0;
+        }
+        const selectedItemsOrder = choiceState.selectedItemsOrder;
+        if (!selectedItemsOrder || !selectedItemsOrder.includes(item.id)) {
+            return 0;
+        }
+        const remainingFree = choice.qty_free;
+        const extraPriceItems = selectedItemsOrder.slice(remainingFree);
+        let extraPriceQty = 0;
+        for (const selectedItem of extraPriceItems) {
+            if (selectedItem === item.id) {
+                extraPriceQty += 1;
+            }
+        }
+        return extraPriceQty;
+    }
+
+    getBasePriceForItem(item) {
+        const comboSelection = this.getComboSelection().find(
+            (comboChoice) => comboChoice.combo_item_id.id === item.id
+        );
+        if (!comboSelection || !comboSelection.configuration) {
+            return {
+                pricePerExtra: 0,
+                pricePerUnit: 0,
+            };
+        }
+        let attributeExtraPrice = item.extra_price || 0;
+        for (const attribute of comboSelection.configuration.attribute_value_ids) {
+            const attributeValuePriceExtra =
+                this.selfOrder.models["product.template.attribute.value"].get(
+                    attribute
+                ).price_extra;
+            attributeExtraPrice += attributeValuePriceExtra || 0;
+        }
+        return {
+            pricePerExtra: comboSelection.combo_item_id.combo_id.base_price,
+            pricePerUnit: attributeExtraPrice,
+        };
+    }
+
+    getExtraPriceForItem(item, comboIndex = null, showZero = false) {
+        const choiceState =
+            comboIndex !== null ? this.state.choices[comboIndex] : this.currentChoiceState;
+        const itemQty =
+            showZero || item.combo_id.qty_free > 0
+                ? choiceState.selectedItems?.[item.id]?.qty || 0
+                : 0;
+        const extraQty = this.getExtraQtyForItem(item, comboIndex, showZero);
+        const basePrice = this.getBasePriceForItem(item);
+        return extraQty * basePrice.pricePerExtra + itemQty * basePrice.pricePerUnit;
+    }
+
+    changeItemQuantity(evt, item, value) {
+        evt?.stopPropagation();
+
+        if (value > 0 && !this.canAddMoreItems()) {
+            return;
+        }
+        const itemState = this.currentChoiceState.selectedItems[item.id];
+        if (!itemState) {
+            return;
+        }
+        itemState.qty = Math.max(0, itemState.qty + value);
+        if (value < 0) {
+            const lastIndex = this.currentChoiceState.selectedItemsOrder.lastIndexOf(item.id);
+            if (lastIndex !== -1) {
+                this.currentChoiceState.selectedItemsOrder.splice(lastIndex, 1);
+            }
+        } else if (value > 0) {
+            this.currentChoiceState.selectedItemsOrder.push(item.id);
+        }
+        if (itemState.qty === 0) {
+            delete this.currentChoiceState.selectedItems[item.id];
+        }
+    }
+
+    isAttributeSelection() {
+        return !!this.currentChoiceState.displayAttributesOfItem;
+    }
+
+    onAttributeSelection(singleSelection, attribute, value) {
+        const product = this.currentChoiceState.displayAttributesOfItem.product_id;
+        if (singleSelection && product.attribute_line_ids.length === 1) {
+            if (!this.selfOrder.kioskMode && value.is_custom) {
+                return;
+            }
+            this.next();
+        }
+    }
+
+    isArchivedCombination() {
+        if (!this.currentChoiceState.displayAttributesOfItem) {
+            return false;
+        }
+
+        const comboItem = this.currentChoiceState.displayAttributesOfItem;
+        if (!comboItem) {
+            return false;
+        }
+        const selection = this.state.selectedValues[comboItem.product_id];
+        if (!selection) {
+            return false;
+        }
+        const variantAttributeValueIds = selection
+            .getAllSelectedAttributeValuesIds()
+            .map((attr) => Number(attr));
+        return comboItem.product_id._isArchivedCombination(variantAttributeValueIds);
+    }
+
+    hasMissingAttributeValues(comboItem) {
+        const product = comboItem.product_id;
+        const selection = this.state.selectedValues[product.id];
+
+        const attributeLines = product.attribute_line_ids.filter(
+            (line) => line.attribute_id?.create_variant === "no_variant"
+        );
+
+        if (attributeLines.length === 0) {
+            return false;
+        }
+        if (!selection) {
+            return true;
+        }
+        return Boolean(selection.getMissingAttributeValue(attributeLines));
     }
 
     changeQuantity(increase) {
@@ -118,33 +314,251 @@ export class ComboPage extends Component {
         return increase ? this.state.qty++ : this.state.qty--;
     }
 
-    async addToCart() {
-        if (this.selfOrder.editedLine) {
-            this.selfOrder.editedLine.delete();
-        }
-
-        this.selfOrder.addToCart(this.props.product, 1, "", {}, {}, this.state.selectedCombos);
-        this.router.back();
-    }
-
-    editCombo(combo_id) {
-        this.state.currentComboIndex = this.comboIds.findIndex((c) => c === combo_id);
-        this.state.showResume = false;
-        this.state.editMode = true;
-        this.state.showQtyButtons = false;
-    }
-
-    get showQtyButtons() {
-        return this.state.showQtyButtons && this.props.product.self_order_available;
-    }
-
-    get comboIds() {
-        const combo = this.props.product.combo_ids;
-        return combo.filter(
-            (c) =>
-                c.combo_item_ids.length > 1 ||
-                (c.combo_item_ids.some((c) => c.product_id.attribute_line_ids.length !== 0) &&
-                    !c.combo_item_ids.every((c) => c.product_id.isCombo()))
+    isBackVisible() {
+        return !(
+            this.state.selectedChoiceIndex === 0 && !this.currentChoiceState.displayAttributesOfItem
         );
     }
+
+    back() {
+        if (this.state.showResume) {
+            this.state.selectedChoiceIndex = this.comboChoices.length - 1;
+            this.state.showResume = false;
+        } else if (this.isAttributeSelection()) {
+            if (!this.isNextEnabled()) {
+                // Disable product selection if not all attributes are selected
+                const choiceState = this.currentChoiceState;
+                delete choiceState.selectedItems[choiceState.displayAttributesOfItem.id];
+                const index = choiceState.selectedItemsOrder.indexOf(
+                    choiceState.displayAttributesOfItem.id
+                );
+                if (index !== -1) {
+                    choiceState.selectedItemsOrder.splice(index, 1);
+                }
+            }
+            this.currentChoiceState.displayAttributesOfItem = false;
+        } else {
+            this.state.selectedChoiceIndex = Math.max(0, this.state.selectedChoiceIndex - 1);
+        }
+        this.resetScrollPosition();
+    }
+
+    isNextEnabled() {
+        if (this.currentChoiceState.displayAttributesOfItem) {
+            const selectedItem = this.currentChoiceState.displayAttributesOfItem;
+            if (!this.hasMissingAttributeValues(selectedItem) && !this.isArchivedCombination()) {
+                return true;
+            }
+        } else {
+            if (
+                this.getSelectedItemCount() >= this.selectedChoice.qty_free ||
+                this.selectedChoice.qty_free === 0
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    next() {
+        if (!this.isNextEnabled()) {
+            return;
+        }
+
+        if (this.state.showResume) {
+            this.addToCart();
+            return;
+        }
+
+        let newSectionDisplayed = false;
+        const choices = this.comboChoices;
+        const isLastChoice = this.state.selectedChoiceIndex === choices.length - 1;
+        const isAttributeSelection = this.isAttributeSelection();
+        const hasMultiItemSelection = this.hasMultiItemSelection;
+        if (isAttributeSelection && hasMultiItemSelection) {
+            // If we're in attribute selection for a multi-item choice, reset to item selection
+            this.currentChoiceState.displayAttributesOfItem = false;
+            newSectionDisplayed = true;
+        } else if (!isAttributeSelection && !hasMultiItemSelection) {
+            const selectedItem = this.getSelectedItems()[0];
+            if (selectedItem) {
+                if (this.hasAttribute(selectedItem.item.product_id)) {
+                    this.currentChoiceState.displayAttributesOfItem = selectedItem.item;
+                    newSectionDisplayed = true;
+                }
+            }
+        }
+
+        if (!newSectionDisplayed) {
+            if (isLastChoice) {
+                this.state.showResume = true;
+            } else {
+                this.state.selectedChoiceIndex += 1;
+            }
+            newSectionDisplayed = true;
+        }
+
+        if (newSectionDisplayed) {
+            this.resetScrollPosition();
+        }
+    }
+
+    onChoiceClicked(choiceIndex) {
+        if (choiceIndex === this.state.selectedChoiceIndex) {
+            this.state.showResume = false;
+            this.currentChoiceState.displayAttributesOfItem = false;
+            return;
+        }
+
+        // Ensure all previous choices are completed
+        for (let i = 0; i < choiceIndex; i++) {
+            const choice = this.state.choices[i];
+            if (!choice) {
+                return false;
+            }
+
+            const selectedItems = this.getSelectedItems(choice);
+            if (selectedItems.length === 0) {
+                return;
+            }
+            const missingAttributes = selectedItems.some((s) =>
+                this.hasMissingAttributeValues(s.item)
+            );
+            if (missingAttributes) {
+                return;
+            }
+        }
+
+        this.state.showResume = false;
+        this.state.selectedChoiceIndex = choiceIndex;
+        this.currentChoiceState.displayAttributesOfItem = false;
+        this.resetScrollPosition();
+    }
+
+    resetScrollPosition() {
+        // Ensure the section below the large image is visible to minimize excessive scrolling for the user
+        setTimeout(() => {
+            const el = window.document.getElementById("k-combo-scroll-target");
+            if (el) {
+                this.scrollContainerRef.el?.scrollTo({ top: el.offsetTop - 20 });
+            }
+        }, 1);
+    }
+
+    getSelection() {
+        return this.comboChoices.map((choice, index) => {
+            const choiceState = this.state.choices[index];
+            const selectedItems = choiceState ? this.getSelectedItems(choiceState) : [];
+            const comboItems = selectedItems.map((selectedItem) => {
+                const comboItem = selectedItem.item;
+                const product = comboItem.product_id;
+                const selectedAttributes = [];
+                const selectedValues = this.state.selectedValues[product.id];
+
+                for (const line of product.attribute_line_ids) {
+                    const selected = selectedValues?.getSelectedAttributeValues(line) ?? [];
+                    if (selected.length > 0) {
+                        selectedAttributes.push({
+                            attribute_line_id: line,
+                            attribute_ids: selected,
+                            names: selected
+                                .map((attrValue) => {
+                                    const customValue = attrValue.is_custom
+                                        ? selectedValues.getCustomValue(
+                                              attrValue.attribute_id,
+                                              attrValue
+                                          )?.custom_value
+                                        : null;
+                                    return customValue
+                                        ? `${attrValue.name}: ${customValue}`
+                                        : attrValue.name;
+                                })
+                                .join(", "),
+                        });
+                    }
+                }
+                return {
+                    combo_item_id: comboItem,
+                    qty: selectedItem.qty,
+                    product_id: product,
+                    attributes: selectedAttributes,
+                    custom_attributes: selectedValues?.getAllCustomValues(),
+                };
+            });
+
+            return {
+                combo_choice_id: choice,
+                combo_items: comboItems,
+            };
+        });
+    }
+
+    getComboSelection() {
+        return this.getSelection().flatMap((choice) =>
+            choice.combo_items.map((item) => ({
+                combo_item_id: item.combo_item_id,
+                qty: item.qty,
+                configuration: {
+                    attribute_custom_values: item.custom_attributes,
+                    attribute_value_ids:
+                        item.attributes?.flatMap((attr) =>
+                            attr.attribute_ids.map((attrVal) => attrVal.id)
+                        ) || [],
+                    price_extra: 0,
+                },
+            }))
+        );
+    }
+
+    addToCart() {
+        this.selfOrder.addToCart(
+            this.props.productTemplate,
+            this.state.qty,
+            "",
+            {},
+            {},
+            this.getComboSelection()
+        );
+
+        this.goBack();
+    }
+
+    getComboPrice() {
+        return computeTotalComboPrice(
+            this.selfOrder,
+            this.props.productTemplate,
+            this.getComboSelection(),
+            this.state.qty
+        );
+    }
+
+    goBack() {
+        this.router.navigate("product_list");
+    }
+
+    scrollUpToRequired() {
+        const selectedItem = this.currentChoiceState.displayAttributesOfItem.product_id;
+        const selection = this.state.selectedValues[selectedItem.id];
+        const missingAttribute = selection?.getMissingAttributeValue(
+            selectedItem.attribute_line_ids
+        );
+        document
+            .getElementById(missingAttribute?.attribute_id?.id)
+            ?.scrollIntoView({ behavior: "smooth" });
+    }
+
+    formatProductName(product) {
+        return formatProductName(product);
+    }
+
+    /*
+     // TODO
+     get editableProductLine() {
+        const order = this.selfOrder.currentOrder;
+        return !(
+            this.selfOrder.editedLine &&
+            this.selfOrder.editedLine.uuid &&
+            order.lastChangesSent[this.selfOrder.editedLine.uuid]
+        );
+    }*/
 }

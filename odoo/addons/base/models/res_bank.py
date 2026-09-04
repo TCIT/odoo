@@ -3,7 +3,8 @@ import re
 from collections.abc import Iterable
 
 from odoo import api, fields, models
-from odoo.tools import _, SQL
+from odoo.exceptions import UserError
+from odoo.tools import _, clean_context
 
 
 def sanitize_account_number(acc_number):
@@ -12,10 +13,10 @@ def sanitize_account_number(acc_number):
     return False
 
 
-class Bank(models.Model):
-    _description = 'Bank'
+class ResBank(models.Model):
     _name = 'res.bank'
-    _order = 'name'
+    _description = 'Bank'
+    _order = 'name, id'
     _rec_names_search = ['name', 'bic']
 
     name = fields.Char(required=True)
@@ -46,6 +47,18 @@ class Bank(models.Model):
             return domain
         return super()._search_display_name(operator, value)
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('bic', False):
+                vals['bic'] = vals['bic'].upper()
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if vals.get('bic', False):
+            vals['bic'] = vals['bic'].upper()
+        return super().write(vals)
+
     @api.onchange('country')
     def _onchange_country_id(self):
         if self.country and self.country != self.state.country_id:
@@ -62,6 +75,7 @@ class ResPartnerBank(models.Model):
     _rec_name = 'acc_number'
     _description = 'Bank Accounts'
     _order = 'sequence, id'
+    _check_company_domain = models.check_company_domain_parent_of
 
     @api.model
     def get_supported_account_types(self):
@@ -73,7 +87,8 @@ class ResPartnerBank(models.Model):
 
     active = fields.Boolean(default=True)
     acc_type = fields.Selection(selection=lambda x: x.env['res.partner.bank'].get_supported_account_types(), compute='_compute_acc_type', string='Type', help='Bank account type: Normal or IBAN. Inferred from the bank account number.')
-    acc_number = fields.Char('Account Number', required=True)
+    acc_number = fields.Char('Account Number', required=True, search='_search_acc_number')
+    clearing_number = fields.Char('Clearing Number')
     sanitized_acc_number = fields.Char(compute='_compute_sanitized_acc_number', string='Sanitized Account Number', readonly=True, store=True)
     acc_holder_name = fields.Char(string='Account Holder Name', help="Account holder name, in case it is different than the name of the Account Holder", compute='_compute_account_holder_name', readonly=False, store=True)
     partner_id = fields.Many2one('res.partner', 'Account Holder', ondelete='cascade', index=True, domain=['|', ('is_company', '=', True), ('parent_id', '=', False)], required=True)
@@ -85,17 +100,25 @@ class ResPartnerBank(models.Model):
     currency_id = fields.Many2one('res.currency', string='Currency')
     company_id = fields.Many2one('res.company', 'Company', related='partner_id.company_id', store=True, readonly=True)
     country_code = fields.Char(related='partner_id.country_code', string="Country Code")
+    note = fields.Text('Notes')
+    color = fields.Integer(compute='_compute_color')
 
-    _sql_constraints = [(
-        'unique_number',
+    _unique_number = models.Constraint(
         'unique(sanitized_acc_number, partner_id)',
-        'The combination Account Number/Partner must be unique.'
-    )]
+        "The combination Account Number/Partner must be unique.",
+    )
 
     @api.depends('acc_number')
     def _compute_sanitized_acc_number(self):
         for bank in self:
             bank.sanitized_acc_number = sanitize_account_number(bank.acc_number)
+
+    def _search_acc_number(self, operator, value):
+        if operator in ('in', 'not in'):
+            value = [sanitize_account_number(i) for i in value]
+        else:
+            value = sanitize_account_number(value)
+        return [('sanitized_acc_number', operator, value)]
 
     @api.depends('acc_number')
     def _compute_acc_type(self):
@@ -118,14 +141,26 @@ class ResPartnerBank(models.Model):
         for acc in self:
             acc.display_name = f'{acc.acc_number} - {acc.bank_id.name}' if acc.bank_id else acc.acc_number
 
-    def _condition_to_sql(self, alias: str, fname: str, operator: str, value, query) -> SQL:
-        if fname == 'acc_number':
-            fname = 'sanitized_acc_number'
-            if not isinstance(value, str) and isinstance(value, Iterable):
-                value = [sanitize_account_number(i) for i in value]
-            else:
-                value = sanitize_account_number(value)
-        return super()._condition_to_sql(alias, fname, operator, value, query)
+    @api.depends('allow_out_payment')
+    def _compute_color(self):
+        for bank in self:
+            bank.color = 10 if bank.allow_out_payment else 1
+
+    def _sanitize_vals(self, vals):
+        if 'sanitized_acc_number' in vals:  # do not allow to write on sanitized directly
+            vals['acc_number'] = vals.pop('sanitized_acc_number')
+        if 'acc_number' in vals:
+            vals['sanitized_acc_number'] = sanitize_account_number(vals['acc_number'])
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._sanitize_vals(vals)
+        return super().create(vals_list)
+
+    def write(self, vals):
+        self._sanitize_vals(vals)
+        return super().write(vals)
 
     def action_archive_bank(self):
         """
@@ -143,3 +178,47 @@ class ResPartnerBank(models.Model):
         """
         self.action_archive()
         return True
+
+    def _user_can_trust(self):
+        self.ensure_one()
+        return True
+
+    def _find_or_create_bank_account(self, account_number, partner, company, *, allow_company_account_creation=False, extra_create_vals=None):
+        """Find a bank account for the given partner and number. Create it if it doesn't exist.
+
+        Manage different corner cases:
+
+        - make sure that we don't try to create the bank number if we look for it but it exists restricted in another
+          company; because of the unique constraint
+        - make sure that we don't create a bank account number for one of the database's companies, unless
+          `allow_company_account_creation` is specified
+
+        :param account_number: the bank account number to search for (or to create)
+        :param partner: the partner linked to the account number
+        :param company: the company that the bank needs to be accessible from (only for searching)
+        :param allow_company_account_creation: whether we disable the protection to create an account for our own
+                companies
+        :param extra_create_vals: values to be added when creating the account, but not to write if the account was
+                found and e.g. modified manually beforehands
+        """
+        bank_account = self.env['res.partner.bank'].sudo().with_context(active_test=False).search([
+            ('acc_number', '=', account_number),
+            ('partner_id', 'child_of', partner.commercial_partner_id.id),
+        ])
+        if not bank_account:
+            if not allow_company_account_creation and partner.id in self.env['res.company']._get_company_partner_ids():
+                raise UserError(_(
+                    "Please add your own bank account manually: %(account_number)s (%(partner)s)",
+                    account_number=account_number,
+                    partner=partner.display_name,
+                ))
+            bank_account = self.env['res.partner.bank'].with_context(clean_context(self.env.context)).create({
+                **(extra_create_vals or {}),
+                'acc_number': account_number,
+                'partner_id': partner.id,
+                'allow_out_payment': False,
+            })
+        return bank_account.filtered_domain([
+            *self.env['res.partner.bank']._check_company_domain(company),
+            ('active', '=', True),
+        ]).sorted(lambda b: b.partner_id != partner).sudo(False)[:1]

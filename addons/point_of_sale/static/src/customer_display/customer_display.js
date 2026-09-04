@@ -1,29 +1,46 @@
-import { Component, useState, whenReady } from "@odoo/owl";
-import { OdooLogo } from "@point_of_sale/app/generic_components/odoo_logo/odoo_logo";
-import { OrderWidget } from "@point_of_sale/app/generic_components/order_widget/order_widget";
-import { Orderline } from "@point_of_sale/app/generic_components/orderline/orderline";
+import { Component, useEffect, whenReady, useRef } from "@odoo/owl";
+import { OdooLogo } from "@point_of_sale/app/components/odoo_logo/odoo_logo";
+import { useSingleDialog } from "@point_of_sale/customer_display/utils";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { session } from "@web/session";
 import { useService } from "@web/core/utils/hooks";
 import { mountComponent } from "@web/env";
-import { roundPrecision as round_pr } from "@web/core/utils/numbers";
+import { TagsList } from "@web/core/tags_list/tags_list";
+import { CustomerFacingQR } from "./customer_facing_qr";
 
 export class CustomerDisplay extends Component {
     static template = "point_of_sale.CustomerDisplay";
-    static components = { OdooLogo, OrderWidget, Orderline, MainComponentsContainer };
+    static components = { OdooLogo, MainComponentsContainer, TagsList };
     static props = [];
+
     setup() {
         this.session = session;
         this.dialog = useService("dialog");
-        this.order = useState(useService("customer_display_data"));
+        this.order = useService("customer_display_data");
+        const singleDialog = useSingleDialog();
+
+        this.scrollableRef = useRef("scrollable");
+        useEffect(() => {
+            this.scrollableRef.el
+                ?.querySelector(".orderline.selected")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
+        useEffect(
+            (qrPaymentData) => {
+                if (qrPaymentData) {
+                    singleDialog.open(CustomerFacingQR, qrPaymentData);
+                } else {
+                    singleDialog.close();
+                }
+            },
+            () => [this.order.qrPaymentData]
+        );
     }
 
-    get netWeight() {
-        const weight = round_pr(this.order.weight || 0, this.order.scaleData.uomRounding);
-        const weightRound = weight.toFixed(
-            Math.ceil(Math.log(1.0 / this.order.scaleData.uomRounding) / Math.log(10))
-        );
-        return weightRound - parseFloat(this.order.tare);
+    getInternalNotes() {
+        return JSON.parse(this.line.internalNote || "[]");
     }
 }
+
 whenReady(() => mountComponent(CustomerDisplay, document.body));

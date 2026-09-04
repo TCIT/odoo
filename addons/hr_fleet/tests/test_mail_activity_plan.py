@@ -38,30 +38,40 @@ class TestActivitySchedule(ActivityScheduleHRCase):
     @users('admin')
     def test_responsible(self):
         """ Check that the responsible is correctly configured. """
+
+        for employees in (self.employee_1, self.employee_1 + self.employee_2):
+            employees = employees.with_env(self.env)
+            # Happy case
+            form = self._instantiate_activity_schedule_wizard(employees)
+            form.plan_id = self.plan_fleet
+
+            schedule_lines = form.plan_schedule_line_ids._records
+            self.assertEqual(len(schedule_lines), 1)
+            self.assertEqual(schedule_lines[0]['line_description'], 'Car return')
+            if len(employees) == 1:
+                self.assertEqual(schedule_lines[0]['responsible_user_id'], self.user_manager.id)
+            else:
+                self.assertEqual(schedule_lines[0]['responsible_user_id'], False)
+
+            self.assertFalse(form.has_error)
+            wizard = form.save()
+            wizard.action_schedule_plan()
+            for employee in employees:
+                activities = self.get_last_activities(employee, 1)
+                self.assertEqual(len(activities), 1)
+                self.assertEqual(activities[0].user_id, self.user_manager)
+
         employees = (self.employee_1 + self.employee_2).with_env(self.env)
-
-        # Happy case
-        form = self._instantiate_activity_schedule_wizard(employees)
-        form.plan_id = self.plan_fleet
-        self.assertEqual(form.plan_summary, "<ul>Fleet Manager <ul><li>To-Do: Car return</li></ul></ul>")
-        self.assertFalse(form.has_error)
-        wizard = form.save()
-        wizard.action_schedule_plan()
-        for employee in employees:
-            activities = self.get_last_activities(employee, 1)
-            self.assertEqual(len(activities), 1)
-            self.assertEqual(activities[0].user_id, self.user_manager)
-
         # Cases with errors
         self.employee_1.car_ids[0].manager_id = False
         form = self._instantiate_activity_schedule_wizard(employees)
         form.plan_id = self.plan_fleet
-        self.assertTrue(form.has_error)
-        n_error = form.error.count('<li>')
-        self.assertEqual(n_error, 1)
-        self.assertIn(f"The vehicle of employee {self.employee_1.name} is not linked to a fleet manager.", form.error)
-        with self.assertRaises(ValidationError):
-            form.save()
+        self.assertTrue(form.has_warning)
+        n_warning = form.warning.count('<li>')
+        self.assertEqual(n_warning, 1)
+        self.assertIn(f"The vehicle of employee {self.employee_1.name} is not linked to a fleet manager, assigning to you.", form.warning)
+        # assert form can now be saved without raising an error
+        form.save()
 
         self.employee_1.car_ids = self.env["fleet.vehicle"]
         form = self._instantiate_activity_schedule_wizard(employees)

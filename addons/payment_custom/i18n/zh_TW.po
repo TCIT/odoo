@@ -1,35 +1,51 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_custom
-# 
+# * payment_custom
+#
 # Translators:
+# Martin Trigaux, 2025
 # Wil Odoo, 2025
-# 
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-04 04:04+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
+"projects/odoo-19/payment_custom/zh_Hant/>\n"
+"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_custom
 #: model_terms:ir.ui.view,arch_db:payment_custom.custom_state_header
 msgid ""
-"<small class=\"text-center text-wrap lh-sm\">Scan me in your banking "
-"app</small>"
+"<small class=\"text-center text-wrap lh-sm\">Scan me in your banking app</"
+"small>"
 msgstr "<small class=\"text-center text-wrap lh-sm\">用你的銀行程式掃瞄我</small>"
 
 #. module: payment_custom
 #: model_terms:ir.ui.view,arch_db:payment_custom.custom_state_header
 msgid "<strong class=\"mt-auto\">Communication: </strong>"
 msgstr "<strong class=\"mt-auto\">通訊： </strong>"
+
+#. module: payment_custom
+#. odoo-python
+#: code:addons/payment_custom/models/payment_provider.py:0
+msgid "Bank Account"
+msgstr "銀行帳戶"
+
+#. module: payment_custom
+#. odoo-python
+#: code:addons/payment_custom/models/payment_provider.py:0
+msgid "Bank Accounts"
+msgstr "銀行帳戶"
 
 #. module: payment_custom
 #: model:ir.model.fields,field_description:payment_custom.field_payment_provider__code
@@ -47,6 +63,12 @@ msgid "Custom Mode"
 msgstr "自訂模式"
 
 #. module: payment_custom
+#: model:ir.model.fields,field_description:payment_custom.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_custom.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "顯示名稱"
+
+#. module: payment_custom
 #: model:ir.model.fields,field_description:payment_custom.field_payment_provider__qr_code
 msgid "Enable QR Codes"
 msgstr "啟用QR Codes"
@@ -62,10 +84,10 @@ msgid "Finalize your payment"
 msgstr "最後檢查你的付款"
 
 #. module: payment_custom
-#. odoo-python
-#: code:addons/payment_custom/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "沒有找到匹配參考 %s 的交易。"
+#: model:ir.model.fields,field_description:payment_custom.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_custom.field_payment_transaction__id
+msgid "ID"
+msgstr "識別號"
 
 #. module: payment_custom
 #: model_terms:ir.ui.view,arch_db:payment_custom.custom_state_header
@@ -88,6 +110,12 @@ msgid "Payment Transaction"
 msgstr "付款交易"
 
 #. module: payment_custom
+#. odoo-python
+#: code:addons/payment_custom/models/payment_provider.py:0
+msgid "Please use the following transfer details"
+msgstr "請使用以下轉帳詳細資訊"
+
+#. module: payment_custom
 #: model_terms:ir.ui.view,arch_db:payment_custom.payment_provider_form
 msgid "Reload Pending Message"
 msgstr "重新載入待處理訊息"
@@ -108,3 +136,6 @@ msgstr "此付款服務商的技術代碼。"
 #: model:payment.method,name:payment_custom.payment_method_wire_transfer
 msgid "Wire Transfer"
 msgstr "電匯"
+
+#~ msgid "No transaction found matching reference %s."
+#~ msgstr "沒有找到匹配參考 %s 的交易。"

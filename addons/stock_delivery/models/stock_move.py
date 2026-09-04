@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 from odoo.tools.sql import column_exists, create_column
 
 
@@ -39,31 +40,50 @@ class StockMove(models.Model):
 
     def _get_new_picking_values(self):
         vals = super(StockMove, self)._get_new_picking_values()
-        carrier_id = self.group_id.sale_id.carrier_id.id
-        vals['carrier_id'] = any(rule.propagate_carrier for rule in self.rule_id) and carrier_id
+        if not any(rule.propagate_carrier for rule in self.rule_id):
+            return vals
+        carrier_id = len(self.reference_ids.sale_ids.carrier_id) == 1 and self.reference_ids.sale_ids.carrier_id.id
+        carrier_tracking_ref = self.move_orig_ids.picking_id.filtered('carrier_tracking_ref')[:1].carrier_tracking_ref
+        # check if the previous picking have a carrier_id, then take carrier from that
+        # earlier we were taking carrier from sale but since carrier can be changed or updated in next steps so now we take carrier from prev picking
+        if len(self.move_orig_ids.picking_id.carrier_id) == 1:
+            carrier_id = self.move_orig_ids.picking_id.carrier_id.id
+        if carrier_id:
+            vals['carrier_id'] = carrier_id
+        if carrier_tracking_ref:
+            vals['carrier_tracking_ref'] = carrier_tracking_ref
         return vals
 
     def _key_assign_picking(self):
         keys = super(StockMove, self)._key_assign_picking()
         return keys + (self.sale_line_id.order_id.carrier_id,)
 
+
 class StockMoveLine(models.Model):
     _inherit = 'stock.move.line'
 
     sale_price = fields.Float(compute='_compute_sale_price')
     destination_country_code = fields.Char(related='picking_id.destination_country_code')
-    carrier_id = fields.Many2one(related='picking_id.carrier_id', store=True)  # need to be stored for the groupby in `stock_move_line_view_search_delivery`
+    carrier_id = fields.Many2one(related='picking_id.carrier_id')
 
-    @api.depends('quantity', 'product_uom_id', 'product_id', 'move_id.sale_line_id', 'move_id.sale_line_id.price_reduce_taxinc', 'move_id.sale_line_id.product_uom')
+    @api.depends('quantity', 'product_uom_id', 'product_id', 'move_id.sale_line_id', 'move_id.sale_line_id.price_reduce_taxinc', 'move_id.sale_line_id.product_uom_id')
     def _compute_sale_price(self):
         for move_line in self:
-            if move_line.move_id.sale_line_id:
-                unit_price = move_line.move_id.sale_line_id.price_reduce_taxinc
-                qty = move_line.product_uom_id._compute_quantity(move_line.quantity, move_line.move_id.sale_line_id.product_uom)
+            sale_line_id = move_line.move_id.sale_line_id
+            if sale_line_id and sale_line_id.product_id == move_line.product_id:
+                # Compute the total price (tax included) for the actually delivered quantity
+                # using the same tax logic as the sale order line and purchase order line.
+                base_line = sale_line_id._prepare_base_line_for_taxes_computation()
+                qty = move_line.product_uom_id._compute_quantity(move_line.quantity, sale_line_id.product_uom_id)
+                base_line.update({'quantity': qty})
+                self.env['account.tax']._add_tax_details_in_base_line(base_line, sale_line_id.company_id)
+                tax_results = base_line['tax_details']
+                move_line.sale_price = sale_line_id.currency_id.round(tax_results['raw_total_included_currency'])
             else:
+                # For kits, use the regular unit price
                 unit_price = move_line.product_id.list_price
                 qty = move_line.product_uom_id._compute_quantity(move_line.quantity, move_line.product_id.uom_id)
-            move_line.sale_price = unit_price * qty
+                move_line.sale_price = unit_price * qty
         super(StockMoveLine, self)._compute_sale_price()
 
     def _get_aggregated_product_quantities(self, **kwargs):
@@ -79,3 +99,38 @@ class StockMoveLine(models.Model):
             hs_code = aggregated_move_lines[aggregated_move_line]['product'].product_tmpl_id.hs_code
             aggregated_move_lines[aggregated_move_line]['hs_code'] = hs_code
         return aggregated_move_lines
+
+    def _pre_put_in_pack_hook(self, all_lines=False, package_id=False, package_type_id=False, package_name=False, from_package_wizard=False):
+        res = super()._pre_put_in_pack_hook(all_lines, package_id, package_type_id, package_name, from_package_wizard)
+        if res and not from_package_wizard and self.carrier_id:
+            context = res.get('context', {})
+            context['default_package_carrier_type'] = self._get_package_carrier_type_for_pack()
+            res['context'] = context
+        return res
+
+    def _post_put_in_pack_hook(self, package):
+        weight = self.env.context.get('weight')
+        if not weight and self.carrier_id:
+            weight = package._get_weight(self.picking_id[:1].id).get(package, 0.0)
+        if weight:
+            package.shipping_weight = weight
+        return super()._post_put_in_pack_hook(package)
+
+    def _get_package_carrier_type_for_pack(self):
+        if len(self.carrier_id) > 1 or any(not ml.carrier_id for ml in self):
+            # avoid (duplicate) costs for products
+            raise UserError(self.env._("You cannot pack products into the same package when they have different carriers (i.e. check that all of their transfers have a carrier assigned and are using the same carrier)."))
+
+        # As we pass the `delivery_type` ('fixed' or 'base_on_rule' by default) in a key that
+        # corresponds to the `package_carrier_type` (defaults to 'none'), we do a conversion.
+        # No need to convert for other carriers as the `delivery_type` and
+        # `package_carrier_type` will be the same in these cases.
+        package_carrier_type = self.carrier_id.delivery_type
+        if package_carrier_type in ['fixed', 'base_on_rule']:
+            package_carrier_type = 'none'
+        return package_carrier_type
+
+    def _should_set_package(self):
+        if self.carrier_id:
+            return True
+        return super()._should_set_package()

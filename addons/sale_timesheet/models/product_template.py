@@ -18,8 +18,8 @@ class ProductTemplate(models.Model):
         ('timesheet', 'Timesheets on project (one fare per SO/Project)'),
     ], ondelete={'timesheet': 'set manual'})
     # override domain
-    project_id = fields.Many2one(domain="['|', ('company_id', '=', False), '&', ('company_id', '=?', company_id), ('company_id', '=', current_company_id), ('allow_billable', '=', True), ('pricing_type', '=', 'task_rate'), ('allow_timesheets', 'in', [service_policy == 'delivered_timesheet', True])]")
-    project_template_id = fields.Many2one(domain="['|', ('company_id', '=', False), '&', ('company_id', '=?', company_id), ('company_id', '=', current_company_id), ('allow_billable', '=', True), ('allow_timesheets', 'in', [service_policy == 'delivered_timesheet', True])]")
+    project_id = fields.Many2one(domain="['|', ('company_id', '=', False), '&', ('company_id', '=?', company_id), ('company_id', '=', current_company_id), ('allow_billable', '=', True), ('pricing_type', '=', 'task_rate'), ('allow_timesheets', 'in', [service_policy == 'delivered_timesheet', True]), ('is_template', '=', False)]")
+    project_template_id = fields.Many2one(domain="['|', ('company_id', '=', False), '&', ('company_id', '=?', company_id), ('company_id', '=', current_company_id), ('allow_billable', '=', True), ('allow_timesheets', 'in', [service_policy == 'delivered_timesheet', True]), ('is_template', '=', True)]")
     service_upsell_threshold = fields.Float('Threshold', default=1, help="Percentage of time delivered compared to the prepaid amount that must be reached for the upselling opportunity activity to be triggered.")
     service_upsell_threshold_ratio = fields.Char(compute='_compute_service_upsell_threshold_ratio', export_string_translation=False)
 
@@ -30,8 +30,7 @@ class ProductTemplate(models.Model):
         company_uom = self.env.company.timesheet_encode_uom_id
         for record in self:
             if not record.uom_id or record.uom_id != uom_unit or\
-               product_uom_hour.factor == record.uom_id.factor or\
-               record.uom_id.category_id not in [product_uom_hour.category_id, uom_unit.category_id]:
+               product_uom_hour.factor == record.uom_id.factor:
                 record.service_upsell_threshold_ratio = False
                 continue
             else:
@@ -52,15 +51,22 @@ class ProductTemplate(models.Model):
 
     @api.onchange('type', 'service_type', 'service_policy')
     def _onchange_service_fields(self):
+        hour_uom = self.env.ref('uom.product_uom_hour')
         for record in self:
+            default_uom_id = self.env['ir.default']._get_model_defaults('product.template').get('uom_id')
+            default_uom = self.env['uom.uom'].browse(default_uom_id)
             if record.type == 'service' and record.service_type == 'timesheet' and \
                not (record._origin.service_policy and record.service_policy == record._origin.service_policy):
-                record.uom_id = self.env.ref('uom.product_uom_hour')
+                if default_uom and default_uom._has_common_reference(hour_uom):
+                    record.uom_id = default_uom
+                else:
+                    record.uom_id = hour_uom
             elif record._origin.uom_id:
                 record.uom_id = record._origin.uom_id
+            elif default_uom:
+                record.uom_id = default_uom
             else:
                 record.uom_id = self.default_get(['uom_id']).get('uom_id')
-            record.uom_po_id = record.uom_id
 
     def _get_service_to_general_map(self):
         return {
@@ -93,18 +99,12 @@ class ProductTemplate(models.Model):
     def _unlink_except_master_data(self):
         time_product = self.env.ref('sale_timesheet.time_product')
         if time_product.product_tmpl_id in self:
-            raise ValidationError(_('The %s product is required by the Timesheets app and cannot be archived nor deleted.', time_product.name))
+            raise ValidationError(_('The %s product is required by the Timesheets app and cannot be archived, deleted nor linked to a company.', time_product.name))
 
     def write(self, vals):
-        # timesheet product can't be archived or linked to a company
-        test_mode = getattr(threading.current_thread(), 'testing', False) or self.env.registry.in_test_mode()
-        if not test_mode and 'active' in vals and not vals['active']:
+        # timesheet product can't be deleted, archived or linked to a company
+        if ('active' in vals and not vals['active']) or ('company_id' in vals and vals['company_id']):
             time_product = self.env.ref('sale_timesheet.time_product')
             if time_product.product_tmpl_id in self:
-                raise ValidationError(_('The %s product is required by the Timesheets app and cannot be archived nor deleted.', time_product.name))
-        # TODO: avoid duplicate code by joining both conditions in master
-        if not test_mode and 'company_id' in vals and vals['company_id']:
-            time_product = self.env.ref('sale_timesheet.time_product')
-            if time_product.product_tmpl_id in self:
-                raise ValidationError(_('The %s product is required by the Timesheets app and cannot be linked to a company.', time_product.name))
+                raise ValidationError(_('The %s product is required by the Timesheets app and cannot be archived, deleted nor linked to a company.', time_product.name))
         return super().write(vals)

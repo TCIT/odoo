@@ -1,11 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import Command, _, api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.fields import Command
 
 
 class SaleOrderTemplate(models.Model):
-    _name = "sale.order.template"
+    _name = 'sale.order.template'
     _description = "Quotation Template"
     _order = 'sequence, id'
 
@@ -47,10 +48,6 @@ class SaleOrderTemplate(models.Model):
         comodel_name='sale.order.template.line', inverse_name='sale_order_template_id',
         string="Lines",
         copy=True)
-    sale_order_template_option_ids = fields.One2many(
-        comodel_name='sale.order.template.option', inverse_name='sale_order_template_id',
-        string="Optional Products",
-        copy=True)
     journal_id = fields.Many2one(
         'account.journal', string="Invoicing Journal",
         domain=[('type', '=', 'sale')], company_dependent=True, check_company=True,
@@ -86,16 +83,43 @@ class SaleOrderTemplate(models.Model):
 
     #=== CONSTRAINT METHODS ===#
 
-    @api.constrains('company_id', 'sale_order_template_line_ids', 'sale_order_template_option_ids')
+    @api.constrains('company_id', 'sale_order_template_line_ids')
     def _check_company_id(self):
         for template in self:
-            companies = template.mapped('sale_order_template_line_ids.product_id.company_id') | template.mapped('sale_order_template_option_ids.product_id.company_id')
-            if len(companies) > 1:
-                raise ValidationError(_("Your template cannot contain products from multiple companies."))
-            elif companies and companies != template.company_id:
+            restricted_products = template.sale_order_template_line_ids.product_id.filtered(
+                'company_id'
+            )
+            if not restricted_products:
+                continue
+
+            if not template.company_id:
                 raise ValidationError(_(
-                    "Your template contains products from company %(product_company)s whereas your template belongs to company %(template_company)s. \n Please change the company of your template or remove the products from other companies.",
-                    product_company=', '.join(companies.mapped('display_name')),
+                    "Your template cannot contain products from specific companies if it's shared"
+                    " between companies. Please restrict the template access, or remove those"
+                    " products."
+                ))
+
+            authorized_products = restricted_products.filtered_domain(
+                self.env['product.product']._check_company_domain(template.company_id)
+            )
+            if unauthorized_products := restricted_products - authorized_products:
+                unaccessible_companies = unauthorized_products.company_id
+                if len(unaccessible_companies) > 1:
+                    raise ValidationError(_(
+                        "Your template belongs to company %(template_company)s but contains"
+                        " products from other companies (%(product_company)s) that are not"
+                        " accessible to %(template_company)s.\nPlease change the company of your"
+                        " template or remove the products from other companies.",
+                        product_company=', '.join(unaccessible_companies.mapped('display_name')),
+                        template_company=template.company_id.display_name,
+                    ))
+
+                raise ValidationError(_(
+                    "Your template belongs to company %(template_company)s but contains"
+                    " products from company (%(product_company)s) that are not"
+                    " accessible to %(template_company)s.\nPlease change the company of your"
+                    " template or remove the products from other companies.",
+                    product_company=unaccessible_companies.display_name,
                     template_company=template.company_id.display_name,
                 ))
 
@@ -127,9 +151,6 @@ class SaleOrderTemplate(models.Model):
             for line in self.sale_order_template_line_ids:
                 if line.name == line.product_id.get_product_multiline_description_sale():
                     line.with_context(lang=lang.code).name = line.product_id.with_context(lang=lang.code).get_product_multiline_description_sale()
-            for option in self.sale_order_template_option_ids:
-                if option.name == option.product_id.get_product_multiline_description_sale():
-                    option.with_context(lang=lang.code).name = option.product_id.with_context(lang=lang.code).get_product_multiline_description_sale()
 
     @api.model
     def _demo_configure_template(self):
@@ -160,17 +181,23 @@ class SaleOrderTemplate(models.Model):
             Command.create({
                 'product_id': chair_protection_product.id,
                 'product_uom_qty': 8,
-            })
-        ]
-
-        demo_template.sale_order_template_option_ids = [
-            Command.create({
-                'product_id': self.env.ref('product.product_product_16').id,
             }),
             Command.create({
-                'product_id': self.env.ref('product.product_product_6').id,
+                'name': self.env._("Optional Products Section"),
+                'display_type': 'line_section',
+                'is_optional': True,
+                'product_uom_qty': 0,
+            }),
+            Command.create({
+                'product_id': self.env.ref('product.product_product_16').id,
+                'product_uom_qty': 0,
+            }),
+            Command.create({
+                'product_id': self.env.ref('product.product_product_7').id,
+                'product_uom_qty': 0,
             }),
             Command.create({
                 'product_id': self.env.ref('product.product_product_12').id,
+                'product_uom_qty': 0,
             }),
         ]

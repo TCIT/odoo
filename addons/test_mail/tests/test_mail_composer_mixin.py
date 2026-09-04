@@ -13,12 +13,7 @@ class TestMailComposerMixin(MailCommon, TestRecipients):
 
     @classmethod
     def setUpClass(cls):
-        super(TestMailComposerMixin, cls).setUpClass()
-
-        # ensure employee can create partners, necessary for templates
-        cls.user_employee.write({
-            'groups_id': [(4, cls.env.ref('base.group_partner_manager').id)],
-        })
+        super().setUpClass()
 
         cls.mail_template = cls.env['mail.template'].create({
             'body_html': '<p>EnglishBody for <t t-out="object.name"/></p>',
@@ -45,8 +40,8 @@ class TestMailComposerMixin(MailCommon, TestRecipients):
             notification_type='inbox',
             signature='--\nErnest'
         )
-        cls.user_rendering_restricted.groups_id -= cls.env.ref('mail.group_mail_template_editor')
-        cls.user_employee.groups_id += cls.env.ref('mail.group_mail_template_editor')
+        cls.user_rendering_restricted.group_ids -= cls.env.ref('mail.group_mail_template_editor')
+        cls.user_employee.group_ids += cls.env.ref('mail.group_mail_template_editor')
 
         cls._activate_multi_lang(
             layout_arch_db='<body><t t-out="message.body"/> English Layout for <t t-esc="model_description"/></body>',
@@ -130,10 +125,15 @@ class TestMailComposerMixin(MailCommon, TestRecipients):
         with self.assertRaises(AccessError):
             rendered = composer._render_lang(source.ids)
 
-        # _render_lang should crash when content is not coming from template but not dynamic
-        composer.lang = "fr_FR"
-        rendered = composer._render_lang(source.ids)
-        self.assertEqual(rendered, {source.id: "fr_FR"})
+        # _render_lang should not crash when content is not coming from template
+        # but not dynamic and/or is actually the default computed based on partner
+        for lang_value, expected in [
+            (False, self.partner_1.lang), ("", self.partner_1.lang), ("fr_FR", "fr_FR")
+        ]:
+            with self.subTest(lang_value=lang_value):
+                composer.lang = lang_value
+                rendered = composer._render_lang(source.ids)
+                self.assertEqual(rendered, {source.id: expected})
 
     @users("employee")
     def test_rendering_custom(self):
@@ -189,3 +189,15 @@ class TestMailComposerMixin(MailCommon, TestRecipients):
                          'Translation comes from the template, as both values equal')
         description = composer._render_field('description', source.ids)[source.id]
         self.assertEqual(description, f'<p>Description for {source.name}</p>')
+
+        # check default computation when 'lang' is void -> actually rerouted to template lang
+        composer.lang = False
+        subject = composer._render_field('subject', source.ids, compute_lang=True)[source.id]
+        self.assertEqual(subject, f'SpanishSubject for {source.name}',
+                         'Translation comes from the template, as both values equal')
+
+        # check default computation when 'lang' is void in both -> main customer lang
+        self.mail_template.lang = False
+        subject = composer._render_field('subject', source.ids, compute_lang=True)[source.id]
+        self.assertEqual(subject, f'SpanishSubject for {source.name}',
+                         'Translation comes from customer lang, being default when no value is rendered')

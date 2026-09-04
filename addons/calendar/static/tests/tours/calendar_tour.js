@@ -1,8 +1,5 @@
-/** @odoo-module **/
-
-import { waitFor } from "@odoo/hoot-dom";
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 const todayDate = function () {
     const now = new Date();
@@ -31,6 +28,11 @@ registry.category("web_tour.tours").add("calendar_appointments_hour_tour", {
             trigger: "#name_0",
             content: "Give a name to the new event",
             run: "edit TEST EVENT",
+        },
+        {
+            trigger: "div[name='start'] button",
+            content: "Open the date picker",
+            run: "click",
         },
         {
             trigger: "#start_0",
@@ -88,19 +90,16 @@ const clickOnTheEvent = {
         const custom = document.querySelector(".o_cw_custom_highlight");
         if (custom) {
             custom.click();
-            await waitFor(".o_cw_popover", { timeout: 8000 });
         }
     },
 };
 
 registry.category("web_tour.tours").add("test_calendar_delete_tour", {
     steps: () => [
-        {
-            content: "Select filter (everybody)",
-            trigger: 'div[data-value="all"] input',
-            run: "click",
-        },
         clickOnTheEvent,
+        {
+            trigger: ".o_cw_popover",
+        },
         {
             content: "Delete the event",
             trigger: ".o_cw_popover_delete",
@@ -118,33 +117,11 @@ registry.category("web_tour.tours").add("test_calendar_decline_tour", {
     steps: () => [
         clickOnTheEvent,
         {
-            content: "Delete the event",
-            trigger: ".o_cw_popover_delete",
-            run: "click",
+            trigger: ".o_cw_popover",
         },
-        {
-            content: "Wait declined status",
-            trigger: ".o_attendee_status_declined",
-        },
-    ],
-});
-
-registry.category("web_tour.tours").add("test_calendar_decline_with_everybody_filter_tour", {
-    steps: () => [
-        {
-            content: "Select filter (everybody)",
-            trigger: 'div[data-value="all"] input',
-            run: "click",
-        },
-        clickOnTheEvent,
         {
             content: "Delete the event",
             trigger: ".o_cw_popover_delete",
-            run: "click",
-        },
-        {
-            content: "Select filter (everybody)",
-            trigger: 'div[data-value="all"] input',
             run: "click",
         },
         {

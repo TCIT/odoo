@@ -12,24 +12,25 @@ from odoo.tools import float_round
 _logger = logging.getLogger(__name__)
 
 
-class TeamMember(models.Model):
+class CrmTeamMember(models.Model):
     _inherit = 'crm.team.member'
 
     # assignment
     assignment_enabled = fields.Boolean(related="crm_team_id.assignment_enabled")
     assignment_domain = fields.Char('Assignment Domain', tracking=True)
-    assignment_optout = fields.Boolean('Skip auto assignment')
+    assignment_domain_preferred = fields.Char('Preference assignment Domain', tracking=True)
+    assignment_optout = fields.Boolean('Pause assignment')
     assignment_max = fields.Integer('Average Leads Capacity (on 30 days)', default=30)
     lead_day_count = fields.Integer(
         'Leads (last 24h)', compute='_compute_lead_day_count',
-        help='Lead assigned to this member this last day (lost one excluded)')
+        help='Number of leads assigned to this member in the last 24 hours (lost leads excluded)')
     lead_month_count = fields.Integer(
         'Leads (30 days)', compute='_compute_lead_month_count',
-        help='Lead assigned to this member those last 30 days')
+        help='Number of leads assigned to this member in the last 30 days')
 
     @api.depends('user_id', 'crm_team_id')
     def _compute_lead_day_count(self):
-        day_date = fields.datetime.now() - datetime.timedelta(hours=24)
+        day_date = fields.Datetime.now() - datetime.timedelta(hours=24)
         daily_leads_counts = self._get_lead_from_date(day_date)
 
         for member in self:
@@ -66,6 +67,19 @@ class TeamMember(models.Model):
             except Exception:
                 raise exceptions.ValidationError(_(
                     'Member assignment domain for user %(user)s and team %(team)s is incorrectly formatted',
+                    user=member.user_id.name, team=member.crm_team_id.name
+                ))
+
+    @api.constrains('assignment_domain_preferred')
+    def _constrains_assignment_domain_preferred(self):
+        for member in self:
+            try:
+                domain = literal_eval(member.assignment_domain_preferred or '[]')
+                if domain:
+                    self.env['crm.lead'].search(domain, limit=1)
+            except Exception:
+                raise exceptions.ValidationError(_(
+                    'Member preferred assignment domain for user %(user)s and team %(team)s is incorrectly formatted',
                     user=member.user_id.name, team=member.crm_team_id.name
                 ))
 

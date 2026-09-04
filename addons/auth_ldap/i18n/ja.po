@@ -1,23 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* auth_ldap
-# 
+# * auth_ldap
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Martin Trigaux, 2018
+# Yoshi Tashiro <tashiro@roomsfor.hk>, 2018
+# Manami Hashi <manami@roomsfor.hk>, 2018
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
+"POT-Creation-Date: 2021-07-12 07:50+0000\n"
+"PO-Revision-Date: 2026-08-05 22:25+0000\n"
+"Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
+"auth_ldap/ja/>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ja\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: auth_ldap
 #: model:ir.model.fields,help:auth_ldap.field_res_company_ldap__ldap_filter
@@ -35,11 +40,15 @@ msgid ""
 "        (|(mail=%s)(uid=%s))\n"
 "    "
 msgstr ""
-"   LDAPデータベース内のユーザアカウントを検索するために使用されるフィルタ。これは文字列表現の任意のLDAPフィルタです。任意の `%s` プレースホルダはユーザによって提供されたログイン (識別子) に置き換えられます。\n"
+"    LDAPデータベース内のユーザアカウントを検索するために使用されるフィルタ。"
+"これは    文字列表現の任意のLDAPフィルタです。任意の `%s` プレースホルダは"
+"    ユーザによって提供されたログイン (識別子) に置き換えられます。フィルタ"
+"    には、少なくとも 1 つのプレースホルダーを含める必要があります。\n"
 "\n"
-"    フィルタの結果は正確に(1)でなければならず、そうでなければログインは無効とみなされます。\n"
+"    このフィルターの検索結果は、必ず 1 件のみでなければなりません。1 件以外の"
+"結果が返された場合、    ログインは無効と見なされます。\n"
 "\n"
-"    例(実際の属性はLDAPサーバとセットアップに依存):\n"
+"    例(実際の属性名は LDAP サーバーや設定により異なります):\n"
 "\n"
 "        (&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))\n"
 "\n"
@@ -50,10 +59,10 @@ msgstr ""
 
 #. module: auth_ldap
 #: model:ir.model.fields,help:auth_ldap.field_res_company_ldap__create_user
-msgid ""
-"Automatically create local user accounts for new users authenticating via "
-"LDAP"
-msgstr "LDAPを使用して新しいユーザを認証するためのローカルユーザアカウントを自動的に作成します。"
+msgid "Automatically create local user accounts for new users authenticating via LDAP"
+msgstr ""
+"LDAPを使用して新しいユーザを認証するためのローカルユーザアカウントを自動的に"
+"作成します。"
 
 #. module: auth_ldap
 #: model:ir.model,name:auth_ldap.model_res_company
@@ -73,7 +82,7 @@ msgstr "会社LDAP設定"
 #. module: auth_ldap
 #: model:ir.model,name:auth_ldap.model_res_config_settings
 msgid "Config Settings"
-msgstr "コンフィグ設定"
+msgstr "構成設定"
 
 #. module: auth_ldap
 #: model:ir.model.fields,field_description:auth_ldap.field_res_company_ldap__create_user
@@ -92,10 +101,8 @@ msgstr "作成日"
 
 #. module: auth_ldap
 #: model:ir.model.fields,help:auth_ldap.field_res_company_ldap__ldap_base
-msgid ""
-"DN of the user search scope: all descendants of this base will be searched "
-"for users."
-msgstr "ユーザ検索スコープのDN：このベースの全ての子孫がユーザ用に検索されます。"
+msgid "DN of the user search scope: all descendants of this base will be searched for users."
+msgstr "ユーザ検索スコープのDN：このベースのすべての子孫がユーザ用に検索されます。"
 
 #. module: auth_ldap
 #: model:ir.model.fields,field_description:auth_ldap.field_res_company_ldap__display_name
@@ -155,6 +162,11 @@ msgid "LDAP password"
 msgstr "LDAPパスワード"
 
 #. module: auth_ldap
+#: model:ir.model.fields,field_description:auth_ldap.field_res_company_ldap____last_update
+msgid "Last Modified on"
+msgstr "最終更新日"
+
+#. module: auth_ldap
 #: model:ir.model.fields,field_description:auth_ldap.field_res_company_ldap__write_uid
 msgid "Last Updated by"
 msgstr "最終更新者"
@@ -170,10 +182,11 @@ msgid "Login Information"
 msgstr "ログイン情報"
 
 #. module: auth_ldap
-#. odoo-python
 #: code:addons/auth_ldap/models/res_company_ldap.py:0
 msgid "No local user found for LDAP login and not configured to create one"
-msgstr "LDAPログイン用のローカルユーザが見つからず、作成するように設定されていません。"
+msgstr ""
+"LDAPログイン用のローカルユーザが見つからず、作成するように設定されていません"
+"。"
 
 #. module: auth_ldap
 #: model_terms:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
@@ -182,17 +195,16 @@ msgstr "処理パラメータ"
 
 #. module: auth_ldap
 #: model:ir.model.fields,help:auth_ldap.field_res_company_ldap__ldap_tls
-msgid ""
-"Request secure TLS/SSL encryption when connecting to the LDAP server. This "
-"option requires a server with STARTTLS enabled, otherwise all authentication"
-" attempts will fail."
+msgid "Request secure TLS/SSL encryption when connecting to the LDAP server. This option requires a server with STARTTLS enabled, otherwise all authentication attempts will fail."
 msgstr ""
-"LDAPサーバへの接続時に安全なTLS/SSL暗号化を要求します。このオプションはサーバがSTARTTLSが使用可能であることを要求します。そうでない場合は全ての認証要求は失敗します。"
+"LDAPサーバへの接続時に安全なTLS/SSL暗号化を要求します。このオプションはサーバ"
+"がSTARTTLSが使用可能であることを要求します。そうでない場合はすべての認証要求"
+"は失敗します。"
 
 #. module: auth_ldap
 #: model:ir.model.fields,field_description:auth_ldap.field_res_company_ldap__sequence
 msgid "Sequence"
-msgstr "付番"
+msgstr "シーケンス"
 
 #. module: auth_ldap
 #: model_terms:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
@@ -211,27 +223,22 @@ msgstr "テンプレートユーザ"
 
 #. module: auth_ldap
 #: model:ir.model.fields,help:auth_ldap.field_res_company_ldap__ldap_password
-msgid ""
-"The password of the user account on the LDAP server that is used to query "
-"the directory."
-msgstr "LDAPサーバのユーザアカウントのパスワードはディレクトリへのクエリー使用されます。"
+msgid "The password of the user account on the LDAP server that is used to query the directory."
+msgstr ""
+"LDAPサーバのユーザアカウントのパスワードはディレクトリへのクエリー使用されま"
+"す。"
 
 #. module: auth_ldap
 #: model:ir.model.fields,help:auth_ldap.field_res_company_ldap__ldap_binddn
-msgid ""
-"The user account on the LDAP server that is used to query the directory. "
-"Leave empty to connect anonymously."
-msgstr "LDAPサーバ上のユーザアカウントはディレクトリへのクエリーのために使用されます。匿名接続する場合は空のままにして下さい。"
+msgid "The user account on the LDAP server that is used to query the directory. Leave empty to connect anonymously."
+msgstr ""
+"LDAPサーバ上のユーザアカウントはディレクトリへのクエリーのために使用されます"
+"。匿名接続する場合は空のままにして下さい。"
 
 #. module: auth_ldap
 #: model:ir.model.fields,field_description:auth_ldap.field_res_company_ldap__ldap_tls
 msgid "Use TLS"
 msgstr "TLS を使用"
-
-#. module: auth_ldap
-#: model:ir.model,name:auth_ldap.model_res_users
-msgid "User"
-msgstr "ユーザ"
 
 #. module: auth_ldap
 #: model_terms:ir.ui.view,arch_db:auth_ldap.view_ldap_installer_form
@@ -242,3 +249,8 @@ msgstr "ユーザ情報"
 #: model:ir.model.fields,help:auth_ldap.field_res_company_ldap__user
 msgid "User to copy when creating new users"
 msgstr "新規ユーザ作成時にユーザにコピーされます。"
+
+#. module: auth_ldap
+#: model:ir.model,name:auth_ldap.model_res_users
+msgid "Users"
+msgstr "ユーザ"

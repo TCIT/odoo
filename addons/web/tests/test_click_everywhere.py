@@ -15,7 +15,20 @@ _logger = logging.getLogger(__name__)
 @odoo.tests.tagged('click_all', 'post_install', '-at_install', '-standard')
 class TestMenusAdmin(odoo.tests.HttpCase):
     allow_end_on_form = True
+
+    @classmethod
+    def _request_handler(cls, s: Session, r: PreparedRequest, /, **kw):
+        # mock odoofin requests
+        if 'proxy/v2/get_dashboard_institutions' in r.url:
+            r = Response()
+            r.status_code = 200
+            r.json = list
+            return r
+        return super()._request_handler(s, r, **kw)
+
     def test_01_click_everywhere_as_admin(self):
+        if 'tour_enabled' in self.env['res.users']._fields:
+            self.env.ref('base.user_admin').tour_enabled = False
         menus = self.env['ir.ui.menu'].load_menus(False)
         for app_id in menus['root']['children']:
             with self.subTest(app=menus[app_id]['name']):
@@ -25,7 +38,6 @@ class TestMenusAdmin(odoo.tests.HttpCase):
 
 @odoo.tests.tagged('click_all', 'post_install', '-at_install', '-standard')
 class TestMenusDemo(HttpCaseWithUserDemo):
-    allow_end_on_form = True
     def test_01_click_everywhere_as_demo(self):
         user_demo = self.user_demo
         menus = self.env['ir.ui.menu'].with_user(user_demo.id).load_menus(False)
@@ -36,15 +48,14 @@ class TestMenusDemo(HttpCaseWithUserDemo):
 
 @odoo.tests.tagged('post_install', '-at_install')
 class TestMenusAdminLight(odoo.tests.HttpCase):
-    allow_end_on_form = True
 
     @classmethod
     def _request_handler(cls, s: Session, r: PreparedRequest, /, **kw):
         # mock odoofin requests
-        if 'proxy/v1/get_dashboard_institutions' in r.url:
+        if 'proxy/v2/get_dashboard_institutions' in r.url:
             r = Response()
             r.status_code = 200
-            r.json = lambda: {'result': {}}
+            r.json = list
             return r
         return super()._request_handler(s, r, **kw)
 
@@ -55,8 +66,8 @@ class TestMenusAdminLight(odoo.tests.HttpCase):
         # Due to action_pos_preparation_display_kitchen_display, cliking on the "Kitchen Display"
         # menuitem could open the UI display, which will break the crawler tests as there is no
         # way for the tour to be executed, leading to a timeout
-        if 'pos_preparation_display.display' in self.env:
-            self.env['pos_preparation_display.display'].create({
+        if 'pos.prep.display' in self.env:
+            self.env['pos.prep.display'].create({
                 'name': 'Super Smart Kitchen Display',
             })
         # There is a bug when we go the Field Service app (without any demo data) and we
@@ -74,9 +85,19 @@ class TestMenusAdminLight(odoo.tests.HttpCase):
             })
         self.browser_js("/odoo", "odoo.loader.modules.get('@web/webclient/clickbot/clickbot_loader').startClickEverywhere(undefined, true);", "odoo.isReady === true", login="admin", timeout=120, success_signal="clickbot test succeeded")
 
+
 @odoo.tests.tagged('post_install', '-at_install')
 class TestMenusDemoLight(HttpCaseWithUserDemo):
-    allow_end_on_form = True
+
+    @classmethod
+    def _request_handler(cls, s: Session, r: PreparedRequest, /, **kw):
+        # mock odoofin requests
+        if 'proxy/v2/get_dashboard_institutions' in r.url:
+            r = Response()
+            r.status_code = 200
+            r.json = list
+            return r
+        return super()._request_handler(s, r, **kw)
 
     def test_01_click_apps_menus_as_demo(self):
         # Disable onboarding tours to remove warnings

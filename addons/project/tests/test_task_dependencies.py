@@ -15,7 +15,7 @@ class TestTaskDependencies(TestProjectCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
+        cls.env.user.group_ids |= cls.env.ref('project.group_project_task_dependencies')
         cls.project_pigs.write({
             'allow_task_dependencies': True,
         })
@@ -80,48 +80,32 @@ class TestTaskDependencies(TestProjectCommon):
         self.assertEqual(len(self.task_2.depend_on_ids), 1, "The task 2 should have one dependency.")
 
         # 4) Add task1 as dependency in task3 and check a validation error is raised
-        with self.assertRaises(ValidationError), self.cr.savepoint():
+        with self.assertRaises(ValidationError):
             self.task_3.write({
                 'depend_on_ids': [Command.link(self.task_1.id)],
             })
         self.assertEqual(len(self.task_3.depend_on_ids), 0, "The dependency should not be added in the task 3 because of a cyclic dependency.")
 
         # 5) Add task1 as dependency in task2 and check a validation error is raised
-        with self.assertRaises(ValidationError), self.cr.savepoint():
+        with self.assertRaises(ValidationError):
             self.task_2.write({
                 'depend_on_ids': [Command.link(self.task_1.id)],
             })
         self.assertEqual(len(self.task_2.depend_on_ids), 1, "The number of dependencies should no change in the task 2 because of a cyclic dependency.")
 
     def test_task_dependencies_settings_change(self):
-
-        def set_task_dependencies_setting(enabled):
-            features_config = self.env["res.config.settings"].create({'group_project_task_dependencies': enabled})
-            features_config.execute()
-
-        self.project_pigs.write({
-            'allow_task_dependencies': False,
-        })
-
-        # As the Project General Setting group_project_task_dependencies needs to be toggled in order
-        # to be applied on the existing projects we need to force it so that it does not depends on anything
-        # (like demo data for instance)
-        set_task_dependencies_setting(False)
-        set_task_dependencies_setting(True)
-        self.assertTrue(self.project_pigs.allow_task_dependencies, "Projects allow_task_dependencies should follow group_project_task_dependencies setting changes")
-
+        # set group_project_task_dependencies(True)
         self.project_chickens = self.env['project.project'].create({
             'name': 'My Chicken Project'
         })
-        self.assertTrue(self.project_chickens.allow_task_dependencies, "New Projects allow_task_dependencies should default to group_project_task_dependencies")
+        self.assertFalse(self.project_chickens.allow_task_dependencies, "New Projects allow_task_dependencies should default to False")
 
-        set_task_dependencies_setting(False)
-        self.assertFalse(self.project_pigs.allow_task_dependencies, "Projects allow_task_dependencies should follow group_project_task_dependencies setting changes")
-
+        # set group_project_task_dependencies(False)
+        self.env.user.group_ids -= self.env.ref('project.group_project_task_dependencies')
         self.project_ducks = self.env['project.project'].create({
             'name': 'My Ducks Project'
         })
-        self.assertFalse(self.project_ducks.allow_task_dependencies, "New Projects allow_task_dependencies should default to group_project_task_dependencies")
+        self.assertFalse(self.project_ducks.allow_task_dependencies, "New Projects allow_task_dependencies should still default to False")
 
     def test_duplicate_project_with_task_dependencies(self):
         self.project_pigs.allow_task_dependencies = True
@@ -137,7 +121,6 @@ class TestTaskDependencies(TestProjectCommon):
 
         self.assertEqual(task1_copy.depend_on_ids.ids, [task2_copy.id],
                          "Copy should only create a relation between both copy if they are both part of the project")
-        self.assertEqual(task1_copy.date_deadline, self.task_1.date_deadline, "date_deadline should be copied")
 
         task1_copy.depend_on_ids = self.task_1
 
@@ -174,9 +157,10 @@ class TestTaskDependencies(TestProjectCommon):
 
         # Test copying the whole Node tree
         parent_task_copy = parent_task.copy()
-        parent_copy_node1 = parent_task_copy.child_ids[0]
-        parent_copy_node2 = parent_task_copy.child_ids[1].child_ids
-        parent_copy_node3 = parent_task_copy.child_ids[2]
+        copied_children = parent_task_copy.child_ids.sorted('id')
+        parent_copy_node1 = copied_children[0]
+        parent_copy_node2 = copied_children[1].child_ids
+        parent_copy_node3 = copied_children[2]
 
         # Relation should only be copied between the newly created node
         self.assertEqual(len(parent_copy_node1.dependent_ids), 1)
@@ -202,3 +186,38 @@ class TestTaskDependencies(TestProjectCommon):
         # Original Node should have new relations
         self.assertEqual(len(node1.dependent_ids), 2)
         self.assertEqual(len(node3.depend_on_ids), 2)
+
+    def test_create_from_template_keeps_subtask_dependencies(self):
+        """ Test that a task created from a template keeps the dependencies its sub-tasks have in the template. """
+        template = self.env['project.task'].create({
+            'name': 'Template',
+            'project_id': self.project_pigs.id,
+            'is_template': True,
+            'child_ids': [
+                Command.create({'name': name, 'project_id': self.project_pigs.id, 'is_template': True})
+                for name in ('Design', 'Build', 'Deliver')
+            ],
+        })
+        subtasks = {subtask.name: subtask for subtask in template.child_ids}
+        subtasks['Build'].depend_on_ids = subtasks['Design']
+        subtasks['Deliver'].depend_on_ids = subtasks['Build']
+
+        task = self.env['project.task'].browse(template.action_create_from_template())
+        copies = {subtask.name: subtask for subtask in task.child_ids}
+
+        self.assertFalse(copies['Design'].depend_on_ids)
+        self.assertEqual(copies['Build'].depend_on_ids, copies['Design'])
+        self.assertEqual(copies['Deliver'].depend_on_ids, copies['Build'])
+
+    def test_admin_dependency_toggle(self):
+        """ Test that a Project Manager can toggle task dependencies without raising
+            an AccessError on global message subtypes. Additionally, ensure that
+            toggling this feature does not incorrectly strip the global dependency
+            group when a project that is hidden from the user is still utilizing it.
+        """
+        self.env['project.project'].search([]).write({'allow_task_dependencies': False})
+        self.assertFalse(self.user_projectmanager.has_group('project.group_project_task_dependencies'))
+        self.project_pigs.with_user(self.user_projectmanager).write({'allow_task_dependencies': True})
+        self.assertTrue(self.user_projectmanager.has_group('project.group_project_task_dependencies'))
+        self.project_pigs.with_user(self.user_projectmanager).write({'allow_task_dependencies': False})
+        self.assertFalse(self.user_projectmanager.has_group('project.group_project_task_dependencies'))

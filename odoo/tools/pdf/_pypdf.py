@@ -1,10 +1,11 @@
 from typing import Dict, Any
 
-import pypdf
-from pypdf import errors, filters, generic, PdfReader as _Reader, PdfWriter as _Writer
+from pypdf import errors, filters, generic, PageObject, PdfReader as _Reader, PdfWriter as _Writer
 from pypdf.generic import create_string_object
+from pypdf import __version__  # noqa: F401
 
 __all__ = [
+    "PageObject",
     "PdfReader",
     "PdfWriter",
     "create_string_object",
@@ -14,8 +15,19 @@ __all__ = [
 ]
 
 
-pypdf.PageObject.mergePage = lambda self, page2: self.merge_page(page2)
-pypdf.PageObject.mediaBox = property(lambda self: self.mediabox)
+# setters, so that the aliases below stay assignable like the attributes they shadow
+def _set_media_box(self, value):
+    self.mediabox = value
+
+
+def _set_crop_box(self, value):
+    self.cropbox = value
+
+
+PageObject.mergePage = lambda self, page2: self.merge_page(page2)
+PageObject.compressContentStreams = lambda self: self.compress_content_streams()
+PageObject.mediaBox = property(lambda self: self.mediabox, _set_media_box)
+PageObject.cropBox = property(lambda self: self.cropbox, _set_crop_box)
 # use lambdas (rather than copying) to allow overrides of the base method
 generic.PdfObject.getObject = lambda self: self.get_object()
 generic.StreamObject.getData = lambda self: self.get_data()
@@ -64,8 +76,8 @@ class PdfWriter(_Writer):
     def appendPagesFromReader(self, reader):
         return self.append_pages_from_reader(reader)
 
-    def addBlankPage(self):
-        return self.add_blank_page()
+    def addBlankPage(self, width=None, height=None):
+        return self.add_blank_page(width=width, height=height)
 
     def addAttachment(self, fname, data):
         return self.add_attachment(fname, data)

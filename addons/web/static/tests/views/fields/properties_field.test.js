@@ -1,8 +1,26 @@
+import { PropertiesField } from "@web/views/fields/properties/properties_field";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
-import { PropertiesField } from "@web/views/fields/properties/properties_field";
 import { WebClient } from "@web/webclient/webclient";
 
+import {
+    animationFrame,
+    click,
+    edit,
+    expect,
+    getFixture,
+    mockDate,
+    press,
+    queryAll,
+    queryAllTexts,
+    queryAllValues,
+    queryAttribute,
+    queryFirst,
+    runAllTimers,
+    test,
+    waitFor,
+} from "@odoo/hoot";
+import { editTime, getPickerCell } from "@web/../tests/core/datetime/datetime_test_helpers";
 import {
     clickCancel,
     clickSave,
@@ -10,33 +28,16 @@ import {
     defineModels,
     fields,
     getService,
+    makeServerError,
     models,
     mountView,
     mountWithCleanup,
     onRpc,
     patchWithCleanup,
+    serverState,
     toggleActionMenu,
     toggleMenuItem,
 } from "@web/../tests/web_test_helpers";
-import {
-    getTimePickers,
-    getPickerApplyButton,
-    getPickerCell,
-} from "@web/../tests/core/datetime/datetime_test_helpers";
-import {
-    click,
-    edit,
-    press,
-    queryAll,
-    queryAllTexts,
-    queryAllValues,
-    queryAttribute,
-    queryFirst,
-    select,
-    waitFor,
-} from "@odoo/hoot-dom";
-import { getFixture, expect, test } from "@odoo/hoot";
-import { animationFrame, mockDate, runAllTimers } from "@odoo/hoot-mock";
 
 async function closePopover() {
     // Close the popover by clicking outside
@@ -46,22 +47,26 @@ async function closePopover() {
 }
 
 async function changeType(propertyType) {
-    const TYPES_INDEX = {
-        char: 1,
-        integer: 3,
-        float: 4,
-        date: 5,
-        datetime: 6,
-        selection: 7,
-        tags: 8,
-        many2one: 9,
-        many2many: 10,
-        separator: 11,
-    };
-    const propertyTypeIndex = TYPES_INDEX[propertyType];
+    const TYPES = [
+        "char",
+        "text",
+        "html",
+        "boolean",
+        "integer",
+        "float",
+        "monetary",
+        "date",
+        "datetime",
+        "selection",
+        "tags",
+        "many2one",
+        "many2many",
+        "separator",
+    ];
+    const propertyTypeIndex = TYPES.indexOf(propertyType);
     await click(".o_field_property_definition_type input");
     await animationFrame();
-    await click(`.o-dropdown--menu .dropdown-item:nth-child(${propertyTypeIndex})`);
+    await click(`.o-dropdown--menu .dropdown-item:eq(${propertyTypeIndex})`);
     await animationFrame();
 }
 
@@ -76,9 +81,10 @@ async function makePropertiesGroupView(propertySpecs) {
     // mock random function to have predictable auto generated properties names
     let counter = 1;
     patchWithCleanup(PropertiesField.prototype, {
-        generatePropertyName: () => {
+        generatePropertyName: (propertyType) => {
             counter++;
-            return `property_gen_${counter}`;
+            const name = `property_gen_${counter}`;
+            return propertyType === "html" ? `${name}_html` : name;
         },
     });
 
@@ -96,19 +102,6 @@ async function makePropertiesGroupView(propertySpecs) {
     });
 
     ResCompany._records[0].definitions = definitions;
-
-    // unfold all separators
-    window.localStorage.setItem(
-        "properties.fold,res.company,37",
-        JSON.stringify(
-            definitions
-                .filter((property) => property.type === "separator")
-                .map((property) => property.name)
-        )
-    );
-
-    // clean other element
-    window.localStorage.removeItem("properties.fold,fake.model,1337");
 
     await mountView({
         type: "form",
@@ -131,6 +124,10 @@ async function toggleSeparator(separatorName, isSeparator) {
     await click(`[property-name="${separatorName}"] > * > .o_field_property_open_popover`);
     await animationFrame();
     await changeType(isSeparator ? "separator" : "char");
+    if (isSeparator) {
+        // set unfold by default when switching to a separator
+        await click(`.o_field_property_definition_fold .o_form_label:eq(0)`);
+    }
     await closePopover();
 }
 
@@ -146,15 +143,6 @@ function getGroups() {
             property.getAttribute("property-name"),
         ]),
     ]);
-}
-
-function getLocalStorageFold() {
-    return {
-        "company,37":
-            JSON.parse(window.localStorage.getItem("properties.fold,res.company,37")) || [],
-        "fake.model,1337":
-            JSON.parse(window.localStorage.getItem("properties.fold,fake.model,1337")) || [],
-    };
 }
 
 function getPropertyHandleElement(propertyName) {
@@ -226,6 +214,7 @@ class ResCompany extends models.Model {
                     name: "property_1",
                     string: "My Char",
                     type: "char",
+                    suffix: "suffix",
                     view_in_cards: true,
                 },
                 {
@@ -275,9 +264,24 @@ class User extends models.Model {
             name: "Eve",
         },
     ];
+
+    has_group() {
+        return true;
+    }
 }
 
-defineModels([Partner, ResCompany, User]);
+class ResCurrency extends models.Model {
+    name = fields.Char();
+    symbol = fields.Char();
+
+    _records = Object.entries(serverState.currencies).map(([id, { name, symbol }]) => ({
+        id: Number(id) + 1,
+        name,
+        symbol,
+    }));
+}
+
+defineModels([Partner, ResCompany, User, ResCurrency]);
 
 /**
  * If the current user can not write on the parent, he should not
@@ -305,20 +309,17 @@ test("properties: no access to parent", async () => {
 
     patchWithCleanup(formView.env.services.notification, {
         add: (message, options) => {
-            expect(message).toBe(
-                "You need edit access on the parent document to update these property fields"
-            );
+            expect(message).toBe('Oops! You cannot edit the Company "Company 1".');
         },
     });
 
     expect(".o_field_properties").toHaveCount(1, { message: "The field must be in the view" });
 
     await toggleActionMenu();
-
-    expect(".o-dropdown--menu span:contains(Add Properties)").toHaveCount(1, {
-        message: "Show Add Properties btn in cog menu",
+    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(1, {
+        message: "The 'Edit Properties' btn should be in the cog menu",
     });
-    await toggleMenuItem("Add Properties");
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
     expect(".o_field_properties:first-child .o_field_property_open_popover").toHaveCount(0, {
         message: "The edit definition button must not be in the view",
     });
@@ -353,10 +354,10 @@ test("properties: access to parent", async () => {
     expect(".o_field_properties").toHaveCount(1, { message: "The field must be in the view" });
 
     await toggleActionMenu();
-
-    expect(".o-dropdown--menu span:contains(Add Properties)").toHaveCount(1, {
-        message: "Show Add Properties btn in cog menu",
+    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(1, {
+        message: "Show 'Edit Properties' btn in cog menu",
     });
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     expect(".o_field_properties:first-child .o_field_property_open_popover").not.toBeEmpty({
         message: "The edit definition button must be in the view",
@@ -393,8 +394,6 @@ test("properties: access to parent", async () => {
     await click(getPickerCell("3"));
     await animationFrame();
     expect(".o_datetime_picker").toHaveCount(1);
-
-    await click(getPickerApplyButton());
 
     expect(".o_property_field_popover").toHaveCount(1, {
         message: "Should not close the definition popover after selecting a date",
@@ -449,16 +448,14 @@ test("properties: add a new property", async () => {
     expect(".o_field_properties").toHaveCount(1);
 
     await toggleActionMenu();
-    await animationFrame();
-
-    expect(".o-dropdown--menu span:contains(Add Properties)").toHaveCount(1, {
-        message: "The add button must be in the cog menu",
+    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(1, {
+        message: "The 'Edit Properties' btn should be in the cog menu",
     });
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     // Create a new property
-    await click(".o-dropdown--menu span .fa-cogs");
-    await runAllTimers();
-    await animationFrame();
+    await click(".o_field_property_add button");
+    await waitFor(".o_property_field_popover");
 
     expect(".o_property_field_popover").toHaveCount(1, {
         message: "Should have opened the definition popover",
@@ -498,12 +495,15 @@ test("properties: selection", async () => {
                     </group>
                 </sheet>
             </form>`,
+        actionMenus: {},
     });
 
     expect(".o_field_properties").toHaveCount(1);
     expect(".o_property_field:nth-child(2) select").toHaveCount(1);
     expect(".o_property_field:nth-child(2) select").toHaveValue("b");
 
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
     // Edit the selection property
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
@@ -528,12 +528,10 @@ test("properties: selection", async () => {
         "Selection"
     );
 
-    const getOptions = () => {
-        return queryAll(".o_property_field_popover .o_field_property_selection_option");
-    };
-    const getOptionsValues = () => {
-        return queryAllValues(".o_property_field_popover .o_field_property_selection_option input");
-    };
+    const getOptions = () =>
+        queryAll(".o_property_field_popover .o_field_property_selection_option");
+    const getOptionsValues = () =>
+        queryAllValues(".o_property_field_popover .o_field_property_selection_option input");
 
     // Create a new selection option
     await click(".o_field_property_selection .fa-plus");
@@ -590,13 +588,12 @@ test("properties: selection", async () => {
         message: "Should have added a new option at the correct spot",
     });
 
-    const getOptionDraggableElement = (index) => {
-        return queryFirst(
+    const getOptionDraggableElement = (index) =>
+        queryFirst(
             `.o_field_property_selection_option:nth-child(${
                 index + 1
             }) .o_field_property_selection_drag`
         );
-    };
 
     await contains(getOptionDraggableElement(0)).dragAndDrop(getOptionDraggableElement(2));
     expect(getOptionsValues()).toEqual(["C", "New option 2", "A", "New option"]);
@@ -631,9 +628,13 @@ test("properties: float and integer", async () => {
                     </group>
                 </sheet>
             </form>`,
+        actionMenus: {},
     });
 
     expect(".o_field_properties").toHaveCount(1);
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     // change type to float
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
@@ -673,6 +674,54 @@ test("properties: float and integer", async () => {
 });
 
 /**
+ * Test the text property.
+ */
+test("properties: text", async () => {
+    onRpc("has_access", () => true);
+
+    Partner._records = [
+        {
+            id: 1337,
+            company_id: 42,
+            properties: {
+                property_1: "text value",
+            },
+        },
+    ];
+
+    ResCompany._records.push({
+        id: 42,
+        name: "Company 2",
+        definitions: [
+            {
+                name: "property_1",
+                string: "My Text",
+                type: "text",
+                view_in_kanban: true,
+            },
+        ],
+    });
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1337,
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="company_id"/>
+                        <field name="properties"/>
+                    </group>
+                </sheet>
+            </form>`,
+    });
+
+    expect(".o_field_properties textarea").toHaveCount(1);
+    expect(".o_field_properties textarea").toHaveValue("text value");
+});
+
+/**
  * Test the properties re-arrangement
  */
 test.tags("desktop");
@@ -692,9 +741,14 @@ test("properties: move properties", async () => {
                     </group>
                 </sheet>
             </form>`,
+        actionMenus: {},
     });
 
     expect(".o_field_properties").toHaveCount(1, { message: "The field must be in the view" });
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+
     // Edit the selection property
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await waitFor(".o_property_field_popover");
@@ -765,6 +819,7 @@ test("properties: tags", async () => {
                         </group>
                     </sheet>
                 </form>`,
+        actionMenus: {},
     });
 
     const createNewTag = async (selector, text) => {
@@ -774,6 +829,9 @@ test("properties: tags", async () => {
         await click(".o_field_property_dropdown_add .dropdown-item");
         await animationFrame();
     };
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
@@ -850,6 +908,14 @@ test("properties: tags", async () => {
     expect(".o_property_field_value .o_tag").toHaveCount(1, {
         message: "Should have unselected the removed tag B",
     });
+
+    // Remove a tag by pressing backspace
+    await click(".o_property_field_value .o_input_dropdown input");
+    await press("backspace");
+    await animationFrame();
+    expect(".o_property_field_value .o_tag").toHaveCount(0, {
+        message: "Should have unselected the tag",
+    });
 });
 
 /**
@@ -898,7 +964,11 @@ test("properties: many2one", async () => {
                     </group>
                 </sheet>
             </form>`,
+        actionMenus: {},
     });
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await waitFor(".o_property_field_popover");
@@ -943,6 +1013,63 @@ test("properties: many2one", async () => {
     );
 });
 
+test.tags("desktop");
+test("properties: a relational property with an unevaluable domain shows no record count", async () => {
+    onRpc(({ method, model }) => {
+        if (method === "has_access") {
+            return true;
+        } else if (method === "get_available_models" && model === "ir.model") {
+            return [{ model: "res.users", display_name: "User" }];
+        } else if (method === "fields_get" && model === "res.users") {
+            return { name: { searchable: true, string: "Name", type: "char" } };
+        } else if (method === "search_count" && model === "res.users") {
+            throw makeServerError({ message: "Wrong path" });
+        }
+    });
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="company_id"/>
+                        <field name="properties"/>
+                    </group>
+                </sheet>
+            </form>`,
+        actionMenus: {},
+    });
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+
+    for (const propertyType of ["many2one", "many2many"]) {
+        await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
+        await waitFor(".o_property_field_popover");
+        const popover = queryFirst(".o_property_field_popover");
+        await changeType(propertyType);
+
+        // Selecting the model triggers the matching-records count, which fails here.
+        await click(".o_field_property_definition_model input", { root: popover });
+        await animationFrame();
+        await click(".o_field_property_definition_model .ui-menu-item:first-child", {
+            root: popover,
+        });
+        await animationFrame();
+
+        expect(".o_property_field_popover").toHaveCount(1, {
+            message: `the ${propertyType} property editor stays open`,
+        });
+        expect(queryFirst(".o_property_field_popover").textContent).not.toInclude("record(s)", {
+            message: "no matching record count is shown when the domain cannot be evaluated",
+        });
+        await closePopover();
+    }
+});
+
 /**
  * Test the properties many2many
  */
@@ -984,9 +1111,14 @@ test("properties: many2many", async () => {
                     </group>
                 </sheet>
             </form>`,
+        actionMenus: {},
     });
 
     const getSelectedUsers = () => queryAllTexts(".o_property_field_value .o_tag_badge_text");
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
     const popover = queryFirst(".o_property_field_popover");
@@ -1051,7 +1183,7 @@ test("properties: many2many", async () => {
  * modal should correspond to the selected model and should be updated dynamically.
  */
 test.tags("desktop");
-test("properties: many2one 'Search more...'", async () => {
+test("properties: many2one 'Search more...' +  internal link save keeps data", async () => {
     onRpc(({ method, model }) => {
         if (["has_access", "has_group"].includes(method)) {
             return true;
@@ -1065,6 +1197,8 @@ test("properties: many2one 'Search more...'", async () => {
                 { model: "partner", display_name: "Partner" },
                 { model: "res.users", display_name: "User" },
             ];
+        } else if (method === "get_formview_id") {
+            return false;
         }
     });
 
@@ -1092,12 +1226,19 @@ test("properties: many2one 'Search more...'", async () => {
             <field name="id"/>
             <field name="display_name"/>
         </list>`;
+    User._views[["form", false]] = /* xml */ `
+        <form>
+            <sheet>
+                <group>
+                    <field name="display_name"/>
+                </group>
+            </sheet>
+        </form>`;
     User._views[["list", false]] = /* xml */ `
         <list>
             <field name="id"/>
             <field name="display_name"/>
         </list>`;
-    User._views[["search", false]] = /* xml */ `<search/>`;
 
     // Patch the Many2XAutocomplete default search limit options
     patchWithCleanup(Many2XAutocomplete.defaultProps, {
@@ -1128,7 +1269,11 @@ test("properties: many2one 'Search more...'", async () => {
                     </group>
                 </sheet>
             </form>`,
+        actionMenus: {},
     });
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     // Opening the popover
     await click('[property-name="many_2_one"] .o_field_property_open_popover');
@@ -1162,6 +1307,21 @@ test("properties: many2one 'Search more...'", async () => {
     await animationFrame();
     // Checking the model loaded
     expect.verifySteps(["res.users"]);
+
+    // Select the first value
+    await click(".o_list_table tbody tr:first-child td[name='display_name']");
+    await animationFrame();
+
+    // Click on external button
+    await click(".o_properties_external_button");
+    await animationFrame();
+
+    // Click on Save & close button
+    await click(".modal .o_form_button_save");
+    await animationFrame();
+
+    // Check that value does not disappear
+    expect(".o_field_property_definition_value input").toHaveValue("Alice");
 });
 
 test("properties: date(time) property manipulations", async () => {
@@ -1214,7 +1374,7 @@ test("properties: date(time) property manipulations", async () => {
         resId: 5000,
         arch: /* xml */ `<form><field name="company_id"/><field name="properties"/></form>`,
     });
-    expect.verifySteps(["get_views", "web_read", "has_access"]);
+    expect.verifySteps(["get_views", "web_read"]);
 
     // check initial properties
     expect("[property-name=property_1] .o_property_field_value input").toHaveValue("01/01/2019");
@@ -1237,11 +1397,7 @@ test("properties: date(time) property manipulations", async () => {
     await animationFrame();
     await click(getPickerCell("31"));
     await animationFrame();
-    const [[hourSelect, minuteSelect]] = getTimePickers();
-    await select("12", { target: hourSelect });
-    await animationFrame();
-    await select("5", { target: minuteSelect });
-    await animationFrame();
+    await editTime("12:05");
     expect("[property-name=property_2] input").toHaveValue("12/31/2018 12:05:00");
 
     // save
@@ -1289,9 +1445,13 @@ test("properties: name reset", async () => {
                     </group>
                 </sheet>
             </form>`,
+        actionMenus: {},
     });
 
     expect('.o_property_field[property-name="property_2"]').toHaveCount(1);
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     // open the definition popover
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
@@ -1301,8 +1461,7 @@ test("properties: name reset", async () => {
 
     // select the "User" model
     await click(".o_field_property_definition_model input");
-    await animationFrame();
-    await click(".o_field_property_definition_model .ui-menu-item:nth-child(2)");
+    await contains(".o_field_property_definition_model .ui-menu-item:nth-child(2)").click();
     await animationFrame();
     await closePopover();
 
@@ -1326,24 +1485,46 @@ test("properties: name reset", async () => {
     await animationFrame();
     await changeType("many2one");
     await click(".o_field_property_definition_model input");
-    await animationFrame();
-    await click(".o_field_property_definition_model .ui-menu-item:nth-child(2)");
+    await contains(".o_field_property_definition_model .ui-menu-item:nth-child(2)").click();
     await animationFrame();
     const propertyName = queryAttribute(".o_property_field:nth-child(2)", "property-name");
+    expect(propertyName.endsWith("_html")).toEqual(false);
 
     // save (if we do not save, the name will be the same even if
     // we change the model, because it would be useless to regenerate it again)
     await closePopover();
 
     // restore the model "User", and check that the name has been restored
-    await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
-    await animationFrame();
-    await click(".o_field_property_definition_model input");
-    await animationFrame();
-    await click(".o_field_property_definition_model .ui-menu-item:nth-child(2)");
-    await animationFrame();
+    await contains(".o_property_field:nth-child(2) .o_field_property_open_popover").click();
+    await contains(".o_field_property_definition_model input").click();
+    await contains(".o_field_property_definition_model .ui-menu-item:nth-child(2)").click();
     await closePopover();
     expect(".o_property_field:nth-child(2)").toHaveAttribute("property-name", propertyName);
+
+    // Change the definition and check that the name stay the same
+    await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
+    await contains(".o_field_property_definition_kanban input").click();
+    await closePopover();
+    expect(".o_property_field:nth-child(2)").toHaveAttribute("property-name", propertyName);
+
+    // Change the type to "HTML" and verify that the suffix is added
+    await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
+    await animationFrame();
+    await changeType("html");
+    await closePopover();
+    await animationFrame();
+    const htmlPropertyName = queryAttribute(".o_property_field:nth-child(2)", "property-name");
+    expect(htmlPropertyName.endsWith("_html")).toEqual(true);
+
+    // Restore the selection type, the name should be restored
+    await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
+    await animationFrame();
+    await changeType("selection");
+    await closePopover();
+    await animationFrame();
+    expect(".o_property_field:nth-child(2)").toHaveAttribute("property-name", "property_2", {
+        message: "Name must have been restored",
+    });
 });
 
 /**
@@ -1366,15 +1547,13 @@ test("properties: kanban view", async () => {
     });
 
     // check second card
-    expect(".o_kanban_record:nth-child(2) .o_card_property_field:nth-child(3) span").toHaveText(
+    expect(".o_kanban_record:nth-child(2) .o_card_property_field:nth-child(3)").toHaveText(
         "char value 4"
     );
-    expect(".o_kanban_record:nth-child(2) .o_card_property_field:nth-child(1) span").toHaveText(
-        "char value"
+    expect(".o_kanban_record:nth-child(2) .o_card_property_field:nth-child(1)").toHaveText(
+        "char value\nsuffix"
     );
-    expect(".o_kanban_record:nth-child(2) .o_card_property_field:nth-child(2) span").toHaveText(
-        "C"
-    );
+    expect(".o_kanban_record:nth-child(2) .o_card_property_field:nth-child(2)").toHaveText("C");
 
     // check first card
     expect(".o_kanban_record:nth-child(1) .o_card_property_field").toHaveCount(2);
@@ -1470,8 +1649,8 @@ test("properties: kanban view with multiple sources of properties definitions", 
 
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(5);
     expect(queryAllTexts(".o_kanban_record:not(.o_kanban_ghost)")).toEqual([
-        "Company 1\nfirst partner\nchar value\nB",
-        "Company 1\nsecond partner\nchar value\nC\nchar value 4",
+        "Company 1\nfirst partner\nchar value\nsuffix\nB",
+        "Company 1\nsecond partner\nchar value\nsuffix\nC\nchar value 4",
         "Company 1\nthird partner",
         "Company 1\nfourth partner",
         "Company 2\nother partner\nMy Integer\n1",
@@ -1597,7 +1776,6 @@ test("properties: kanban view without properties", async () => {
  */
 test.tags("desktop");
 test("properties: switch view on desktop", async () => {
-    Partner._views[["search", false]] = /* xml */ `<search/>`;
     Partner._views[["kanban", 99]] = /* xml */ `<kanban>
                 <templates>
                     <t t-name="card">
@@ -1631,7 +1809,6 @@ test("properties: switch view on desktop", async () => {
 
 test.tags("mobile");
 test("properties: switch view on mobile", async () => {
-    Partner._views[["search", false]] = /* xml */ `<search/>`;
     Partner._views[["kanban", 99]] = /* xml */ `<kanban>
                 <templates>
                     <t t-name="card">
@@ -1691,14 +1868,15 @@ test("properties: default value", async () => {
 
     expect(".o_field_properties").toHaveCount(1);
 
-    // create a new property
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+
+    // add a new property field
+    await click(".o_field_property_add button");
+    await waitFor(".o_property_field_popover");
+
     // edit the default value and close the popover definition
     // because we just created the property, the default value should be propagated
-    await toggleActionMenu();
-    await click(".o-dropdown--menu span .fa-cogs");
-    await runAllTimers();
-    await animationFrame();
-
     await click(".o_field_property_definition_value input");
     await edit("First Default Value", { confirm: "Enter" });
     await animationFrame();
@@ -1754,9 +1932,11 @@ test("properties: default value date", async () => {
     });
     expect(".o_field_properties").toHaveCount(1, { message: "The field must be in the view" });
 
-    // add a new date property
     await toggleActionMenu();
-    await click(".o_popover span .fa-cogs");
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+
+    // add a new date property
+    await click(".o_field_property_add button");
     await waitFor(".o_property_field_popover");
     await changeType("date");
     expect(".o_property_field_popover .o_field_property_definition_type input").toHaveValue(
@@ -1783,6 +1963,43 @@ test("properties: default value date", async () => {
     );
 });
 
+test("properties: suffix", async () => {
+    onRpc("has_access", () => true);
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="company_id"/>
+                        <field name="properties"/>
+                    </group>
+                </sheet>
+            </form>`,
+        actionMenus: {},
+    });
+
+    expect(".o_field_properties").toHaveCount(1);
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties");
+
+    await click(".o_field_property_add button");
+    await waitFor(".o_property_field_popover");
+
+    await click(".o_field_property_definition_suffix input");
+    await edit("kg", { confirm: "Enter" });
+    await animationFrame();
+    await closePopover();
+
+    expect(".o_field_properties .o_property_field:last .o_property_field_value_suffix").toHaveText(
+        "kg"
+    );
+});
+
 /**
  * check if property field popover closes when clicking on delete property icon.
  */
@@ -1802,7 +2019,11 @@ test("properties: close property popover once clicked on delete icon", async () 
                     </group>
                 </sheet>
             </form>`,
+        actionMenus: {},
     });
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     // We open the property popover
     await click(".o_property_field:first-child .o_field_property_open_popover");
@@ -1817,7 +2038,7 @@ test("properties: close property popover once clicked on delete icon", async () 
 });
 
 /**
- * Check the behavior of the domain (properies with "definition_deleted" should be ignored).
+ * Check the behavior of the domain (properties with "definition_deleted" should be ignored).
  * In that case, some properties start without the flag "definition_deleted".
  */
 test("properties: form view and falsy domain, properties are not empty", async () => {
@@ -1841,7 +2062,12 @@ test("properties: form view and falsy domain, properties are not empty", async (
                     </group>
                 </sheet>
             </form>`,
+        actionMenus: {},
     });
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+
     expect(".o_test_properties_not_empty").toHaveCount(1);
 
     // delete a property, 2 properties left
@@ -1909,6 +2135,25 @@ test("properties: form view and falsy domain, properties are empty", async () =>
     expect(".o_test_properties_not_empty").toHaveCount(1);
 });
 
+test("properties: discard changes", async () => {
+    onRpc("has_access", () => true);
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <field name="company_id"/>
+                <field name="properties" widget="properties"/>
+            </form>`,
+    });
+    expect(".o_property_field:first-child input").toHaveValue("char value");
+    await contains(".o_property_field:first-child input").edit("char updated");
+    expect(".o_property_field:first-child input").toHaveValue("char updated");
+    await clickCancel();
+    expect(".o_property_field:first-child input").toHaveValue("char value");
+});
+
 // ---------------------------------------------------
 // Test the properties groups
 // ---------------------------------------------------
@@ -1916,6 +2161,8 @@ test("properties: form view and falsy domain, properties are empty", async () =>
 test.tags("desktop");
 test("properties: separators layout", async () => {
     await makePropertiesGroupView([false, false, false, false]);
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
     await toggleSeparator("property_1", true);
     expect(getGroups()).toEqual([
         [
@@ -1924,7 +2171,8 @@ test("properties: separators layout", async () => {
             ["Property 3", "property_3"],
         ],
         [
-            ["", "property_gen_2"],
+            // invisible separator to fill the space
+            ["", ""],
             ["Property 4", "property_4"],
         ],
     ]);
@@ -1934,7 +2182,13 @@ test("properties: separators layout", async () => {
         ".o_field_properties .o_property_group[property-name='property_gen_2']:first-child .o_field_property_group_label"
     );
     await animationFrame();
-    expect(getGroups()).toEqual([[["PROPERTY 1", "property_gen_2"]], [["", "property_gen_2"]]]);
+    expect(getGroups()).toEqual([
+        [["PROPERTY 1", "property_gen_2"]],
+        [
+            ["", ""],
+            ["Property 4", "property_4"],
+        ],
+    ]);
     await click(
         ".o_field_properties .o_property_group[property-name='property_gen_2']:first-child .o_field_property_group_label"
     );
@@ -1964,9 +2218,7 @@ test("properties: separators layout", async () => {
     await click(".o_property_group[property-name='property_gen_2'] .o_field_property_group_label");
     await animationFrame();
     // create 3 new properties
-    await toggleActionMenu();
-    await animationFrame();
-    await click(".o-dropdown--menu span .fa-cogs");
+    await click(".o_field_property_add button");
     await animationFrame();
     await click(".o_field_property_add button");
     await animationFrame();
@@ -1998,7 +2250,7 @@ test("properties: separators layout", async () => {
         ],
         [
             // invisible separator to fill the space
-            ["", "property_gen_2"],
+            ["", ""],
             ["Property 5", "property_gen_4"],
             ["Property 6", "property_gen_5"],
             ["Property 7", "property_gen_6"],
@@ -2025,53 +2277,93 @@ test("properties: separators layout", async () => {
     ]);
 });
 
-test("properties: separators and local storage", async () => {
-    await makePropertiesGroupView([false, false, false, false, true, false]);
+test("properties: open section by default", async () => {
+    onRpc("has_access", () => true);
+    ResCompany._records[0].definitions = [
+        { name: "property_1", string: "Separator 1", type: "separator", fold_by_default: false },
+        { name: "property_2", string: "Property 2", type: "char" },
+        { name: "property_3", string: "Separator 3", type: "separator" },
+        { name: "property_4", string: "Property 4", type: "char" },
+    ];
+    delete Partner._records[1].properties.property_1; // remove char value
 
-    // store the fold state of an other properties field to verify that it stay untouched
-    // and check that the property that doesn't exist is removed
-    window.localStorage.setItem("company,37", JSON.stringify(["fake"]));
-    window.localStorage.setItem("properties.fold,fake.model,1337", JSON.stringify(["a", "b", "c"]));
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="company_id"/>
+                        <field name="properties" columns="2"/>
+                    </group>
+                </sheet>
+            </form>`,
+        actionMenus: {},
+    });
 
     expect(getGroups()).toEqual([
         [
-            ["", ""],
-            ["Property 1", "property_1"],
+            ["SEPARATOR 1", "property_1"],
             ["Property 2", "property_2"],
-            ["Property 3", "property_3"],
-            ["Property 4", "property_4"],
         ],
-        [
-            ["SEPARATOR 5", "property_5"],
-            ["Property 6", "property_6"],
-        ],
+        [["SEPARATOR 3", "property_3"]],
     ]);
 
-    // fold the group
-    await click("div[property-name='property_5'] .o_field_property_group_label");
+    await click("div[property-name='property_1'] .o_field_property_group_label");
     await animationFrame();
+
+    expect(getGroups()).toEqual([[["SEPARATOR 1", "property_1"]], [["SEPARATOR 3", "property_3"]]]);
+});
+
+test.tags("desktop");
+test("properties: save separator folded state", async () => {
+    onRpc("web_save", ({ args }) => {
+        expect.step(args[1].properties.map((p) => [p.name, p.value]));
+    });
+
+    await makePropertiesGroupView([true, true, true, true]);
     expect(getGroups()).toEqual([
-        [
-            ["", ""],
-            ["Property 1", "property_1"],
-            ["Property 2", "property_2"],
-            ["Property 3", "property_3"],
-            ["Property 4", "property_4"],
-        ],
-        [["SEPARATOR 5", "property_5"]],
+        [["SEPARATOR 1", "property_1"]],
+        [["SEPARATOR 2", "property_2"]],
+        [["SEPARATOR 3", "property_3"]],
+        [["SEPARATOR 4", "property_4"]],
     ]);
-    expect(getLocalStorageFold()).toEqual({
-        "company,37": [],
-        "fake.model,1337": ["a", "b", "c"], // stay untouched
-    });
 
-    // unfold the group
-    await click("div[property-name='property_5'] .o_field_property_group_label");
+    // return true if the given separator is folded
+    const foldState = (separatorName) =>
+        !queryFirst(`div[property-name='${separatorName}'] .o_field_property_label .fa-caret-down`);
+
+    const assertFolded = (values) => {
+        expect(values.length).toBe(4);
+        expect(foldState("property_1")).toBe(values[0]);
+        expect(foldState("property_2")).toBe(values[1]);
+        expect(foldState("property_3")).toBe(values[2]);
+        expect(foldState("property_4")).toBe(values[3]);
+    };
+
+    await click(
+        ".o_field_properties .o_property_group[property-name='property_1'] .o_field_property_group_label"
+    );
     await animationFrame();
-    expect(getLocalStorageFold()).toEqual({
-        "company,37": ["property_5"],
-        "fake.model,1337": ["a", "b", "c"], // stay untouched
-    });
+    assertFolded([true, false, false, false]);
+
+    await click(
+        ".o_field_properties .o_property_group[property-name='property_3'] .o_field_property_group_label"
+    );
+    await animationFrame();
+    assertFolded([true, false, true, false]);
+
+    await clickSave();
+    expect.verifySteps([
+        [
+            ["property_1", true],
+            ["property_2", false],
+            ["property_3", true],
+            ["property_4", false],
+        ],
+    ]);
 });
 
 /**
@@ -2082,18 +2374,15 @@ test("properties: separators move properties", async () => {
     await makePropertiesGroupView([false, true, true, false, true, true, false]);
 
     // return true if the given separator is folded
-    const foldState = (separatorName) => {
-        return !queryFirst(
-            `div[property-name='${separatorName}'] .o_field_property_label .fa-caret-down`
-        );
-    };
+    const foldState = (separatorName) =>
+        !queryFirst(`div[property-name='${separatorName}'] .o_field_property_label .fa-caret-down`);
 
     const assertFolded = (values) => {
         expect(values.length).toBe(4);
-        expect(values[0]).toBe(foldState("property_2"));
-        expect(values[1]).toBe(foldState("property_3"));
-        expect(values[2]).toBe(foldState("property_5"));
-        expect(values[3]).toBe(foldState("property_6"));
+        expect(foldState("property_2")).toBe(values[0]);
+        expect(foldState("property_3")).toBe(values[1]);
+        expect(foldState("property_5")).toBe(values[2]);
+        expect(foldState("property_6")).toBe(values[3]);
     };
 
     // fold all groups
@@ -2116,6 +2405,9 @@ test("properties: separators move properties", async () => {
         [["SEPARATOR 5", "property_5"]],
         [["SEPARATOR 6", "property_6"]],
     ]);
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     // move the first property down
     await click("[property-name='property_1'] .o_field_property_open_popover");
@@ -2222,8 +2514,7 @@ test("properties: separators move properties", async () => {
     assertFolded([false, false, false, true]);
 
     // now, create a new property, it must unfold the last group
-    await toggleActionMenu();
-    await click(".o-dropdown--menu span .fa-cogs");
+    await click(".o_field_property_add button");
     await animationFrame();
     expect(getGroups()).toEqual([
         [
@@ -2242,11 +2533,6 @@ test("properties: separators move properties", async () => {
         ],
     ]);
     assertFolded([false, false, false, false]);
-
-    expect(getLocalStorageFold()).toEqual({
-        "company,37": ["property_5", "property_3", "property_2", "property_6"],
-        "fake.model,1337": [],
-    });
 });
 
 test.tags("desktop");
@@ -2267,12 +2553,14 @@ test("properties: separators drag and drop", async () => {
         ],
     ]);
 
-    const getPropertyHandleElement = (propertyName) => {
-        return queryFirst(`*[property-name='${propertyName}'] .oi-draggable`);
-    };
+    const getPropertyHandleElement = (propertyName) =>
+        queryFirst(`*[property-name='${propertyName}'] .oi-draggable`);
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     // if we move properties inside the same column, do not generate the group
-    await contains(getPropertyHandleElement("property_1"), { visible: false }).dragAndDrop(
+    await contains(getPropertyHandleElement("property_1")).dragAndDrop(
         getPropertyHandleElement("property_3")
     );
     expect(getGroups()).toEqual([
@@ -2290,7 +2578,7 @@ test("properties: separators drag and drop", async () => {
     ]);
 
     // but if we move a property in a different column, we need to generate the group
-    await contains(getPropertyHandleElement("property_3"), { visible: false }).dragAndDrop(
+    await contains(getPropertyHandleElement("property_3")).dragAndDrop(
         getPropertyHandleElement("property_4")
     );
     expect(getGroups()).toEqual([
@@ -2313,7 +2601,7 @@ test("properties: separators drag and drop", async () => {
     await click("div[property-name='property_gen_2'] .o_field_property_group_label");
 
     // drag and drop the firth property in the folded group
-    await contains(getPropertyHandleElement("property_5"), { visible: false }).dragAndDrop(
+    await contains(getPropertyHandleElement("property_5")).dragAndDrop(
         getPropertyHandleElement("property_gen_2")
     );
     // should unfold automatically
@@ -2332,7 +2620,7 @@ test("properties: separators drag and drop", async () => {
     ]);
 
     // drag and drop the first group at the second position
-    await contains(getPropertyHandleElement("property_gen_2"), { visible: false }).dragAndDrop(
+    await contains(getPropertyHandleElement("property_gen_2")).dragAndDrop(
         getPropertyHandleElement("property_gen_3")
     );
     expect(getGroups()).toEqual([
@@ -2350,7 +2638,7 @@ test("properties: separators drag and drop", async () => {
     ]);
 
     // move property 3 at the last position of the other group
-    await contains(getPropertyHandleElement("property_3"), { visible: false }).dragAndDrop(
+    await contains(getPropertyHandleElement("property_3")).dragAndDrop(
         getPropertyHandleElement("property_gen_2")
     );
     expect(getGroups()).toEqual([
@@ -2368,7 +2656,7 @@ test("properties: separators drag and drop", async () => {
     ]);
 
     // move property 3 at the first position of its group
-    await contains(getPropertyHandleElement("property_3"), { visible: false }).dragAndDrop(
+    await contains(getPropertyHandleElement("property_3")).dragAndDrop(
         getPropertyHandleElement("property_2")
     );
     expect(getGroups()).toEqual([
@@ -2386,7 +2674,7 @@ test("properties: separators drag and drop", async () => {
     ]);
 });
 
-test("properties: showAddButton option", async () => {
+test("properties: start in edit mode", async () => {
     onRpc("has_access", () => true);
     await mountView({
         type: "form",
@@ -2397,7 +2685,7 @@ test("properties: showAddButton option", async () => {
                 <sheet>
                     <group>
                         <field name="company_id"/>
-                        <field name="properties" showAddButton="True"/>
+                        <field name="properties" editMode="True"/>
                     </group>
                 </sheet>
             </form>`,
@@ -2416,7 +2704,7 @@ test("properties: no add properties action in cogmenu if no properties field", a
         actionMenus: {},
     });
     await toggleActionMenu();
-    expect(".o-dropdown--menu span:contains(Add Properties)").toHaveCount(0);
+    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(0);
 });
 
 test.tags("desktop");
@@ -2491,26 +2779,92 @@ test("new property, change record, change property type", async () => {
             </form>`,
         actionMenus: {},
     });
-    // Add a new property
+
     await toggleActionMenu();
-    await click(".o_popover span .fa-cogs");
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
 
     await contains(".o_property_field .o_property_field_value input").edit("aze");
     await contains(".o_pager_next").click();
     expect(".o_property_field .o_property_field_value input").toHaveValue("");
     // Change second record's property type
-    await contains(".o_property_field .o_field_property_open_popover", { visible: false }).click();
+    await contains(".o_property_field .o_field_property_open_popover").click();
     await changeType("integer");
 
     await contains(".o_pager_previous").click();
     expect(".o_property_field .o_property_field_value input").toHaveValue("0");
 });
 
-test.tags("desktop")("properties: moving single property to 2nd group in auto split mode", async () => {
+test("property many2one, change property type from many2one to integer", async () => {
+    Partner._records = [
+        {
+            id: 1,
+            company_id: 37,
+            display_name: "Pierre",
+            properties: {
+                many_2_one: false,
+            },
+        },
+    ];
+    ResCompany._records[0].definitions = [
+        {
+            name: "many_2_one",
+            string: "My Many-2-one",
+            type: "many2one",
+            comodel: "partner",
+            domain: false,
+        },
+    ];
+
+    onRpc(({ method, model, args }) => {
+        if (["has_access", "has_group"].includes(method)) {
+            return true;
+        } else if (method === "display_name_for" && model === "ir.model") {
+            return [{ model: "partner", display_name: "Partner" }];
+        } else if (method === "get_available_models" && model === "ir.model") {
+            return [{ model: "partner", display_name: "Partner" }];
+        } else if (method === "web_save") {
+            const { name, ...propertiesWithoutName } = args[1].properties[0];
+            expect(name).not.toEqual("many_2_one");
+            expect(propertiesWithoutName).toEqual({
+                string: "My Many-2-one",
+                type: "integer",
+                value: 0,
+                definition_changed: true,
+                default: 0,
+            });
+        }
+    });
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        resIds: [1, 2],
+        arch: `
+            <form>
+                <field name="company_id"/>
+                <field name="properties"/>
+            </form>`,
+        actionMenus: {},
+    });
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+
+    // Change the record's property type
+    await contains(".o_property_field .o_field_property_open_popover").click();
+    await changeType("integer");
+
+    // save
+    await clickSave();
+});
+
+test.tags("desktop");
+test("properties: moving single property to 2nd group in auto split mode", async () => {
     await makePropertiesGroupView([false]);
-    const { moveTo, drop } = await contains(getPropertyHandleElement("property_1"), {
-        visible: false,
-    }).drag();
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    const { moveTo, drop } = await contains(getPropertyHandleElement("property_1")).drag();
     const secondGroup = queryFirst(".o_property_group:last-of-type");
     await moveTo(secondGroup, "bottom");
     await drop();
@@ -2523,12 +2877,14 @@ test.tags("desktop")("properties: moving single property to 2nd group in auto sp
     ]);
 });
 
-test.tags("desktop")("properties: moving single property to 1st group", async () => {
+test.tags("desktop");
+test("properties: moving single property to 1st group", async () => {
     await makePropertiesGroupView([true, true, false]);
-
-    await contains(getPropertyHandleElement("property_3"), {
-        visible: false,
-    }).dragAndDrop(getPropertyHandleElement("property_1"));
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await contains(getPropertyHandleElement("property_3")).dragAndDrop(
+        getPropertyHandleElement("property_1")
+    );
     expect(getGroups()).toEqual([
         [
             ["SEPARATOR 1", "property_1"],
@@ -2538,12 +2894,15 @@ test.tags("desktop")("properties: moving single property to 1st group", async ()
     ]);
 });
 
-test.tags("desktop")("properties: split, moving property from 2nd group to 1st", async () => {
+test.tags("desktop");
+test("properties: split, moving property from 2nd group to 1st", async () => {
     await makePropertiesGroupView([true, false, false]);
-
-    await contains(getPropertyHandleElement("property_3"), {
-        visible: false,
-    }).dragAndDrop(getPropertyHandleElement("property_2"), "top");
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await contains(getPropertyHandleElement("property_3")).dragAndDrop(
+        getPropertyHandleElement("property_2"),
+        "top"
+    );
     expect(getGroups()).toEqual([
         [
             ["SEPARATOR 1", "property_1"],
@@ -2554,12 +2913,15 @@ test.tags("desktop")("properties: split, moving property from 2nd group to 1st",
     ]);
 });
 
-test.tags("desktop")("properties: split, moving property from 1st group to 2nd", async () => {
+test.tags("desktop");
+test("properties: split, moving property from 1st group to 2nd", async () => {
     await makePropertiesGroupView([true, false, false, false, false, false]);
-
-    await contains(getPropertyHandleElement("property_3"), {
-        visible: false,
-    }).dragAndDrop(getPropertyHandleElement("property_6"), "top");
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await contains(getPropertyHandleElement("property_3")).dragAndDrop(
+        getPropertyHandleElement("property_6"),
+        "top"
+    );
     expect(getGroups()).toEqual([
         [
             ["SEPARATOR 1", "property_1"],
@@ -2572,5 +2934,300 @@ test.tags("desktop")("properties: split, moving property from 1st group to 2nd",
             ["Property 3", "property_3"],
             ["Property 6", "property_6"],
         ],
+    ]);
+});
+
+test("properties: do not write undefined value", async () => {
+    Partner._records.push({
+        id: 5000,
+        display_name: "third partner",
+        properties: {
+            property_1: "test",
+            property_2: undefined,
+        },
+        company_id: 37,
+    });
+    ResCompany._records[0].definitions = [
+        {
+            name: "property_1",
+            string: "Property 1",
+            type: "char",
+        },
+        {
+            name: "property_2",
+            string: "Property 2",
+            type: "char",
+        },
+    ];
+    onRpc(({ method, args }) => {
+        if (method === "has_access") {
+            return true;
+        }
+        if (method === "web_save") {
+            expect.step("web_save");
+            expect(args[1].properties).toEqual([
+                {
+                    name: "property_1",
+                    string: "Property 1",
+                    type: "char",
+                    value: "edited",
+                },
+                {
+                    name: "property_2",
+                    string: "Property 2",
+                    type: "char",
+                    // Value not added here
+                },
+            ]);
+        }
+    });
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 5000,
+        arch: /* xml */ `<form><field name="company_id"/><field name="properties"/></form>`,
+    });
+
+    await contains("[property-name=property_1] input").edit("edited");
+
+    expect.verifySteps([]);
+    await clickSave();
+    expect.verifySteps(["web_save"]);
+});
+
+test("properties: monetary without currency_field", async () => {
+    onRpc("has_access", () => true);
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="company_id"/>
+                        <field name="properties"/>
+                    </group>
+                </sheet>
+            </form>`,
+        actionMenus: {},
+    });
+    expect(".o_field_properties").toHaveCount(1);
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties");
+
+    await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
+    await animationFrame();
+
+    await click(".o_field_property_definition_type input");
+    await animationFrame();
+    expect(
+        `.o_field_property_definition_type_menu .o-dropdown-item:contains(Monetary) > div.text-muted`
+    ).toHaveAttribute(
+        "data-tooltip",
+        "Not possible to create monetary field because there is no currency on current model."
+    );
+});
+
+test("properties: monetary with currency_id", async () => {
+    Partner._fields.currency_id = fields.Many2one({ relation: "res.currency", default: 1 });
+
+    onRpc("has_access", () => true);
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="company_id"/>
+                        <field name="properties"/>
+                    </group>
+                </sheet>
+            </form>`,
+        actionMenus: {},
+    });
+    expect(".o_field_properties").toHaveCount(1);
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties");
+
+    await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
+    await animationFrame();
+
+    await click(".o_field_property_definition_type input");
+    await animationFrame();
+    expect(
+        `.o_field_property_definition_type_menu .o-dropdown-item:contains(Monetary) > div:not(.text-muted)`
+    ).toHaveCount(1);
+
+    await contains(
+        `.o_field_property_definition_type_menu .o-dropdown-item:contains(Monetary)`
+    ).click();
+    expect(`.o_field_property_definition_currency_field select`).toHaveText("Currency");
+    expect(`.o_field_property_definition_currency_field select`).toHaveValue("currency_id");
+    expect(".o_field_property_definition_value .o_input > span:eq(0)").toHaveText("$");
+    expect(`.o_field_property_definition_value input`).toHaveValue("0.00");
+
+    await closePopover();
+    expect(
+        ".o_property_field:nth-child(2) .o_property_field_value .o_input > span:eq(0)"
+    ).toHaveText("$");
+    expect(`.o_property_field:nth-child(2) .o_property_field_value input`).toHaveValue("0.00");
+});
+
+test("properties: monetary with multiple currency field", async () => {
+    Partner._fields.another_currency_id = fields.Many2one({ relation: "res.currency", default: 2 });
+    Partner._fields.currency_id = fields.Many2one({ relation: "res.currency", default: 1 });
+
+    onRpc("has_access", () => true);
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="another_currency_id" invisible="1"/>
+                        <field name="company_id"/>
+                        <field name="properties"/>
+                    </group>
+                </sheet>
+            </form>`,
+        actionMenus: {},
+    });
+    expect(".o_field_properties").toHaveCount(1);
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties");
+
+    await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
+    await animationFrame();
+
+    await click(".o_field_property_definition_type input");
+    await animationFrame();
+    expect(
+        `.o_field_property_definition_type_menu .o-dropdown-item:contains(Monetary) > div:not(.text-muted)`
+    ).toHaveCount(1);
+
+    await contains(
+        `.o_field_property_definition_type_menu .o-dropdown-item:contains(Monetary)`
+    ).click();
+    expect(`.o_field_property_definition_currency_field select`).toHaveText(
+        "Currency\nAnother currency"
+    );
+    expect(`.o_field_property_definition_currency_field select`).toHaveValue("currency_id");
+
+    await contains(".o_field_property_definition_currency_field select").select(
+        "another_currency_id"
+    );
+    expect(`.o_field_property_definition_currency_field select`).toHaveValue("another_currency_id");
+    expect(".o_field_property_definition_value .o_input > span:eq(1)").toHaveText("€");
+    expect(`.o_field_property_definition_value input`).toHaveValue("0.00");
+
+    await closePopover();
+    expect(
+        ".o_property_field:nth-child(2) .o_property_field_value .o_input > span:eq(1)"
+    ).toHaveText("€");
+    expect(`.o_property_field:nth-child(2) .o_property_field_value input`).toHaveValue("0.00");
+});
+
+test("properties: no parent document set", async () => {
+    onRpc("has_access", () => true);
+
+    const formView = await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="company_id"/>
+                        <field name="properties"/>
+                    </group>
+                </sheet>
+            </form>`,
+        actionMenus: {},
+    });
+
+    patchWithCleanup(formView.env.services.notification, {
+        add: (message, options) => {
+            expect.step("notification");
+            expect(message).toBe(
+                "Oops! A Company is needed to add property fields."
+            );
+            expect(options.type).toBe("warning");
+        },
+    });
+
+    expect(".o_field_properties").toHaveCount(1, { message: "The field must be in the view" });
+
+    await toggleActionMenu();
+
+    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(1, {
+        message: "Show Edit Properties btn in cog menu",
+    });
+
+    await toggleMenuItem("Edit Properties");
+
+    expect.verifySteps(["notification"]);
+
+    expect(".o_field_properties:first-child .o_field_property_open_popover").toHaveCount(0, {
+        message: "The edit definition button must not be in the view",
+    });
+});
+
+test.tags("desktop");
+test("properties: Create a property with an onchange methods", async () => {
+    expect.errors(0);
+    for (const record of Partner._records) {
+        record.properties = {};
+    }
+    ResCompany._records[0].definitions = [];
+    Partner._onChanges.properties = () => {};
+    onRpc("onchange", async () => {
+        expect.step("on_change_called");
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    });
+
+    onRpc("has_access", () => true);
+    patchWithCleanup(PropertiesField.prototype, {
+        onPropertyCreate() {
+            expect.step("onPropertyCreate");
+            return super.onPropertyCreate(...arguments);
+        },
+        _openPropertyDefinition() {
+            expect.step("_openPropertyDefinition");
+            return super._openPropertyDefinition(...arguments);
+        },
+    });
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: `
+            <form>
+                <field name="company_id"/>
+                <field name="properties"/>
+            </form>`,
+        actionMenus: {},
+    });
+    await toggleActionMenu();
+    await contains(".o_popover span .fa-cogs").click();
+    await runAllTimers();
+    await closePopover();
+    expect.verifySteps([
+        "onPropertyCreate",
+        "on_change_called",
+        "_openPropertyDefinition",
+        "on_change_called",
     ]);
 });

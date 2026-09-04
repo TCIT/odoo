@@ -1,37 +1,38 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_payment
-# 
+# * account_payment
+#
 # Translators:
-# Atte Isopuro <atte.isopuro@web-veistamo.fi>, 2024
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
-# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2024
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
-# Tommi Rintala <tommi.rintala@gmail.com>, 2024
-# Mikko Salmela <salmemik@gmail.com>, 2024
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Martin Trigaux, 2024
-# Antti Oksman <antti.oksman@web-veistamo.fi>, 2024
-# Miika Nissi <miika.nissi@tawasta.fi>, 2024
-# Svante Suominen <svante.suominen@web-veistamo.fi>, 2024
-# Tuomas Lyyra <tuomas.lyyra@legenda.fi>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
-# Jessica Jakara, 2025
-# 
+# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2022
+# Svante Suominen <svante.suominen@web-veistamo.fi>, 2022
+# Antti Oksman <antti.oksman@web-veistamo.fi>, 2022
+# Tommi Rintala <tommi.rintala@gmail.com>, 2022
+# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2022
+# Miika Nissi <miika.nissi@tawasta.fi>, 2022
+# Martin Trigaux, 2022
+# Tuomas Lyyra <tuomas.lyyra@legenda.fi>, 2022
+# Kari Lindgren <kari.lindgren@emsystems.fi>, 2022
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2022
+# Mikko Salmela <salmemik@gmail.com>, 2022
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2022
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Saara Hakanen <sahak@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Jessica Jakara, 2025\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-05-29 17:36+0000\n"
+"PO-Revision-Date: 2026-08-02 18:02+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"account_payment/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_payment
 #. odoo-python
@@ -40,19 +41,19 @@ msgid ""
 "#%(number)s - Installment of <strong>%(amount)s</strong> due on <strong "
 "class=\"text-primary\">%(date)s</strong>"
 msgstr ""
-"#%(number)s - Lyhennyserän <strong>%(amount)s</strong> eräpäivä on <strong "
+"#%(number)s - Maksuerän <strong>%(amount)s</strong> eräpäivä <strong "
 "class=\"text-primary\">%(date)s</strong>"
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "%s day(s) overdue"
 msgstr "%s päivä(ä) myöhässä"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_success
 msgid "<b>Communication: </b>"
-msgstr "<b>Viite: </b>"
+msgstr "<b>Viesti: </b>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
@@ -104,7 +105,7 @@ msgstr "<i class=\"fa fa-fw fa-check-circle\"/> Maksua käsitellään"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid "<span class=\"d-none d-md-inline\"> Pending</span>"
-msgstr "<span class=\"d-none d-md-inline\"> Vireillä</span>"
+msgstr "<span class=\"d-none d-md-inline\"> Odottaa</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
@@ -117,32 +118,36 @@ msgid ""
 "<strong>Installment</strong>\n"
 "                                        <br/>"
 msgstr ""
-"<strong>Lyhennyserä</strong>\n"
+"<strong>Maksuerä</strong>\n"
 "                                        <br/>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
-"                        few minutes, please check your payment provider configuration."
+"                        Wait a moment for it to be processed. If the refund "
+"is still pending in a\n"
+"                        few minutes, please check your payment provider "
+"configuration."
 msgstr ""
-"<strong>Varoitus!</strong> Tästä maksusta on vireillä palautus.\n"
-"                        Odota hetki, että se käsitellään. Jos palautus on edelleen vireillä\n"
-"                        muutaman minuutin kuluttua, tarkista maksupalvelun tarjoajan asetukset."
+"<strong>Varoitus!</strong> Tähän maksuun liittyy käsiteltävänä oleva "
+"takaisinmaksu.\n"
+"                        Odota, että se käsitellään. Jos takaisinmaksu "
+"odottaa edelleen\n"
+"                        muutaman minuutin kuluttua, tarkista "
+"maksupalveluntarjoajan asetukset."
 
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/wizards/payment_link_wizard.py:0
 msgid "A discount will be applied if the customer pays before %s included."
-msgstr ""
-"Alennus myönnetään, jos asiakas maksaa ennen %s sisältyvää päivämäärää."
+msgstr "Alennus myönnetään, jos asiakas maksaa ennen %s tai sinä päivänä."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay"
-" twice."
+"A payment has already been made on this invoice, please make sure to not pay "
+"twice."
 msgstr ""
 "Laskun tiedoilla on jo suoritettu maksu. Varmista, ettet maksa kahdesti."
 
@@ -150,34 +155,29 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_payment/models/account_payment.py:0
 msgid "A payment transaction with reference %s already exists."
-msgstr "Maksutapahtuma, jonka viite on %s, on jo olemassa."
+msgstr "Maksutapahtuma viitteellä %s on jo olemassa."
 
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/models/account_payment.py:0
 msgid "A token is required to create a new payment transaction."
-msgstr "Uuden maksutapahtuman luomiseen vaaditaan tunnus."
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,button_text:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Activate Stripe"
-msgstr "Aktivoi Stripe"
+msgstr "Uuden maksutapahtuman luomiseen vaaditaan tunniste."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_overdue_invoices_page
 msgid "Amount"
-msgstr "Arvo"
+msgstr "Määrä"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment__amount_available_for_refund
 msgid "Amount Available For Refund"
-msgstr "Palautettavaksi käytettävissä oleva määrä"
+msgstr "Takaisinmaksuun saatavilla oleva määrä"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__invoice_amount_due
 msgid "Amount Due"
-msgstr "Erääntynyt summa"
+msgstr "Maksettava summa"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__amount_paid
@@ -191,8 +191,8 @@ msgid ""
 "Are you sure you want to void the authorized transaction? This action can't "
 "be undone."
 msgstr ""
-"Are you sure you want to void the authorized transaction? This action can't "
-"be undone."
+"Haluatko varmasti mitätöidä valtuutetun tapahtuman? Tätä toimintoa ei voi "
+"peruuttaa."
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__authorized_transaction_ids
@@ -201,9 +201,14 @@ msgid "Authorized Transactions"
 msgstr "Valtuutetut tapahtumat"
 
 #. module: account_payment
+#: model:ir.model,name:account_payment.model_account_bank_statement_line
+msgid "Bank Statement Line"
+msgstr "Pankkitiliotteen rivi"
+
+#. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.account_invoice_view_form_inherit_payment
 msgid "Capture Transaction"
-msgstr "Vastaanota siirto"
+msgstr "Tallenna tapahtuma"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
@@ -211,11 +216,6 @@ msgstr "Vastaanota siirto"
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
 msgid "Close"
 msgstr "Sulje"
-
-#. module: account_payment
-#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__payment_method_code
-msgid "Code"
-msgstr "Koodi"
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_res_config_settings
@@ -243,21 +243,32 @@ msgid "Discount Date"
 msgstr "Alennuspäivä"
 
 #. module: account_payment
+#: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_move__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_provider__display_name
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_transaction__display_name
+#: model:ir.model.fields,field_description:account_payment.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "Näyttönimi"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__display_open_installments
 msgid "Display Open Installments"
-msgstr "Näytä avoimet erät"
+msgstr "Näytä avoimet maksuerät"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_success
 msgid ""
 "Done, your online payment has been successfully processed. Thank you for "
 "your order."
-msgstr "Valmis, verkkomaksusi on käsitelty. Kiitos tilauksestasi."
+msgstr "Valmis, verkkomaksusi on käsitelty onnistuneesti. Kiitos tilauksestasi."
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__epd_info
@@ -267,17 +278,12 @@ msgstr "Tietoa ennakkomaksualennuksesta"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid "Early Payment Discount of"
-msgstr "Varhaisen maksun kassa-alennus"
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,description:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Enable credit & debit card payments supported by Stripe."
-msgstr "Ota käyttöön Stripen tukemat luotto- ja pankkikorttimaksut."
+msgstr "Ennakkomaksualennus"
 
 #. module: account_payment
 #: model:ir.model.fields.selection,name:account_payment.selection__payment_refund_wizard__support_refund__full_only
 msgid "Full Only"
-msgstr "Vain täysi"
+msgstr "Vain kokonainen"
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_payment_link_wizard
@@ -292,17 +298,28 @@ msgstr "Luo maksulinkki"
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__has_eligible_epd
 msgid "Has Eligible Epd"
-msgstr "Kelvollinen ennakkomaksualennukseen"
+msgstr "Sisältää kelvollisen ennakkomaksualennuksen"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__has_pending_refund
 msgid "Has a pending refund"
-msgstr "Maksun palautus on käynnissä"
+msgstr "Sisältää odottavan takaisinmaksun"
 
 #. module: account_payment
+#: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__id
+#: model:ir.model.fields,field_description:account_payment.field_account_journal__id
+#: model:ir.model.fields,field_description:account_payment.field_account_move__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_provider__id
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_transaction__id
+#: model:ir.model.fields,field_description:account_payment.field_res_config_settings__id
 msgid "ID"
-msgstr "ID"
+msgstr "Tunnus"
 
 #. module: account_payment
 #. odoo-python
@@ -311,7 +328,8 @@ msgid ""
 "Impossible to pay all the overdue invoices if they don't share the same "
 "currency."
 msgstr ""
-"Kaikkia erääntyneitä laskuja ei voi maksaa, jos niillä ei ole sama valuutta."
+"Kaikkia erääntyneitä laskuja ei voi maksaa, jos ne eivät ole samassa "
+"valuutassa."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment_method_line__payment_provider_state
@@ -319,8 +337,8 @@ msgid ""
 "In test mode, a fake payment is processed through a test payment interface.\n"
 "This mode is advised when setting up the provider."
 msgstr ""
-"Testitilassa väärennetty maksu käsitellään testimaksuliittymän kautta.\n"
-"Tätä tilaa suositellaan palveluntarjoajan perustamisen yhteydessä."
+"Testitilassa epäaidot maksut käsitellään testimaksuliittymän kautta.\n"
+"Tätä tilaa suositellaan palveluntarjoajan käyttöönoton yhteydessä."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.res_config_settings_view_form
@@ -347,12 +365,12 @@ msgstr "Laskut"
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_transaction__invoices_count
 msgid "Invoices Count"
-msgstr "Laskujen määrä"
+msgstr "Laskujen lukumäärä"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_home_account_payment
 msgid "Invoices to pay"
-msgstr "Maksettavana olevat laskut"
+msgstr "Maksettavat laskut"
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_account_journal
@@ -382,7 +400,7 @@ msgstr "Sallittu enimmäispalautus"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_link_wizard__form_inherit_account_payment
 msgid "Next Installments"
-msgstr "Seuraavat erät"
+msgstr "Seuraavat maksuerät"
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment__payment_token_id
@@ -390,8 +408,8 @@ msgid ""
 "Note that only tokens from providers allowing to capture the amount are "
 "available."
 msgstr ""
-"Huomaa, että saatavilla on vain sellaisten palveluntarjoajien tunnisteita, "
-"jotka mahdollistavat summan tallentamisen."
+"Huomaa, että käytettävissä on vain sellaisten palveluntarjoajien "
+"tunnisteita, jotka sallivat summan tallentamisen."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment_register__payment_token_id
@@ -399,42 +417,33 @@ msgid ""
 "Note that tokens from providers set to only authorize transactions (instead "
 "of capturing the amount) are not available."
 msgstr ""
-"Huomaa, että sellaisten palveluntarjoajien tunnisteet, jotka on asetettu "
-"vain hyväksymään tapahtumia (eikä tallentamaan summaa), eivät ole "
-"käytettävissä."
+"Huomaa, että sellaisten palveluntarjoajien tunnisteet, jotka on määritetty "
+"ainaoastaan valtuuttamaan tapahtumia (summan tallentamisen sijaan), eivät "
+"ole käytettävissä."
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,step_image_alt:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Onboarding Online Payments"
-msgstr "Verkkomaksujen käyttöönotto"
-
-#. module: account_payment
-#: model:ir.model,name:account_payment.model_onboarding_onboarding_step
-msgid "Onboarding Step"
-msgstr "Perehdytyksen askel"
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,title:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Online Payments"
-msgstr "Verkkomaksut"
+#. odoo-python
+#: code:addons/account_payment/wizards/payment_link_wizard.py:0
+msgid "Online payment option is not enabled in Configuration."
+msgstr "Verkkomaksuvaihtoehtoa ei ole otettu käyttöön asetuksissa."
 
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/controllers/portal.py:0
 msgid "Overdue invoices should share the same company."
-msgstr "Erääntyneillä laskuilla tulee olla sama yritys."
+msgstr "Erääntyneillä laskuilla pitäisi olla sama yritys."
 
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/controllers/portal.py:0
 msgid "Overdue invoices should share the same currency."
-msgstr "Erääntyneillä laskuilla tulee olla sama valuutta."
+msgstr "Erääntyneillä laskuilla pitäisi olla sama valuutta."
 
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/controllers/portal.py:0
 msgid "Overdue invoices should share the same partner."
-msgstr "Erääntyneillä laskuilla tulee olla sama yhteistyökumppani."
+msgstr "Erääntyneillä laskuilla pitäisi olla sama kumppani."
 
 #. module: account_payment
 #: model:ir.model.fields.selection,name:account_payment.selection__payment_refund_wizard__support_refund__partial
@@ -461,7 +470,7 @@ msgstr "Maksa laskut verkossa"
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_docs_entry
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid "Pay Now"
-msgstr "Maksa"
+msgstr "Maksa nyt"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
@@ -471,7 +480,7 @@ msgstr "Maksa nyt"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_home_overdue_invoice
 msgid "Pay overdue"
-msgstr "Maksa myöhässä olevat"
+msgstr "Maksa erääntyneet"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__payment_id
@@ -482,7 +491,7 @@ msgstr "Maksu"
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__payment_amount
 msgid "Payment Amount"
-msgstr "Maksumäärä"
+msgstr "Maksun summa"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_provider__journal_id
@@ -505,12 +514,12 @@ msgstr "Maksupalveluntarjoaja"
 #. module: account_payment
 #: model:ir.ui.menu,name:account_payment.payment_provider_menu
 msgid "Payment Providers"
-msgstr "Maksupalvelujen tarjoajat"
+msgstr "Maksupalveluntarjoajat"
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_payment_refund_wizard
 msgid "Payment Refund Wizard"
-msgstr "Maksujen palautuksen ohjattu toiminto"
+msgstr "Ohjattu takaisinmaksutoiminto"
 
 #. module: account_payment
 #: model:ir.ui.menu,name:account_payment.payment_token_menu
@@ -560,7 +569,7 @@ msgstr "Viite"
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:account_payment.view_account_payment_form_inherit_payment
 msgid "Refund"
-msgstr "Hyvitys"
+msgstr "Takaisinmaksu"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__amount_to_refund
@@ -575,17 +584,17 @@ msgstr "Hyvitetty summa"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.view_account_payment_form_inherit_payment
 msgid "Refunds"
-msgstr "Hyvitykset"
+msgstr "Takaisinmaksut"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment__refunds_count
 msgid "Refunds Count"
-msgstr "Palautusten määrä"
+msgstr "Hyvitysten lukumäärä"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.view_account_journal_form
 msgid "SETUP"
-msgstr "ASETUS"
+msgstr "KÄYTTÖÖNOTTO"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment__payment_token_id
@@ -605,12 +614,7 @@ msgstr "Maksun lähde"
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__payment_provider_state
 msgid "State"
-msgstr "Alue"
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,done_text:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Step Completed!"
-msgstr "Vaihe valmis!"
+msgstr "Tila"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment__suitable_payment_token_ids
@@ -630,8 +634,8 @@ msgstr "Pääsytunniste on virheellinen."
 msgid ""
 "The amount to be refunded must be positive and cannot be superior to %s."
 msgstr ""
-"Palautettavan määrän on oltava positiivinen, eikä se voi olla suurempi kuin "
-"%s."
+"Takaisinmaksettavan summan on oltava positiivinen, eikä se voi olla suurempi "
+"kuin %s."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__journal_id
@@ -641,11 +645,8 @@ msgstr "Päiväkirja, johon onnistuneet tapahtumat kirjataan."
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/models/payment_transaction.py:0
-msgid ""
-"The payment related to the transaction with reference %(ref)s has been "
-"posted: %(link)s"
-msgstr ""
-"Viitteellä %(ref)s olevaan tapahtumaan liittyvä maksu on kirjattu: %(link)s"
+msgid "The payment related to transaction %(ref)s has been posted: %(link)s"
+msgstr "Tapahtumaan %(ref)s liittyvä maksu on kirjattu: %(link)s"
 
 #. module: account_payment
 #. odoo-python
@@ -656,7 +657,19 @@ msgstr "Annetut parametrit ovat virheellisiä."
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment__source_payment_id
 msgid "The source payment of related refund payments"
-msgstr "Tähän liittyvien maksupalautusten lähdemaksu"
+msgstr "Liittyvien takaisinmaksujen lähdemaksu"
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There are pending transactions for this invoice."
+msgstr "Tälle laskulle on käsiteltävänä olevia tapahtumia."
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There is no amount to be paid."
+msgstr "Ei maksetavaa."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
@@ -683,15 +696,34 @@ msgid "There was en error processing your payment: invalid credit card ID."
 msgstr "Maksusi käsittelyssä tapahtui virhe: virheellinen luottokorttitunnus."
 
 #. module: account_payment
-#: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice cannot be paid online."
+msgstr "Tätä laskua ei voi maksaa verkossa."
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
 msgid "This invoice has already been paid."
 msgstr "Tämä lasku on jo maksettu."
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice isn't posted."
+msgstr "Tätä laskua ei ole kirjattu."
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This is not an outgoing invoice."
+msgstr "Tämä ei ole lähtevä lasku."
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__transaction_count
 #: model:ir.model.fields,field_description:account_payment.field_account_move__transaction_count
 msgid "Transaction Count"
-msgstr "Tilitapahtumien määrä"
+msgstr "Tapahtumien lukumäärä"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__transaction_ids
@@ -713,16 +745,18 @@ msgstr "Käytä sähköistä maksutapaa"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.account_invoice_view_form_inherit_payment
 msgid "Void Transaction"
-msgstr "Mitätön kauppa"
+msgstr "Mitätöity tapahtuma"
 
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the "
+"enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
-"Et voi poistaa maksutapaa, joka on linkitetty palveluntarjoajaan, joka on käytössä tai testitilassa.\n"
+"Et voi poistaa maksutapaa, joka on linkitetty palveluntarjoajaan sallitussa- "
+"tai testitilassa.\n"
 "Linkitetyt palveluntarjoajat: %s"
 
 #. module: account_payment
@@ -732,8 +766,8 @@ msgid ""
 "You cannot uninstall this module as payments using this payment method "
 "already exist."
 msgstr ""
-"Et voi poistaa tätä moduulia, koska tätä maksutapaa käyttävät maksut ovat jo"
-" olemassa."
+"Et voi poistaa tätä moduulia, koska tätä maksutapaa käyttäviä maksuja on jo "
+"olemassa."
 
 #. module: account_payment
 #. odoo-python
@@ -742,20 +776,21 @@ msgid ""
 "You must first deactivate a payment provider before deleting its journal.\n"
 "Linked providers: %s"
 msgstr ""
-"Maksupalveluntarjoaja on ensin poistettava käytöstä, ennen kuin sen päiväkirja voidaan poistaa.\n"
+"Maksupalveluntarjoaja on poistettava käytöstä ennen sen päiväkirjan "
+"poistamista.\n"
 "Linkitetyt palveluntarjoajat: %s"
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "due in %s day(s)"
 msgstr "erääntyy %s päivän kuluttua"
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "due today"
-msgstr "eräpäivä tänään"
+msgstr "erääntyy tänään"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
@@ -766,3 +801,40 @@ msgstr "on otettu käyttöön."
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid "overdue"
 msgstr "myöhässä"
+
+#~ msgid "Code"
+#~ msgstr "Koodi"
+
+#~ msgid ""
+#~ "<strong>No suitable payment option could be found.</strong><br/>\n"
+#~ "                                If you believe that it is an error, "
+#~ "please contact the website administrator."
+#~ msgstr ""
+#~ "<strong>Sopivaa maksuvaihtoehtoa ei löytynyt.</strong><br/>\n"
+#~ "                                Jos uskot, että kyseessä on virhe, ota "
+#~ "yhteyttä sivuston ylläpitäjään. "
+
+#~ msgid "Pay with"
+#~ msgstr "Maksutapa"
+
+#~ msgid "Register Payment"
+#~ msgstr "Kirjaa maksu"
+
+#~ msgid ""
+#~ "The payment related to the transaction with reference %(ref)s has been "
+#~ "posted: %(link)s"
+#~ msgstr ""
+#~ "Viitteellä %(ref)s olevaan tapahtumaan liittyvä maksu on kirjattu: %"
+#~ "(link)s"
+
+#~ msgid "Type of Refund Supported"
+#~ msgstr "Tuettu maksupalautustyyppi"
+
+#~ msgid ""
+#~ "You can't delete a payment method that is linked to a provider in the "
+#~ "enabled or test state.\n"
+#~ "Linked provider(s): %s"
+#~ msgstr ""
+#~ "Et voi poistaa maksutapaa, joka on linkitetty palveluntarjoajaan, joka on "
+#~ "käytössä tai testitilassa.\n"
+#~ "Linkitetyt palveluntarjoajat: %s"

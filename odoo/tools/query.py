@@ -69,6 +69,7 @@ class Query:
 
         # groupby, having, order, limit, offset
         self.groupby: SQL | None = None
+        self._order_groupby: list[SQL] = []
         self.having: SQL | None = None
         self._order: SQL | None = None
         self.limit: int | None = None
@@ -77,7 +78,8 @@ class Query:
         # memoized result
         self._ids: tuple[int, ...] | None = None
 
-    def make_alias(self, alias: str, link: str) -> str:
+    @staticmethod
+    def make_alias(alias: str, link: str) -> str:
         """ Return an alias based on ``alias`` and ``link``. """
         return _generate_table_alias(alias, link)
 
@@ -85,7 +87,7 @@ class Query:
         """ Add a table with a given alias to the from clause. """
         assert alias not in self._tables and alias not in self._joins, f"Alias {alias!r} already in {self}"
         self._tables[alias] = table if table is not None else SQL.identifier(alias)
-        self._ids = None
+        self._ids = self._ids and None
 
     def add_join(self, kind: str, alias: str, table: str | SQL | None, condition: SQL):
         """ Add a join clause with the given alias, table and condition. """
@@ -100,12 +102,12 @@ class Query:
             assert self._joins[alias] == (sql_kind, table, condition)
         else:
             self._joins[alias] = (sql_kind, table, condition)
-            self._ids = None
+            self._ids = self._ids and None
 
     def add_where(self, where_clause: str | SQL, where_params=()):
         """ Add a condition to the where clause. """
         self._where_clauses.append(SQL(where_clause, *where_params)) # pylint: disable = sql-injection
-        self._ids = None
+        self._ids = self._ids and None
 
     def join(self, lhs_alias: str, lhs_column: str, rhs_table: str | SQL, rhs_column: str, link: str) -> str:
         """

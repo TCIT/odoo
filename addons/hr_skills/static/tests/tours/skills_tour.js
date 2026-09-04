@@ -1,7 +1,5 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add("hr_skills_tour", {
     url: "/odoo",
@@ -28,8 +26,13 @@ registry.category("web_tour.tours").add("hr_skills_tour", {
             run: "click",
         },
         {
+            content: "Add Experience",
+            trigger: ".nav-link:contains('Resume')",
+            run: "click",
+        },
+        {
             content: "Add a new Resume experience",
-            trigger: ".o_field_resume_one2many tr.o_resume_group_header button.btn-secondary",
+            trigger: ".o_field_resume_one2many button.btn-secondary",
             run: "click",
         },
         {
@@ -37,6 +40,11 @@ registry.category("web_tour.tours").add("hr_skills_tour", {
             trigger:
                 ".modal:contains(new resume line) .modal-body .o_field_widget[name='name'] input",
             run: "edit Mamie Rock",
+        },
+        {
+            trigger: ".modal:contains(new resume line) .o_field_widget[name='date_start'] button",
+            content: "open date picker",
+            run: "click",
         },
         {
             content: "Set start date",
@@ -63,12 +71,7 @@ registry.category("web_tour.tours").add("hr_skills_tour", {
         },
         {
             content: "Change type",
-            trigger: ".modal:contains(new resume line) .o_field_widget[name='line_type_id'] input",
-            run: "edit Experience",
-        },
-        {
-            content: "Choose experience",
-            trigger: '.ui-autocomplete .ui-menu-item a:contains("Experience")',
+            trigger: ".modal:contains(new resume line) .o_field_widget[name='line_type_id'] .o_selection_badge:contains(Other Experience)",
             run: "click",
         },
         {
@@ -86,33 +89,22 @@ registry.category("web_tour.tours").add("hr_skills_tour", {
         },
         {
             content: "Select Music",
-            trigger:
-                ".modal:contains(select skills) .o_field_widget[name='skill_type_id'] label:contains('Best Music')",
+            trigger: ".o_field_widget[name='skill_type_id'] span:contains('Best Music')",
             run: "click",
-        },
-        {
-            content: "Select a song",
-            trigger: ".modal:contains(select skills) .o_field_widget[name='skill_id'] input",
-            run: "edit Fortun",
         },
         {
             content: "Choose the song",
-            trigger: '.ui-autocomplete .ui-menu-item a:contains("Fortunate Son")',
+            trigger: ".o_field_widget[name='skill_id'] span:contains('Fortunate Son')",
             run: "click",
         },
         {
-            content: "Select a level",
-            trigger: ".modal:contains(select skills) .o_field_widget[name='skill_level_id'] input",
-            run: "edit Level",
-        },
-        {
             content: "Choose the level",
-            trigger: '.ui-autocomplete .ui-menu-item a:contains("Level 2")',
+            trigger: ".o_field_widget[name='skill_level_id'] span:contains('Level 2')",
             run: "click",
         },
         {
             content: "Save new skill",
-            trigger: ".modal:contains(select skills) .o_form_button_save:contains(save & close)",
+            trigger: ".modal:contains(update skills) .o_form_button_save:contains(save & close)",
             run: "click",
         },
         {
@@ -130,33 +122,38 @@ registry.category("web_tour.tours").add("hr_skills_tour", {
             run: "click",
         },
         {
-            content: "Music should be already selected",
-            trigger:
-                ".modal:contains(select skills) .o_field_widget[name=skill_id] input:value(Fortunate Son)",
-        },
-        {
-            content: "Select a song",
-            trigger: ".modal:contains(select skills) .o_field_widget[name='skill_id'] input",
-            run: "edit Mary",
-        },
-        {
-            content: "Choose the song",
-            trigger: '.ui-autocomplete .ui-menu-item a:contains("Oh Mary")',
+            content: "Select Certification",
+            trigger: ".o_field_widget[name='skill_type_id'] span:contains('Music Certification')",
             run: "click",
         },
         {
-            content: "Select a level",
-            trigger: ".modal:contains(select skills) .o_field_widget[name='skill_level_id'] input",
-            run: "edit Level 7",
+            content: "Choose the instrument",
+            trigger: ".o_field_widget[name='skill_id'] span:contains('Piano')",
+            run: "click",
         },
         {
             content: "Choose the level",
-            trigger: '.ui-autocomplete .ui-menu-item a:contains("Level 7")',
+            trigger: "div[name='valid_from'] button",
             run: "click",
         },
         {
+            content: "Choose the level",
+            trigger: ".o_field_widget[name='valid_from'] input",
+            run: "edit 02/03/2025",
+        },
+        {
+            content: "Choose the level",
+            trigger: ".o_field_widget[name='valid_to']",
+            run: "click",
+        },
+        {
+            content: "Choose the level",
+            trigger: ".o_field_widget[name='valid_to'] input",
+            run: "edit 03/04/2025",
+        },
+        {
             content: "Save new skill",
-            trigger: ".modal:contains(select skills) .o_form_button_save:contains(save & close)",
+            trigger: ".modal:contains(update skills) .o_form_button_save:contains(save & close)",
             run: "click",
         },
         {
@@ -165,11 +162,8 @@ registry.category("web_tour.tours").add("hr_skills_tour", {
         },
         {
             content: "Check if item is added",
-            trigger: ".o_data_row td.o_data_cell:contains('Oh Mary')",
+            trigger: ".o_data_row td.o_data_cell:contains('Piano')",
         },
-        {
-            content: "wait for save completion",
-            trigger: ".o_form_readonly, .o_form_saved",
-        },
+        ...stepUtils.saveForm(),
     ],
 });

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from markupsafe import Markup
@@ -10,8 +9,10 @@ from odoo.tools import html2plaintext
 class SlideChannelPartner(models.Model):
     _inherit = 'slide.channel.partner'
 
-    def _recompute_completion(self):
-        res = super(SlideChannelPartner, self)._recompute_completion()
+    def _post_completion_update_hook(self, completed=True):
+        res = super()._post_completion_update_hook(completed)
+        if not completed:
+            return res
         completed_membership = self.filtered(lambda m: m.member_status == 'completed')
         if not completed_membership:
             return res
@@ -24,14 +25,13 @@ class SlideChannelPartner(models.Model):
 
         if employees:
             HrResumeLine = self.env['hr.resume.line'].sudo()
-            line_type = self.env.ref('hr_skills_slides.resume_type_training', raise_if_not_found=False)
+            line_type = self.env.ref('hr_skills.resume_type_training', raise_if_not_found=False)
             line_type_id = line_type and line_type.id
 
             lines_for_channel_by_employee = dict(HrResumeLine._read_group([
                 ('employee_id', 'in', employees.ids),
                 ('channel_id', 'in', completed_membership.channel_id.ids),
-                ('line_type_id', '=', line_type_id),
-                ('display_type', '=', 'course')
+                ('line_type_id', '=', line_type_id)
             ], ['employee_id'], ['channel_id:array_agg']))
 
             lines_to_create = []
@@ -43,11 +43,10 @@ class SlideChannelPartner(models.Model):
                         'employee_id': employee.id,
                         'name': channel.name,
                         'date_start': fields.Date.today(),
-                        'date_end': fields.Date.today(),
                         'description': html2plaintext(channel.description),
                         'line_type_id': line_type_id,
-                        'display_type': 'course',
-                        'channel_id': channel.id
+                        'course_type': 'elearning',
+                        'channel_id': channel.id,
                     })
             if lines_to_create:
                 HrResumeLine.create(lines_to_create)
@@ -59,12 +58,13 @@ class SlideChannelPartner(models.Model):
             if self.env.user.employee_ids:
                 msg = _('The employee has completed the course %s',
                     Markup('<a href="%(link)s">%(course)s</a>') % {
-                        'link': scp.channel_id.website_url,
+                        'link': scp.channel_id.website_absolute_url,
                         'course': scp.channel_id.name,
                 })
                 self.env.user.employee_id.message_post(body=msg)
 
-class Channel(models.Model):
+
+class SlideChannel(models.Model):
     _inherit = 'slide.channel'
 
     def _action_add_members(self, target_partners, member_status='joined', raise_on_access=False):
@@ -74,7 +74,7 @@ class Channel(models.Model):
                 channel._message_employee_chatter(
                     _('The employee subscribed to the course %s',
                         Markup('<a href="%(link)s">%(course)s</a>') % {
-                            'link': channel.website_url,
+                            'link': channel.website_absolute_url,
                             'course': channel.name
                     }),
                     target_partners
@@ -90,7 +90,7 @@ class Channel(models.Model):
             channel._message_employee_chatter(
                 _('The employee left the course %s',
                     Markup('<a href="%(link)s">%(course)s</a>') % {
-                        'link': channel.website_url,
+                        'link': channel.website_absolute_url,
                         'course': channel.name,
                 }),
                 partners)

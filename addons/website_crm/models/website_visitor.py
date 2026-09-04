@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models, api
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
 class WebsiteVisitor(models.Model):
@@ -16,7 +15,7 @@ class WebsiteVisitor(models.Model):
         for visitor in self:
             visitor.lead_count = len(visitor.lead_ids)
 
-    @api.depends('partner_id.email_normalized', 'partner_id.mobile', 'lead_ids.email_normalized', 'lead_ids.mobile')
+    @api.depends('partner_id.email_normalized', 'partner_id.phone', 'lead_ids.email_normalized', 'lead_ids.phone')
     def _compute_email_phone(self):
         super(WebsiteVisitor, self)._compute_email_phone()
 
@@ -29,7 +28,7 @@ class WebsiteVisitor(models.Model):
             if not visitor.email:
                 visitor.email = next((lead.email_normalized for lead in visitor_leads if lead.email_normalized), False)
             if not visitor.mobile:
-                visitor.mobile = next((lead.mobile or lead.phone for lead in visitor_leads if lead.mobile or lead.phone), False)
+                visitor.mobile = next((lead.phone for lead in visitor_leads if lead.phone), False)
 
     def _check_for_message_composer(self):
         check = super(WebsiteVisitor, self)._check_for_message_composer()
@@ -45,8 +44,7 @@ class WebsiteVisitor(models.Model):
 
     def _inactive_visitors_domain(self):
         """ Visitors tied to leads are considered always active and should not be deleted. """
-        domain = super()._inactive_visitors_domain()
-        return expression.AND([domain, [('lead_ids', '=', False)]])
+        return super()._inactive_visitors_domain() & Domain('lead_ids', '=', False)
 
     def _merge_visitor(self, target):
         """ Link the leads to the main visitor to avoid them being lost. """

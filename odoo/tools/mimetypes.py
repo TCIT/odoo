@@ -15,6 +15,8 @@ import zipfile
 __all__ = ['guess_mimetype']
 
 _logger = logging.getLogger(__name__)
+_logger_guess_mimetype = _logger.getChild('guess_mimetype')
+MIMETYPE_HEAD_SIZE = 2048
 
 # We define our own guess_mimetype implementation and if magic is available we
 # use it instead.
@@ -74,6 +76,13 @@ def _check_open_container_format(data):
 
         return False
 
+
+_old_ms_office_mimetypes = {
+    '.doc': 'application/msword',
+    '.xls': 'application/vnd.ms-excel',
+    '.ppt': 'application/vnd.ms-powerpoint',
+}
+_olecf_mimetypes = ('application/x-ole-storage', 'application/CDFV2')
 _xls_pattern = re.compile(b"""
     \x09\x08\x10\x00\x00\x06\x05\x00
   | \xFD\xFF\xFF\xFF(\x10|\x1F|\x20|"|\\#|\\(|\\))
@@ -128,7 +137,7 @@ _mime_mappings = (
     _Entry('image/png', [b'\x89PNG\r\n\x1A\n'], []),
     _Entry('image/gif', [b'GIF87a', b'GIF89a'], []),
     _Entry('image/bmp', [b'BM'], []),
-    _Entry('application/xml', [b'<'], [
+    _Entry('text/xml', [b'<'], [
         _check_svg,
     ]),
     _Entry('image/x-icon', [b'\x00\x00\x01\x00'], []),
@@ -142,11 +151,13 @@ _mime_mappings = (
     # zip, but will include jar, odt, ods, odp, docx, xlsx, pptx, apk
     _Entry('application/zip', [b'PK\x03\x04'], [_check_ooxml, _check_open_container_format]),
 )
-def _odoo_guess_mimetype(bin_data, default='application/octet-stream'):
+
+
+def _odoo_guess_mimetype(bin_data: bytes, default='application/octet-stream'):
     """ Attempts to guess the mime type of the provided binary data, similar
     to but significantly more limited than libmagic
 
-    :param str bin_data: binary data to try and guess a mime type for
+    :param bin_data: binary data to try and guess a mime type for
     :returns: matched mimetype or ``application/octet-stream`` if none matched
     """
     # by default, guess the type using the magic number of file hex signature (like magic, but more limited)
@@ -160,7 +171,7 @@ def _odoo_guess_mimetype(bin_data, default='application/octet-stream'):
                         if guess: return guess
                     except Exception:
                         # log-and-next
-                        _logger.getChild('guess_mimetype').warn(
+                        _logger_guess_mimetype.warning(
                             "Sub-checker '%s' of type '%s' failed",
                             discriminant.__name__, entry.mimetype,
                             exc_info=True
@@ -178,28 +189,46 @@ def _odoo_guess_mimetype(bin_data, default='application/octet-stream'):
 
 try:
     import magic
-except ImportError:
-    magic = None
-
-if magic:
-    # There are 2 python libs named 'magic' with incompatible api.
-    # magic from pypi https://pypi.python.org/pypi/python-magic/
-    if hasattr(magic, 'from_buffer'):
-        _guesser = functools.partial(magic.from_buffer, mime=True)
-    # magic from file(1) https://packages.debian.org/squeeze/python-magic
-    elif hasattr(magic, 'open'):
-        ms = magic.open(magic.MAGIC_MIME_TYPE)
-        ms.load()
-        _guesser = ms.buffer
-
     def guess_mimetype(bin_data, default=None):
-        mimetype = _guesser(bin_data[:1024])
-        # upgrade incorrect mimetype to official one, fixed upstream
-        # https://github.com/file/file/commit/1a08bb5c235700ba623ffa6f3c95938fe295b262
-        if mimetype == 'image/svg':
-            return 'image/svg+xml'
+        if isinstance(bin_data, bytearray):
+            bin_data = bytes(bin_data[:MIMETYPE_HEAD_SIZE])
+        elif not isinstance(bin_data, bytes):
+            raise TypeError('`bin_data` must be bytes or bytearray')
+        mimetype = magic.from_buffer(bin_data[:MIMETYPE_HEAD_SIZE], mime=True)
+        if mimetype == 'application/octet-stream':
+            mimetype = _odoo_guess_mimetype(bin_data)
+        if mimetype in ('application/CDFV2', 'application/x-ole-storage'):
+            # Those are the generic file format that Microsoft Office
+            # was using before 2006, use our own check to further
+            # discriminate the mimetype.
+            try:
+                if msoffice_mimetype := _check_olecf(bin_data):
+                    return msoffice_mimetype
+            except Exception:  # noqa: BLE001
+                _logger_guess_mimetype.warning(
+                    "Sub-checker '_check_olecf' of type '%s' failed",
+                    mimetype,
+                    exc_info=True,
+                )
+        if mimetype == 'application/zip':
+            # magic doesn't properly detect some Microsoft Office
+            # documents created after 2025, use our own check to further
+            # discriminate the mimetype.
+            # /!\ Only work when bin_data holds the whole zipfile. /!\
+            try:
+                if msoffice_mimetype := _check_ooxml(bin_data):
+                    return msoffice_mimetype
+            except zipfile.BadZipFile:
+                pass
+            except Exception:  # noqa: BLE001
+                _logger_guess_mimetype.warning(
+                    "Sub-checker '_check_ooxml' of type '%s' failed",
+                    mimetype,
+                    exc_info=True,
+                )
         return mimetype
-else:
+
+except ImportError:
     guess_mimetype = _odoo_guess_mimetype
 
 
@@ -209,12 +238,14 @@ def neuter_mimetype(mimetype, user):
         return 'text/plain'
     return mimetype
 
+
+_extension_pattern = re.compile(r'\w+')
 def get_extension(filename):
     # A file has no extension if it has no dot (ignoring the leading one
     # of hidden files) or that what follow the last dot is not a single
     # word, e.g. "Mr. Doe"
     _stem, dot, ext = filename.lstrip('.').rpartition('.')
-    if not dot or not ext.isalnum():
+    if not dot or not _extension_pattern.fullmatch(ext):
         return ''
 
     # Assume all 4-chars extensions to be valid extensions even if it is
@@ -244,7 +275,15 @@ def fix_filename_extension(filename, mimetype):
         mimetype, otherwise the same filename with the mimetype's
         extension added at the end.
     """
-    if mimetypes.guess_type(filename)[0] == mimetype:
+    extension_mimetype = mimetypes.guess_type(filename)[0]
+    if extension_mimetype == mimetype:
+        return filename
+
+    extension = get_extension(filename)
+    if mimetype in _olecf_mimetypes and extension in _old_ms_office_mimetypes:
+        return filename
+
+    if mimetype == 'application/zip' and extension in {'.docx', '.xlsx', '.pptx'}:
         return filename
 
     if extension := mimetypes.guess_extension(mimetype):

@@ -1,15 +1,16 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import io
 import logging
 import unittest
 import zipfile
-from odoo.fields import Command
-
-from odoo.tests.common import HttpCase, tagged
 from base64 import b64decode
 
+from odoo.addons.base.tests.common import TransactionCaseWithUserPortal
+from odoo.exceptions import AccessError
+from odoo.fields import Command
+from odoo.tests.common import HttpCase, tagged
 from odoo.tools import mute_logger
+
 _logger = logging.getLogger(__name__)
 
 try:
@@ -17,6 +18,16 @@ try:
 except ImportError:
     _logger.warning("`vobject` Python module not found, vcard file generation disabled. Consider installing this module if you want to generate vcard files")
     vobject = None
+
+
+class TestPartnerPrivate(TransactionCaseWithUserPortal):
+    def test_access_onchange(self):
+        partner = self.partner_portal.with_user(self.user_portal)
+        self.assertEqual(partner.has_access('read'), True)
+        self.assertEqual(partner.has_access('write'), False)
+
+        with self.assertRaises(AccessError):
+            partner.onchange({}, ['name'], {'name': {}})
 
 
 @tagged('-at_install', 'post_install')
@@ -31,7 +42,6 @@ class TestPartnerVCard(HttpCase):
         self.partners = self.env['res.partner'].create([{
             'name': 'John Doe',
             'email': 'john.doe@test.example.com',
-            'mobile': '+1 202 555 0888',
             'phone': '+1 202 555 0122',
             'function': 'Painter',
             'street': 'Cookieville Minimum-Security Orphanarium',
@@ -42,7 +52,6 @@ class TestPartnerVCard(HttpCase):
         }, {
             'name': 'shut',
             'email': 'shut@test.example.com',
-            'mobile': '+1 202 555 0999',
             'phone': '+1 202 555 0123',
             'function': 'Developer',
             'street': 'Donutville Maximum-Security Orphanarium',
@@ -66,8 +75,6 @@ class TestPartnerVCard(HttpCase):
         self.assertEqual(vcard.contents["url"][0].value, partner.website, "Vcard should have the same website")
         self.assertEqual(vcard.contents["tel"][0].params['TYPE'], ["work"], "Vcard should have the same phone")
         self.assertEqual(vcard.contents["tel"][0].value, partner.phone, "Vcard should have the same phone")
-        self.assertEqual(vcard.contents["tel"][1].params['TYPE'], ["cell"], "Vcard should have the same mobile")
-        self.assertEqual(vcard.contents["tel"][1].value, partner.mobile, "Vcard should have the same mobile")
         self.assertEqual(vcard.contents["title"][0].value, partner.function, "Vcard should have the same function")
         self.assertEqual(len(vcard.contents['photo'][0].value), len(b64decode(partner.avatar_512)), "Vcard should have the same photo")
 
@@ -95,7 +102,7 @@ class TestPartnerVCard(HttpCase):
 
     def test_check_partner_access_for_user(self):
         self.env['res.users'].create({
-            'groups_id': [Command.set([self.env.ref('base.group_public').id])],
+            'group_ids': [Command.set([self.env.ref('base.group_public').id])],
             'name': 'Test User',
             'login': 'testuser',
             'password': 'testuser',

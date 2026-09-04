@@ -1,6 +1,7 @@
 import { containsAnyInline } from "./dom_info";
 import { wrapInlinesInBlocks } from "./dom";
 import { markup } from "@odoo/owl";
+import { htmlReplace } from "@web/core/utils/html";
 
 export function initElementForEdition(element, options = {}) {
     if (
@@ -15,23 +16,42 @@ export function initElementForEdition(element, options = {}) {
             baseContainerNodeName: "DIV",
         });
     }
+
+    // During `convert_inline`, image elements may receive `width` and `height` attributes,
+    // along with inline styles. These attributes force specific dimensions, which breaks
+    // the fallback to default sizing. We remove them here to allow proper resizing behavior.
+    // The attributes will be re-applied on save.
+    for (const img of element.querySelectorAll("img[width], img[height]")) {
+        const width = img.getAttribute("width");
+        const height = img.getAttribute("height");
+        img.removeAttribute("height");
+        img.removeAttribute("width");
+        img.style.setProperty("width", isNaN(width) ? width : `${width}px`);
+        img.style.setProperty("height", isNaN(height) ? height : `${height}px`);
+    }
 }
 
 /**
- * Properly close common XML-like self-closing elements to avoid HTML parsing
- * issues.
+ * Converts XML-style self-closing tags (e.g., <div/> <span/> <t/>) into proper
+ * HTML start/end tag pairs, except for true HTML void elements.
  *
- * @param {string} content
- * @returns {string}
+ * @param {string | ReturnType<markup>} content
+ * @returns {ReturnType<markup>}
  */
 export function fixInvalidHTML(content) {
     if (!content) {
         return content;
     }
-    // TODO: improve the regex to support nodes with data-attributes containing
-    // `/` and `>` characters.
-    const regex = /<\s*(a|strong|t)[^<]*?\/\s*>/g;
-    return content.replace(regex, (match, g0) => match.replace(/\/\s*>/, `></${g0}>`));
+    // Match self-closing tags EXCEPT HTML void elements.
+    // We do not use selfClosingElementTags because it includes XML-only tags
+    // such as <t>, which must not be treated as void in HTML.
+    const regex =
+        /<\s*(?!area\b|base\b|br\b|col\b|embed\b|hr\b|img\b|input\b|link\b|meta\b|param\b|v:image\b|v:fill\b|source\b|track\b|wbr\b)([a-zA-Z0-9:-]+)\s*((?:(?:\s+[\w:-]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*))\s*\/>/g;
+    return htmlReplace(content, regex, (match, tag, attributes) => {
+        // markup: content is either already markup or escaped in htmlReplace
+        attributes = markup(attributes);
+        return markup`<${tag}${attributes}></${tag}>`;
+    });
 }
 
 let Markup = null;

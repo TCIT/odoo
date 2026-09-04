@@ -10,14 +10,14 @@ import pytz
 
 def ctx_tz(record, field):
     res_lang = None
-    ctx = record._context
-    tz_name = pytz.timezone(ctx.get('tz') or record.env.user.tz or 'UTC')
+    ctx = record.env.context
     timestamp = Datetime.from_string(record[field])
     if ctx.get('lang'):
         res_lang = record.env['res.lang']._get_data(code=ctx['lang'])
     if res_lang:
         timestamp = pytz.utc.localize(timestamp, is_dst=False)
-        return datetime.strftime(timestamp.astimezone(tz_name), res_lang.date_format + ' ' + res_lang.time_format)
+        tz = record.env.tz
+        return datetime.strftime(timestamp.astimezone(tz), res_lang.date_format + ' ' + res_lang.time_format)
     return Datetime.context_timestamp(record, timestamp)
 
 
@@ -60,7 +60,7 @@ class ResCompany(models.Model):
         msg_alert = ''
         report_dict = {}
         if self._is_accounting_unalterable():
-            orders = self.env['pos.order'].search([('state', 'in', ['paid', 'done', 'invoiced']), ('company_id', '=', self.id),
+            orders = self.with_context(prefetch_fields=False).env['pos.order'].search([('state', 'in', ['paid', 'done']), ('company_id', '=', self.id),
                                     ('l10n_fr_secure_sequence_number', '!=', 0)], order="l10n_fr_secure_sequence_number ASC")
 
             if not orders:

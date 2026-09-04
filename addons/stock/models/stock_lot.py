@@ -1,21 +1,23 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import operator as py_operator
-from operator import attrgetter
+from collections.abc import Iterable
 from re import findall as regex_findall, split as regex_split
+from collections import defaultdict
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.osv import expression
+from odoo.fields import Domain
 
-OPERATORS = {
+PY_OPERATORS = {
     '<': py_operator.lt,
     '>': py_operator.gt,
     '<=': py_operator.le,
     '>=': py_operator.ge,
     '=': py_operator.eq,
-    '!=': py_operator.ne
+    '!=': py_operator.ne,
+    'in': lambda elem, container: elem in container,
+    'not in': lambda elem, container: elem not in container,
 }
 
 
@@ -27,28 +29,26 @@ class StockLot(models.Model):
     _order = 'name, id'
 
     @api.model
-    def default_get(self, fields_list):
+    def default_get(self, fields):
         context = dict(self.env.context)
         # We always want the company_id to be computed, regardless of where it's been created.
         context.pop('default_company_id', False)
-        return super(StockLot, self.with_context(context)).default_get(fields_list)
+        return super(StockLot, self.with_context(context)).default_get(fields)
 
     def _read_group_location_id(self, locations, domain):
         partner_locations = locations.search([('usage', 'in', ('customer', 'supplier'))])
         return partner_locations + locations.warehouse_id.search([]).lot_stock_id
 
-    name = fields.Char(
-        'Lot/Serial Number', default=lambda self: self.env['ir.sequence'].next_by_code('stock.lot.serial'),
-        required=True, help="Unique Lot/Serial Number", index='trigram')
+    name = fields.Char('Lot/Serial Number', required=True, compute='_compute_name', store=True, readonly=False, help="Unique Lot/Serial Number", index='trigram', precompute=True)
     ref = fields.Char('Internal Reference', help="Internal reference number in case it differs from the manufacturer's lot/serial number")
     product_id = fields.Many2one(
         'product.product', 'Product', index=True,
         domain=("[('tracking', '!=', 'none'), ('is_storable', '=', True)] +"
             " ([('product_tmpl_id', '=', context['default_product_tmpl_id'])] if context.get('default_product_tmpl_id') else [])"),
-        required=True, check_company=True)
+        required=True, check_company=True, tracking=True)
     product_uom_id = fields.Many2one(
-        'uom.uom', 'Unit of Measure',
-        related='product_id.uom_id', store=True)
+        'uom.uom', 'Unit',
+        related='product_id.uom_id')
     quant_ids = fields.One2many('stock.quant', 'lot_id', 'Quants', readonly=True)
     product_qty = fields.Float('On Hand Quantity', compute='_product_qty', search='_search_product_qty')
     note = fields.Html(string='Description')
@@ -56,11 +56,17 @@ class StockLot(models.Model):
     company_id = fields.Many2one('res.company', 'Company', index=True, store=True, readonly=False, compute='_compute_company_id')
     delivery_ids = fields.Many2many('stock.picking', compute='_compute_delivery_ids', string='Transfers')
     delivery_count = fields.Integer('Delivery order count', compute='_compute_delivery_ids')
-    last_delivery_partner_id = fields.Many2one('res.partner', compute='_compute_last_delivery_partner_id')
+    partner_ids = fields.Many2many('res.partner', compute='_compute_partner_ids', search='_search_partner_ids')
     lot_properties = fields.Properties('Properties', definition='product_id.lot_properties_definition', copy=True)
     location_id = fields.Many2one(
         'stock.location', 'Location', compute='_compute_single_location', store=True, readonly=False,
         inverse='_set_single_location', domain="[('usage', '!=', 'view')]", group_expand='_read_group_location_id')
+
+    @api.depends('product_id')
+    def _compute_name(self):
+        for lot in self:
+            if not lot.name:
+                lot.name = lot.product_id.lot_sequence_id.next_by_id() if lot.product_id.lot_sequence_id else False
 
     @api.model
     def generate_lot_names(self, first_lot, count):
@@ -102,7 +108,7 @@ class StockLot(models.Model):
         if any(not lot.company_id for lot in self):
             # We need to check across other companies to not have duplicates between 'no-company' and a company.
             self = self.sudo()
-        records = self._read_group(domain, groupby, ['__count'], order='company_id DESC')
+        records = self.with_context(skip_preprocess_gs1=True)._read_group(domain, groupby, ['__count'], order='company_id DESC')
         error_message_lines = set()
         cross_lots = {}
         for company, product, name, count in records:
@@ -142,23 +148,21 @@ class StockLot(models.Model):
         always triggered.
         """
         for prod_lot in self:
-            prod_lot.display_complete = prod_lot.id or self._context.get('display_complete')
+            prod_lot.display_complete = prod_lot.id or self.env.context.get('display_complete')
 
     def _compute_delivery_ids(self):
-        delivery_ids_by_lot = self._find_delivery_ids_by_lot()
+        delivery_ids_by_lot = self._find_delivery_ids_by_lot_iterative()
         for lot in self:
-            lot.delivery_ids = delivery_ids_by_lot[lot.id]
+            lot.delivery_ids = delivery_ids_by_lot.get(lot.id, [])
             lot.delivery_count = len(lot.delivery_ids)
 
-    def _compute_last_delivery_partner_id(self):
-        serial_products = self.filtered(lambda l: l.product_id.tracking == 'serial')
-        delivery_ids_by_lot = serial_products._find_delivery_ids_by_lot()
-        (self - serial_products).last_delivery_partner_id = False
-        for lot in serial_products:
-            if lot.product_id.tracking == 'serial' and len(delivery_ids_by_lot[lot.id]) > 0:
-                lot.last_delivery_partner_id = self.env['stock.picking'].browse(delivery_ids_by_lot[lot.id]).sorted(key='date_done', reverse=True)[0].partner_id
+    def _compute_partner_ids(self):
+        delivery_ids_by_lot = self._find_delivery_ids_by_lot_iterative()
+        for lot in self:
+            if delivery_ids_by_lot.get(lot.id, []):
+                lot.partner_ids = self.env['stock.picking'].browse(delivery_ids_by_lot[lot.id]).sorted(key='date_done', reverse=True).partner_id
             else:
-                lot.last_delivery_partner_id = False
+                lot.partner_ids = False
 
     @api.depends('quant_ids', 'quant_ids.quantity')
     def _compute_single_location(self):
@@ -204,21 +208,44 @@ class StockLot(models.Model):
         return vals_list
 
     @api.depends('quant_ids', 'quant_ids.quantity')
+    @api.depends_context('owner_id', 'package_id', 'to_date', 'location', 'warehouse_id', 'allowed_company_ids')
     def _product_qty(self):
-        for lot in self:
-            # We only care for the quants in internal or transit locations.
-            quants = lot.quant_ids.filtered(lambda q: q.location_id.usage == 'internal' or (q.location_id.usage == 'transit' and q.location_id.company_id))
-            lot.product_qty = sum(quants.mapped('quantity'))
+        domain_quant_loc, domain_move_in_loc, domain_move_out_loc = self.env['product.product'].with_context(skip_in_progress=True)._get_domain_locations()
+        owner_id = self.env.context.get('owner_id')
+        package_id = self.env.context.get('package_id')
+        to_date = fields.Datetime.to_datetime(self.env.context.get('to_date'))
+        dates_in_the_past = to_date and to_date < fields.Datetime.now()
+        domain_quant = Domain([('lot_id', 'in', self.ids)]) & domain_quant_loc
+        if owner_id is not None:
+            domain_quant &= Domain([('owner_id', '=', owner_id)])
+            domain_move_in_loc &= Domain([('owner_id', '=', owner_id)])
+            domain_move_out_loc &= Domain([('owner_id', '=', owner_id)])
+        if package_id is not None:
+            domain_quant &= Domain([('package_id', '=', package_id)])
+        quant_qty_by_lot = dict(self.env['stock.quant']._read_group(domain_quant, ['lot_id'], ['quantity:sum']))
+        if not dates_in_the_past:
+            for lot in self:
+                lot.product_qty = quant_qty_by_lot.get(lot, 0.0)
+        else:
+            # If the date is in the past, we need to adjust the quantity on hand with the moves that happened after that date.
+            domain_lot_done = Domain([('lot_id', 'in', self.ids), ('state', '=', 'done'), ('move_id.date', '>', to_date)])
+            move_in_qty_by_lot = dict(self.env['stock.move.line']._read_group(domain_move_in_loc & domain_lot_done, ['lot_id'], ['quantity_product_uom:sum']))
+            move_out_qty_by_lot = dict(self.env['stock.move.line']._read_group(domain_move_out_loc & domain_lot_done, ['lot_id'], ['quantity_product_uom:sum']))
+            for lot in self:
+                lot.product_qty = quant_qty_by_lot.get(lot, 0.0) - move_in_qty_by_lot.get(lot, 0.0) + move_out_qty_by_lot.get(lot, 0.0)
 
     def _search_product_qty(self, operator, value):
-        if operator not in OPERATORS:
-            raise UserError(_("Invalid domain operator %s", operator))
-        if not isinstance(value, (float, int)):
-            raise UserError(_("Invalid domain right operand '%s'. It must be of type Integer/Float", value))
+        op = PY_OPERATORS.get(operator)
+        if not op:
+            return NotImplemented
+        if isinstance(value, Iterable) and not isinstance(value, str):
+            value = {float(v) for v in value}
+        else:
+            value = float(value)
         domain = [
             ('lot_id', '!=', False),
             '|', ('location_id.usage', '=', 'internal'),
-            '&', ('location_id.usage', '=', 'transit'), ('location_id.company_id', '!=', False)
+            '&', ('location_id.usage', '=', 'transit'), ('location_id.company_id', 'in', self.env.companies.ids)
         ]
         lots_w_qty = self.env['stock.quant']._read_group(domain=domain, groupby=['lot_id'], aggregates=['quantity:sum'], having=[('quantity:sum', '!=', 0)])
         ids = []
@@ -226,21 +253,42 @@ class StockLot(models.Model):
         for lot, quantity_sum in lots_w_qty:
             lot_id = lot.id
             lot_ids_w_qty.append(lot_id)
-            if OPERATORS[operator](quantity_sum, value):
+            if op(quantity_sum, value):
                 ids.append(lot_id)
-        if value == 0.0 and operator == '=':
-            return [('id', 'not in', lot_ids_w_qty)]
-        if value == 0.0 and operator == '!=':
-            return [('id', 'in', lot_ids_w_qty)]
+
         # check if we need include zero values in result
-        include_zero = (
-            value < 0.0 and operator in ('>', '>=') or
-            value > 0.0 and operator in ('<', '<=') or
-            value == 0.0 and operator in ('>=', '<=')
-        )
+        include_zero = op(0.0, value)
         if include_zero:
             return ['|', ('id', 'in', ids), ('id', 'not in', lot_ids_w_qty)]
         return [('id', 'in', ids)]
+
+    def _search_partner_ids(self, operator, value):
+        """ returns partner_ids that are directly delivered the product of the lot/SN, i.e. not
+        lots/SNs that are consumed within a MO. This means this search is NOT symmetric with the
+        partner_ids field within the form view since it uses different logic that isn't efficient
+        enough for this search due to it being usable within the list view.
+        """
+        if operator in Domain.NEGATIVE_OPERATORS or not isinstance(value, (Iterable)):
+            return NotImplemented
+        is_no_partner = operator == 'in' and list(value) == [False]
+        domain = Domain([
+            ('lot_id', '!=', False),
+            ('state', '=', 'done'),
+        ])
+        if is_no_partner:
+            # reverse the search, get all lots sent to partner so we can return all lots NOT sent
+            domain &= Domain('picking_partner_id', 'not in', value)
+        else:
+            domain &= Domain.OR([
+                Domain('picking_partner_id', operator, value),
+                Domain('move_partner_id', operator, value),
+            ])
+        domain &= Domain(self._get_outgoing_domain())
+        move_lines = self.env['stock.move.line'].search(domain)
+
+        if is_no_partner:
+            return [('id', 'not in', move_lines.lot_id.ids)]
+        return [('id', 'in', move_lines.lot_id.ids)]
 
     def action_lot_open_quants(self):
         self = self.with_context(search_default_lot_id=self.id, create=False)
@@ -272,19 +320,17 @@ class StockLot(models.Model):
     def _get_outgoing_domain(self):
         return [
             '|',
-            ('picking_code', '=', 'outgoing'),
+            '|', ('picking_code', '=', 'outgoing'), ('move_id.picking_code', '=', 'outgoing'),
             ('produce_line_ids', '!=', False),
         ]
 
     def _find_delivery_ids_by_lot(self, lot_path=None, delivery_by_lot=None):
         if lot_path is None:
             lot_path = set()
-        domain = [
+        domain = Domain([
             ('lot_id', 'in', self.ids),
             ('state', '=', 'done'),
-        ]
-        domain_restriction = self._get_outgoing_domain()
-        domain = expression.AND([domain, domain_restriction])
+        ]) & Domain(self._get_outgoing_domain())
         move_lines = self.env['stock.move.line'].search(domain)
         moves_by_lot = {
             lot_id: {'producing_lines': set(), 'barren_lines': set()}
@@ -319,3 +365,67 @@ class StockLot(models.Model):
 
             delivery_by_lot[lot.id] = list(delivery_ids)
         return delivery_by_lot
+
+    def _find_delivery_ids_by_lot_iterative(self):
+        """ Retrieve all delivery IDs (outgoing picking) linked to the lots
+            in self and all the lots found when parcouring the produce lines.
+            :return: A dictionary where keys are the IDs of the original 'stock.lot'
+                      records (self) and values are lists of associated 'stock.picking' IDs.
+            :rtype: dict
+        """
+
+        all_lot_ids = set(self.ids)
+        barren_lines = defaultdict(set)
+        parent_map = defaultdict(set)
+
+        # Prefetch the lines linked to lots and split them between producing lines
+        # and barren lines (lines that have `produce_line_ids` and lines that don't
+        # have them respectively) and build the map of the parents of each lot (so we
+        # can browse the tree from the leaves to the root and propagate the pickings)
+        queue = list(self.ids)
+        while queue:
+            domain = Domain([
+                ('lot_id', 'in', queue),
+                ('state', '=', 'done'),
+            ]) & Domain(self._get_outgoing_domain())
+
+            queue = []
+            move_lines = self.env['stock.move.line'].search(domain)
+            for line in move_lines:
+                lot_id = line.lot_id.id
+
+                produce_line_lot_ids = line.produce_line_ids.lot_id.ids
+                if produce_line_lot_ids:
+                    for child_lot_id in produce_line_lot_ids:
+                        parent_map[child_lot_id].add(lot_id)
+                else:
+                    barren_lines[lot_id].add(line.id)
+
+                next_lots = set(produce_line_lot_ids) - all_lot_ids
+                all_lot_ids.update(next_lots)
+                queue.extend(next_lots)
+
+        # Initialize delivery_by_lot with barren lines (i.e. the leaves of the lot tree)
+        lots_to_propagate = set()
+        delivery_by_lot = {lot_id: set() for lot_id in all_lot_ids}
+        for lot_id in barren_lines:
+            barren_line_ids = barren_lines[lot_id]
+            if barren_line_ids:
+                barren_move_lines = self.env['stock.move.line'].browse(barren_line_ids)
+                delivery_by_lot[lot_id].update(barren_move_lines.picking_id.ids)
+                lots_to_propagate.add(lot_id)
+
+        # Propagate the deliveries from the children to their parent lots.
+        # This loop processes lots whose delivery sets have just been updated,
+        # ensuring the new results are merged upward through the parent graph until
+        # all deliveries are propagated
+        while lots_to_propagate:
+            lot_id = lots_to_propagate.pop()
+
+            for parent_id in parent_map.get(lot_id, []):
+                new_deliveries = delivery_by_lot[lot_id] - delivery_by_lot[parent_id]
+                if new_deliveries:
+                    delivery_by_lot[parent_id].update(new_deliveries)
+                    lots_to_propagate.add(parent_id)
+
+        return {lot_id: list(delivery_by_lot[lot_id]) for lot_id in delivery_by_lot}

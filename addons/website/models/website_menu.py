@@ -7,14 +7,14 @@ from werkzeug.urls import url_parse
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.fields import Command
+from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools.translate import html_translate
 
 
-class Menu(models.Model):
+class WebsiteMenu(models.Model):
+    _name = 'website.menu'
 
-    _name = "website.menu"
     _description = "Website Menu"
 
     _parent_store = True
@@ -39,9 +39,9 @@ class Menu(models.Model):
                 menu.mega_menu_classes = False
 
     name = fields.Char('Menu', required=True, translate=True)
-    url = fields.Char('Url', default='')
-    page_id = fields.Many2one('website.page', 'Related Page', ondelete='cascade')
-    controller_page_id = fields.Many2one('website.controller.page', 'Related Model Page', ondelete='cascade')
+    url = fields.Char("Url", compute="_compute_url", store=True, required=True, readonly=False, default="#", copy=True)
+    page_id = fields.Many2one('website.page', 'Related Page', ondelete='cascade', index='btree_not_null')
+    controller_page_id = fields.Many2one('website.controller.page', 'Related Model Page', ondelete='cascade', index='btree_not_null')
     new_window = fields.Boolean('New Window')
     sequence = fields.Integer(default=_default_sequence)
     website_id = fields.Many2one('website', 'Website', ondelete='cascade')
@@ -50,6 +50,7 @@ class Menu(models.Model):
     parent_path = fields.Char(index=True)
     is_visible = fields.Boolean(compute='_compute_visible', string='Is Visible')
     group_ids = fields.Many2many('res.groups', string='Visible Groups',
+        groups='base.group_user',
         help="User needs to be at least in one of these groups to see the menu")
     is_mega_menu = fields.Boolean(compute=_compute_field_is_mega_menu, inverse=_set_field_is_mega_menu)
     mega_menu_content = fields.Html(translate=html_translate, sanitize=False, prefetch=True)
@@ -58,20 +59,58 @@ class Menu(models.Model):
     @api.depends('website_id')
     @api.depends_context('display_website')
     def _compute_display_name(self):
-        if not self._context.get('display_website') and not self.env.user.has_group('website.group_multi_website'):
+        if not self.env.context.get('display_website') and not self.env.user.has_group('website.group_multi_website'):
             return super()._compute_display_name()
 
         for menu in self:
-            menu_name = menu.name
+            menu_name = menu.name or ""
             if menu.website_id:
                 menu_name += f' [{menu.website_id.name}]'
             menu.display_name = menu_name
+
+    @api.depends("page_id", "is_mega_menu", "child_id")
+    def _compute_url(self):
+        for menu in self:
+            if menu.is_mega_menu or menu.child_id:
+                menu.url = "#"
+            else:
+                menu.url = (menu.page_id.url if menu.page_id else menu.url) or "#"
+
+    @api.constrains("parent_id", "child_id", "is_mega_menu", "mega_menu_content")
+    def _validate_parent_menu(self):
+        """
+        Ensure valid menu hierarchy and mega menu constraints.
+
+        Rules enforced:
+        - Menus must not exceed two levels of nesting.
+        - A mega menu must not have a parent or child.
+        - Menus with children cannot be added as a submenu under another menu.
+        """
+        for record in self:
+            parent_menu = record.parent_id.sudo() if record.parent_id else self.env[self._name]
+
+            # Check hierarchy level
+            level = 0
+            current_menu = parent_menu
+            while current_menu:
+                level += 1
+                current_menu = current_menu.parent_id
+                if level > 2:
+                    raise UserError(_("Menus cannot have more than two levels of hierarchy."))
+
+            # Mega menu constraint
+            if parent_menu.is_mega_menu or (record.is_mega_menu and (parent_menu.parent_id or record.child_id)):
+                raise UserError(_("A mega menu cannot have a parent or child menu."))
+
+            # Submenu structure constraint
+            if record.child_id and (parent_menu.parent_id or record.child_id.child_id):
+                raise UserError(_("Menus with child menus cannot be added as a submenu."))
 
     @api.model_create_multi
     def create(self, vals_list):
         ''' In case a menu without a website_id is trying to be created, we duplicate
             it for every website.
-            Note: Particulary useful when installing a module that adds a menu like
+            Note: Particularly useful when installing a module that adds a menu like
                   /shop. So every website has the shop menu.
                   Be careful to return correct record for ir.model.data xml_id in case
                   of default main menus creation.
@@ -86,42 +125,39 @@ class Menu(models.Model):
             if 'website_id' in vals:
                 menus |= super().create(vals)
                 continue
-            elif self._context.get('website_id'):
-                vals['website_id'] = self._context.get('website_id')
+            elif self.env.context.get('website_id'):
+                vals['website_id'] = self.env.context.get('website_id')
                 menus |= super().create(vals)
                 continue
             else:
-                # create for every site
-                w_vals = [dict(vals, **{
-                    'website_id': website.id,
-                    'parent_id': website.menu_id.id,
-                }) for website in self.env['website'].search([])]
-                new_menu = super().create(w_vals)[-1:]  # take the last one
                 # if creating a default menu, we should also save it as such
                 default_menu = self.env.ref('website.main_menu', raise_if_not_found=False)
+                # create for every site
+                w_vals = []
+                for website in self.env["website"].search([]):
+                    parent_id = vals.get("parent_id")
+                    if not parent_id or (default_menu and parent_id == default_menu.id):
+                        parent_id = website.menu_id.id
+                    w_vals.append({
+                        **vals,
+                        'website_id': website.id,
+                        'parent_id': parent_id,
+                    })
+                new_menu = super().create(w_vals)[-1:]  # take the last record
                 if default_menu and vals.get('parent_id') == default_menu.id:
                     new_menu = super().create(vals)
                 menus |= new_menu
         # Only one record per vals is returned but multiple could have been created
         return menus
 
-    def write(self, values):
+    def write(self, vals):
         self.env.registry.clear_cache('templates')
-        if 'group_ids' in values:
-            commands = values['group_ids'] or []
-            designer_group_id = self.env.ref('website.group_website_designer').id
-            link_designer_group = Command.link(designer_group_id)
-            for record in self:
-                # Simulate write.
-                ids = set(record.group_ids.mapped('id'))
-                for command, record_id in commands:
-                    if command == Command.LINK:
-                        ids.add(record_id)
-                    elif command == Command.UNLINK and record_id in ids:
-                        ids.remove(record_id)
-                if ids and designer_group_id not in ids:
-                    commands.append(link_designer_group)
-        return super().write(values)
+        res = super().write(vals)
+        if 'group_ids' in vals and not self.env.context.get("adding_designer_group_to_menu"):
+            self.filtered("group_ids").with_context(
+                adding_designer_group_to_menu=True
+            ).group_ids += self.env.ref("website.group_website_designer")
+        return res
 
     def unlink(self):
         self.env.registry.clear_cache('templates')
@@ -131,7 +167,7 @@ class Menu(models.Model):
             menus_to_remove |= self.env['website.menu'].search([('url', '=', menu.url),
                                                                 ('website_id', '!=', False),
                                                                 ('id', '!=', menu.id)])
-        return super(Menu, menus_to_remove).unlink()
+        return super(WebsiteMenu, menus_to_remove).unlink()
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_master_tags(self):
@@ -160,16 +196,13 @@ class Menu(models.Model):
 
     def _clean_url(self):
         # clean the url with heuristic
-        if self.page_id:
-            url = self.page_id.sudo().url
-        else:
-            url = self.url
-            if url and not self.url.startswith('/'):
-                if '@' in self.url:
-                    if not self.url.startswith('mailto'):
-                        url = 'mailto:%s' % self.url
-                elif not self.url.startswith('http'):
-                    url = '/%s' % self.url
+        url = self.url
+        if url and not url.startswith('/') and url not in ('#top', '#bottom'):
+            if "@" in self.url:
+                if not self.url.startswith("mailto"):
+                    url = "mailto:%s" % self.url
+            elif not self.url.startswith("http"):
+                url = "/%s" % self.url
         return url
 
     def _is_active(self):
@@ -201,15 +234,14 @@ class Menu(models.Model):
         request_url = url_parse(request.httprequest.url)
 
         if not self.child_id:
-            # Don't compare to `url` as it could be shadowed by the linked
-            # website page's URL
-            menu_url = self._clean_url()
-            if not menu_url:
-                return False
-
-            menu_url = url_parse(menu_url)
+            menu_url = url_parse(self._clean_url())
             unslug_url = self.env['ir.http']._unslug_url
             if unslug_url(menu_url.path) == unslug_url(request_url.path):
+                # By default we compare the unslug version of the current URL
+                # with the menu URL but if the menu is linked to a page we don't
+                # consider it active if the paths don't match exactly.
+                if self.page_id and menu_url.path != request_url.path:
+                    return False
                 if not (
                     set(menu_url.decode_query().items(multi=True))
                     <= set(request_url.decode_query().items(multi=True))
@@ -234,19 +266,18 @@ class Menu(models.Model):
         website = self.env['website'].browse(website_id)
 
         def make_tree(node):
-            menu_url = node.page_id.url if node.page_id else node.url
             menu_node = {
                 'fields': {
                     'id': node.id,
                     'name': node.name,
-                    'url': menu_url,
+                    'url': node.url,
                     'new_window': node.new_window,
                     'is_mega_menu': node.is_mega_menu,
                     'sequence': node.sequence,
                     'parent_id': node.parent_id.id,
                 },
                 'children': [],
-                'is_homepage': menu_url == (website.homepage_url or '/'),
+                'is_homepage': node.url == (website.homepage_url or '/'),
             }
             for child in node.child_id:
                 menu_node['children'].append(make_tree(child))
@@ -276,24 +307,25 @@ class Menu(models.Model):
             menu_id = self.browse(menu['id'])
             # Check if the url match a website.page (to set the m2o relation),
             # except if the menu url contains '#', we then unset the page_id
-            if not menu['url'] or '#' in menu['url']:
+            if '#' in menu['url']:
                 # Multiple case possible
                 # 1. `#` => menu container (dropdown, ..)
-                # 2. `#anchor` => anchor on current page
-                # 3. `/url#something` => valid internal URL
-                # 4. https://google.com#smth => valid external URL
+                # 2. `#top` or `#bottom` => special anchors valid for any page
+                # 3. `#anchor` => anchor on current page
+                # 4. `/url#something` => valid internal URL
+                # 5. https://google.com#smth => valid external URL
                 if menu_id.page_id:
                     menu_id.page_id = None
-                if request and menu['url'] and menu['url'].startswith('#') and len(menu['url']) > 1:
+                if request and menu['url'].startswith('#') and len(menu['url']) > 1 and \
+                        menu['url'] not in ['#top', '#bottom']:
                     # Working on case 2.: prefix anchor with referer URL
                     referer_url = werkzeug.urls.url_parse(request.httprequest.headers.get('Referer', '')).path
                     menu['url'] = referer_url + menu['url']
             else:
-                domain = self.env["website"].website_domain(website_id) + [
-                    "|",
-                    ("url", "=", menu["url"]),
-                    ("url", "=", "/" + menu["url"]),
-                ]
+                domain = self.env["website"].browse(website_id).website_domain() & (
+                    Domain("url", "=", menu["url"])
+                    | Domain("url", "=", "/" + menu["url"])
+                )
                 page = self.env["website.page"].search(domain, limit=1)
                 if page:
                     menu['page_id'] = page.id

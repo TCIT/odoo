@@ -3,8 +3,7 @@
 
 import logging
 
-from odoo import fields, models, api
-
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -14,6 +13,7 @@ except ImportError:
     _logger.warning("The num2words python library is not installed, amount-to-text features won't be fully available.")
     num2words = None
 
+
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
@@ -21,9 +21,14 @@ class AccountMove(models.Model):
 
     def _get_name_invoice_report(self):
         self.ensure_one()
-        if self.company_id.country_id in self.env.ref('base.gulf_cooperation_council').country_ids:
-            return 'l10n_gcc_invoice.arabic_english_invoice'
+        if self.company_id.country_id and 'GCC' in self.company_id.country_id.country_group_codes:
+            return 'l10n_gcc_invoice.l10n_gcc_report_invoice_document'
         return super()._get_name_invoice_report()
+
+    def _l10n_gcc_get_invoice_title(self):
+        """To be overriden by inheriting modules implementing a custom invoice title"""
+        self.ensure_one()
+        return False
 
     def _num2words(self, number, lang):
         if num2words is None:
@@ -32,13 +37,14 @@ class AccountMove(models.Model):
 
         return num2words(number, lang=lang).title()
 
+    # TODO: Remove in master
     def _load_narration_translation(self):
         # Workaround to have the english/arabic version of the payment terms
         # in the report
         if not self:
             return
         moves_to_fix = self.env['account.move']
-        for move in self.filtered(lambda m: m.narration and m.is_sale_document(include_receipts=True) and m.company_id.country_id in self.env.ref('base.gulf_cooperation_council').country_ids):
+        for move in self.filtered(lambda m: m.narration and m.is_sale_document(include_receipts=True) and m.company_id.country_id and 'GCC' in m.company_id.country_id.country_group_codes):
             lang = move.partner_id.lang or self.env.user.lang
             if move.company_id.terms_type == 'html' or move.narration != move.company_id.with_context(lang=lang).invoice_terms:
                 continue
@@ -54,21 +60,21 @@ class AccountMove(models.Model):
         ], dirty=True)
         moves_to_fix.modified(['narration'])
 
+    # TODO: Remove in master
     @api.model_create_multi
     def create(self, vals_list):
         moves = super().create(vals_list)
-        moves._load_narration_translation()
         return moves
 
+    # TODO: Remove in master
     def _compute_narration(self):
         super()._compute_narration()
-        # Only update translations of real records
-        self.filtered('id')._load_narration_translation()
+
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
-    l10n_gcc_invoice_tax_amount = fields.Float(string='Tax Amount', compute='_compute_tax_amount', digits='Product Price')
+    l10n_gcc_invoice_tax_amount = fields.Float(string='Tax Amount', compute='_compute_tax_amount', min_display_digits='Product Price')
     l10n_gcc_line_name = fields.Char(compute='_compute_l10n_gcc_line_name')
 
     @api.depends('price_subtotal', 'price_total')
@@ -85,3 +91,21 @@ class AccountMoveLine(models.Model):
                 line.l10n_gcc_line_name = lang_product_name(line, line.move_id.partner_id.lang)
             else:
                 line.l10n_gcc_line_name = line.name
+
+    def _get_child_lines(self):
+        # EXTENDS account
+        self.ensure_one()
+        res = super()._get_child_lines()
+
+        for line in res:
+            line['l10n_gcc_invoice_tax_amount'] = line['price_total'] - line['price_subtotal']
+
+        return res
+
+    def _l10n_gcc_get_section_total(self):
+        section_lines = self._get_section_lines()
+        return sum(section_lines.mapped('price_total'))
+
+    def _l10n_gcc_get_section_tax_amount(self):
+        section_lines = self._get_section_lines()
+        return sum(section_lines.mapped('l10n_gcc_invoice_tax_amount'))

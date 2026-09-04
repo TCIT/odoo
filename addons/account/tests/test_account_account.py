@@ -1,6 +1,6 @@
 from odoo import Command
 from odoo.addons.account.tests.common import TestAccountMergeCommon
-from odoo.tests import Form, tagged
+from odoo.tests import Form, tagged, new_test_user
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import mute_logger
 import psycopg2
@@ -217,7 +217,7 @@ class TestAccountAccount(TestAccountMergeCommon):
         ''' Test the constraint on `account.company_ids`. '''
         # Test that at least one company is required on accounts.
         with self.assertRaises(UserError):
-            self.company_data['default_account_revenue'].company_ids = False
+            self.company_data['default_account_revenue'].sudo().company_ids = False
 
         # Test that unassigning a company from an account fails if there already are journal items
         # for that company and that account.
@@ -331,12 +331,11 @@ class TestAccountAccount(TestAccountMergeCommon):
 
         # Set the account as reconcile and partially reconcile something.
         account.reconcile = True
-        self.env.invalidate_all()
 
         move.line_ids.filtered(lambda line: line.account_id == account).reconcile()
 
         # Try to set the account as a not-reconcile one.
-        with self.assertRaises(UserError), self.cr.savepoint():
+        with self.assertRaises(UserError):
             account.reconcile = False
 
     def test_remove_account_from_account_group(self):
@@ -594,7 +593,7 @@ class TestAccountAccount(TestAccountMergeCommon):
 
             - Creates: partner and a account move of that partner.
             - Checks if the most frequent account for the partner matches created account (with recent move).
-            - Sets the account as deprecated and checks that it no longer appears in the suggestions.
+            - Sets the account as archived and checks that it no longer appears in the suggestions.
 
             * since tested function takes into account last 2 years, we use freeze_time
         """
@@ -614,16 +613,78 @@ class TestAccountAccount(TestAccountMergeCommon):
         )
         self.assertEqual(account.id, results_1[0], "Account with most account_moves should be listed first")
 
-        account.deprecated = True
-        account.flush_recordset(['deprecated'])
+        account.active = False
+        account.flush_recordset(['active'])
         results_2 = self.env['account.account']._get_most_frequent_accounts_for_partner(
             company_id=self.env.company.id,
             partner_id=partner.id,
             move_type="out_invoice"
         )
-        self.assertFalse(account.id in results_2, "Deprecated account should NOT appear in account suggestions")
+        self.assertFalse(account.id in results_2, "Archived account should NOT appear in account suggestions")
 
-    @freeze_time('2017-01-01')
+    def test_placeholder_code(self):
+        """ Test that the placeholder code is '{code_in_company} ({company})'
+            where `company` is the first of the user's companies that is
+            in `account.company_ids`.
+
+            Check that `_field_to_sql` gives the same value.
+        """
+        def get_placeholder_code_via_sql(account):
+            account_query = account._as_query()
+            placeholder_code_sql = account_query.select(account._field_to_sql('account_account', 'placeholder_code', account_query))
+            placeholder_code = self.env.execute_query(placeholder_code_sql)[0][0]
+            return placeholder_code
+
+        # This user cannot access company 2, so it can't access the created account.
+        user_2 = new_test_user(
+            self.env,
+            name="User that can't access company 2",
+            login='user_that_cannot_access_company_2',
+            password='user_that_cannot_access_company_2',
+            email='user_that_cannot_access_company_2@test.com',
+            group_ids=self.get_default_groups().ids,
+            company_id=self.env.company.id,
+        )
+
+        account = self.env['account.account'].create([{
+            'name': 'My account',
+            'company_ids': [Command.set(self.company_data_2['company'].ids)],
+            'code': '180001',
+        }])
+
+        self.assertEqual(account.placeholder_code, '180001 (company_2)')
+        self.assertEqual(get_placeholder_code_via_sql(account), '180001 (company_2)')
+
+        self.assertEqual(account.with_company(self.company_data_2['company']).placeholder_code, '180001')
+        self.assertEqual(get_placeholder_code_via_sql(account.with_company(self.company_data_2['company'])), '180001')
+
+        # Invalidate in order to recompute `placeholder_code` with `user_2`
+        account.invalidate_recordset(fnames=['placeholder_code'])
+        self.assertEqual(account.with_user(user_2).sudo().placeholder_code, False)
+        self.assertEqual(get_placeholder_code_via_sql(account.with_user(user_2).sudo()), None)
+
+    def test_account_accessible_by_search_in_sudo_mode(self):
+        """ Test that even if an account isn't accessible by the current user, it is returned by a search in sudo mode. """
+        account = self.env['account.account'].with_company(self.company_data_2['company']).create([{
+            'name': 'Account in Company 2',
+            'code': '180002',
+        }])
+
+        # This user can't access company 2, so it can't access the created account.
+        user_that_cannot_access_company_2 = new_test_user(
+            self.env,
+            name="User that can't access company 2",
+            login='user_that_cannot_access_company_2',
+            password='user_that_cannot_access_company_2',
+            email='user_that_cannot_access_company_2@test.com',
+            group_ids=self.get_default_groups().ids,
+            company_id=self.env.company.id,
+        )
+
+        searched_account = self.env['account.account'].with_user(user_that_cannot_access_company_2).sudo().search([('id', '=', account.id)])
+        self.assertEqual(searched_account, account)
+
+    @freeze_time('2018-01-01')
     def test_account_opening_balance(self):
         company = self.env.company
         account = self.company_data['default_account_revenue']
@@ -854,6 +915,7 @@ class TestAccountAccount(TestAccountMergeCommon):
 
             account_form.name = "My Test Account"
             account_form.code = 'test1'
+            account_form.account_type = 'asset_current'
             with account_form.code_mapping_ids.edit(1) as code_mapping_form:
                 code_mapping_form.code = 'test2'
             with account_form.code_mapping_ids.edit(2) as code_mapping_form:
@@ -978,3 +1040,117 @@ class TestAccountAccount(TestAccountMergeCommon):
         invoice.line_ids._compute_account_id()
 
         self.assertEqual(invoice.invoice_line_ids.account_id, self.company_data['default_account_revenue'])
+
+    def test_access_to_parent_accounts_from_branch(self):
+        """ Ensure that a user with access to a branch can access to the accounts of the parent company """
+        parent_company = self.env['res.company'].create([{
+            'name': "Parent Company",
+        }])
+        branch = self.env['res.company'].create([{
+            'name': "Branch Company",
+            'parent_id': parent_company.id,
+        }])
+        self.env['account.account'].create([{
+            'name': 'Parent Account',
+            'code': '444719',
+            'company_ids': [Command.link(parent_company.id)]
+        }])
+        # create a user with account rights and access to the branch company only
+        branch_user = self.env['res.users'].create({
+            'login': 'branch',
+            'name': 'XYZ',
+            'email': 'xyz@example.com',
+            'group_ids': [Command.link(self.env.ref('account.group_account_user').id)],
+            'company_ids': [Command.link(branch.id)],
+            'company_id': branch.id,
+        })
+
+        parent_accounts = self.env['account.account'].search([('company_ids', '=', parent_company.id)])
+        self.assertEqual(len(parent_accounts), 1, "There should be 1 account in the parent company")
+
+        branch_accounts = self.env['account.account'].search([('company_ids', '=', branch.id)])
+        self.assertEqual(len(branch_accounts), 0, "There should be no account in the branch company")
+        # get the accounts from the parent company with the branch user
+        accounts = self.env['account.account'].with_user(branch_user.id).search([('company_ids', 'parent_of', [branch.id])])
+        self.assertEqual(len(accounts), 1, "Branch user should have access to the accounts of the parent company")
+
+    def test_search_account_with_existing_code(self):
+        """ Ensure that we can properly search records by code, even if they are inactive """
+        example_account = self.env["account.account"].search([], limit=1)
+        found = self.env["account.account"].search([("code", "=ilike", example_account.code)])
+        self.assertEqual(found, example_account)
+
+        example_account.active = False
+        found = self.env["account.account"].search([("code", "=ilike", example_account.code), ("active", "=", False)])
+        not_found = self.env["account.account"].search([("code", "=ilike", example_account.code)])
+        self.assertEqual(found, example_account)
+        self.assertFalse(not_found)
+
+    def test_no_multi_company_on_bank_cash_accounts(self):
+        """Ensure multiple companies cannot be selected on bank and cash accounts."""
+        parent_company = self.env['res.company'].create([{
+            'name': "Parent Company",
+        }])
+        branch = self.env['res.company'].create([{
+            'name': "Branch Company",
+            'parent_id': parent_company.id,
+        }])
+        account = self.env['account.account'].create({
+            'code': 'TE1000',
+            'name': 'Bank Account Test',
+            'account_type': 'asset_cash',
+            'company_ids': [Command.link(parent_company.id)],
+        })
+        with self.assertRaisesRegex(ValidationError, "Bank & Cash accounts cannot be shared between companies."):
+            account.write({'company_ids': [Command.link(branch.id)]})
+
+    def test_duplicate_entry_update_amount_recomputes_totals(self):
+        """Ensure totals are recomputed after updating a duplicated journal entry."""
+        move = self.env['account.move'].create({
+            'move_type': 'entry',
+            'journal_id': self.company_data['default_journal_misc'].id,
+            'line_ids': [
+                Command.create({
+                    'account_id': self.company_data['default_account_revenue'].id,
+                    'balance': -1000.0,
+                }),
+                Command.create({
+                    'account_id': self.company_data['default_account_expense'].id,
+                    'balance': 1000.0,
+                }),
+            ],
+        })
+        move_copy = move.copy()
+        debit_line = move_copy.line_ids.filtered(lambda line: line.debit)
+        credit_line = move_copy.line_ids.filtered(lambda line: line.credit)
+        self.assertRecordValues(debit_line, [{
+            'debit': 1000.0,
+            'balance': 1000.0,
+            'amount_currency': 1000.0,
+            'price_subtotal': 1000.0,
+            'price_total': 1000.0,
+        }])
+        move_copy.write({
+            'line_ids': [
+                Command.update(debit_line.id, {
+                    'debit': 1500.0,
+                }),
+                Command.update(credit_line.id, {
+                    'credit': 1500.0,
+                }),
+            ],
+        })
+        self.assertRecordValues(debit_line, [{
+            'debit': 1500.0,
+            'balance': 1500.0,
+            'amount_currency': 1500.0,
+            'price_subtotal': 1500.0,
+            'price_total': 1500.0,
+        }])
+        self.assertRecordValues(credit_line, [{
+            'credit': 1500.0,
+            'balance': -1500.0,
+            'amount_currency': -1500.0,
+            'price_subtotal': -1500.0,
+            'price_total': -1500.0,
+        }])

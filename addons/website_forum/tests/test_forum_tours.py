@@ -14,6 +14,9 @@ class TestUi(HttpCaseGamification):
             'name': 'Very Smart Question',
             'forum_id': cls.env.ref('website_forum.forum_help').id,
         })
+        cls.env.ref('base.user_admin').write({
+            'email': 'mitchell.admin@example.com',
+        })
 
     def test_01_admin_forum_tour(self):
         self.start_tour("/", 'question', login="admin")
@@ -23,3 +26,8 @@ class TestUi(HttpCaseGamification):
         demo = self.user_demo
         demo.karma = forum.karma_post + 1
         self.start_tour("/", 'forum_question', login="demo")
+        tags = self.env['forum.tag'].search([('name', 'in', ['Tag', 'tag', 'test tag'])])
+        self.assertEqual(len(tags), 3)
+
+    def test_03_admin_forum_cover_dropzone(self):
+        self.start_tour('/', 'forum_cover_dropzone', login='admin')

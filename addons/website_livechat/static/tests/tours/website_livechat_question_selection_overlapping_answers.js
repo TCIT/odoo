@@ -8,7 +8,7 @@ registry.category("web_tour.tours").add("website_livechat.question_selection_ove
         },
         { trigger: ".o-livechat-root:shadow .o-mail-Message:contains(Choose an option)" },
         {
-            trigger: ".o-livechat-root:shadow li:eq(0)",
+            trigger: ".o-livechat-root:shadow li button:eq(0)",
             run: "click",
         },
         { trigger: ".o-livechat-root:shadow .o-mail-Message:contains(You selected not X)" },
@@ -18,7 +18,7 @@ registry.category("web_tour.tours").add("website_livechat.question_selection_ove
         },
         { trigger: ".o-livechat-root:shadow .o-mail-Message:contains(Choose an option)" },
         {
-            trigger: ".o-livechat-root:shadow li:eq(1)",
+            trigger: ".o-livechat-root:shadow li button:eq(1)",
             run: "click",
         },
         { trigger: ".o-livechat-root:shadow .o-mail-Message:contains(You selected X)" },
@@ -28,9 +28,15 @@ registry.category("web_tour.tours").add("website_livechat.question_selection_ove
         },
         { trigger: ".o-livechat-root:shadow .o-mail-Message:contains(Choose an option)" },
         {
-            trigger: ".o-livechat-root:shadow li:eq(2)",
+            trigger: ".o-livechat-root:shadow li button:eq(2)",
             run: "click",
         },
         { trigger: ".o-livechat-root:shadow .o-mail-Message:contains(You selected maybe X)" },
+        { trigger: ".o-livechat-root:shadow span:contains(This livechat conversation has ended.)" },
+        {
+            trigger: ".o-livechat-root:shadow .o-mail-ChatWindow-header [title*=Close]",
+            run: "click",
+        },
+        { trigger: ".o-livechat-root:shadow p:contains(Did we correctly answer your question?)" },
     ],
 });

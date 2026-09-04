@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Switzerland - Accounting',
-    'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations/switzerland.html',
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations/switzerland.html',
     'icon': '/account/static/description/l10n.png',
     'countries': ['ch'],
     'description': """
@@ -23,6 +23,7 @@ The generation of the QR-bill is automatic if you meet the previous criteria. Th
     'category': 'Accounting/Localizations/Account Charts',
     'depends': [
         'account',
+        'account_edi_ubl_cii',
         'base_iban',
         'l10n_din5008',
     ],
@@ -49,5 +50,6 @@ The generation of the QR-bill is automatic if you meet the previous criteria. Th
         ],
     }
 ,
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

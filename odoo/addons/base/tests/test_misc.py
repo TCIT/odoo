@@ -1,23 +1,15 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
 import datetime
-from dateutil.relativedelta import relativedelta
 import os.path
+
 import pytz
 
-from odoo.tools import (
-    config,
-    date_utils,
-    file_open,
-    file_path,
-    merge_sequences,
-    misc,
-    remove_accents,
-)
+from odoo.tests.common import BaseCase, TransactionCase
+from odoo.tools import config, misc, urls
 from odoo.tools.mail import validate_url
-from odoo.tests.common import TransactionCase, BaseCase
+from odoo.tools.misc import file_open, file_path, merge_sequences, remove_accents
 
 
 class TestMergeSequences(BaseCase):
@@ -46,149 +38,6 @@ class TestMergeSequences(BaseCase):
             ['A', 'X', 'Y'],        # 'X' must follow 'A' and precede 'Y'
         )
         self.assertEqual(seq, ['A', 'B', 'X', 'Y', 'C', 'Z'])
-
-
-class TestDateRangeFunction(BaseCase):
-    """ Test on date_range generator. """
-
-    def test_date_range_with_naive_datetimes(self):
-        """ Check date_range with naive datetimes. """
-        start = datetime.datetime(1985, 1, 1)
-        end = datetime.datetime(1986, 1, 1)
-
-        expected = [
-            datetime.datetime(1985, 1, 1, 0, 0),
-            datetime.datetime(1985, 2, 1, 0, 0),
-            datetime.datetime(1985, 3, 1, 0, 0),
-            datetime.datetime(1985, 4, 1, 0, 0),
-            datetime.datetime(1985, 5, 1, 0, 0),
-            datetime.datetime(1985, 6, 1, 0, 0),
-            datetime.datetime(1985, 7, 1, 0, 0),
-            datetime.datetime(1985, 8, 1, 0, 0),
-            datetime.datetime(1985, 9, 1, 0, 0),
-            datetime.datetime(1985, 10, 1, 0, 0),
-            datetime.datetime(1985, 11, 1, 0, 0),
-            datetime.datetime(1985, 12, 1, 0, 0),
-            datetime.datetime(1986, 1, 1, 0, 0)
-        ]
-
-        dates = [date for date in date_utils.date_range(start, end)]
-
-        self.assertEqual(dates, expected)
-
-    def test_date_range_with_date(self):
-        """ Check date_range with naive datetimes. """
-        start = datetime.date(1985, 1, 1)
-        end = datetime.date(1986, 1, 1)
-
-        expected = [
-            datetime.date(1985, 1, 1),
-            datetime.date(1985, 2, 1),
-            datetime.date(1985, 3, 1),
-            datetime.date(1985, 4, 1),
-            datetime.date(1985, 5, 1),
-            datetime.date(1985, 6, 1),
-            datetime.date(1985, 7, 1),
-            datetime.date(1985, 8, 1),
-            datetime.date(1985, 9, 1),
-            datetime.date(1985, 10, 1),
-            datetime.date(1985, 11, 1),
-            datetime.date(1985, 12, 1),
-            datetime.date(1986, 1, 1),
-        ]
-
-        self.assertEqual(list(date_utils.date_range(start, end)), expected)
-
-    def test_date_range_with_timezone_aware_datetimes_other_than_utc(self):
-        """ Check date_range with timezone-aware datetimes other than UTC."""
-        timezone = pytz.timezone('Europe/Brussels')
-
-        start = datetime.datetime(1985, 1, 1)
-        end = datetime.datetime(1986, 1, 1)
-        start = timezone.localize(start)
-        end = timezone.localize(end)
-
-        expected = [datetime.datetime(1985, 1, 1, 0, 0),
-                    datetime.datetime(1985, 2, 1, 0, 0),
-                    datetime.datetime(1985, 3, 1, 0, 0),
-                    datetime.datetime(1985, 4, 1, 0, 0),
-                    datetime.datetime(1985, 5, 1, 0, 0),
-                    datetime.datetime(1985, 6, 1, 0, 0),
-                    datetime.datetime(1985, 7, 1, 0, 0),
-                    datetime.datetime(1985, 8, 1, 0, 0),
-                    datetime.datetime(1985, 9, 1, 0, 0),
-                    datetime.datetime(1985, 10, 1, 0, 0),
-                    datetime.datetime(1985, 11, 1, 0, 0),
-                    datetime.datetime(1985, 12, 1, 0, 0),
-                    datetime.datetime(1986, 1, 1, 0, 0)]
-
-        expected = [timezone.localize(e) for e in expected]
-
-        dates = [date for date in date_utils.date_range(start, end)]
-
-        self.assertEqual(expected, dates)
-
-    def test_date_range_with_mismatching_zones(self):
-        """ Check date_range with mismatching zone should raise an exception."""
-        start_timezone = pytz.timezone('Europe/Brussels')
-        end_timezone = pytz.timezone('America/Recife')
-
-        start = datetime.datetime(1985, 1, 1)
-        end = datetime.datetime(1986, 1, 1)
-        start = start_timezone.localize(start)
-        end = end_timezone.localize(end)
-
-        with self.assertRaises(ValueError):
-            dates = [date for date in date_utils.date_range(start, end)]
-
-    def test_date_range_with_inconsistent_datetimes(self):
-        """ Check date_range with a timezone-aware datetime and a naive one."""
-        context_timezone = pytz.timezone('Europe/Brussels')
-
-        start = datetime.datetime(1985, 1, 1)
-        end = datetime.datetime(1986, 1, 1)
-        end = context_timezone.localize(end)
-
-        with self.assertRaises(ValueError):
-            dates = [date for date in date_utils.date_range(start, end)]
-
-    def test_date_range_with_hour(self):
-        """ Test date range with hour and naive datetime."""
-        start = datetime.datetime(2018, 3, 25)
-        end = datetime.datetime(2018, 3, 26)
-        step = relativedelta(hours=1)
-
-        expected = [
-            datetime.datetime(2018, 3, 25, 0, 0),
-            datetime.datetime(2018, 3, 25, 1, 0),
-            datetime.datetime(2018, 3, 25, 2, 0),
-            datetime.datetime(2018, 3, 25, 3, 0),
-            datetime.datetime(2018, 3, 25, 4, 0),
-            datetime.datetime(2018, 3, 25, 5, 0),
-            datetime.datetime(2018, 3, 25, 6, 0),
-            datetime.datetime(2018, 3, 25, 7, 0),
-            datetime.datetime(2018, 3, 25, 8, 0),
-            datetime.datetime(2018, 3, 25, 9, 0),
-            datetime.datetime(2018, 3, 25, 10, 0),
-            datetime.datetime(2018, 3, 25, 11, 0),
-            datetime.datetime(2018, 3, 25, 12, 0),
-            datetime.datetime(2018, 3, 25, 13, 0),
-            datetime.datetime(2018, 3, 25, 14, 0),
-            datetime.datetime(2018, 3, 25, 15, 0),
-            datetime.datetime(2018, 3, 25, 16, 0),
-            datetime.datetime(2018, 3, 25, 17, 0),
-            datetime.datetime(2018, 3, 25, 18, 0),
-            datetime.datetime(2018, 3, 25, 19, 0),
-            datetime.datetime(2018, 3, 25, 20, 0),
-            datetime.datetime(2018, 3, 25, 21, 0),
-            datetime.datetime(2018, 3, 25, 22, 0),
-            datetime.datetime(2018, 3, 25, 23, 0),
-            datetime.datetime(2018, 3, 26, 0, 0)
-        ]
-
-        dates = [date for date in date_utils.date_range(start, end, step)]
-
-        self.assertEqual(dates, expected)
 
 
 class TestFormatLangDate(TransactionCase):
@@ -259,6 +108,9 @@ class TestFormatLangDate(TransactionCase):
         self.assertEqual(misc.format_datetime(lang.env, datetime_str, tz='Europe/Brussels', dt_format=fmt_fr, lang_code='fr_FR'), '31 janvier 2017 à 11:33:00 +0100')
         self.assertEqual(misc.format_datetime(lang.with_context(lang='zh_CN').env, datetime_str, tz='Europe/Brussels', dt_format=fmt_us, lang_code='en_US'), 'January 31, 2017 at 11:33:00 AM +0100')
 
+        # Check given 'short' format
+        self.assertEqual(misc.format_datetime(lang.with_context(lang='fr_FR').env, datetime_str, tz='America/New_York', dt_format='short'), '31/01/2017 05:33')
+
         # -- test `time`
         time_part = datetime.time(16, 30, 22)
         time_part_tz = datetime.time(16, 30, 22, tzinfo=pytz.timezone('America/New_York'))  # 4:30 PM timezoned
@@ -281,6 +133,9 @@ class TestFormatLangDate(TransactionCase):
         # Check given `lang_code` overwites context lang
         self.assertEqual(misc.format_time(lang.with_context(lang='fr_FR').env, time_part, time_format='ah:mm', lang_code='zh_CN'), '\u4e0b\u53484:30')
         self.assertEqual(misc.format_time(lang.with_context(lang='zh_CN').env, time_part, time_format='ah:mm', lang_code='fr_FR'), 'PM4:30')
+
+        # Check given 'short' format
+        self.assertEqual(misc.format_time(lang.with_context(lang='fr_FR').env, time_part, time_format='short'), '16:30')
 
     def test_02_tz(self):
         self.env.user.tz = 'Europe/Brussels'
@@ -384,17 +239,17 @@ class TestRemoveAccents(BaseCase):
 
 class TestAddonsFileAccess(BaseCase):
 
-    def assertCannotAccess(self, path, ExceptionType=FileNotFoundError, filter_ext=None):
+    def assertCannotAccess(self, path, ExceptionType=OSError, filter_ext=None, check_exists=True):
         with self.assertRaises(ExceptionType):
-            file_path(path, filter_ext=filter_ext)
+            file_path(path, filter_ext=filter_ext, check_exists=check_exists)
 
     def assertCanRead(self, path, needle='', mode='r', filter_ext=None):
         with file_open(path, mode, filter_ext) as f:
             self.assertIn(needle, f.read())
 
-    def assertCannotRead(self, path, ExceptionType=FileNotFoundError, filter_ext=None):
+    def assertCannotRead(self, path, ExceptionType=OSError, filter_ext=None):
         with self.assertRaises(ExceptionType):
-            file_open(path, filter_ext=filter_ext)
+            file_open(path, filter_ext=filter_ext).close()
 
     def test_file_path(self):
         # absolute path
@@ -417,6 +272,10 @@ class TestAddonsFileAccess(BaseCase):
 
         # files in root_path are allowed
         self.assertTrue(file_path('tools/misc.py'))
+
+        # absolute or relative inexisting files are ok
+        self.assertTrue(file_path(config.root_path + '/__inexisting', check_exists=False))
+        self.assertTrue(file_path('base/__inexisting_file', check_exists=False))
 
         # errors when outside addons_paths
         self.assertCannotAccess('/doesnt/exist')
@@ -444,7 +303,7 @@ class TestAddonsFileAccess(BaseCase):
         self.assertCanRead(__file__, test_needle.encode(), mode='rb', filter_ext=('.py',))
 
         # directory target *is* an error
-        with self.assertRaises(FileNotFoundError):
+        with self.assertRaises(IsADirectoryError):
             file_open(os.path.join(__file__, '..'))
 
         # relative path
@@ -460,6 +319,10 @@ class TestAddonsFileAccess(BaseCase):
 
         # files in root_path are allowed
         self.assertCanRead('tools/misc.py')
+
+        # absolute or relative inexisting files are ok
+        self.assertCannotRead(config.root_path + '/__inexisting')
+        self.assertCannotRead('base/__inexisting_file')
 
         # errors when outside addons_paths
         self.assertCannotRead('/doesnt/exist')
@@ -505,15 +368,15 @@ class TestFormatLang(TransactionCase):
         self.env["res.lang"].create({
             "name": "formatLang Lang",
             "code": "fLT",
-            "grouping": "[3,2,-1]",
+            "grouping": "[3,0]",
             "decimal_point": "!",
             "thousands_sep": "?",
         })
 
         self.env['res.lang']._activate_lang('fLT')
 
-        self.assertEqual(misc.formatLang(self.env['res.lang'].with_context(lang='fLT').env, 1000000000, grouping=True), '10000?00?000!00')
-        self.assertEqual(misc.formatLang(self.env['res.lang'].with_context(lang='fLT').env, 1000000000, grouping=False), '1000000000.00')
+        self.assertEqual(misc.formatLang(self.env['res.lang'].with_context(lang='fLT').env, 1000000000, grouping=True), '1?000?000?000!00')
+        self.assertEqual(misc.formatLang(self.env['res.lang'].with_context(lang='fLT').env, 1000000000, grouping=False), '1000000000!00')
 
     def test_decimal_precision(self):
         decimal_precision = self.env['decimal.precision'].create({
@@ -575,6 +438,24 @@ class TestFormatLang(TransactionCase):
         self.assertEqual(misc.formatLang(self.env, 1822050000, rounding_method='HALF-UP', rounding_unit='lakhs'), '18,221')
         self.assertEqual(misc.formatLang(self.env, 1822049900, rounding_method='HALF-UP', rounding_unit='lakhs'), '18,220')
 
+    def test_format_decimal_point_without_grouping(self):
+        lang = self.env['res.lang'].browse(misc.get_lang(self.env).id)
+        self.assertEqual(lang.format(f'%.{1}f', 1200.50, grouping=True), '1,200.5')
+        self.assertEqual(lang.format(f'%.{1}f', 1200.50, grouping=False), '1200.5')
+
+        comma_lang = self.env['res.lang'].create({
+            'name': 'Comma (CM)',
+            'code': 'co_MA',
+            'iso_code': 'co_MA',
+            'thousands_sep': ' ',
+            'decimal_point': ',',
+            'grouping': '[3,0]',
+            'active': True,
+        })
+
+        self.assertEqual(comma_lang.format(f'%.{1}f', 1200.50, grouping=True), '1 200,5')
+        self.assertEqual(comma_lang.format(f'%.{1}f', 1200.50, grouping=False), '1200,5')
+
 
 class TestUrlValidate(BaseCase):
     def test_url_validate(self):
@@ -598,6 +479,113 @@ class TestUrlValidate(BaseCase):
         self.assertEqual(validate_url('/index.html'), 'http:///index.html')
         self.assertEqual(validate_url('?debug=1'), 'http://?debug=1')
         self.assertEqual(validate_url('#model=project.task&id=3603607'), 'http://#model=project.task&id=3603607')
+
+
+class TestUrlJoin(BaseCase):
+    # simple path joins
+    def test_basic_relative_path(self):
+        self.assertEqual(urls.urljoin('http://example.com/', 'c'), 'http://example.com/c')
+        self.assertEqual(urls.urljoin('http://example.com/b/', 'c'), 'http://example.com/b/c')
+
+    def test_path_normalization(self):
+        self.assertEqual(urls.urljoin('http://example.com/b/', '/c'), 'http://example.com/b/c')  # leading / normalized
+        self.assertEqual(urls.urljoin('http://example.com/b///', '///c'), 'http://example.com/b/c')
+        self.assertEqual(urls.urljoin('http://example.com/b/', 'c/'), 'http://example.com/b/c/')  # trailing / must be kept
+
+    def test_base_has_no_path(self):
+        self.assertEqual(urls.urljoin('http://example.com', 'c.com'), 'http://example.com/c.com')
+        self.assertEqual(urls.urljoin('http://example.com', '/c'), 'http://example.com/c')
+
+    def test_extra_trailing_slash(self):
+        self.assertEqual(urls.urljoin('http://example.com/b', ''), 'http://example.com/b')
+        self.assertEqual(urls.urljoin('http://example.com/b', ' '), 'http://example.com/b')
+        self.assertEqual(urls.urljoin('http://example.com/b', '/'), 'http://example.com/b/')
+
+    # Scheme/Netloc
+    def test_leading_and_trailing_slashes(self):
+        self.assertEqual(urls.urljoin('http://example.com/b//c/d/e/////f/g/', '/h/i/j/'), 'http://example.com/b/c/d/e/f/g/h/i/j/')
+        self.assertEqual(urls.urljoin('http://example.com/b//c/d/e/////f/g', '/h/i/j/'), 'http://example.com/b/c/d/e/f/g/h/i/j/')
+        self.assertEqual(urls.urljoin('http://example.com/b//c/d/e/////f/g', 'h/i/j/'), 'http://example.com/b/c/d/e/f/g/h/i/j/')
+        self.assertEqual(urls.urljoin('http://example.com/b//c/d/e/////f/g//', '/h/i/j'), 'http://example.com/b/c/d/e/f/g/h/i/j')
+        self.assertEqual(urls.urljoin('http://example.com//', '/b/c'), 'http://example.com/b/c')
+        self.assertEqual(urls.urljoin('/', '\\/example.com'), '/example.com')
+        self.assertEqual(urls.urljoin('/', '\\\x07/example.com'), '/example.com')
+        self.assertEqual(urls.urljoin('/', '\r\n\t\x00\\\r\n\t/example.com'), '/example.com')
+
+    def test_absolute_url_raises(self):
+        to_fail = [
+            ('http://example.com/b#f1', 'http://example.com/c#f2'),
+            ('http://test.example.com', 'https://test2.example.com'),
+            ('https://test.example.com', 'http://test.example.com'),
+            ('https://example.com/p?example=test', 'https://example.com/q?example=example'),
+        ]
+        for base, extra in to_fail:
+            with self.subTest(base=base, extra=extra):
+                with self.assertRaises(ValueError):
+                    urls.urljoin(base, extra)
+
+    def test_dot_segments_not_allowed(self):
+        urls_with_dot = [
+            ('http://example.com/b/', 'c/./d'),
+            ('http://example.com/b/', 'c/../d'),
+            ('http://example.com/b/', 'c/d/%2E%2E/e'),
+            ('http://example.com/b/', 'c/%2E/d'),
+            ('http://example.com/b/', 'c%2F%2E./d'),
+            ('http://example.com/b/', 'c%2F%2E%2Fd'),
+            ('http://example.com/./b/', 'c/d'),
+            ('http://example.com/b/../', 'c/d'),
+            ('http://example.com/%2E/b/', 'c/d'),
+            ('http://example.com/b%2F%2E%2E/d', 'c/d'),
+        ]
+        for base, extra in urls_with_dot:
+            with self.subTest(base=base, extra=extra):
+                with self.assertRaises(ValueError):
+                    urls.urljoin(base, extra)
+
+    # Query Handling
+    def test_query_keeps_base_by_default(self):
+        self.assertEqual(urls.urljoin('http://example.com/b?q1=1', 'c?q2=2'), 'http://example.com/b/c?q2=2')
+        self.assertEqual(urls.urljoin('http://example.com/b', 'c?q2=2'), 'http://example.com/b/c?q2=2')
+        self.assertEqual(urls.urljoin('http://example.com/b?q1=1', 'c'), 'http://example.com/b/c')
+
+    def test_allow_query_override(self):
+        self.assertEqual(urls.urljoin('http://example.com/b', 'c?q2=2'), 'http://example.com/b/c?q2=2')
+        self.assertEqual(urls.urljoin('http://example.com/b?q1=1', 'c'), 'http://example.com/b/c')
+        self.assertEqual(urls.urljoin('http://example.com/b?q1=1', 'c?q2=2'), 'http://example.com/b/c?q2=2')
+        self.assertEqual(urls.urljoin('http://example.com/b#c?q1=2&q2=3', 'c?q1=1&q2=2'), 'http://example.com/b/c?q1=1&q2=2')
+
+    # Fragment Handling
+    def test_only_extra_fragments(self):
+        self.assertEqual(urls.urljoin('http://example.com/b#f1', 'c#f2'), 'http://example.com/b/c#f2')
+        self.assertEqual(urls.urljoin('http://example.com/b', 'c#f2'), 'http://example.com/b/c#f2')
+        self.assertEqual(urls.urljoin('http://example.com/b#f1', 'c'), 'http://example.com/b/c')
+
+    # Input Validation
+    def test_not_string_fails(self):
+        with self.assertRaises(AssertionError):
+            urls.urljoin(None, 'c')
+        with self.assertRaises(AssertionError):
+            urls.urljoin('http://a', 123)
+
+    # Edge Cases
+    def test_whitespaces(self):
+        self.assertEqual(urls.urljoin('http://example.com/b', ' \ta '), 'http://example.com/b/a ')
+        self.assertEqual(urls.urljoin('http://example.com/b', '\t \x0a\x0b\n\r\t a\t \t'), 'http://example.com/b/a ')
+        self.assertEqual(urls.urljoin('http://example.com/b', ' a \n\t'), 'http://example.com/b/a ')
+
+    def test_empty_base_string(self):
+        self.assertEqual(urls.urljoin('', 'example.com'), '/example.com')
+        self.assertEqual(urls.urljoin('', '/c?q=1#f'), '/c?q=1#f')
+
+    def test_percent_encoding(self):
+        self.assertEqual(
+            urls.urljoin('http://host/space%20here/', 'x%2Fy'),
+            'http://host/space%20here/x%2Fy',
+        )
+        self.assertEqual(
+            urls.urljoin('http://host/a/', '%2Fhidden'),
+            'http://host/a/%2Fhidden',
+        )
 
 
 class TestMiscToken(TransactionCase):
@@ -630,3 +618,99 @@ class TestMiscToken(TransactionCase):
         new_timestamp = new_timestamp.to_bytes(8, byteorder='little')
         token = base64.urlsafe_b64encode(token[:1] + new_timestamp + token[9:]).decode()
         self.assertIsNone(misc.verify_hash_signed(self.env, 'test', token))
+
+    def test_custom_secret(self):
+        payload = {'value': 123456, 'name': 'bob'}
+        token = misc.hash_sign(self.env, 'test', payload, expiration_hours=24, secret='very_secret')
+
+        self.assertEqual(misc.verify_hash_signed(self.env, 'test', token, secret='very_secret'), payload)
+        self.assertEqual(misc.verify_hash_signed(self.env, 'test', token, secret=b'very_secret'), payload)
+        self.assertIsNone(misc.verify_hash_signed(self.env, 'test', token, secret='other'))
+        self.assertIsNone(misc.verify_hash_signed(self.env, 'test', token))
+
+    def test_default_secret(self):
+        payload = ["str1", "str2", "str3", 4, 5]
+        db_secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
+
+        token_default = misc.hash_sign(self.env, 'test', payload, expiration_hours=24)
+        token_explicit = misc.hash_sign(self.env, 'test', payload, expiration_hours=24, secret=db_secret)
+
+        self.assertEqual(misc.verify_hash_signed(self.env, 'test', token_default), payload)
+        self.assertEqual(misc.verify_hash_signed(self.env, 'test', token_explicit), payload)
+        self.assertEqual(misc.verify_hash_signed(self.env, 'test', token_default, secret=db_secret), payload)
+
+
+class TestFormatAmountFunction(TransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_object_format_amount = cls.env["res.currency"].create({
+            "name": "format_amount Currency",
+            "symbol": "fA",
+            "rounding": 0.01,  # Makes 12.345 as 12.34
+            "position": "before",
+        })
+        # A language where decimal separator and thousands separator is same to check effectiveness of
+        # regular expression used in format_amount
+        cls.kiliki_language = cls.env["res.lang"].create({
+            "name": "Kili kili",
+            "code": "GFL",
+            "grouping": "[3,0]",
+            "decimal_point": "#",
+            "thousands_sep": "#",
+        })
+
+        cls.kiliki_language.install_lang()
+        cls.kiliki_language.active = True
+
+    def assert_format_amount(self, amount, expected, trailing_zeroes=True, lang_code=None):
+        result = misc.format_amount(
+            self.env,
+            amount,
+            self.currency_object_format_amount,
+            trailing_zeroes=trailing_zeroes,
+            lang_code=lang_code,
+        )
+        self.assertEqual(result, expected)
+
+    def test_trailing_true_on_number_having_no_trailing_zeroes(self):
+        # Has no effect on number not having trailing zeroes
+        self.assert_format_amount(1.234, "fA%s1.23" % "\N{NO-BREAK SPACE}")
+
+        # Has no effect on number not having trailing zeroes - currency position after
+        self.currency_object_format_amount.position = "after"
+        self.assert_format_amount(1.234, "1.23%sfA" % "\N{NO-BREAK SPACE}")
+
+    def test_trailing_false_on_number_having_no_trailing_zeroes(self):
+        # Has no effect on number not having trailing zeroes even if trailing zeroes set as False
+        self.assert_format_amount(1.234, "fA%s1.23" % "\N{NO-BREAK SPACE}")
+
+        # Has no effect on number not having trailing zeroes - currency position after
+        self.currency_object_format_amount.position = "after"
+        self.assert_format_amount(1.234, "1.23%sfA" % "\N{NO-BREAK SPACE}")
+
+    def test_trailing_zeroes_true_on_number_having_trailing_zeroes(self):
+        # Has no effect on number having trailing zeroes if trailing zeroes set as True (True by default)
+        self.assert_format_amount(1.0000, "fA%s1.00" % "\N{NO-BREAK SPACE}")
+
+        # Has no effect on number having trailing zeroes - currency position after
+        self.currency_object_format_amount.position = "after"
+        self.assert_format_amount(1.0000, "1.00%sfA" % "\N{NO-BREAK SPACE}")
+
+    def test_trailing_false_on_number_having_trailing_zeroes(self):
+        # Has effect (removes trailing zeroes) on number having trailing zeroes if trailing zeroes set as False
+        self.assert_format_amount(1.0000, "fA%s1" % "\N{NO-BREAK SPACE}", False)
+
+        # Has effect on number having trailing zeroes - currency position after
+        self.currency_object_format_amount.position = "after"
+        self.assert_format_amount(1.0000, "1%sfA" % "\N{NO-BREAK SPACE}", False)
+
+    def test_trailing_false_on_number_having_trailing_zeroes_with_kilikili_language(self):
+        # Here the amount is first will be given decimal separator and thousandth separator as
+        # follows 10#000#00 in which second # is decimal so, the RE targets the decimal separator
+        # at the last position.
+        self.assert_format_amount(10000, "fA%s10#000" % "\N{NO-BREAK SPACE}", False, "GFL")
+
+        # Has no effect on number having same decimal and thousandth seperator - currency position after
+        self.currency_object_format_amount.position = "after"
+        self.assert_format_amount(10000, "10#000%sfA" % "\N{NO-BREAK SPACE}", False, "GFL")

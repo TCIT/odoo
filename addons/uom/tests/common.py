@@ -1,27 +1,30 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests import TransactionCase
+from odoo.addons.base.tests.common import BaseCommon
 
 
-class UomCommon(TransactionCase):
+class UomCommon(BaseCommon):
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.uom_gram = cls.env.ref('uom.product_uom_gram')
-        cls.uom_kgm = cls.env.ref('uom.product_uom_kgm')
-        cls.uom_ton = cls.env.ref('uom.product_uom_ton')
-        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
-        cls.uom_dozen = cls.env.ref('uom.product_uom_dozen')
+        cls.uom_gram = cls.quick_ref('uom.product_uom_gram')
+        cls.uom_kgm = cls.quick_ref('uom.product_uom_kgm')
+        cls.uom_ton = cls.quick_ref('uom.product_uom_ton')
+        cls.uom_unit = cls.quick_ref('uom.product_uom_unit')
+        cls.uom_dozen = cls.quick_ref('uom.product_uom_dozen')
+        cls.uom_dozen.active = True
+        cls.uom_hour = cls.quick_ref('uom.product_uom_hour')
+        cls.uom_pack_6 = cls.quick_ref('uom.product_uom_pack_6')
 
-        cls.group_uom = cls.env.ref('uom.group_uom')
+        cls.group_uom = cls.quick_ref('uom.group_uom')
 
     @classmethod
     def _enable_uom(cls):
-        cls.env.user.groups_id += cls.group_uom
+        cls.env.user.group_ids += cls.group_uom
 
     @classmethod
     def _disable_uom(cls):
-        cls.env.user.groups_id -= cls.group_uom
+        cls.env.user.group_ids -= cls.group_uom

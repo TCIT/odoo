@@ -2,6 +2,7 @@ import { beforeEach, expect, test } from "@odoo/hoot";
 import { cookie } from "@web/core/browser/cookie";
 import { redirect } from "@web/core/utils/urls";
 import {
+    contains,
     defineModels,
     fields,
     getService,
@@ -14,6 +15,8 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { animationFrame } from "@odoo/hoot-dom";
 import { browser } from "@web/core/browser/browser";
+import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
+import { router } from "@web/core/browser/router";
 
 class Partner extends models.Model {
     _name = "res.partner";
@@ -25,11 +28,10 @@ class Partner extends models.Model {
         form: `
             <form>
                 <group>
-                    <field name="display_name"/>
+                    <field name="name"/>
                 </group>
             </form>
         `,
-        search: `<search></search>`,
     };
 }
 
@@ -80,6 +82,17 @@ test("open record withtout the correct company (doAction)", async () => {
         });
     });
 
+    const _pushState = router.pushState;
+    patchWithCleanup(router, {
+        pushState: (state, options) => {
+            expect(browser.location.href).toBe("https://www.hoot.test/");
+            const res = _pushState(state, options);
+            expect.step("pushState");
+            expect(browser.location.href).toBe("http://example.com/odoo/res.partner/1");
+            return res;
+        },
+    });
+
     await mountWebClient();
     getService("action").doAction({
         type: "ir.actions.act_window",
@@ -89,8 +102,69 @@ test("open record withtout the correct company (doAction)", async () => {
     });
     await animationFrame();
     expect(cookie.get("cids")).toBe("1-2");
-    expect.verifySteps(["reload"]);
+    expect.verifySteps(["pushState", "reload"]);
     expect(browser.location.href).toBe("http://example.com/odoo/res.partner/1", {
         message: "url should contain the information of the doAction",
     });
+});
+
+test("create/modify a record with a non-connected company", async () => {
+    cookie.set("cids", "1");
+    onRpc("web_save", ({ kwargs }) => {
+        expect.step(kwargs.context.allowed_company_ids);
+        if (
+            kwargs.context.allowed_company_ids.length === 1 &&
+            kwargs.context.allowed_company_ids[0] === 1
+        ) {
+            throw makeServerError({
+                type: "AccessError",
+                message: "Wrong Company",
+                context: { suggested_company: { id: 2, display_name: "Company 2" } },
+            });
+        }
+    });
+
+    await mountWebClient();
+    await getService("action").doAction({
+        type: "ir.actions.act_window",
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    await contains(`.o_field_widget[name=name] input`).edit("some foo value");
+    await contains(`.o_form_button_save`).click();
+    await animationFrame();
+    expect.verifySteps([[1], [1, 2]]);
+    expect(cookie.get("cids")).toBe("1-2");
+    expect(`.o_field_widget[name=name] input`).toHaveValue("some foo value");
+});
+
+test.tags("desktop");
+test("form view in dialog shows wrong company error", async () => {
+    expect.errors(1);
+    cookie.set("cids", "1");
+
+    onRpc("web_read", () => {
+        throw makeServerError({
+            type: "AccessError",
+            message: "Wrong Company",
+            context: { suggested_company: { id: 2, display_name: "Company 2" } },
+        });
+    });
+    onRpc("has_group", () => true);
+    Partner._views.list = /* xml */ `
+        <list>
+            <field name="display_name" />
+        </list>
+    `;
+
+    await mountWebClient();
+
+    getService("dialog").add(FormViewDialog, {
+        resModel: "res.partner",
+        resId: 1,
+    });
+    await animationFrame();
+    expect.verifyErrors(['Error: The following error occurred in onWillStart: "Wrong Company"']);
+    expect(cookie.get("cids")).toBe("1"); // cookies were not modified
+    expect.verifySteps([]); // don't reload
 });

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from ast import literal_eval
@@ -8,8 +7,8 @@ from werkzeug.exceptions import Forbidden
 
 from odoo import http
 from odoo.addons.website_event.controllers.main import WebsiteEventController
+from odoo.fields import Domain
 from odoo.http import request
-from odoo.osv import expression
 from odoo.tools import format_duration
 
 
@@ -21,7 +20,7 @@ class ExhibitorController(WebsiteEventController):
             ('exhibitor_type', 'in', ['exhibitor', 'online']),
         ]
         if not request.env.user.has_group('event.group_event_registration_desk'):
-            search_domain_base = expression.AND([search_domain_base, [('is_published', '=', True)]])
+            search_domain_base = Domain.AND([search_domain_base, [('is_published', '=', True)]])
         return search_domain_base
 
     # ------------------------------------------------------------
@@ -37,7 +36,7 @@ class ExhibitorController(WebsiteEventController):
     def event_exhibitors(self, event, **searches):
         return request.render(
             "website_event_exhibitor.event_exhibitors",
-            self._event_exhibitors_get_values(event, **searches)
+            self._event_exhibitors_get_values(event, **searches) | {'seo_object': event.exhibitor_menu_ids}
         )
 
     def _event_exhibitors_get_values(self, event, **searches):
@@ -50,7 +49,7 @@ class ExhibitorController(WebsiteEventController):
 
         # search on content
         if searches.get('search'):
-            search_domain = expression.AND([
+            search_domain = Domain.AND([
                 search_domain,
                 ['|', ('name', 'ilike', searches['search']), ('website_description', 'ilike', searches['search'])]
             ])
@@ -58,7 +57,7 @@ class ExhibitorController(WebsiteEventController):
         # search on countries
         search_countries = self._get_search_countries(searches['countries'])
         if search_countries:
-            search_domain = expression.AND([
+            search_domain = Domain.AND([
                 search_domain,
                 [('partner_id.country_id', 'in', search_countries.ids)]
             ])
@@ -66,7 +65,7 @@ class ExhibitorController(WebsiteEventController):
         # search on sponsor types
         search_sponsorships = self._get_search_sponsorships(searches['sponsorships'])
         if search_sponsorships:
-            search_domain = expression.AND([
+            search_domain = Domain.AND([
                 search_domain,
                 [('sponsor_type_id', 'in', search_sponsorships.ids)]
             ])
@@ -106,6 +105,7 @@ class ExhibitorController(WebsiteEventController):
             # event information
             'event': event,
             'main_object': event,
+            'slots': event.event_slot_ids._filter_open_slots().grouped('date'),
             'sponsor_categories': sponsor_categories,
             'hide_sponsors': True,
             # search information
@@ -132,9 +132,6 @@ class ExhibitorController(WebsiteEventController):
             raise Forbidden()
         sponsor = sponsor.sudo()
 
-        if 'widescreen' not in options and sponsor.chat_room_id and sponsor.is_in_opening_hours:
-            options['widescreen'] = True
-
         return request.render(
             "website_event_exhibitor.event_exhibitor_main",
             self._event_exhibitor_get_values(event, sponsor, **options)
@@ -143,7 +140,7 @@ class ExhibitorController(WebsiteEventController):
     def _event_exhibitor_get_values(self, event, sponsor, **options):
         # search for exhibitor list
         search_domain_base = self._get_event_sponsors_base_domain(event)
-        search_domain_base = expression.AND([
+        search_domain_base = Domain.AND([
             search_domain_base,
             [('id', '!=', sponsor.id)]
         ])
@@ -165,6 +162,7 @@ class ExhibitorController(WebsiteEventController):
             # event information
             'event': event,
             'main_object': sponsor,
+            'slots': event.event_slot_ids._filter_open_slots().grouped('date'),
             'sponsor': sponsor,
             'hide_sponsors': True,
             # sidebar
@@ -175,13 +173,14 @@ class ExhibitorController(WebsiteEventController):
             # environment
             'hostname': request.httprequest.host.split(':')[0],
             'is_event_user': request.env.user.has_group('event.group_event_registration_desk'),
+            'website_visitor_timezone': request.env['website.visitor']._get_visitor_timezone(),
         }
 
     # ------------------------------------------------------------
     # BUSINESS / MISC
     # ------------------------------------------------------------
 
-    @http.route('/event_sponsor/<int:sponsor_id>/read', type='json', auth='public', website=True)
+    @http.route('/event_sponsor/<int:sponsor_id>/read', type='jsonrpc', auth='public', website=True)
     def event_sponsor_read(self, sponsor_id):
         """ Marshmalling data for "event not started / sponsor not available" modal """
         sponsor = request.env['event.sponsor'].browse(sponsor_id)
@@ -207,8 +206,7 @@ class ExhibitorController(WebsiteEventController):
         sponsor_data['event_is_done'] = sponsor.event_id.is_done
         sponsor_data['event_start_today'] = sponsor.event_id.start_today
         sponsor_data['event_start_remaining'] = sponsor.event_id.start_remaining
-        sponsor_data['event_date_begin_located'] = sponsor.event_id.date_begin_located
-        sponsor_data['event_date_end_located'] = sponsor.event_id.date_end_located
+        sponsor_data['event_date_begin'] = sponsor.event_id.date_begin
         sponsor_data['hour_from_str'] = format_duration(sponsor_data['hour_from'])
         sponsor_data['hour_to_str'] = format_duration(sponsor_data['hour_to'])
 

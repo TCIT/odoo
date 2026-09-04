@@ -1,4 +1,5 @@
 from odoo import api, models
+from odoo.addons.account.models.partner import _ref_company_registry
 
 
 class ResPartner(models.Model):
@@ -11,8 +12,18 @@ class ResPartner(models.Model):
         super()._compute_company_registry()
         for partner in self.filtered(lambda p: p.country_id.code == 'DK' and p.vat):
             vat_country, vat_number = self._split_vat(partner.vat)
-            if vat_country.isnumeric():
-                vat_country = 'dk'
-                vat_number = partner.vat
-            if vat_country == 'dk' and self.simple_vat_check(vat_country, vat_number):
+            if vat_country in ('DK', '') and self._check_vat_number('DK', vat_number):
                 partner.company_registry = vat_number
+
+    @api.depends('country_id.code', 'ref_company_ids.account_fiscal_country_id.code')
+    def _compute_company_registry_placeholder(self):
+        super()._compute_company_registry_placeholder()
+        for partner in self:
+            country = partner.ref_company_ids[:1].account_fiscal_country_id or partner.country_id
+            if country.code == 'DK':
+                partner.company_registry_placeholder = _ref_company_registry.get('dk') or ''
+
+    def _get_company_registry_labels(self):
+        labels = super()._get_company_registry_labels()
+        labels['DK'] = 'CVR'
+        return labels

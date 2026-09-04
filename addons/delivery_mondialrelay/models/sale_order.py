@@ -5,7 +5,7 @@ from odoo import models, _
 from odoo.exceptions import UserError
 
 
-class SaleOrderMondialRelay(models.Model):
+class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     def action_confirm(self):

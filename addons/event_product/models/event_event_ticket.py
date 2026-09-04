@@ -2,7 +2,7 @@
 from odoo import api, models, fields
 
 
-class EventTicket(models.Model):
+class EventEventTicket(models.Model):
     _inherit = 'event.event.ticket'
     _order = "event_id, sequence, price, name, id"
 
@@ -11,14 +11,14 @@ class EventTicket(models.Model):
         compute_sudo=True)
     price_incl = fields.Float(
         string='Price include', compute='_compute_price_incl',
-        digits='Product Price', readonly=False, compute_sudo=True)
+        min_display_digits='Product Price', readonly=False, compute_sudo=True)
 
     @api.depends('product_id.active')
     def _compute_sale_available(self):
         inactive_product_tickets = self.filtered(lambda ticket: not ticket.product_id.active)
         for ticket in inactive_product_tickets:
             ticket.sale_available = False
-        super(EventTicket, self - inactive_product_tickets)._compute_sale_available()
+        super(EventEventTicket, self - inactive_product_tickets)._compute_sale_available()
 
     def _compute_price_reduce_taxinc(self):
         for event in self:

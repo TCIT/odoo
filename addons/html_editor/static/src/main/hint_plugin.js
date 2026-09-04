@@ -1,59 +1,80 @@
 import { Plugin } from "@html_editor/plugin";
-import { isEmptyBlock, isProtected } from "@html_editor/utils/dom_info";
+import { isEditorTab, isEmptyBlock, isProtected } from "@html_editor/utils/dom_info";
 import { removeClass } from "@html_editor/utils/dom";
-import { childNodes, selectElements } from "@html_editor/utils/dom_traversal";
+import { descendants, selectElements } from "@html_editor/utils/dom_traversal";
 import { closestBlock } from "../utils/blocks";
-import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
+import { debounce } from "@web/core/utils/timing";
 
-function isMutationRecordSavable(record) {
-    return !(record.type === "attributes" && record.attributeName === "placeholder");
-}
+/**
+ * @typedef {import("@html_editor/editor").EditorContext} EditorContext
+ * @typedef {import("@html_editor/core/selection_plugin").SelectionData} SelectionData
+ * @typedef {import("plugins").CSSSelector} CSSSelector
+ * @typedef {import("plugins").TranslatedString} TranslatedString
+ */
+
+/**
+ * @typedef {((
+ *   selectionData: SelectionData,
+ *   editable: EditorContext["editable"]
+ * ) => HTMLElement[] | NodeList)[]} hint_targets_providers
+ * @typedef {{ selector: CSSSelector; text: TranslatedString; }[]} hints
+ */
 
 export class HintPlugin extends Plugin {
     static id = "hint";
     static dependencies = ["history", "selection"];
+    /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
-        selectionchange_handlers: this.updateHints.bind(this),
+        selectionchange_handlers: this.triggerDebouncedUpdateHints.bind(this),
         external_history_step_handlers: () => {
             this.clearHints();
             this.updateHints();
         },
-        clean_handlers: this.clearHints.bind(this),
+        normalize_handlers: this.normalize.bind(this),
         clean_for_save_handlers: ({ root }) => this.clearHints(root),
         content_updated_handlers: this.updateHints.bind(this),
 
-        savable_mutation_record_predicates: isMutationRecordSavable,
+        hint_targets_providers: (selectionData, editable) => {
+            if (!selectionData.currentSelectionIsInEditable || !selectionData.documentSelection) {
+                return [];
+            }
+            const blockEl = closestBlock(selectionData.documentSelection.anchorNode);
+            if (this.dependencies.selection.isNodeEditable(blockEl)) {
+                return [blockEl];
+            } else {
+                return [];
+            }
+        },
         system_classes: ["o-we-hint"],
-        ...(this.config.placeholder && {
-            hints: [
-                {
-                    text: this.config.placeholder,
-                    target: (selectionData, editable) => {
-                        if (
-                            selectionData.documentSelectionIsInEditable ||
-                            childNodes(editable).length !== 1
-                        ) {
-                            return;
-                        }
-                        const el = editable.firstChild;
-                        if (isEmptyBlock(el) && el.matches(baseContainerGlobalSelector)) {
-                            return el;
-                        }
-                    },
-                },
-            ],
-        }),
+        system_attributes: ["o-we-hint-text"],
     };
 
     setup() {
-        this.hint = null;
         this.updateHints(this.editable);
+        const shouldDebounce = this.config.debounceHints !== false;
+        if (shouldDebounce) {
+            this.debouncedUpdateHints = debounce(this.updateHints.bind(this), 30);
+        } else {
+            this.debouncedUpdateHints = this.updateHints.bind(this);
+        }
     }
 
     destroy() {
         super.destroy();
         this.clearHints();
+    }
+
+    normalize() {
+        this.clearHints();
+        this.updateHints();
+    }
+
+    triggerDebouncedUpdateHints(selectionData = this.dependencies.selection.getSelectionData()) {
+        if (selectionData.documentSelectionIsInEditable) {
+            this.clearHints();
+        }
+        this.debouncedUpdateHints();
     }
 
     /**
@@ -62,26 +83,20 @@ export class HintPlugin extends Plugin {
     updateHints() {
         const selectionData = this.dependencies.selection.getSelectionData();
         const editableSelection = selectionData.editableSelection;
-        if (this.hint) {
-            const blockEl = closestBlock(editableSelection.anchorNode);
-            this.removeHint(this.hint);
-            this.removeHint(blockEl);
-        }
+        this.clearHints();
         if (editableSelection.isCollapsed) {
-            for (const hint of this.getResource("hints")) {
-                if (hint.selector) {
-                    const el = closestBlock(editableSelection.anchorNode);
-                    if (el && el.matches(hint.selector) && !isProtected(el) && isEmptyBlock(el)) {
-                        this.makeHint(el, hint.text);
-                        this.hint = el;
-                    }
-                } else {
-                    const target = hint.target(selectionData, this.editable);
-                    // Do not replace an existing empty block hint by a temp hint.
-                    if (target && !target.classList.contains("o-we-hint")) {
-                        this.makeHint(target, hint.text);
-                        this.hint = target;
-                        return;
+            const hints = this.getResource("hints");
+            for (const provideTargets of this.getResource("hint_targets_providers")) {
+                for (const target of provideTargets(selectionData, this.editable)) {
+                    const nodeHint = hints.find((h) => target.matches(h.selector))?.text;
+                    if (
+                        target &&
+                        nodeHint &&
+                        isEmptyBlock(target) &&
+                        !isProtected(target) &&
+                        !descendants(target).some(isEditorTab)
+                    ) {
+                        this.makeHint(target, nodeHint);
                     }
                 }
             }
@@ -89,16 +104,15 @@ export class HintPlugin extends Plugin {
     }
 
     makeHint(el, text) {
-        el.setAttribute("placeholder", text);
+        this.dispatchTo("make_hint_handlers", el);
+        el.setAttribute("o-we-hint-text", text);
         el.classList.add("o-we-hint");
     }
 
     removeHint(el) {
-        el.removeAttribute("placeholder");
+        el.removeAttribute("o-we-hint-text");
         removeClass(el, "o-we-hint");
-        if (this.hint === el) {
-            this.hint = null;
-        }
+        this.getResource("system_style_properties").forEach((n) => el.style.removeProperty(n));
     }
 
     clearHints(root = this.editable) {

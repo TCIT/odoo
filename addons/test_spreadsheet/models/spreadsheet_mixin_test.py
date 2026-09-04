@@ -1,7 +1,7 @@
 from odoo import models
 
 
-class SpreadsheetDummy(models.Model):
+class SpreadsheetTest(models.Model):
     """ A very simple model only inheriting from spreadsheet.mixin to test
     its model functioning."""
     _description = 'Dummy Spreadsheet'

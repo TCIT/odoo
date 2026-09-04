@@ -1,6 +1,6 @@
-/** @odoo-module **/
-
+import { AvatarCardEmployeePopover } from "@hr/components/avatar_card_employee/avatar_card_employee_popover";
 import { onWillStart } from "@odoo/owl";
+import { usePopover } from "@web/core/popover/popover_hook";
 import { user } from "@web/core/user";
 
 /**
@@ -20,6 +20,7 @@ export function EmployeeFieldRelationMixin(fieldClass) {
             onWillStart(async () => {
                 this.isHrUser = await user.hasGroup("hr.group_hr_user");
             });
+            this.avatarCard = usePopover(AvatarCardEmployeePopover, { closeOnClickAway: true });
         }
 
         get relation() {
@@ -27,6 +28,17 @@ export function EmployeeFieldRelationMixin(fieldClass) {
                 return this.props.relation;
             }
             return this.isHrUser ? "hr.employee" : "hr.employee.public";
+        }
+
+        getAvatarCardProps(record) {
+            const originalProps = super.getAvatarCardProps(record);
+            if (["hr.employee", "hr.employee.public"].includes(this.relation)) {
+                return {
+                    ...originalProps,
+                    recordModel: this.relation,
+                };
+            }
+            return originalProps;
         }
     };
 }

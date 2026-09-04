@@ -1,7 +1,5 @@
-/** @odoo-modules */
-
+import { stepUtils } from "@web_tour/tour_utils";
 import { registerWebsitePreviewTour } from '@website/js/tours/tour_utils';
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
 
 registerWebsitePreviewTour('website_sale_restricted_editor_ui', {
     url: `/shop`,
@@ -20,7 +18,7 @@ registerWebsitePreviewTour('website_sale_restricted_editor_ui', {
     },
     {
         // Wait for the possibility to edit to appear
-        trigger: ".o_menu_systray .o_edit_website_container a",
+        trigger: ".o_menu_systray button:contains('Edit')",
     },
     {
         content: "Ensure the publish and 'edit-in-backend' buttons are not shown",

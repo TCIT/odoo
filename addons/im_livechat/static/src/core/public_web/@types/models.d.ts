@@ -1,17 +1,24 @@
 declare module "models" {
     export interface DiscussApp {
-        defaultLivechatCategory: DiscussAppCategory,
-        livechats: Thread,
+        defaultLivechatCategory: DiscussAppCategory;
+        lastThread: Thread;
+        livechatLookingForHelpCategory: DiscussAppCategory;
+        livechats: Thread[];
     }
-    export interface Thread {
-        anonymous_country: Country,
-        anonymous_name: String,
-        appAsLivechats: DiscussApp,
-    }
-    export interface Store {
-        has_access_livechat: boolean,
+    export interface DiscussAppCategory {
+        livechat_channel_id: LivechatChannel;
     }
     export interface LivechatChannel {
-        threads: Thread[],
+        appCategory: DiscussAppCategory;
+        threads: Thread[];
+    }
+    export interface Thread {
+        appAsLivechats: DiscussApp;
+        country_id: Country;
+        livechat_channel_id: LivechatChannel;
+        livechat_expertise_ids: LivechatExpertise[];
+        livechat_status: "in_progress"|"waiting"|"need_help"|undefined;
+        matchesSelfExpertise: Readonly<boolean>;
+        shadowedBySelf: number;
     }
 }

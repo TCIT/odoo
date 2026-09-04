@@ -1,50 +1,49 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* spreadsheet_dashboard_website_sale
-# 
-# Translators:
-# Tiffany Chang, 2025
-# 
+# * spreadsheet_dashboard_website_sale
+#
+# Aliraza Habibitanha <alireza.habibitanha@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:49+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Tiffany Chang, 2025\n"
-"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-09 10:21+0000\n"
+"Last-Translator: Aliraza Habibitanha <alireza.habibitanha@gmail.com>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-19/"
+"spreadsheet_dashboard_website_sale/fa/>\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fa\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Abandoned Carts"
-msgstr "سبدهای رها شده"
+msgstr "سبدهای خرید رها شده"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Carts"
-msgstr "سبدها"
+msgstr "سبدهای خرید"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Categories"
-msgstr "دسته بندی ها"
+msgstr "دسته‌بندی‌ها"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 msgid "Category"
-msgstr "دسته بندی"
+msgstr "دسته‌بندی"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
@@ -57,7 +56,7 @@ msgstr "کشور"
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Current"
-msgstr "جاری"
+msgstr "فعلی"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
@@ -70,7 +69,7 @@ msgstr "مشتری"
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "KPI"
-msgstr "شاخص کلیدی عملکرد"
+msgstr ""
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
@@ -84,13 +83,13 @@ msgstr "فروش ماهانه"
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Orders"
-msgstr "سفارشات"
+msgstr "سفارش‌ها"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 msgid "Period"
-msgstr "دوره"
+msgstr "بازه زمانی"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
@@ -107,7 +106,6 @@ msgstr "محصول"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Products"
 msgstr "محصولات"
@@ -121,10 +119,9 @@ msgstr "درآمد"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Top Categories"
-msgstr "دسته‌بندی‌های برتر"
+msgstr "برترین دسته‌بندی‌ها"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
@@ -138,20 +135,19 @@ msgstr "برترین محصولات"
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Total Revenue"
-msgstr "مجموع درآمد"
+msgstr "کل درآمد"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
-#: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "Units"
-msgstr "عدد"
+msgstr "واحد"
 
 #. module: spreadsheet_dashboard_website_sale
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 msgid "Website"
-msgstr "تارنما"
+msgstr "وب سایت"
 
 #. module: spreadsheet_dashboard_website_sale
 #: model:spreadsheet.dashboard,name:spreadsheet_dashboard_website_sale.spreadsheet_dashboard_ecommerce
@@ -163,4 +159,4 @@ msgstr "تجارت الکترونیکی"
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_website_sale/data/files/ecommerce_sample_dashboard.json:0
 msgid "since last period"
-msgstr "از آخرین دوره"
+msgstr "نسبت به دوره قبل"

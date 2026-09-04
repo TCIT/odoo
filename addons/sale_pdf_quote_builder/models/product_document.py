@@ -2,8 +2,9 @@
 
 import base64
 
-from odoo import Command, _, api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.fields import Command
 
 from odoo.addons.sale_pdf_quote_builder import utils
 
@@ -43,7 +44,8 @@ class ProductDocument(models.Model):
                 ))
             if doc.datas and not doc.mimetype.endswith('pdf'):
                 raise ValidationError(_("Only PDF documents can be attached inside a quote."))
-            utils._ensure_document_not_encrypted(base64.b64decode(doc.datas))
+            if doc.datas:
+                utils._ensure_document_not_encrypted(base64.b64decode(doc.datas))
 
     # === COMPUTE METHODS === #
 
@@ -52,7 +54,7 @@ class ProductDocument(models.Model):
         # Empty the linked form fields as we want all and only those from the current datas
         self.form_field_ids = [Command.clear()]
         document_to_parse = self.filtered(
-            lambda doc: doc.attached_on_sale == 'inside' and doc.datas
+            lambda doc: doc.attached_on_sale == 'inside' and doc.datas and doc.mimetype and doc.mimetype.endswith('pdf')
         )
         if document_to_parse:
             doc_type = 'product_document'

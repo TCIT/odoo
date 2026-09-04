@@ -1,15 +1,13 @@
-/* @odoo-module */
-
-
-import { Component, useState } from "@odoo/owl";
+import { Component, onWillStart, useState } from "@odoo/owl";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { deserializeDateTime } from "@web/core/l10n/dates";
-import { rpc } from "@web/core/network/rpc";
+import { rpc, ConnectionLostError } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { isIosApp } from "@web/core/browser/feature_detection";
+import { _t } from "@web/core/l10n/translation";
 const { DateTime } = luxon;
 
 export class ActivityMenu extends Component {
@@ -18,7 +16,10 @@ export class ActivityMenu extends Component {
     static template = "hr_attendance.attendance_menu";
 
     setup() {
-        this.ui = useState(useService("ui"));
+        this.ui = useService("ui");
+        this.lazySession = useService("lazy_session");
+        this.notification = useService("notification");
+        this.dialogService = useService("dialog");
         this.employee = false;
         this.state = useState({
             checkedIn: false,
@@ -26,14 +27,23 @@ export class ActivityMenu extends Component {
         });
         this.date_formatter = registry.category("formatters").get("float_time")
         this.dropdown = useDropdownState();
-        // load data but do not wait for it to render to prevent from delaying
-        // the whole webclient
-        this.searchReadEmployee();
+        onWillStart(()=> {
+            // access lazy session but do no wait for it, to prevent from delaying the whole webclient
+            this.lazySession.getValue("attendance_user_data", (employee) => {
+                if (employee) {
+                    this.employee = employee;
+                    this._searchReadEmployeeFill();
+                }
+            });
+        });
     }
 
     async searchReadEmployee(){
-        const result = await rpc("/hr_attendance/attendance_user_data");
-        this.employee = result;
+        this.employee = await rpc("/hr_attendance/attendance_user_data");
+        this._searchReadEmployeeFill();
+    }
+
+    _searchReadEmployeeFill() {
         if (this.employee.id) {
             this.hoursToday = this.date_formatter(
                 this.employee.hours_today
@@ -53,28 +63,65 @@ export class ActivityMenu extends Component {
         }
     }
 
+    async checking(latitude = false, longitude = false) {
+        try {
+            this.employee = await rpc("/hr_attendance/systray_check_in_out", {
+                latitude,
+                longitude
+            })
+            this._searchReadEmployeeFill();
+        } catch (error) {
+            if(error instanceof ConnectionLostError) {
+                this.notification.add(
+                    _t("Connection lost. Check in/out could not be recorded."), 
+                    { 
+                        title: _t("Attendance Error"),
+                        type: "danger",
+                        sticky: false,
+                    }
+                );
+            }else{
+                throw error;
+            }
+        } finally {
+            this._attendanceInProgress = false;
+        }
+    };
+
+    confirmChecking() {
+        this.dialogService.add(ConfirmationDialog, {
+            body: _t("Unable to get a valid location. Do you want to proceed with your check-in/out anyway?"),
+            confirmLabel: _t("Proceed Anyway"),
+            confirm: async () => await this.checking(),
+            cancel: () => { this._attendanceInProgress = false; },
+        });
+    }
+
     async signInOut() {
         this.dropdown.close();
-        if (!isIosApp()) { // iOS app lacks permissions to call `getCurrentPosition`
+        if (this._attendanceInProgress) {
+            return;
+        }
+        this._attendanceInProgress = true;
+
+        const trackingEnabled = this.employee && this.employee.device_tracking_enabled;
+        if (trackingEnabled && navigator.geolocation && navigator.onLine) {
             navigator.geolocation.getCurrentPosition(
                 async ({coords: {latitude, longitude}}) => {
-                    await rpc("/hr_attendance/systray_check_in_out", {
-                        latitude,
-                        longitude
-                    })
-                    await this.searchReadEmployee()
+                    await this.checking(latitude,longitude);
                 },
-                async err => {
-                    await rpc("/hr_attendance/systray_check_in_out")
-                    await this.searchReadEmployee()
+                () => {
+                    this.confirmChecking();
                 },
                 {
                     enableHighAccuracy: true,
+                    timeout: 10000,
                 }
-            )
+            );
+        } else if (trackingEnabled) {
+            this.confirmChecking();
         } else {
-            await rpc("/hr_attendance/systray_check_in_out")
-            await this.searchReadEmployee()
+            await this.checking();
         }
     }
 }

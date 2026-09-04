@@ -1,4 +1,4 @@
-import { Activity } from "@mail/core/web/activity_model";
+import { Activity } from "@mail/core/common/activity_model";
 import { assignIn } from "@mail/utils/common/misc";
 import { patch } from "@web/core/utils/patch";
 
@@ -10,7 +10,8 @@ patch(Activity, {
     },
 });
 
-patch(Activity.prototype, {
+/** @type {import("models").Activity} */
+const activityPatch = {
     async rescheduleMeeting() {
         const action = await this.store.env.services.orm.call(
             "mail.activity",
@@ -19,4 +20,5 @@ patch(Activity.prototype, {
         );
         this.store.env.services.action.doAction(action);
     },
-});
+};
+patch(Activity.prototype, activityPatch);

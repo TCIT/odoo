@@ -17,14 +17,10 @@ class TestMailTemplateCommon(MailCommon, TestRecipients):
 
     @classmethod
     def setUpClass(cls):
-        super(TestMailTemplateCommon, cls).setUpClass()
+        super().setUpClass()
         cls.test_record = cls.env['mail.test.lang'].with_context(cls._test_context).create({
             'email_from': 'ignasse@example.com',
             'name': 'Test',
-        })
-
-        cls.user_employee.write({
-            'groups_id': [(4, cls.env.ref('base.group_partner_manager').id)],
         })
 
         cls._attachments = [{
@@ -52,6 +48,7 @@ class TestMailTemplateCommon(MailCommon, TestRecipients):
             'email_cc': '%s' % cls.email_3,
             'partner_to': '%s,%s' % (cls.partner_2.id, cls.user_admin.partner_id.id),
             'subject': 'EnglishSubject for {{ object.name }}',
+            'use_default_to': False,
         })
 
         # activate translations
@@ -64,6 +61,17 @@ class TestMailTemplateCommon(MailCommon, TestRecipients):
         cls.user_admin.write({'notification_type': 'email'})
         # Force the attachments of the template to be in the natural order.
         cls.test_template.invalidate_recordset(['attachment_ids'])
+
+        # dynamic reports
+        cls.test_report = cls.env['ir.actions.report'].create([
+            {
+                'name': 'Test Report 3 with variable data on Mail Test Ticket',
+                'model': 'mail.test.ticket.mc',
+                'print_report_name': "'TestReport3 for %s' % object.name",
+                'report_type': 'qweb-pdf',
+                'report_name': 'test_mail.mail_test_ticket_test_variable_template',
+            },
+        ])
 
 
 @tagged('mail_template')
@@ -80,17 +88,18 @@ class TestMailTemplate(TestMailTemplateCommon):
         self.assertEqual(action.name, 'Send Mail (%s)' % self.test_template.name)
         self.assertEqual(action.binding_model_id.model, 'mail.test.lang')
 
-    def test_template_copy(self):
-        """ Test copying template, notably for attachments management """
-        template = self.test_template
-        self.assertEqual(template.attachment_ids.mapped("res_id"), [template.id] * 2)
-        copy = template.copy()
-        self.assertEqual(template.attachment_ids, copy.attachment_ids)
-        self.assertEqual(
-            template.attachment_ids.mapped("res_id"), [copy.id] * 2,
-            "Updated res_id, seems strange"
-        )
-        self.assertEqual(copy.attachment_ids.mapped("res_id"), [copy.id] * 2)
+    def test_template_fields(self):
+        """ Test computed fields """
+        # has_dynamic_reports: based on ir.actions.report
+        test_template_lang = self.test_template.with_user(self.user_employee)
+        self.assertFalse(test_template_lang.has_dynamic_reports)
+        test_template_ticket_mc = self.env['mail.template'].with_user(self.user_employee).create({
+            'model_id': self.env['ir.model']._get_id('mail.test.ticket.mc'),
+        })
+        self.assertTrue(test_template_ticket_mc.has_dynamic_reports)
+        # has_mail_server: based on ir.mail_server available
+        self.assertTrue(test_template_lang.has_mail_server)
+        self.assertTrue(test_template_ticket_mc.has_mail_server)
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     @users('employee')
@@ -198,6 +207,8 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
         super().setUp()
         # warm up group access cache: 5 queries + 1 query per user
         self.user_employee.has_group('base.group_user')
+        # we don't use mock_mail_gateway thus want to mock smtp to test the stack
+        self._mock_smtplib_connection()
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     @warmup
@@ -247,10 +258,10 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
         self.assertEqual(len(mails_sudo), 100)
         for idx, (mail, record) in enumerate(zip(mails_sudo, self.test_records_batch)):
             self.assertEqual(sorted(mail.attachment_ids.mapped('name')), ['first.txt', 'second.txt'])
-            self.assertEqual(mail.attachment_ids.mapped("res_id"), [self.test_template_wreports.id] * 2)
+            self.assertEqual(mail.attachment_ids.mapped("res_id"), [template.id] * 2)
             self.assertEqual(mail.attachment_ids.mapped("res_model"), [template._name] * 2)
-            self.assertEqual(mail.email_cc, self.test_template.email_cc)
-            self.assertEqual(mail.email_to, self.test_template.email_to)
+            self.assertEqual(mail.email_cc, template.email_cc)
+            self.assertEqual(mail.email_to, template.email_to)
             self.assertEqual(mail.recipient_ids, self.partner_2 | self.user_admin.partner_id)
             if idx >= 50:
                 self.assertEqual(mail.subject, f'EnglishSubject for {record.name}')
@@ -263,7 +274,8 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
         """ Test 'send_email' on template on a given record, used notably as
         contextual action, with dynamic reports involved """
         self.env.invalidate_all()
-        with self.with_user(self.user_employee.login), self.assertQueryCount(23):
+        # tm: 22, nightly: +1
+        with self.with_user(self.user_employee.login), self.assertQueryCount(21):
             mail_id = self.test_template_wreports.with_env(self.env).send_mail(self.test_record.id)
             mail = self.env['mail.mail'].sudo().browse(mail_id)
 
@@ -279,7 +291,8 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
     def test_template_send_email_wreport_batch(self):
         """ Test 'send_email' on template in batch with dynamic reports """
         self.env.invalidate_all()
-        with self.with_user(self.user_employee.login), self.assertQueryCount(234):
+        # tm: 233, nightly: +1
+        with self.with_user(self.user_employee.login), self.assertQueryCount(232):
             template = self.test_template_wreports.with_env(self.env)
             mails_sudo = template.send_mail_batch(self.test_records_batch.ids)
 

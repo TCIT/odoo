@@ -14,6 +14,9 @@ import struct
 import warnings
 from contextlib import suppress
 
+from OpenSSL import crypto as ssl_crypto
+import OpenSSL._util as ssl_util
+
 _logger = logging.getLogger(__name__)
 
 
@@ -43,27 +46,13 @@ def bit_array_to_byte(val):
         value += val[i] << max_idx - i
     return value
 
+
 # --------------------------------------------------------------------------------
 # OPENSSL
 # --------------------------------------------------------------------------------
-
-
-try:
-    from OpenSSL import crypto as ssl_crypto
-    import OpenSSL._util as ssl_util
-except ImportError:
-    ssl_crypto = None
-    _logger.warning("Cannot import library 'OpenSSL' for PKCS#7 envelope extraction.")
-
-
 def remove_signature_openssl(content):
     """ Remove the PKCS#7 envelope from given content, making a '.xml.p7m' file content readable as it was '.xml'.
         As OpenSSL may not be installed, in that case a warning is issued and None is returned. """
-
-    # Prevent using the library if it had import errors
-    if not ssl_crypto:
-        _logger.warning("Error reading the content, check if the OpenSSL library is installed for for PKCS#7 envelope extraction.")
-        return None
 
     # Load some tools from the library
     null = ssl_util.ffi.NULL
@@ -347,7 +336,7 @@ class Reader:
         # Each byte we read is less significant, so we increase the significance of the
         # value we already read and increment by the current byte
         node_len = 0
-        for dummy in range(1, bytes_read + 1):
+        for _dummy in range(1, bytes_read + 1):
             current_byte, offset = self.consume('B', stream, offset)
             node_len = (node_len << 8) + current_byte
 

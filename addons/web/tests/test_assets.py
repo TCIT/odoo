@@ -149,6 +149,7 @@ class TestWebAssetsCursors(HttpCase):
         """
         cursors = []
         original_cursor = self.env.registry.cursor
+
         def cursor(readonly=False):
             cursor = original_cursor(readonly=readonly)
             cursors.append(('ro' if cursor.readonly else 'rw', '(ro_requested)' if readonly else '(rw_requested)'))
@@ -158,9 +159,7 @@ class TestWebAssetsCursors(HttpCase):
             response = self.url_open(f'/web/assets/{self.bundle_version}/{self.bundle_name}.min.css', allow_redirects=False)
             self.assertEqual(response.status_code, 200)
 
-        # remove the check_signaling cursor
-        self.assertEqual(cursors[0][1], '(rw_requested)', "the first cursor used for match and check signaling should be rw")
-        return cursors[1:]
+        return cursors
 
     def test_web_binary_keep_cursor_ro(self):
         """
@@ -184,7 +183,7 @@ class TestWebAssetsCursors(HttpCase):
         )
 
     def test_web_binary_keep_cursor_rw(self):
-        self.env.registry.test_readonly_enabled = False
+        self.set_registry_readonly_mode(False)
         self.assertEqual(
             self._get_generate_cursors_readwriteness(),
             [
@@ -192,3 +191,31 @@ class TestWebAssetsCursors(HttpCase):
             ],
             'Only one readwrite cursor should be used to generate assets without replica',
         )
+
+    def test_web_binary_streams_generated_asset_from_rw_cursor(self):
+        """
+        When a readonly asset request has to generate a fresh bundle, the response should
+        not reread that freshly created attachment from the readonly cursor.
+        """
+        generated_attachment_ids = set()
+        original_save_attachment = odoo.addons.base.models.assetsbundle.AssetsBundle.save_attachment
+        original_get_stream_from = odoo.addons.base.models.ir_binary.IrBinary._get_stream_from
+
+        def save_attachment(bundle, extension, content):
+            attachment = original_save_attachment(bundle, extension, content)
+            generated_attachment_ids.update(attachment.ids)
+            return attachment
+
+        def get_stream_from(binary, record, *args, **kwargs):
+            if (
+                binary.env.cr.readonly
+                and record._name == 'ir.attachment'
+                and record.id in generated_attachment_ids
+            ):
+                raise AssertionError("Freshly generated assets should not be streamed from a readonly cursor")
+            return original_get_stream_from(binary, record, *args, **kwargs)
+
+        with patch('odoo.addons.base.models.assetsbundle.AssetsBundle.save_attachment', autospec=True, side_effect=save_attachment):
+            with patch('odoo.addons.base.models.ir_binary.IrBinary._get_stream_from', autospec=True, side_effect=get_stream_from):
+                response = self.url_open(f'/web/assets/{self.bundle_version}/{self.bundle_name}.min.css', allow_redirects=False)
+                self.assertEqual(response.status_code, 200)

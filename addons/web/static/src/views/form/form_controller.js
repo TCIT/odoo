@@ -1,9 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { hasTouch } from "@web/core/browser/feature_detection";
-import {
-    deleteConfirmationMessage,
-    ConfirmationDialog,
-} from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
 import { useDebugCategory } from "@web/core/debug/debug_context";
 import { registry } from "@web/core/registry";
@@ -24,6 +21,7 @@ import { Field } from "@web/views/fields/field";
 import { useModel } from "@web/model/model";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
 import { useViewCompiler } from "@web/views/view_compiler";
+import { useDeleteRecords } from "@web/views/view_hook";
 import { Widget } from "@web/views/widgets/widget";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
 
@@ -31,7 +29,6 @@ import { ButtonBox } from "./button_box/button_box";
 import { FormCompiler } from "./form_compiler";
 import { FormErrorDialog } from "./form_error_dialog/form_error_dialog";
 import { FormStatusIndicator } from "./form_status_indicator/form_status_indicator";
-import { StatusBarDropdownItems } from "./status_bar_dropdown_items/status_bar_dropdown_items";
 import { FormCogMenu } from "./form_cog_menu/form_cog_menu";
 
 import {
@@ -45,6 +42,7 @@ import {
     useEffect,
     useRef,
     useState,
+    useSubEnv,
 } from "@odoo/owl";
 import { FetchRecordError } from "@web/model/relational_model/errors";
 import { effect } from "@web/core/utils/reactive";
@@ -133,17 +131,13 @@ export class FormController extends Component {
         ViewButton,
         Field,
         CogMenu: FormCogMenu,
-        StatusBarDropdownItems,
         Widget,
     };
 
     static props = {
         ...standardViewProps,
         discardRecord: { type: Function, optional: true },
-        mode: {
-            optional: true,
-            validate: (m) => ["edit", "readonly"].includes(m),
-        },
+        readonly: { type: Boolean, optional: true },
         saveRecord: { type: Function, optional: true },
         removeRecord: { type: Function, optional: true },
         Model: Function,
@@ -164,11 +158,11 @@ export class FormController extends Component {
 
     setup() {
         this.evaluateBooleanExpr = evaluateBooleanExpr;
+        this.actionService = useService("action");
         this.dialogService = useService("dialog");
         this.orm = useService("orm");
         this.viewService = useService("view");
         this.ui = useService("ui");
-        this.companyService = useService("company");
         useBus(this.ui.bus, "resize", this.render);
 
         this.archInfo = this.props.archInfo;
@@ -183,9 +177,16 @@ export class FormController extends Component {
         }
 
         this.formInDialog = 0;
-
         useBus(this.env.bus, "FORM-CONTROLLER:FORM-IN-DIALOG:ADD", () => this.formInDialog++);
         useBus(this.env.bus, "FORM-CONTROLLER:FORM-IN-DIALOG:REMOVE", () => this.formInDialog--);
+
+        // Wait to be mounted before displaying dialog/notification for onchange warnings returned
+        // by the first onchange, for 2 reasons:
+        //  1) we don't want to show twice the warning if the component is destroyed before being
+        //     mounted and re-created
+        //  2) for form views in dialogs, this causes an infinite loop if willStart calls dialog.add
+        const mountedProm = new Promise((r) => onMounted(r));
+        this.onWillDisplayOnchangeWarning = () => mountedProm;
 
         const beforeFirstLoad = async () => {
             await loadSubViews(
@@ -209,7 +210,7 @@ export class FormController extends Component {
             this.model.config.fields = fields;
         };
         this.model = useState(useModel(this.props.Model, this.modelParams, { beforeFirstLoad }));
-
+        useSubEnv({ model: this.model });
         onMounted(() => {
             effect(
                 (model) => {
@@ -223,11 +224,15 @@ export class FormController extends Component {
 
         onError((error) => {
             const suggestedCompany = error.cause?.data?.context?.suggested_company;
-            if (error.cause?.data?.name === "odoo.exceptions.AccessError" && suggestedCompany) {
+            if (
+                error.cause?.data?.name === "odoo.exceptions.AccessError" &&
+                suggestedCompany &&
+                !this.env.inDialog
+            ) {
                 this.env.pushStateBeforeReload();
-                const activeCompanyIds = this.companyService.activeCompanyIds;
+                const activeCompanyIds = user.activeCompanies.map((c) => c.id);
                 activeCompanyIds.push(suggestedCompany.id);
-                this.companyService.setCompanies(activeCompanyIds, true);
+                user.activateCompanies(activeCompanyIds);
             } else {
                 throw error;
             }
@@ -256,16 +261,6 @@ export class FormController extends Component {
             this.buttonBoxTemplate = buttonBoxTemplates.ButtonBox;
         }
 
-        const xmlDocHeader = this.archInfo.xmlDoc.querySelector("header");
-        if (xmlDocHeader) {
-            const { StatusBarDropdownItems } = useViewCompiler(
-                this.props.Compiler || FormCompiler,
-                { StatusBarDropdownItems: xmlDocHeader },
-                { isSubView: true, asDropdownItems: true }
-            );
-            this.statusBarDropdownItemsTemplate = StatusBarDropdownItems;
-        }
-
         this.rootRef = useRef("root");
         useViewButtons(this.rootRef, {
             beforeExecuteAction: this.beforeExecuteActionButton.bind(this),
@@ -284,15 +279,13 @@ export class FormController extends Component {
         useSetupAction({
             rootRef: this.rootRef,
             beforeVisibilityChange: () => this.beforeVisibilityChange(),
-            beforeLeave: () => this.beforeLeave(),
+            beforeLeave: (options) => this.beforeLeave(options),
             beforeUnload: (ev) => this.beforeUnload(ev),
-            getLocalState: () => {
-                return {
-                    activeNotebookPages: !this.model.root.isNew ? activeNotebookPages : {},
-                    modelState: this.model.exportState(),
-                    resId: this.model.root.resId,
-                };
-            },
+            getLocalState: () => ({
+                activeNotebookPages: !this.model.root.isNew ? activeNotebookPages : {},
+                modelState: this.model.exportState(),
+                resId: this.model.root.resId,
+            }),
         });
         useDebugCategory("form", { component: this });
 
@@ -337,27 +330,29 @@ export class FormController extends Component {
         if (this.env.inDialog) {
             useFormViewInDialog();
         }
+
+        this.deleteRecordsWithConfirmation = useDeleteRecords(this.model);
     }
 
     get cogMenuProps() {
         return {
             getActiveIds: () => (this.model.root.isNew ? [] : [this.model.root.resId]),
-            context: this.props.context,
+            context: this.model.root.context,
             items: this.props.info.actionMenus ? this.actionMenuItems : {},
             isDomainSelected: this.model.root.isDomainSelected,
             resModel: this.model.root.resModel,
             domain: this.props.domain,
-            onActionExecuted: () =>
-                this.model.load({ resId: this.model.root.resId, resIds: this.model.root.resIds }),
+            onActionExecuted: ({ noReload } = {}) => {
+                if (!noReload) {
+                    const { resId, resIds } = this.model.root;
+                    return this.model.load({ resId: resId, resIds: resIds });
+                }
+            },
             shouldExecuteAction: this.shouldExecuteAction.bind(this),
         };
     }
 
     get modelParams() {
-        let mode = this.props.mode || "edit";
-        if (!this.canEdit && this.props.resId) {
-            mode = "readonly";
-        }
         return {
             config: {
                 resModel: this.props.resModel,
@@ -366,7 +361,7 @@ export class FormController extends Component {
                 fields: this.props.fields,
                 activeFields: {}, // will be generated after loading sub views (see willStart)
                 isMonoRecord: true,
-                mode,
+                mode: this.props.readonly ? "readonly" : "edit",
                 context: this.props.context,
             },
             state: this.props.state?.modelState,
@@ -374,6 +369,7 @@ export class FormController extends Component {
                 onWillLoadRoot: this.onWillLoadRoot.bind(this),
                 onWillSaveRecord: this.onWillSaveRecord.bind(this),
                 onRecordSaved: this.onRecordSaved.bind(this),
+                onWillDisplayOnchangeWarning: this.onWillDisplayOnchangeWarning.bind(this),
             },
             useSendBeaconToSaveUrgently: true,
         };
@@ -420,22 +416,54 @@ export class FormController extends Component {
      */
     async onWillSaveRecord() {}
 
-    async onSaveError(error, { discard }) {
-        const proceed = await new Promise((resolve) => {
-            this.model.dialog.add(FormErrorDialog, {
-                message: error.data.message,
-                onDiscard: () => {
-                    discard();
-                    resolve(true);
-                },
-                onStayHere: () => resolve(false),
+    async onSaveError(error, { discard, retry }, leaving) {
+        const suggestedCompany = error.data?.context?.suggested_company;
+        const activeCompanyIds = user.activeCompanies.map((c) => c.id);
+        if (
+            error.data?.name === "odoo.exceptions.AccessError" &&
+            suggestedCompany &&
+            !activeCompanyIds.includes(suggestedCompany.id)
+        ) {
+            // update the context with the needed company
+            this.model.config.context.allowed_company_ids.push(suggestedCompany.id);
+            // activate the company without reloading !
+            activeCompanyIds.push(suggestedCompany.id);
+            user.activateCompanies(activeCompanyIds, { reload: false });
+            return retry();
+        }
+        if (leaving) {
+            const proceed = await new Promise((resolve) => {
+                this.model.dialog.add(FormErrorDialog, {
+                    message: error.data.message,
+                    data: error.data,
+                    onDiscard: () => {
+                        discard();
+                        resolve(true);
+                    },
+                    onRedirect: async ({ action, additionalContext }) => {
+                        try {
+                            await this.actionService.doAction(action, {
+                                additionalContext,
+                                forceLeave: true,
+                            });
+                        } finally {
+                            resolve(false);
+                        }
+                    },
+                    onStayHere: () => resolve(false),
+                });
             });
-        });
-        return proceed;
+            return proceed;
+        }
+        throw error;
     }
 
     displayName() {
-        return this.model.root.data.display_name || (this.model.root.isNew && _t("New")) || "";
+        return (
+            this.model.root.data.display_name?.split("\n")[0] ||
+            (this.model.root.isNew && _t("New")) ||
+            ""
+        );
     }
 
     async onPagerUpdate({ offset, resIds }) {
@@ -443,7 +471,7 @@ export class FormController extends Component {
         try {
             if (dirty) {
                 await this.model.root.save({
-                    onError: this.onSaveError.bind(this),
+                    onError: (error, options) => this.onSaveError(error, options, true),
                     nextId: resIds[offset],
                 });
             } else {
@@ -465,11 +493,11 @@ export class FormController extends Component {
         }
     }
 
-    async beforeLeave() {
-        if (this.model.root.dirty) {
+    async beforeLeave({ forceLeave } = {}) {
+        if (this.model.root.dirty && !forceLeave) {
             return this.save({
                 reload: false,
-                onError: this.onSaveError.bind(this),
+                onError: (error, options) => this.onSaveError(error, options, true),
             });
         }
     }
@@ -485,21 +513,12 @@ export class FormController extends Component {
     getStaticActionMenuItems() {
         const { activeActions } = this.archInfo;
         return {
-            archive: {
-                isAvailable: () => this.archiveEnabled && this.model.root.isActive,
+            addPropertyFieldValue: {
+                isAvailable: () => activeActions.addPropertyFieldValue,
                 sequence: 10,
-                description: _t("Archive"),
-                icon: "oi oi-archive",
-                callback: () => {
-                    this.dialogService.add(ConfirmationDialog, this.archiveDialogProps);
-                },
-            },
-            unarchive: {
-                isAvailable: () => this.archiveEnabled && !this.model.root.isActive,
-                sequence: 20,
-                icon: "oi oi-unarchive",
-                description: _t("Unarchive"),
-                callback: () => this.model.root.unarchive(),
+                icon: "fa fa-cogs",
+                description: _t("Edit Properties"),
+                callback: () => this.model.bus.trigger("PROPERTY_FIELD:EDIT"),
             },
             duplicate: {
                 isAvailable: () => activeActions.create && activeActions.duplicate,
@@ -508,20 +527,30 @@ export class FormController extends Component {
                 description: _t("Duplicate"),
                 callback: () => this.duplicateRecord(),
             },
+            archive: {
+                isAvailable: () => this.archiveEnabled && this.model.root.isActive,
+                sequence: 40,
+                description: _t("Archive"),
+                icon: "oi oi-archive",
+                callback: () => {
+                    this.dialogService.add(ConfirmationDialog, this.archiveDialogProps);
+                },
+            },
+            unarchive: {
+                isAvailable: () => this.archiveEnabled && !this.model.root.isActive,
+                sequence: 45,
+                icon: "oi oi-unarchive",
+                description: _t("Unarchive"),
+                callback: () => this.model.root.unarchive(),
+            },
             delete: {
                 isAvailable: () => activeActions.delete && !this.model.root.isNew,
-                sequence: 40,
+                sequence: 50,
                 icon: "fa fa-trash-o",
                 description: _t("Delete"),
+                class: "text-danger",
                 callback: () => this.deleteRecord(),
                 skipSave: true,
-            },
-            addPropertyFieldValue: {
-                isAvailable: () => activeActions.addPropertyFieldValue,
-                sequence: 50,
-                icon: "fa fa-cogs",
-                description: _t("Add Properties"),
-                callback: () => this.model.bus.trigger("PROPERTY_FIELD:ADD_PROPERTY_VALUE"),
             },
         };
     }
@@ -566,9 +595,9 @@ export class FormController extends Component {
         if ((dirty || this.model.root.isNew) && !item.skipSave) {
             let hasError = false;
             const isSaved = await this.model.root.save({
-                onError: (...args) => {
+                onError: (error, options) => {
                     hasError = true;
-                    return this.onSaveError(...args);
+                    return this.onSaveError(error, options, true);
                 },
             });
             return isSaved && !hasError;
@@ -583,22 +612,17 @@ export class FormController extends Component {
 
     get deleteConfirmationDialogProps() {
         return {
-            title: _t("Bye-bye, record!"),
-            body: deleteConfirmationMessage,
             confirm: async () => {
                 await this.model.root.delete();
                 if (!this.model.root.resId) {
                     this.env.config.historyBack();
                 }
             },
-            confirmLabel: _t("Delete"),
-            cancel: () => {},
-            cancelLabel: _t("No, keep it"),
         };
     }
 
     async deleteRecord() {
-        this.dialogService.add(ConfirmationDialog, this.deleteConfirmationDialogProps);
+        this.deleteRecordsWithConfirmation(this.deleteConfirmationDialogProps, [this.model.root]);
     }
 
     async beforeExecuteActionButton(clickParams) {
@@ -624,7 +648,7 @@ export class FormController extends Component {
 
     async create() {
         const dirty = await this.model.root.isDirty();
-        const onError = this.onSaveError.bind(this);
+        const onError = (error, options) => this.onSaveError(error, options, true);
         const canProceed = !dirty || (await this.model.root.save({ onError }));
         // FIXME: disable/enable not done in onPagerUpdate
         if (canProceed) {
@@ -640,7 +664,10 @@ export class FormController extends Component {
         if (this.props.saveRecord) {
             saved = await this.props.saveRecord(record, params);
         } else {
-            saved = await record.save(params);
+            saved = await record.save({
+                onError: (error, options) => this.onSaveError(error, options, false),
+                ...params,
+            });
         }
         if (saved && this.props.onSave) {
             this.props.onSave(record, params);
@@ -661,7 +688,9 @@ export class FormController extends Component {
         if (this.props.onDiscard) {
             this.props.onDiscard(this.model.root);
         }
-        if (this.model.root.isNew || this.env.inDialog) {
+        if (this.env.inDialog) {
+            await this.env.dialogData.close();
+        } else if (this.model.root.isNew) {
             this.env.config.historyBack();
         }
     }

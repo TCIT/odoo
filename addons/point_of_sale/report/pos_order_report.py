@@ -4,8 +4,8 @@
 from odoo import fields, models, tools
 
 
-class PosOrderReport(models.Model):
-    _name = "report.pos.order"
+class ReportPosOrder(models.Model):
+    _name = 'report.pos.order'
     _description = "Point of Sale Orders Report"
     _auto = False
     _order = 'date desc'
@@ -17,8 +17,7 @@ class PosOrderReport(models.Model):
     product_id = fields.Many2one('product.product', string='Product', readonly=True)
     product_tmpl_id = fields.Many2one('product.template', string='Product Template', readonly=True)
     state = fields.Selection(
-        [('draft', 'New'), ('paid', 'Paid'), ('done', 'Posted'),
-         ('invoiced', 'Invoiced'), ('cancel', 'Cancelled')],
+        [('draft', 'New'), ('paid', 'Paid'), ('done', 'Posted'), ('cancel', 'Cancelled')],
         string='Status', readonly=True)
     user_id = fields.Many2one('res.users', string='User', readonly=True)
     price_total = fields.Float(string='Total Price', readonly=True)
@@ -47,11 +46,12 @@ class PosOrderReport(models.Model):
             WITH payment_method_by_order_line AS (
                 SELECT
                     pol.id AS pos_order_line_id,
-                    (array_agg(pm.payment_method_id))[1] AS payment_method_id
+                    pm.pos_order_id as pos_order_id,
+                    (array_agg(pm.payment_method_id ORDER BY pm.id ASC))[1] AS payment_method_id
                 FROM pos_order_line pol
                 LEFT JOIN pos_order po ON (po.id = pol.order_id)
                 LEFT JOIN pos_payment pm ON (pm.pos_order_id=po.id)
-                GROUP BY pol.id
+                GROUP BY pol.id, pm.pos_order_id
             ),
             first_pos_category AS (
                 SELECT
@@ -66,10 +66,10 @@ class PosOrderReport(models.Model):
                 l.id AS id,
                 1 AS nbr_lines, -- number of lines in order line is always 1
                 s.date_order AS date,
-                ROUND((l.price_subtotal) / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END, cu.decimal_places) AS price_subtotal_excl,
+                ROUND((SIGN(l.qty) * SIGN(l.price_unit) * ABS(l.price_subtotal)) / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END, cu.decimal_places) AS price_subtotal_excl,
                 l.qty AS product_qty,
                 l.qty * l.price_unit / COALESCE(NULLIF(s.currency_rate, 0), 1.0) AS price_sub_total,
-                ROUND((l.price_subtotal_incl) / COALESCE(NULLIF(s.currency_rate, 0), 1.0), cu.decimal_places) AS price_total,
+                ROUND((SIGN(l.qty) * SIGN(l.price_unit) * ABS(l.price_subtotal_incl)) / COALESCE(NULLIF(s.currency_rate, 0), 1.0), cu.decimal_places) AS price_total,
                 (l.qty * l.price_unit) * (l.discount / 100) / COALESCE(NULLIF(s.currency_rate, 0), 1.0) AS total_discount,
                 CASE
                     WHEN l.qty * u.factor = 0 THEN NULL
@@ -89,7 +89,7 @@ class PosOrderReport(models.Model):
                 s.pricelist_id,
                 s.session_id,
                 s.account_move IS NOT NULL AS invoiced,
-                l.price_subtotal - COALESCE(l.total_cost,0) / COALESCE(NULLIF(s.currency_rate, 0), 1.0) AS margin,
+                ((SIGN(l.qty) * SIGN(l.price_unit) * ABS(l.price_subtotal)) - COALESCE(l.total_cost,0)) / COALESCE(NULLIF(s.currency_rate, 0), 1.0) AS margin,
                 pm.payment_method_id AS payment_method_id,
                 fpc.id AS pos_categ_id
 
@@ -114,8 +114,8 @@ class PosOrderReport(models.Model):
         return ""
 
     def init(self):
-        tools.drop_view_if_exists(self._cr, self._table)
-        self._cr.execute("""
+        tools.drop_view_if_exists(self.env.cr, self._table)
+        self.env.cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
                 %s
                 %s

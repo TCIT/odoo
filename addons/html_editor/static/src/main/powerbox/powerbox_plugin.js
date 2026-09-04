@@ -1,5 +1,4 @@
 import { Plugin } from "@html_editor/plugin";
-import { isEmptyBlock } from "@html_editor/utils/dom_info";
 import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { rotate } from "@web/core/utils/arrays";
@@ -7,6 +6,7 @@ import { Powerbox } from "./powerbox";
 import { withSequence } from "@html_editor/utils/resource";
 import { omit, pick } from "@web/core/utils/objects";
 import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
+import { closestElement } from "@html_editor/utils/dom_traversal";
 
 /** @typedef { import("@html_editor/core/selection_plugin").EditorSelection } EditorSelection */
 /** @typedef { import("@html_editor/core/user_command_plugin").UserCommand } UserCommand */
@@ -15,8 +15,7 @@ import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
 /**
  * @typedef {Object} PowerboxCategory
  * @property {string} id
- * @property {String} name
- *
+ * @property {TranslatedString} name
  *
  * @typedef {Object} PowerboxItem
  * @property {string} categoryId Id of a powerbox category
@@ -30,40 +29,6 @@ import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
  */
 
 /**
- * A powerbox item must derive from a user command ( @see UserCommand )
- * specified by commandId. Properties defined in a powerbox item override those
- * from a user command.
- *
- * Example:
- *
- * resources = {
- *      user_commands: [
- *          @type {UserCommand}
- *          {
- *              id: myCommand,
- *              run: myCommandFunction,
- *              title: _t("My Command"),
- *              description: _t("My command's description"),
- *              icon: "fa-bug",
- *          },
- *      ],
- *      powerbox_categories: [
- *          @type {PowerboxCategory}
- *          { id: "myCategory", name: _t("My Category") }
- *      ],
- *      powerbox_items: [
- *          @type {PowerboxItem}
- *          {
- *              categoryId: "myCategory",
- *              commandId: "myCommand",
- *              title: _t("My Powerbox Command"), // overrides the user command's `title`
- *              // `description` and `icon` are inferred from the user command
- *          }
- *      ],
- * };
- */
-
-/**
  * The resulting powerbox command after deriving properties from a user command
  * (type for internal use).
  * @typedef {Object} PowerboxCommand
@@ -74,23 +39,8 @@ import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
  * @property {string} icon
  * @property {Function} run
  * @property {TranslatedString[]} [keywords]
- * @property { (selection: EditorSelection) => boolean  } [isAvailable]
+ * @property { (selection: EditorSelection) => boolean } isAvailable
  */
-
-/**
- * @param {SelectionData} selectionData
- */
-function target(selectionData) {
-    const node = selectionData.editableSelection.anchorNode;
-    const el = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
-    if (
-        selectionData.documentSelectionIsInEditable &&
-        el.matches(baseContainerGlobalSelector) &&
-        isEmptyBlock(el)
-    ) {
-        return el;
-    }
-}
 
 /**
  * @typedef { Object } PowerboxShared
@@ -98,6 +48,46 @@ function target(selectionData) {
  * @property { PowerboxPlugin['getAvailablePowerboxCommands'] } getAvailablePowerboxCommands
  * @property { PowerboxPlugin['openPowerbox'] } openPowerbox
  * @property { PowerboxPlugin['updatePowerbox'] } updatePowerbox
+ */
+
+/** @typedef {PowerboxCategory[]} powerbox_categories */
+/**
+ * @typedef {import("plugins").CSSSelector[]} powerbox_blacklist_selectors
+ *
+ * @see UserCommand
+ * @typedef {PowerboxItem[]} powerbox_items
+ *
+ * A powerbox item must derive from a user command (see UserCommand) specified
+ * by commandId. Properties defined in a powerbox item override those from a
+ * user command. Other properties are inferred from the UserCommand.
+ *
+ * Example:
+ *
+ *     resources = {
+ *          user_commands: [
+ *              // see {UserCommand}
+ *              {
+ *                  id: myCommand,
+ *                  run: myCommandFunction,
+ *                  title: _t("My Command"),
+ *                  description: _t("My command's description"),
+ *                  icon: "fa-bug",
+ *              },
+ *          ],
+ *          powerbox_categories: [
+ *              // see {PowerboxCategory}
+ *              { id: "myCategory", name: _t("My Category") }
+ *          ],
+ *          powerbox_items: [
+ *              // see {PowerboxItem}
+ *              {
+ *                  categoryId: "myCategory",
+ *                  commandId: "myCommand",
+ *                  title: _t("My Powerbox Command"), // overrides the user command's `title`
+ *                  // `description` and `icon` are inferred from the user command
+ *              }
+ *          ],
+ *     };
  */
 
 export class PowerboxPlugin extends Plugin {
@@ -109,28 +99,17 @@ export class PowerboxPlugin extends Plugin {
         "openPowerbox",
         "updatePowerbox",
     ];
+    /** @type {import("plugins").EditorResources} */
     resources = {
-        user_commands: {
-            id: "openPowerbox",
-            run: () =>
-                this.openPowerbox({
-                    commands: this.getAvailablePowerboxCommands(),
-                    categories: this.getResource("powerbox_categories"),
-                }),
-        },
         powerbox_categories: [
             withSequence(10, { id: "structure", name: _t("Structure") }),
             withSequence(60, { id: "widget", name: _t("Widget") }),
+            withSequence(100, { id: "modules", name: _t("Modules") }),
         ],
-        power_buttons: withSequence(100, {
-            commandId: "openPowerbox",
-            title: _t("More options"),
-            icon: "fa-ellipsis-v",
-        }),
-        hints: {
+        hints: withSequence(30, {
+            selector: baseContainerGlobalSelector,
             text: _t('Type "/" for commands'),
-            target,
-        },
+        }),
     };
 
     setup() {
@@ -148,7 +127,9 @@ export class PowerboxPlugin extends Plugin {
             applyCommand: this.applyCommand.bind(this),
         };
         this.powerboxCommands = this.makePowerboxCommands();
-        this.addDomListener(this.editable.ownerDocument, "keydown", this.onKeyDown);
+        this.addDomListener(this.editable.ownerDocument, "keydown", this.onKeyDown, {
+            capture: true,
+        });
     }
 
     /**
@@ -156,9 +137,11 @@ export class PowerboxPlugin extends Plugin {
      */
     getAvailablePowerboxCommands() {
         const selection = this.dependencies.selection.getEditableSelection();
-        return this.powerboxCommands.filter(
-            (cmd) => cmd.isAvailable === undefined || cmd.isAvailable(selection)
-        );
+        const blacklistSelector = this.getResource("powerbox_blacklist_selectors").join(", ");
+        if (blacklistSelector && closestElement(selection.anchorNode).matches(blacklistSelector)) {
+            return [];
+        }
+        return this.powerboxCommands.filter((cmd) => cmd.isAvailable(selection));
     }
 
     /**
@@ -175,10 +158,14 @@ export class PowerboxPlugin extends Plugin {
         return powerboxItems.map((/** @type {PowerboxItem} */ item) => {
             const command = this.dependencies.userCommand.getCommand(item.commandId);
             return {
-                ...pick(command, "title", "description", "icon", "isAvailable"),
+                ...pick(command, "title", "description", "icon"),
                 ...omit(item, "commandId", "commandParams"),
                 categoryName: categoryDict[item.categoryId].name,
-                run: () => command.run(item.commandParams),
+                run: (context) => command.run(item.commandParams, context),
+                isAvailable: (selection) =>
+                    [command.isAvailable, item.isAvailable]
+                        .filter(Boolean)
+                        .every((predicate) => predicate(selection)),
             };
         });
     }
@@ -192,6 +179,9 @@ export class PowerboxPlugin extends Plugin {
      */
     openPowerbox({ commands, categories, onApplyCommand = () => {}, onClose = () => {} } = {}) {
         this.closePowerbox();
+        if (!commands.length) {
+            return;
+        }
         this.onApplyCommand = onApplyCommand;
         this.onClose = onClose;
         this.updatePowerbox(commands, categories);
@@ -234,6 +224,7 @@ export class PowerboxPlugin extends Plugin {
         const key = ev.key;
         switch (key) {
             case "Escape":
+                ev.stopImmediatePropagation();
                 this.closePowerbox();
                 break;
             case "Enter":
@@ -244,11 +235,13 @@ export class PowerboxPlugin extends Plugin {
                 break;
             case "ArrowUp": {
                 ev.preventDefault();
+                ev.stopImmediatePropagation();
                 this.state.currentIndex = rotate(this.state.currentIndex, this.state.commands, -1);
                 break;
             }
             case "ArrowDown": {
                 ev.preventDefault();
+                ev.stopImmediatePropagation();
                 this.state.currentIndex = rotate(this.state.currentIndex, this.state.commands, 1);
                 break;
             }
@@ -261,8 +254,9 @@ export class PowerboxPlugin extends Plugin {
     }
 
     applyCommand(command) {
-        this.onApplyCommand(command);
-        command.run();
+        const context = {};
+        this.onApplyCommand(command, context);
+        command.run(context);
         this.closePowerbox();
     }
 }

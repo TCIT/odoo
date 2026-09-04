@@ -11,12 +11,18 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { ModelSelector } from "@web/core/model_selector/model_selector";
 
-async function mountModelSelector(models = [], value = undefined, onModelSelected = () => {}) {
+async function mountModelSelector(
+    models = [],
+    value = undefined,
+    onModelSelected = () => {},
+    nbVisibleModels = undefined
+) {
     await mountWithCleanup(ModelSelector, {
         props: {
             models,
             value,
             onModelSelected,
+            nbVisibleModels,
         },
     });
 }
@@ -27,16 +33,16 @@ class IrModel extends models.Model {
     name = fields.Char({ string: "Model Name" });
     model = fields.Char();
     _records = [
-        { id: 1, name: "Model 1", model: "model_1" },
-        { id: 2, name: "Model 2", model: "model_2" },
-        { id: 3, name: "Model 3", model: "model_3" },
-        { id: 4, name: "Model 4", model: "model_4" },
-        { id: 5, name: "Model 5", model: "model_5" },
-        { id: 6, name: "Model 6", model: "model_6" },
-        { id: 7, name: "Model 7", model: "model_7" },
-        { id: 8, name: "Model 8", model: "model_8" },
-        { id: 9, name: "Model 9", model: "model_9" },
-        { id: 10, name: "Model 10", model: "model_10" },
+        { id: 1, name: "Model 1", model: "model.1" },
+        { id: 2, name: "Model 2", model: "model.2" },
+        { id: 3, name: "Model 3", model: "model.3" },
+        { id: 4, name: "Model 4", model: "model.4" },
+        { id: 5, name: "Model 5", model: "model.5" },
+        { id: 6, name: "Model 6", model: "model.6" },
+        { id: 7, name: "Model 7", model: "model.7" },
+        { id: 8, name: "Model 8", model: "model.8" },
+        { id: 9, name: "Model 9", model: "model.9" },
+        { id: 10, name: "Model 10", model: "model.10" },
     ];
 }
 
@@ -60,7 +66,7 @@ test("model_selector: with no model", async () => {
 });
 
 test("model_selector: displays model display names", async () => {
-    await mountModelSelector(["model_1", "model_2", "model_3"]);
+    await mountModelSelector(["model.1", "model.2", "model.3"]);
     await contains(".o-autocomplete--input").click();
     expect("li.o-autocomplete--dropdown-item").toHaveCount(3);
     const items = queryAll("li.o-autocomplete--dropdown-item");
@@ -69,56 +75,114 @@ test("model_selector: displays model display names", async () => {
     expect(items[2]).toHaveText("Model 3");
 });
 
-test("model_selector: with 8 models", async () => {
+test("model_selector: with 8 models, showing 5", async () => {
+    await mountModelSelector(
+        ["model.1", "model.2", "model.3", "model.4", "model.5", "model.6", "model.7", "model.8"],
+        undefined,
+        undefined,
+        5
+    );
+    await contains(".o-autocomplete--input").click();
+    expect("li.o-autocomplete--dropdown-item").toHaveCount(6);
+    expect("li.o-autocomplete--dropdown-item:eq(5)").toHaveText("Start typing...");
+});
+
+test("model_selector: with 8 models, showing 8", async () => {
     await mountModelSelector([
-        "model_1",
-        "model_2",
-        "model_3",
-        "model_4",
-        "model_5",
-        "model_6",
-        "model_7",
-        "model_8",
+        "model.1",
+        "model.2",
+        "model.3",
+        "model.4",
+        "model.5",
+        "model.6",
+        "model.7",
+        "model.8",
     ]);
     await contains(".o-autocomplete--input").click();
     expect("li.o-autocomplete--dropdown-item").toHaveCount(8);
 });
 
-test("model_selector: with more than 8 models", async () => {
+test("model_selector: with more than 8 models, showing 8", async () => {
     await mountModelSelector([
-        "model_1",
-        "model_2",
-        "model_3",
-        "model_4",
-        "model_5",
-        "model_6",
-        "model_7",
-        "model_8",
-        "model_9",
-        "model_10",
+        "model.1",
+        "model.2",
+        "model.3",
+        "model.4",
+        "model.5",
+        "model.6",
+        "model.7",
+        "model.8",
+        "model.9",
+        "model.10",
     ]);
     await contains(".o-autocomplete--input").click();
     expect("li.o-autocomplete--dropdown-item").toHaveCount(9);
     expect("li.o-autocomplete--dropdown-item:eq(8)").toHaveText("Start typing...");
 });
 
+test("model_selector: with more than 8 models, showing 9", async () => {
+    await mountModelSelector(
+        [
+            "model.1",
+            "model.2",
+            "model.3",
+            "model.4",
+            "model.5",
+            "model.6",
+            "model.7",
+            "model.8",
+            "model.9",
+            "model.10",
+        ],
+        undefined,
+        undefined,
+        9
+    );
+    await contains(".o-autocomplete--input").click();
+    expect("li.o-autocomplete--dropdown-item").toHaveCount(10);
+    expect("li.o-autocomplete--dropdown-item:eq(9)").toHaveText("Start typing...");
+});
+
+test("model_selector: with more than 8 models, showing all", async () => {
+    await mountModelSelector(
+        [
+            "model.1",
+            "model.2",
+            "model.3",
+            "model.4",
+            "model.5",
+            "model.6",
+            "model.7",
+            "model.8",
+            "model.9",
+            "model.10",
+        ],
+        undefined,
+        undefined,
+        10
+    );
+    await contains(".o-autocomplete--input").click();
+    expect("li.o-autocomplete--dropdown-item").toHaveCount(10);
+    expect("li.o-autocomplete--dropdown-item:eq(9)").toHaveText("Model 10");
+});
+
 test("model_selector: search content is not applied when opening the autocomplete", async () => {
-    await mountModelSelector(["model_1", "model_2"], "_2");
+    await mountModelSelector(["model.1", "model.2"], "_2");
     await contains(".o-autocomplete--input").click();
     expect("li.o-autocomplete--dropdown-item").toHaveCount(2);
 });
 
 test("model_selector: with search matching some records on technical name", async () => {
-    await mountModelSelector(["model_1", "model_2"]);
+    await mountModelSelector(["model.1", "model.2"]);
     await contains(".o-autocomplete--input").click();
-    await contains(".o-autocomplete--input").edit("_2", { confirm: false });
+    await contains(".o-autocomplete--input").edit(".2", { confirm: false });
     await runAllTimers();
     expect("li.o-autocomplete--dropdown-item").toHaveCount(1);
     expect("li.o-autocomplete--dropdown-item").toHaveText("Model 2");
 });
 
 test("model_selector: with search matching some records on business name", async () => {
-    await mountModelSelector(["model_1", "model_2"]);
+    await mountModelSelector(["model.1", "model.2"]);
     await contains(".o-autocomplete--input").click();
     await contains(".o-autocomplete--input").edit(" 2", { confirm: false });
     await runAllTimers();
@@ -127,7 +191,7 @@ test("model_selector: with search matching some records on business name", async
 });
 
 test("model_selector: with search matching no record", async () => {
-    await mountModelSelector(["model_1", "model_2"]);
+    await mountModelSelector(["model.1", "model.2"]);
     await contains(".o-autocomplete--input").edit("a random search query", { confirm: false });
     await runAllTimers();
     expect("li.o-autocomplete--dropdown-item").toHaveCount(1);
@@ -135,11 +199,11 @@ test("model_selector: with search matching no record", async () => {
 });
 
 test("model_selector: select a model", async () => {
-    await mountModelSelector(["model_1", "model_2", "model_3"], "Model 1", (selected) => {
+    await mountModelSelector(["model.1", "model.2", "model.3"], "Model 1", (selected) => {
         expect.step("model selected");
         expect(selected).toEqual({
             label: "Model 2",
-            technical: "model_2",
+            technical: "model.2",
         });
     });
     await contains(".o-autocomplete--input").click();
@@ -147,26 +211,19 @@ test("model_selector: select a model", async () => {
     expect.verifySteps(["model selected"]);
 });
 
-test("model_selector: click on start typing", async () => {
-    await mountModelSelector([
-        "model_1",
-        "model_2",
-        "model_3",
-        "model_4",
-        "model_5",
-        "model_6",
-        "model_7",
-        "model_8",
-        "model_9",
-        "model_10",
-    ]);
-    await contains(".o-autocomplete--input").click();
-    await contains("li.o-autocomplete--dropdown-item:eq(8)").click();
-    expect(".o-autocomplete--input").toHaveValue("");
-    expect(".o-autocomplete.dropdown ul").toHaveCount(0);
+test("model_selector: with an initial value", async () => {
+    await mountModelSelector(["model.1", "model.2", "model.3"], "Model 1");
+    expect(".o-autocomplete--input").toHaveValue("Model 1");
 });
 
-test("model_selector: with an initial value", async () => {
-    await mountModelSelector(["model_1", "model_2", "model_3"], "Model 1");
-    expect(".o-autocomplete--input").toHaveValue("Model 1");
+test("model_selector: autofocus", async () => {
+    await mountWithCleanup(ModelSelector, {
+        props: {
+            models: ["model.1"],
+            autofocus: true,
+            onModelSelected: () => {},
+        },
+    });
+    const input = queryAll("input.o-autocomplete--input")[0];
+    expect(input).toBe(document.activeElement);
 });

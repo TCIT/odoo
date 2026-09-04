@@ -6,7 +6,7 @@ from ast import literal_eval
 from odoo import fields, models, api
 
 
-class RelocateStockQuant(models.TransientModel):
+class StockQuantRelocate(models.TransientModel):
     _name = 'stock.quant.relocate'
     _description = 'Stock Quantity Relocation'
 
@@ -14,7 +14,7 @@ class RelocateStockQuant(models.TransientModel):
     company_id = fields.Many2one(related="quant_ids.company_id")
     dest_location_id = fields.Many2one('stock.location', domain="[('usage', '=', 'internal'), ('company_id', '=', company_id)]")
     dest_package_id_domain = fields.Char(compute="_compute_dest_package_id_domain")
-    dest_package_id = fields.Many2one('stock.quant.package', domain="dest_package_id_domain", compute="_compute_dest_package_id", store=True)
+    dest_package_id = fields.Many2one('stock.package', domain="dest_package_id_domain", compute="_compute_dest_package_id", store=True)
     message = fields.Text('Reason for relocation')
     is_partial_package = fields.Boolean(compute='_compute_is_partial_package')
     partial_package_names = fields.Char(compute="_compute_is_partial_package")
@@ -72,5 +72,5 @@ class RelocateStockQuant(models.TransientModel):
         if self.env.context.get('default_lot_id', False) and len(lot_ids) == 1:
             return lot_ids.action_lot_open_quants()
         elif self.env.context.get('single_product', False) and len(product_ids) == 1:
-            return product_ids.action_update_quantity_on_hand()
+            return product_ids.action_open_quants()
         return self.quant_ids.with_context(always_show_loc=1).action_view_quants()

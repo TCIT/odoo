@@ -11,10 +11,6 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'property_account_receivable_id': 'l10n_ca_112110',
             'property_account_payable_id': 'l10n_ca_221110',
-            'property_account_income_categ_id': 'l10n_ca_411100',
-            'property_account_expense_categ_id': 'l10n_ca_511210',
-            'property_stock_account_input_categ_id': 'l10n_ca_121130',
-            'property_stock_account_output_categ_id': 'l10n_ca_121140',
             'property_stock_valuation_account_id': 'l10n_ca_121120',
         }
 
@@ -29,7 +25,7 @@ class AccountChartTemplate(models.AbstractModel):
             'ON': ('hst_sale_tax_13', 'hst_purchase_tax_13'),
             'NB': ('hst_sale_tax_15', 'hst_purchase_tax_15'),
             'NL': ('hst_sale_tax_15', 'hst_purchase_tax_15'),
-            'NS': ('hst_sale_tax_15', 'hst_purchase_tax_15'),
+            'NS': ('hst_sale_tax_14', 'hst_purchase_tax_14'),
             'PE': ('hst_sale_tax_15', 'hst_purchase_tax_15'),
         }.get(self.env.company.state_id.code, ('gst_sale_tax_5', 'gst_purchase_tax_5'))
 
@@ -47,5 +43,17 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_journal_early_pay_discount_gain_account_id': 'l10n_ca_423200',
                 'account_sale_tax_id': default_sales_tax,
                 'account_purchase_tax_id': default_purchase_tax,
+                'income_account_id': 'l10n_ca_411100',
+                'expense_account_id': 'l10n_ca_511210',
+                'account_stock_journal_id': 'inventory_valuation',
+                'account_stock_valuation_id': 'l10n_ca_121120',
+            },
+        }
+
+    @template('ca_2023', 'account.account')
+    def _get_ca_account_account(self):
+        return {
+            'l10n_ca_121120': {
+                'account_stock_variation_id': 'l10n_ca_512207',
             },
         }

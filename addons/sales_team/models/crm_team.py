@@ -1,25 +1,18 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-import json
 import random
 
-from babel.dates import format_date
-from datetime import date
-from dateutil.relativedelta import relativedelta
-
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.release import version
-from odoo.tools import SQL
 
 
 class CrmTeam(models.Model):
-    _name = "crm.team"
+    _name = 'crm.team'
     _inherit = ['mail.thread']
     _description = "Sales Team"
     _order = "sequence ASC, create_date DESC, id DESC"
     _check_company_auto = True
+
+    def _get_default_color(self):
+        return random.randint(1, 11)
 
     def _get_default_team_id(self, user_id=False, domain=False):
         """ Compute default team id for sales related documents. Note that this
@@ -38,7 +31,7 @@ class CrmTeam(models.Model):
           5- any team matching my company (based on company rule)
 
         :param user_id: salesperson to target, fallback on env.uid;
-        :domain: optional domain to filter teams (like use_lead = True);
+        :param domain: optional domain to filter teams (like use_lead = True);
         """
         if not user_id:
             user = self.env.user
@@ -97,7 +90,7 @@ class CrmTeam(models.Model):
     currency_id = fields.Many2one(
         "res.currency", string="Currency",
         related='company_id.currency_id', readonly=True)
-    user_id = fields.Many2one('res.users', string='Team Leader', check_company=True)
+    user_id = fields.Many2one('res.users', string='Team Leader', check_company=True, domain=[('share', '!=', True)])
     # memberships
     is_membership_multi = fields.Boolean(
         'Multiple Memberships Allowed', compute='_compute_is_membership_multi',
@@ -119,7 +112,7 @@ class CrmTeam(models.Model):
         'crm.team.member', 'crm_team_id', string='Sales Team Members (incl. inactive)',
         context={'active_test': False})
     # UX options
-    color = fields.Integer(string='Color Index', help="The color of the channel")
+    color = fields.Integer(string='Color Index', help="The color of the channel", default=_get_default_color)
     favorite_user_ids = fields.Many2many(
         'res.users', 'team_favorite_user_rel', 'team_id', 'user_id',
         string='Favorite Members', default=_get_default_favorite_user_ids)
@@ -127,7 +120,19 @@ class CrmTeam(models.Model):
         string='Show on dashboard', compute='_compute_is_favorite', inverse='_inverse_is_favorite',
         help="Favorite teams to display them in the dashboard and access them easily.")
     dashboard_button_name = fields.Char(string="Dashboard Button", compute='_compute_dashboard_button_name')
-    dashboard_graph_data = fields.Text(compute='_compute_dashboard_graph')
+
+    @api.constrains('company_id')
+    def _constrains_company_members(self):
+        for team in self.filtered('company_id'):
+            invalid_members = team.crm_team_member_ids.filtered(
+                lambda m: team.company_id not in m.user_id.company_ids
+            )
+            if invalid_members:
+                raise UserError(_("The following team members are not allowed in company '%(company)s' of the Sales Team '%(team)s': %(users)s",
+                    company=team.company_id.display_name,
+                    team=team.name,
+                    users=", ".join(invalid_members.mapped('user_id.name'))
+                ))
 
     @api.depends('sequence')  # TDE FIXME: force compute in new mode
     def _compute_is_membership_multi(self):
@@ -165,18 +170,15 @@ class CrmTeam(models.Model):
             return
         # done in a loop, but to be used in form view only -> not optimized
         for team in self:
-            member_warning = False
             other_memberships = self.env['crm.team.member'].search([
                 ('crm_team_id', '!=', team._origin.id if team.ids else False),
                 ('user_id', 'in', team.member_ids.ids)
             ])
             if other_memberships:
-                member_warning = _("Adding %(user_names)s in this team will remove them from %(team_names)s.",
+                team.member_warning = _("%(user_names)s already in other teams (%(team_names)s).",
                                    user_names=", ".join(other_memberships.mapped('user_id.name')),
                                    team_names=", ".join(other_memberships.mapped('crm_team_id.name'))
                                   )
-            if member_warning:
-                team.member_warning = member_warning + " " + _("Working in multiple teams? Activate the option under Configuration>Settings.")
 
     def _search_member_ids(self, operator, value):
         return [('crm_team_member_ids.user_id', operator, value)]
@@ -208,10 +210,6 @@ class CrmTeam(models.Model):
         for team in self:
             team.dashboard_button_name = _("Big Pretty Button :)") # placeholder
 
-    def _compute_dashboard_graph(self):
-        for team in self:
-            team.dashboard_graph_data = json.dumps(team._get_dashboard_graph_data())
-
     # ------------------------------------------------------------
     # CRUD
     # ------------------------------------------------------------
@@ -222,13 +220,13 @@ class CrmTeam(models.Model):
         teams.filtered(lambda t: t.member_ids)._add_members_to_favorites()
         return teams
 
-    def write(self, values):
-        res = super(CrmTeam, self).write(values)
-        # manually launch company sanity check
-        if values.get('company_id'):
-            self.crm_team_member_ids._check_company(fnames=['crm_team_id'])
+    def write(self, vals):
+        res = super().write(vals)
 
-        if values.get('member_ids'):
+        if vals.get('company_id'):  # Force re-check of memberships constraint for this team
+            self.crm_team_member_ids._constrains_membership()
+
+        if vals.get('member_ids'):
             self._add_members_to_favorites()
         return res
 
@@ -258,127 +256,3 @@ class CrmTeam(models.Model):
     def _add_members_to_favorites(self):
         for team in self:
             team.favorite_user_ids = [(4, member.id) for member in team.member_ids]
-
-    # ------------------------------------------------------------
-    # GRAPH
-    # ------------------------------------------------------------
-
-    def _graph_get_model(self) -> str:
-        """ skeleton function defined here because it'll be called by crm and/or sale
-        """
-        raise UserError(_('Undefined graph model for Sales Team: %s', self.name))
-
-    def _graph_get_dates(self, today):
-        """ return a coherent start and end date for the dashboard graph covering a month period grouped by week.
-        """
-        start_date = today - relativedelta(months=1)
-        # we take the start of the following week if we group by week
-        # (to avoid having twice the same week from different month)
-        start_date += relativedelta(days=8 - start_date.isocalendar()[2])
-        return [start_date, today]
-
-    def _graph_date_column(self) -> SQL:
-        return SQL('create_date')
-
-    def _graph_get_table(self, GraphModel) -> SQL:
-        return SQL(GraphModel._table)
-
-    def _graph_x_query(self) -> SQL:
-        return SQL('EXTRACT(WEEK FROM %s)', self._graph_date_column())
-
-    def _graph_y_query(self) -> SQL:
-        raise UserError(_('Undefined graph model for Sales Team: %s', self.name))
-
-    def _extra_sql_conditions(self) -> SQL:
-        return SQL()
-
-    def _graph_title_and_key(self):
-        """ Returns an array containing the appropriate graph title and key respectively.
-
-            The key is for lineCharts, to have the on-hover label.
-        """
-        return ['', '']
-
-    def _graph_data(self, start_date, end_date):
-        """ return format should be an iterable of dicts that contain {'x_value': ..., 'y_value': ...}
-            x_values should be weeks.
-            y_values are floats.
-        """
-        # apply rules
-        extra_conditions = self._extra_sql_conditions() or SQL("TRUE")
-        dashboard_graph_model = self._graph_get_model()
-        GraphModel = self.env[dashboard_graph_model]
-        where_query = GraphModel._where_calc([])
-        GraphModel._apply_ir_rules(where_query, 'read')
-        if where_clause := where_query.where_clause:
-            extra_conditions = SQL("%s AND (%s)", extra_conditions, where_clause)
-
-        sql = SQL(
-            """
-            SELECT %(x_query)s as x_value, %(y_query)s as y_value
-            FROM %(table)s
-            WHERE team_id = %(team_id)s
-                AND DATE(%(date_column)s) >= %(start_date)s
-                AND DATE(%(date_column)s) <= %(end_date)s
-                AND %(extra_conditions)s
-            GROUP BY x_value
-            """,
-            x_query=self._graph_x_query(),
-            y_query=self._graph_y_query(),
-            table=self._graph_get_table(GraphModel),
-            team_id=self.id,
-            date_column=self._graph_date_column(),
-            start_date=start_date,
-            end_date=end_date,
-            extra_conditions=extra_conditions,
-        )
-
-        self._cr.execute(sql)
-        return self.env.cr.dictfetchall()
-
-    def _get_dashboard_graph_data(self):
-        def get_week_name(start_date, locale):
-            """ Generates a week name (string) from a datetime according to the locale:
-                E.g.: locale    start_date (datetime)      return string
-                      "en_US"      November 16th           "16-22 Nov"
-                      "en_US"      December 28th           "28 Dec-3 Jan"
-            """
-            if (start_date + relativedelta(days=6)).month == start_date.month:
-                short_name_from = format_date(start_date, 'd', locale=locale)
-            else:
-                short_name_from = format_date(start_date, 'd MMM', locale=locale)
-            short_name_to = format_date(start_date + relativedelta(days=6), 'd MMM', locale=locale)
-            return short_name_from + '-' + short_name_to
-
-        self.ensure_one()
-        values = []
-        today = fields.Date.from_string(fields.Date.context_today(self))
-        start_date, end_date = self._graph_get_dates(today)
-        graph_data = self._graph_data(start_date, end_date)
-        x_field = 'label'
-        y_field = 'value'
-
-        # generate all required x_fields and update the y_values where we have data for them
-        locale = self._context.get('lang') or 'en_US'
-
-        weeks_in_start_year = int(date(start_date.year, 12, 28).isocalendar()[1]) # This date is always in the last week of ISO years
-        week_count = (end_date.isocalendar()[1] - start_date.isocalendar()[1]) % weeks_in_start_year + 1
-        for week in range(week_count):
-            short_name = get_week_name(start_date + relativedelta(days=7 * week), locale)
-            values.append({x_field: short_name, y_field: 0, 'type': 'future' if week + 1 == week_count else 'past'})
-
-        for data_item in graph_data:
-            index = int((data_item.get('x_value') - start_date.isocalendar()[1]) % weeks_in_start_year)
-            values[index][y_field] = data_item.get('y_value')
-
-        [graph_title, graph_key] = self._graph_title_and_key()
-        color = '#875A7B' if '+e' in version else '#7c7bad'
-
-        # If no actual data available, show some sample data
-        if not graph_data:
-            graph_key = _('Sample data')
-            for value in values:
-                value['type'] = 'o_sample_data'
-                # we use unrealistic values for the sample data
-                value['value'] = random.randint(0, 20)
-        return [{'values': values, 'area': True, 'title': graph_title, 'key': graph_key, 'color': color}]

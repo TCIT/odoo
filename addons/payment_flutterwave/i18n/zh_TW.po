@@ -1,23 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_flutterwave
-# 
+# * payment_flutterwave
+#
 # Translators:
 # Wil Odoo, 2025
-# 
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 16:41+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
+"projects/odoo-19/payment_flutterwave/zh_Hant/>\n"
+"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_flutterwave
 #. odoo-python
@@ -33,10 +36,11 @@ msgid "Code"
 msgstr "代碼"
 
 #. module: payment_flutterwave
-#. odoo-python
-#: code:addons/payment_flutterwave/models/payment_provider.py:0
-msgid "Could not establish the connection to the API."
-msgstr "無法建立與 API 的連線。"
+#: model:ir.model.fields,field_description:payment_flutterwave.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_flutterwave.field_payment_token__display_name
+#: model:ir.model.fields,field_description:payment_flutterwave.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "顯示名稱"
 
 #. module: payment_flutterwave
 #: model:ir.model.fields.selection,name:payment_flutterwave.selection__payment_provider__code__flutterwave
@@ -64,10 +68,11 @@ msgid "Flutterwave Webhook Secret"
 msgstr "Flutterwave 網絡鈎子密鑰"
 
 #. module: payment_flutterwave
-#. odoo-python
-#: code:addons/payment_flutterwave/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "沒有找到匹配參考 %s 的交易。"
+#: model:ir.model.fields,field_description:payment_flutterwave.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_flutterwave.field_payment_token__id
+#: model:ir.model.fields,field_description:payment_flutterwave.field_payment_transaction__id
+msgid "ID"
+msgstr "識別號"
 
 #. module: payment_flutterwave
 #: model:ir.model,name:payment_flutterwave.model_payment_provider
@@ -90,23 +95,9 @@ msgid "Public Key"
 msgstr "公鑰"
 
 #. module: payment_flutterwave
-#. odoo-python
-#: code:addons/payment_flutterwave/models/payment_transaction.py:0
-msgid "Received data with missing reference."
-msgstr "收到的數據缺漏參考編號。"
-
-#. module: payment_flutterwave
 #: model_terms:ir.ui.view,arch_db:payment_flutterwave.payment_provider_form
 msgid "Secret Key"
 msgstr "密鑰"
-
-#. module: payment_flutterwave
-#. odoo-python
-#: code:addons/payment_flutterwave/models/payment_provider.py:0
-msgid ""
-"The communication with the API failed. Flutterwave gave us the following "
-"information: '%s'"
-msgstr "與 API 通訊失敗。Flutterwave 提供了以下資訊：%s"
 
 #. module: payment_flutterwave
 #: model:ir.model.fields,help:payment_flutterwave.field_payment_token__flutterwave_customer_email
@@ -126,12 +117,6 @@ msgstr "此付款服務商的技術代碼。"
 #. module: payment_flutterwave
 #. odoo-python
 #: code:addons/payment_flutterwave/models/payment_transaction.py:0
-msgid "The transaction is not linked to a token."
-msgstr "交易未有連結至代碼。"
-
-#. module: payment_flutterwave
-#. odoo-python
-#: code:addons/payment_flutterwave/models/payment_transaction.py:0
 msgid "Unknown payment status: %s"
 msgstr "未知支付狀態：%s"
 
@@ -139,3 +124,20 @@ msgstr "未知支付狀態：%s"
 #: model_terms:ir.ui.view,arch_db:payment_flutterwave.payment_provider_form
 msgid "Webhook Secret"
 msgstr "網絡鈎子秘密"
+
+#~ msgid "Could not establish the connection to the API."
+#~ msgstr "無法建立與 API 的連線。"
+
+#~ msgid "No transaction found matching reference %s."
+#~ msgstr "沒有找到匹配參考 %s 的交易。"
+
+#~ msgid "Received data with missing reference."
+#~ msgstr "收到的數據缺漏參考編號。"
+
+#~ msgid ""
+#~ "The communication with the API failed. Flutterwave gave us the following "
+#~ "information: '%s'"
+#~ msgstr "與 API 通訊失敗。Flutterwave 提供了以下資訊：%s"
+
+#~ msgid "The transaction is not linked to a token."
+#~ msgstr "交易未有連結至代碼。"

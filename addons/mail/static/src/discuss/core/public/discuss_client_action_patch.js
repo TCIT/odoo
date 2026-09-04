@@ -1,26 +1,23 @@
 import { DiscussClientAction } from "@mail/core/public_web/discuss_client_action";
 import { WelcomePage } from "@mail/discuss/core/public/welcome_page";
-import { useState } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
-import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 
 DiscussClientAction.components = { ...DiscussClientAction.components, WelcomePage };
 patch(DiscussClientAction.prototype, {
     setup() {
         super.setup(...arguments);
-        this.store = useService("mail.store");
-        this.publicState = useState({
-            welcome: this.store.shouldDisplayWelcomeViewInitially,
-        });
         if (this.store.isChannelTokenSecret) {
             // Change the URL to avoid leaking the invitation link.
             browser.history.replaceState(
                 browser.history.state,
                 null,
-                `/discuss/channel/${this.store.discuss_public_thread.id}${browser.location.search}`
+                `/discuss/channel/${this.store.discuss.thread.id}${browser.location.search}`
             );
         }
+        const url = new URL(browser.location.href);
+        url.searchParams.delete("email_token");
+        browser.history.replaceState(browser.history.state, null, url.toString());
         browser.addEventListener("popstate", () => this.restoreDiscussThread(this.props));
     },
     getActiveId() {
@@ -32,10 +29,10 @@ patch(DiscussClientAction.prototype, {
     },
     async restoreDiscussThread() {
         await super.restoreDiscussThread(...arguments);
-        this.publicState.welcome ||=
-            this.store.discuss.thread?.defaultDisplayMode === "video_full_screen";
+        this.store.is_welcome_page_displayed ||=
+            this.store.discuss.thread?.default_display_mode === "video_full_screen";
     },
     closeWelcomePage() {
-        this.publicState.welcome = false;
+        this.store.is_welcome_page_displayed = false;
     },
 });

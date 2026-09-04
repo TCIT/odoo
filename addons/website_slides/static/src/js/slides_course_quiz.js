@@ -1,9 +1,6 @@
-/** @odoo-module **/
-
     import publicWidget from '@web/legacy/js/public/public_widget';
     import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
     import { renderToElement } from "@web/core/utils/render";
-    import { escape } from "@web/core/utils/strings";
     import { session } from "@web/session";
     import CourseJoin from '@website_slides/js/slides_course_join';
     import QuestionFormWidget from '@website_slides/js/slides_course_quiz_question_form';
@@ -195,10 +192,9 @@
          * @private
          */
         _reorderQuestions: function () {
-            rpc('/web/dataset/resequence', {
-                model: "slide.question",
-                ids: this._getQuestionsIds()
-            }).then(this._modifyQuestionsSequence.bind(this))
+            this.orm
+                .webResequence("slide.question", this._getQuestionsIds())
+                .then(this._modifyQuestionsSequence.bind(this))
         },
         /*
          * @private
@@ -562,7 +558,9 @@
             const questionId = parseInt(question.dataset.questionId);
             this.call('dialog', 'add', ConfirmationDialog, {
                 title: _t('Delete Question'),
-                body: markup(_t('Are you sure you want to delete this question "<strong>%s</strong>"?', escape(question.dataset.title))),
+                body: _t('Are you sure you want to delete this question "%(title)s"?', {
+                    title: markup`<strong>${question.dataset.title}</strong>`,
+                }),
                 cancel: () => {
                 },
                 cancelLabel: _t('No'),

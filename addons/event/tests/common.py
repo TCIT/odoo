@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
+from contextlib import contextmanager
+from freezegun import freeze_time
+from unittest.mock import patch
 
-from odoo import fields
+from odoo import Command, fields
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.tests import common
 
@@ -10,7 +11,7 @@ class EventCase(common.TransactionCase):
 
     @classmethod
     def setUpClass(cls):
-        super(EventCase, cls).setUpClass()
+        super().setUpClass()
 
         cls.admin_user = cls.env.ref('base.user_admin')
         cls.admin_user.write({
@@ -22,6 +23,7 @@ class EventCase(common.TransactionCase):
         # set country in order to format Belgian numbers
         cls.company_admin.write({
             'country_id': cls.env.ref('base.be').id,
+            'email': 'noreply@company.com',
         })
 
         # Test users to use through the various tests
@@ -86,19 +88,25 @@ class EventCase(common.TransactionCase):
             tz='Europe/Brussels',
         )
 
+        cls.event_organizer = cls.env['res.partner'].create({
+            'city': 'Bruxelles',
+            'country_id': cls.env.ref('base.be').id,
+            'email': 'organizer@example.com',
+            'name': 'Organizer',
+            'phone': '+32455123456',
+            'street': 'Organizer Street',
+        })
         cls.event_customer = cls.env['res.partner'].create({
             'name': 'Constantin Customer',
             'email': 'constantin@test.example.com',
             'country_id': cls.env.ref('base.be').id,
             'phone': '0485112233',
-            'mobile': False,
         })
         cls.event_customer2 = cls.env['res.partner'].create({
             'name': 'Constantin Customer 2',
             'email': 'constantin2@test.example.com',
             'country_id': cls.env.ref('base.be').id,
             'phone': '0456987654',
-            'mobile': '0456654321',
         })
         cls.reference_now = fields.Datetime.from_string('2022-09-05 15:11:34')
         cls.event_type_questions = cls.env['event.type'].create({
@@ -113,7 +121,7 @@ class EventCase(common.TransactionCase):
         cls.event_question_1 = cls.env['event.question'].create({
             'title': 'Question1',
             'question_type': 'simple_choice',
-            'event_type_id': cls.event_type_questions.id,
+            'event_type_ids': [Command.set(cls.event_type_questions.ids)],
             'once_per_order': False,
             'answer_ids': [
                 (0, 0, {'name': 'Q1-Answer1'}),
@@ -123,7 +131,7 @@ class EventCase(common.TransactionCase):
         cls.event_question_2 = cls.env['event.question'].create({
             'title': 'Question2',
             'question_type': 'simple_choice',
-            'event_type_id': cls.event_type_questions.id,
+            'event_type_ids': [Command.set(cls.event_type_questions.ids)],
             'once_per_order': True,
             'answer_ids': [
                 (0, 0, {'name': 'Q2-Answer1'}),
@@ -133,7 +141,7 @@ class EventCase(common.TransactionCase):
         cls.event_question_3 = cls.env['event.question'].create({
             'title': 'Question3',
             'question_type': 'text_box',
-            'event_type_id': cls.event_type_questions.id,
+            'event_type_ids': [Command.set(cls.event_type_questions.ids)],
             'once_per_order': True,
         })
 
@@ -149,6 +157,20 @@ class EventCase(common.TransactionCase):
             'phone': f'04560000{idx}{idx}',
         } for idx in range(0, reg_count)])
         return registrations
+
+    @classmethod
+    def _create_registrations_for_slot_and_ticket(cls, event, slot, ticket, count, **add_values):
+        return cls.env['event.registration'].create([
+            dict(
+                    {
+                    'email': f'{slot.id if slot else "NoSlot"}.{ticket.id if ticket else "NoTicket"}@test.example.com',
+                    'event_id': event.id,
+                    'event_slot_id': slot.id if slot else False,
+                    'event_ticket_id': ticket.id if ticket else False,
+                    'name': f'{slot.id if slot else "NoSlot"}.{ticket.id if ticket else "NoTicket"}',
+                }, **add_values
+            ) for idx in range(0, count)
+        ])
 
     @classmethod
     def _setup_test_reports(cls):
@@ -185,22 +207,22 @@ class EventCase(common.TransactionCase):
         cls.template_subscription = cls.env['mail.template'].create({
             "body_html": """<div>Hello your registration to <t t-out="object.event_id.name"/> is confirmed.</div>""",
             "email_from": "{{ (object.event_id.organizer_id.email_formatted or object.event_id.user_id.email_formatted or '') }}",
-            "email_to": """{{ (object.email and '"%s" <%s>' % (object.name, object.email)) or object.partner_id.email_formatted or '' }}""",
             "lang": "{{ object.event_id.lang or object.partner_id.lang }}",
             "model_id": cls.env['ir.model']._get_id("event.registration"),
             "name": "Event: Registration Confirmation TEST",
             "subject": "Confirmation for {{ object.event_id.name }}",
             "report_template_ids": [(4, cls.test_report_action.id)],
+            "use_default_to": True,
         })
         cls.template_reminder = cls.env['mail.template'].create({
             "body_html": """<div>Hello this is a reminder for your registration to  <t t-out="object.event_id.name"/>.</div>""",
             "email_from": "{{ (object.event_id.organizer_id.email_formatted or object.event_id.user_id.email_formatted or '') }}",
-            "email_to": """{{ (object.email and '"%s" <%s>' % (object.name, object.email)) or object.partner_id.email_formatted or '' }}""",
             "lang": "{{ object.event_id.lang or object.partner_id.lang }}",
             "model_id": cls.env['ir.model']._get_id("event.registration"),
             "name": "Event: Registration Reminder TEST",
             "subject": "Reminder for {{ object.event_id.name }}: {{ object.event_date_range }}",
             "report_template_ids": [(4, cls.test_report_action.id)],
+            "use_default_to": True,
         })
 
     def assertSchedulerCronTriggers(self, capture, call_at_list):
@@ -208,3 +230,12 @@ class EventCase(common.TransactionCase):
         for record, call_at in zip(capture.records, call_at_list):
             self.assertEqual(record.call_at, call_at.replace(microsecond=0))
             self.assertEqual(record.cron_id, self.env.ref('event.event_mail_scheduler'))
+
+    @contextmanager
+    def mock_datetime_and_now(self, mock_dt):
+        """ Used when synchronization date (using env.cr.now()) is important
+        in addition to standard datetime mocks. Used mainly to detect sync
+        issues. """
+        with freeze_time(mock_dt), \
+             patch.object(self.env.cr, 'now', lambda: mock_dt):
+            yield

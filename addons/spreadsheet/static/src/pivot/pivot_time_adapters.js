@@ -1,13 +1,12 @@
-/** @odoo-module */
 // @ts-check
 
-import { registries, helpers, constants } from "@odoo/o-spreadsheet";
+import { registries, helpers, constants, EvaluationError } from "@odoo/o-spreadsheet";
 import { deserializeDate } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
 
 const { pivotTimeAdapterRegistry } = registries;
-const { formatValue, toNumber, toJsDate, toString } = helpers;
+const { toNumber, toJsDate, toString } = helpers;
 const { DEFAULT_LOCALE } = constants;
 
 const { DateTime } = luxon;
@@ -49,14 +48,20 @@ const { DateTime } = luxon;
  * The reason is PIVOT functions are currently generated without being aware of the spreadsheet locale.
  */
 
-const odooNumberDateAdapter = {
-    normalizeServerValue(groupBy, field, readGroupResult) {
-        return Number(readGroupResult[groupBy]);
-    },
-    increment(normalizedValue, step) {
-        return normalizedValue + step;
-    },
-};
+function boundedOdooNumberDateAdapter(lower, upper) {
+    return {
+        normalizeServerValue(groupBy, field, readGroupResult) {
+            return Number(readGroupResult[groupBy]);
+        },
+        increment(normalizedValue, step) {
+            const value = normalizedValue + step;
+            if (value < lower || upper < value) {
+                return undefined;
+            }
+            return value;
+        },
+    };
+}
 
 const odooDayAdapter = {
     normalizeServerValue(groupBy, field, readGroupResult) {
@@ -68,11 +73,22 @@ const odooDayAdapter = {
     },
 };
 
+const weekInputRegex = /\d{1,2}\/\d{4}/;
+
 /**
  * Normalized value: "2/2023" for week 2 of 2023
  */
 const odooWeekAdapter = {
     normalizeFunctionValue(value) {
+        if (!weekInputRegex.test(value)) {
+            const example = `"52/${DateTime.now().year}"`;
+            throw new EvaluationError(
+                _t(
+                    "Week value must be a string in the format %(example)s, but received %(received_value)s instead.",
+                    { example, received_value: value }
+                )
+            );
+        }
         const [week, year] = toString(value).split("/");
         return `${Number(week)}/${Number(year)}`;
     },
@@ -105,19 +121,6 @@ const odooWeekAdapter = {
  * e.g. "01/2020" for January 2020
  */
 const odooMonthAdapter = {
-    normalizeFunctionValue(value) {
-        const date = toNumber(value, DEFAULT_LOCALE);
-        return formatValue(date, { locale: DEFAULT_LOCALE, format: "mm/yyyy" });
-    },
-    toValueAndFormat(normalizedValue) {
-        return {
-            value: toNumber(normalizedValue, DEFAULT_LOCALE),
-            format: "mmmm yyyy",
-        };
-    },
-    toFunctionValue(normalizedValue) {
-        return `"${normalizedValue}"`;
-    },
     normalizeServerValue(groupBy, field, readGroupResult) {
         const firstOfTheMonth = getGroupStartingDay(field, groupBy, readGroupResult);
         const date = deserializeDate(firstOfTheMonth).reconfigure({ numberingSystem: "latn" });
@@ -169,12 +172,20 @@ const odooQuarterAdapter = {
     },
 };
 
-const odooDayOfWeekAdapter = {
+const odooYearAdapter = {
     normalizeServerValue(groupBy, field, readGroupResult) {
-        /**
-         * 0: First day of the week in the locale.
-         */
-        return Number(readGroupResult[groupBy]) + 1;
+        const value = readGroupResult[groupBy];
+        return Array.isArray(value) ? Number(value[1]) : false;
+    },
+    increment(normalizedValue, step) {
+        return normalizedValue + step;
+    },
+};
+
+const odooDayOfWeekAdapter = {
+    normalizeServerValue(groupBy, field, readGroupResult, locale) {
+        const fromLocaleIsZero = (7 - locale.weekStart + Number(readGroupResult[groupBy])) % 7;
+        return fromLocaleIsZero + 1; // 1-based
     },
     increment(normalizedValue, step) {
         return (normalizedValue + step) % 7;
@@ -211,11 +222,11 @@ const odooSecondNumberAdapter = {
  */
 function falseHandlerDecorator(adapter) {
     return {
-        normalizeServerValue(groupBy, field, readGroupResult) {
+        normalizeServerValue(groupBy, field, readGroupResult, locale) {
             if (readGroupResult[groupBy] === false) {
                 return false;
             }
-            return adapter.normalizeServerValue(groupBy, field, readGroupResult);
+            return adapter.normalizeServerValue(groupBy, field, readGroupResult, locale);
         },
         increment(normalizedValue, step) {
             if (
@@ -227,7 +238,7 @@ function falseHandlerDecorator(adapter) {
             return adapter.increment(normalizedValue, step);
         },
         normalizeFunctionValue(value) {
-            if (value.toLowerCase() === "false") {
+            if ((typeof value === "string" && value.toLowerCase() === "false") || value === false) {
                 return false;
             }
             return adapter.normalizeFunctionValue(value);
@@ -252,7 +263,7 @@ function falseHandlerDecorator(adapter) {
 
 function extendSpreadsheetAdapter(granularity, adapter) {
     const originalAdapter = pivotTimeAdapterRegistry.get(granularity);
-    pivotTimeAdapterRegistry.add(
+    pivotTimeAdapterRegistry.replace(
         granularity,
         falseHandlerDecorator({
             ...originalAdapter,
@@ -262,34 +273,30 @@ function extendSpreadsheetAdapter(granularity, adapter) {
 }
 
 pivotTimeAdapterRegistry.add("week", falseHandlerDecorator(odooWeekAdapter));
-pivotTimeAdapterRegistry.add("month", falseHandlerDecorator(odooMonthAdapter));
 pivotTimeAdapterRegistry.add("quarter", falseHandlerDecorator(odooQuarterAdapter));
 
 extendSpreadsheetAdapter("day", odooDayAdapter);
-extendSpreadsheetAdapter("year", odooNumberDateAdapter);
-extendSpreadsheetAdapter("day_of_month", odooNumberDateAdapter);
-extendSpreadsheetAdapter("day", odooDayAdapter);
-extendSpreadsheetAdapter("iso_week_number", odooNumberDateAdapter);
-extendSpreadsheetAdapter("month_number", odooNumberDateAdapter);
-extendSpreadsheetAdapter("quarter_number", odooNumberDateAdapter);
+extendSpreadsheetAdapter("year", odooYearAdapter);
+extendSpreadsheetAdapter("day_of_month", boundedOdooNumberDateAdapter(1, 31));
+extendSpreadsheetAdapter("iso_week_number", boundedOdooNumberDateAdapter(0, 54));
+extendSpreadsheetAdapter("month_number", boundedOdooNumberDateAdapter(1, 12));
+extendSpreadsheetAdapter("quarter_number", boundedOdooNumberDateAdapter(1, 4));
 extendSpreadsheetAdapter("day_of_week", odooDayOfWeekAdapter);
 extendSpreadsheetAdapter("hour_number", odooHourNumberAdapter);
 extendSpreadsheetAdapter("minute_number", odooMinuteNumberAdapter);
 extendSpreadsheetAdapter("second_number", odooSecondNumberAdapter);
+extendSpreadsheetAdapter("month", odooMonthAdapter);
 
 /**
  * When grouping by a time field, return
  * the group starting day (local to the timezone)
  * @param {object} field
  * @param {string} groupBy
- * @param {object} readGroup
+ * @param {object} group
  * @returns {string | undefined}
  */
-function getGroupStartingDay(field, groupBy, readGroup) {
-    if (!readGroup["__range"] || !readGroup["__range"][groupBy]) {
-        return undefined;
-    }
-    const sqlValue = readGroup["__range"][groupBy].from;
+function getGroupStartingDay(field, groupBy, group) {
+    const sqlValue = group[groupBy][0];
     if (field.type === "date") {
         return sqlValue;
     }
@@ -299,14 +306,14 @@ function getGroupStartingDay(field, groupBy, readGroup) {
 
 /**
  * Parses a pivot week header value.
- * @param {string} value
+ * @param {Array} value
  * @example
- * parseServerWeekHeader("W1 2020") // { week: 1, year: 2020 }
+ * parseServerWeekHeader(['2016-04-11', 'W15 2016']) // { week: 15, year: 2016 }
  */
 function parseServerWeekHeader(value) {
-    // Value is always formatted as "W1 2020", no matter the language.
+    // Value is always formatted as "W15 2016", no matter the language.
     // Parsing this formatted value is the only way to ensure we get the same
     // locale aware week number as the one used in the server.
-    const [week, year] = value.split(" ");
+    const [week, year] = value[1].split(" ");
     return { week: Number(week.slice(1)), year: Number(year) };
 }

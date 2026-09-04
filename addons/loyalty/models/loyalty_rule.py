@@ -1,20 +1,20 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ast
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.osv import expression
+from odoo.fields import Domain
+
 
 class LoyaltyRule(models.Model):
     _name = 'loyalty.rule'
-    _description = 'Loyalty Rule'
+    _description = "Loyalty Rule"
 
     @api.model
-    def default_get(self, fields_list):
+    def default_get(self, fields):
         # Try to copy the values of the program types default's
-        result = super().default_get(fields_list)
+        result = super().default_get(fields)
         if 'program_type' in self.env.context:
             program_type = self.env.context['program_type']
             program_default_values = self.env['loyalty.program']._program_type_default_values()
@@ -22,7 +22,7 @@ class LoyaltyRule(models.Model):
                 len(program_default_values[program_type]['rule_ids']) == 2 and\
                 isinstance(program_default_values[program_type]['rule_ids'][1][2], dict):
                 result.update({
-                    k: v for k, v in program_default_values[program_type]['rule_ids'][1][2].items() if k in fields_list
+                    k: v for k, v in program_default_values[program_type]['rule_ids'][1][2].items() if k in fields
                 })
         return result
 
@@ -31,14 +31,14 @@ class LoyaltyRule(models.Model):
         #  and makes sure to display the currency related to the program instead of the company's.
         symbol = self.env.context.get('currency_symbol', self.env.company.currency_id.symbol)
         return [
-            ('order', _('per order')),
-            ('money', _('per %s spent', symbol)),
-            ('unit', _('per unit paid')),
+            ('order', _("per order")),
+            ('money', _("per %s spent", symbol)),
+            ('unit', _("per unit paid")),
         ]
 
     active = fields.Boolean(default=True)
-    program_id = fields.Many2one('loyalty.program', required=True, ondelete='cascade')
-    program_type = fields.Selection(related="program_id.program_type")
+    program_id = fields.Many2one(comodel_name='loyalty.program', ondelete='cascade', required=True, index=True)
+    program_type = fields.Selection(related='program_id.program_type')
     # Stored for security rules
     company_id = fields.Many2one(related='program_id.company_id', store=True)
     currency_id = fields.Many2one(related='program_id.currency_id')
@@ -47,56 +47,74 @@ class LoyaltyRule(models.Model):
     user_has_debug = fields.Boolean(compute='_compute_user_has_debug')
     product_domain = fields.Char(default="[]")
 
-    product_ids = fields.Many2many('product.product', string='Products')
-    product_category_id = fields.Many2one('product.category', string='Categories')
-    product_tag_id = fields.Many2one('product.tag', string='Product Tag')
+    product_ids = fields.Many2many(string="Products", comodel_name='product.product')
+    product_category_id = fields.Many2one(string="Categories", comodel_name='product.category')
+    product_tag_id = fields.Many2one(string="Product Tag", comodel_name='product.tag')
 
-    reward_point_amount = fields.Float(default=1, string="Reward")
+    reward_point_amount = fields.Float(string="Reward", default=1)
     # Only used for program_id.applies_on == 'future'
-    reward_point_split = fields.Boolean(string='Split per unit', default=False,
-        help="Whether to separate reward coupons per matched unit, only applies to 'future' programs and trigger mode per money spent or unit paid..")
+    reward_point_split = fields.Boolean(
+        string="Split per unit",
+        help="Whether to separate reward coupons per matched unit, only applies to 'future' programs and trigger mode per money spent or unit paid...",
+        default=False,
+    )
     reward_point_name = fields.Char(related='program_id.portal_point_name', readonly=True)
-    reward_point_mode = fields.Selection(selection=_get_reward_point_mode_selection, required=True, default='order')
+    reward_point_mode = fields.Selection(
+        selection=_get_reward_point_mode_selection, required=True, default='order'
+    )
 
-    minimum_qty = fields.Integer('Minimum Quantity', default=1)
-    minimum_amount = fields.Monetary('Minimum Purchase', 'currency_id')
+    minimum_qty = fields.Integer(string="Minimum Quantity", default=1)
+    minimum_amount = fields.Monetary(string="Minimum Purchase")
     minimum_amount_tax_mode = fields.Selection(
         selection=[
             ('incl', "tax included"),
             ('excl', "tax excluded"),
         ],
-        default='incl',
         required=True,
+        default='incl',
     )
 
-    mode = fields.Selection([
-        ('auto', 'Automatic'),
-        ('with_code', 'With a promotion code'),
-    ], string="Application", compute='_compute_mode', store=True, readonly=False)
-    code = fields.Char(string='Discount code', compute='_compute_code', store=True, readonly=False)
+    mode = fields.Selection(
+        string="Application",
+        selection=[
+            ('auto', "Automatic"),
+            ('with_code', "With a promotion code"),
+        ],
+        compute='_compute_mode',
+        store=True,
+        readonly=False,
+    )
+    code = fields.Char(string="Discount code", compute='_compute_code', store=True, readonly=False)
 
-    _sql_constraints = [
-        ('reward_point_amount_positive', 'CHECK (reward_point_amount > 0)', 'Rule points reward must be strictly positive.'),
-    ]
+    _reward_point_amount_positive = models.Constraint(
+        'CHECK (reward_point_amount > 0)',
+        "Rule points reward must be strictly positive.",
+    )
 
     @api.constrains('reward_point_split')
     def _constraint_trigger_multi(self):
         # Prevent setting trigger multi in case of nominative programs, it does not make sense to allow this
         for rule in self:
             if rule.reward_point_split and (rule.program_id.applies_on == 'both' or rule.program_id.program_type == 'ewallet'):
-                raise ValidationError(_('Split per unit is not allowed for Loyalty and eWallet programs.'))
+                raise ValidationError(_("Split per unit is not allowed for Loyalty and eWallet programs."))
 
-    @api.constrains('code')
+    @api.constrains('code', 'active')
     def _constrains_code(self):
-        mapped_codes = self.filtered('code').mapped('code')
+        mapped_codes = self.filtered(lambda r: r.code and r.active).mapped('code')
         # Program code must be unique
         if len(mapped_codes) != len(set(mapped_codes)) or\
-            self.env['loyalty.rule'].search_count(
-                [('mode', '=', 'with_code'), ('code', 'in', mapped_codes), ('id', 'not in', self.ids)]):
-            raise ValidationError(_('The promo code must be unique.'))
+            self.env['loyalty.rule'].search_count([
+                ('mode', '=', 'with_code'),
+                ('code', 'in', mapped_codes),
+                ('id', 'not in', self.ids),
+                ('active', '=', True),
+            ]):
+            raise ValidationError(_("The promo code must be unique."))
         # Prevent coupons and programs from sharing a code
-        if self.env['loyalty.card'].search_count([('code', 'in', mapped_codes)]):
-            raise ValidationError(_('A coupon with the same code was found.'))
+        if self.env['loyalty.card'].search_count([
+            ('code', 'in', mapped_codes), ('active', '=', True)
+        ]):
+            raise ValidationError(_("A coupon with the same code was found."))
 
     @api.depends('mode')
     def _compute_code(self):
@@ -114,7 +132,7 @@ class LoyaltyRule(models.Model):
                 rule.mode = 'auto'
 
     @api.depends_context('uid')
-    @api.depends("mode")
+    @api.depends('mode')
     def _compute_user_has_debug(self):
         self.user_has_debug = self.env.user.has_group('base.group_no_one')
 
@@ -127,9 +145,9 @@ class LoyaltyRule(models.Model):
             constrains.append([('categ_id', 'child_of', self.product_category_id.id)])
         if self.product_tag_id:
             constrains.append([('all_product_tag_ids', 'in', self.product_tag_id.id)])
-        domain = expression.OR(constrains) if constrains else []
+        domain = Domain.OR(constrains) if constrains else Domain.TRUE
         if self.product_domain and self.product_domain != '[]':
-            domain = expression.AND([domain, ast.literal_eval(self.product_domain)])
+            domain &= Domain(ast.literal_eval(self.product_domain))
         return domain
 
     def _get_valid_products(self):

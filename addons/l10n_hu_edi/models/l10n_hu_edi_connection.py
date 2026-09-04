@@ -126,7 +126,7 @@ class L10nHuEdiConnection:
         :param invoice_operations: a list of dictionaries:
             {
                 'index': <index given to invoice>,
-                'operation': 'CREATE' or 'MODIFY',
+                'operation': 'CREATE' or 'MODIFY' or 'STORNO',
                 'invoice_data': <XML data of the invoice as bytes>
             }
         :return str: The transaction code issued by NAV.
@@ -366,7 +366,7 @@ class L10nHuEdiConnection:
             'passwordHash': self._calculate_password_hash(credentials['password']),
             'taxNumber': credentials['vat'][:8],
             'requestSignature': request_signature,
-            'softwareId': f'BE477472701-{module_version}'[:18],
+            'softwareId': f'BE477472701-{module_version}'.ljust(18, '0')[:18],
             'softwareName': 'Odoo Enterprise',
             'softwareOperation': 'ONLINE_SERVICE',
             'softwareMainVersion': odoo_version,

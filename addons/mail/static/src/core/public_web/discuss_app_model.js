@@ -1,97 +1,82 @@
-import { Record } from "@mail/core/common/record";
+import { fields, Record } from "@mail/core/common/record";
 import { browser } from "@web/core/browser/browser";
-import { _t } from "@web/core/l10n/translation";
+
+export const NO_MEMBERS_DEFAULT_OPEN_LS = "mail.user_setting.no_members_default_open";
+export const DISCUSS_SIDEBAR_COMPACT_LS = "mail.user_setting.discuss_sidebar_compact";
+export const LAST_DISCUSS_ACTIVE_ID_LS = "mail.user_setting.discuss_last_active_id";
 
 export class DiscussApp extends Record {
-    static new(data) {
-        /** @type {import("models").DiscussApp} */
-        const res = super.new(data);
-        Object.assign(res, {
-            channels: {
-                extraClass: "o-mail-DiscussSidebarCategory-channel",
-                icon: "fa fa-hashtag",
-                id: "channels",
-                name: _t("Channels"),
-                canView: true,
-                canAdd: true,
-                sequence: 10,
-                serverStateKey: "is_discuss_sidebar_category_channel_open",
-                addTitle: _t("Add or join a channel"),
-                addHotkey: "c",
-            },
-            chats: {
-                extraClass: "o-mail-DiscussSidebarCategory-chat",
-                icon: "fa fa-users",
-                id: "chats",
-                name: _t("Direct messages"),
-                canView: false,
-                canAdd: true,
-                sequence: 30,
-                serverStateKey: "is_discuss_sidebar_category_chat_open",
-                addTitle: _t("Start a conversation"),
-                addHotkey: "d",
-            },
-        });
-        return res;
-    }
-    /** @returns {import("models").DiscussApp} */
-    static get(data) {
-        return super.get(data);
-    }
-    /** @returns {import("models").DiscussApp|import("models").DiscussApp[]} */
-    static insert(data) {
-        return super.insert(...arguments);
-    }
-
     INSPECTOR_WIDTH = 300;
-    /** @type {'main'|'channel'|'chat'|'livechat'} */
-    activeTab = "main";
+    COMPACT_SIDEBAR_WIDTH = 60;
+    /** @type {'notification'|'channel'|'chat'|'livechat'|'inbox'} */
+    activeTab = "notification";
     searchTerm = "";
     isActive = false;
-    isMemberPanelOpenByDefault = Record.attr(true, {
+    _recomputeIsMemberPanelOpenByDefault = 0;
+    isMemberPanelOpenByDefault = fields.Attr(true, {
         compute() {
-            return (
-                browser.localStorage.getItem("mail.user_setting.no_members_default_open") !== "true"
-            );
+            void this._recomputeIsMemberPanelOpenByDefault;
+            return browser.localStorage.getItem(NO_MEMBERS_DEFAULT_OPEN_LS) !== "true";
+        },
+    });
+    _recomputeIsSidebarCompact = 0;
+    isSidebarCompact = fields.Attr(false, {
+        compute() {
+            void this._recomputeIsSidebarCompact;
+            return browser.localStorage.getItem(DISCUSS_SIDEBAR_COMPACT_LS) === "true";
+        },
+    });
+    lastActiveId = fields.Attr(undefined, {
+        /** @this {import("models").DiscussApp} */
+        compute() {
+            return browser.localStorage.getItem(LAST_DISCUSS_ACTIVE_ID_LS) ?? undefined;
         },
         /** @this {import("models").DiscussApp} */
         onUpdate() {
-            if (this.isMemberPanelOpenByDefault) {
-                browser.localStorage.removeItem("mail.user_setting.no_members_default_open");
+            if (this.lastActiveId) {
+                browser.localStorage.setItem(LAST_DISCUSS_ACTIVE_ID_LS, this.lastActiveId);
             } else {
-                browser.localStorage.setItem("mail.user_setting.no_members_default_open", "true");
+                browser.localStorage.removeItem(LAST_DISCUSS_ACTIVE_ID_LS);
             }
         },
     });
-    isSidebarCompact = Record.attr(false, {
-        compute() {
-            return (
-                browser.localStorage.getItem("mail.user_setting.discuss_sidebar_compact") === "true"
-            );
-        },
+    thread = fields.One("Thread", {
         /** @this {import("models").DiscussApp} */
         onUpdate() {
-            if (this.isSidebarCompact) {
-                browser.localStorage.setItem(
-                    "mail.user_setting.discuss_sidebar_compact",
-                    this.isSidebarCompact.toString()
-                );
-            } else {
-                browser.localStorage.removeItem("mail.user_setting.discuss_sidebar_compact");
-            }
+            this._threadOnUpdate();
         },
     });
-    allCategories = Record.many("DiscussAppCategory", {
-        inverse: "app",
-        sort: (c1, c2) =>
-            c1.sequence !== c2.sequence
-                ? c1.sequence - c2.sequence
-                : c1.name.localeCompare(c2.name),
-    });
-    thread = Record.one("Thread");
-    channels = Record.one("DiscussAppCategory");
-    chats = Record.one("DiscussAppCategory");
     hasRestoredThread = false;
+
+    static new() {
+        const record = super.new(...arguments);
+        record.onStorage = record.onStorage.bind(record);
+        browser.addEventListener("storage", record.onStorage);
+        return record;
+    }
+
+    delete() {
+        browser.removeEventListener("storage", this.onStorage);
+        super.delete(...arguments);
+    }
+
+    onStorage(ev) {
+        if (ev.key === DISCUSS_SIDEBAR_COMPACT_LS) {
+            this._recomputeIsSidebarCompact++;
+        }
+        if (ev.key === NO_MEMBERS_DEFAULT_OPEN_LS) {
+            this._recomputeIsMemberPanelOpenByDefault++;
+        }
+    }
+
+    /** @param {import("@mail/core/common/action").Action} [nextActiveAction] */
+    shouldDisableMemberPanelAutoOpenFromClose(nextActiveAction) {
+        return true;
+    }
+
+    _threadOnUpdate() {
+        this.lastActiveId = this.store.Thread.localIdToActiveId(this.thread?.localId);
+    }
 }
 
 DiscussApp.register();

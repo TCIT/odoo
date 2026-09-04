@@ -1,22 +1,55 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { SelectionField, selectionField } from "@web/views/fields/selection/selection_field";
 
 export class AccountTypeSelection extends SelectionField {
     static template = "account.AccountTypeSelection";
-    get hierarchyOptions() {
-        const opts = this.options;
-        return [
-            { name: _t('Balance Sheet') },
-            { name: _t('Assets'), children: opts.filter(x => x[0] && x[0].startsWith('asset')) },
-            { name: _t('Liabilities'), children: opts.filter(x => x[0] && x[0].startsWith('liability')) },
-            { name: _t('Equity'), children: opts.filter(x => x[0] && x[0].startsWith('equity')) },
-            { name: _t('Profit & Loss') },
-            { name: _t('Income'), children: opts.filter(x => x[0] && x[0].startsWith('income')) },
-            { name: _t('Expense'), children: opts.filter(x => x[0] && x[0].startsWith('expense')) },
-            { name: _t('Other'), children: opts.filter(x => x[0] && x[0] === 'off_balance') },
+    setup() {
+        super.setup();
+        const getChoicesForGroup = (group) => {
+            return this.choices.filter(x => x.value.startsWith(group));
+        }
+        this.sections = [
+            {
+                label: _t('Balance Sheet'),
+                name: "balance_sheet"
+            },
+            {
+                label: _t('Profit & Loss'),
+                name: "profit_and_loss"
+            },
+        ]
+        this.groups = [
+            {
+                label: _t('Assets'),
+                choices: getChoicesForGroup('asset'),
+                section: "balance_sheet",
+            },
+            {
+                label: _t('Liabilities'),
+                choices: getChoicesForGroup('liability'),
+                section: "balance_sheet",
+            },
+            {
+                label: _t('Equity'),
+                choices: getChoicesForGroup('equity'),
+                section: "balance_sheet",
+            },
+            {
+                label: _t('Income'),
+                choices: getChoicesForGroup('income'),
+                section: "profit_and_loss",
+            },
+            {
+                label: _t('Expense'),
+                choices: getChoicesForGroup('expense'),
+                section: "profit_and_loss",
+            },
+            {
+                label: _t('Other'),
+                choices: getChoicesForGroup('off_balance'),
+                section: "profit_and_loss",
+            },
         ];
     }
 }

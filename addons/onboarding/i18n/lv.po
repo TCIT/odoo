@@ -1,31 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* onboarding
-# 
-# Translators:
-# Will Sensors, 2024
-# Konstantins Zabogonskis <inculin4ik@gmail.com>, 2024
-# ievaputnina <ievai.putninai@gmail.com>, 2024
-# Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2024
-# 
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:57+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2024\n"
-"Language-Team: Latvian (https://app.transifex.com/odoo/teams/41243/lv/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-07 22:00+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Latvian <https://translate.odoo.com/projects/odoo-19/"
+"onboarding/lv/>\n"
+"Language: lv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lv\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);\n"
-
-#. module: onboarding
-#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
-msgid "#{alt}"
-msgstr ""
+"Plural-Forms: nplurals=3; plural=(n % 10 == 0 || n % 100 >= 11 && n % 100 <= "
+"19) ? 0 : ((n % 10 == 1 && n % 100 != 11) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__progress_ids
@@ -35,7 +27,7 @@ msgstr ""
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
 msgid "All done!"
-msgstr "Viss pabeigts!"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__progress_ids
@@ -51,8 +43,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/onboarding/models/onboarding_onboarding_step.py:0
 msgid ""
-"An \"Opening Action\" is required for the following steps to be linked to an"
-" onboarding panel: %(step_titles)s"
+"An \"Opening Action\" is required for the following steps to be linked to an "
+"onboarding panel: %(step_titles)s"
 msgstr ""
 
 #. module: onboarding
@@ -68,12 +60,12 @@ msgstr ""
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
 msgid "Cancel"
-msgstr "Atcelt"
+msgstr ""
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
 msgid "Close"
-msgstr "Aizvērt"
+msgstr ""
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
@@ -94,7 +86,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__company_id
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__company_id
 msgid "Company"
-msgstr "Uzņēmums"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__current_onboarding_state
@@ -108,7 +100,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__create_uid
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__create_uid
 msgid "Created by"
-msgstr "Izveidoja"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__create_date
@@ -116,12 +108,12 @@ msgstr "Izveidoja"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__create_date
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__create_date
 msgid "Created on"
-msgstr "Izveidots"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__description
 msgid "Description"
-msgstr "Apraksts"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__display_name
@@ -129,7 +121,7 @@ msgstr "Apraksts"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__display_name
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__display_name
 msgid "Display Name"
-msgstr "Nosaukums"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__done
@@ -137,7 +129,7 @@ msgstr "Nosaukums"
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress__onboarding_state__done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress_step__step_state__done
 msgid "Done"
-msgstr "Gatavs"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__done_icon
@@ -160,7 +152,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__id
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__is_per_company
@@ -173,7 +165,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress__onboarding_state__just_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress_step__step_state__just_done
 msgid "Just done"
-msgstr "Tikko gatavs"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__write_uid
@@ -181,7 +173,7 @@ msgstr "Tikko gatavs"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__write_uid
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__write_uid
 msgid "Last Updated by"
-msgstr "Pēdējo reizi atjaunoja"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__write_date
@@ -189,14 +181,14 @@ msgstr "Pēdējo reizi atjaunoja"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__write_date
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__write_date
 msgid "Last Updated on"
-msgstr "Pēdējās izmaiņas"
+msgstr ""
 
 #. module: onboarding
 #. odoo-python
 #: code:addons/onboarding/models/onboarding_onboarding_step.py:0
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
 msgid "Let's do it"
-msgstr "Izdarīsim to"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__text_completed
@@ -224,7 +216,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/onboarding/models/onboarding_onboarding.py:0
 msgid "Nice work! Your configuration is done."
-msgstr "Labs darbs! Jūsu konfigurācija ir pabeigta."
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__not_done
@@ -232,12 +224,12 @@ msgstr "Labs darbs! Jūsu konfigurācija ir pabeigta."
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress__onboarding_state__not_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress_step__step_state__not_done
 msgid "Not done"
-msgstr "Nav pabeigts"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model,name:onboarding.model_onboarding_onboarding
 msgid "Onboarding"
-msgstr "Uzņemšana"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__current_progress_id
@@ -278,7 +270,7 @@ msgstr ""
 #: model:ir.model,name:onboarding.model_onboarding_onboarding_step
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__step_id
 msgid "Onboarding Step"
-msgstr "Uzņemšanas posms"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__step_state
@@ -349,7 +341,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__sequence
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__sequence
 msgid "Sequence"
-msgstr "Sekvence"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__is_per_company
@@ -365,7 +357,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/onboarding/models/onboarding_onboarding_step.py:0
 msgid "Step Completed!"
-msgstr "Solis pabeigts!"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image
@@ -405,7 +397,7 @@ msgstr ""
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__title
 msgid "Title"
-msgstr "Nosaukums"
+msgstr ""
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_form

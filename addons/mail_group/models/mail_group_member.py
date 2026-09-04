@@ -19,14 +19,13 @@ class MailGroupMember(models.Model):
     email_normalized = fields.Char(
         string='Normalized Email', compute='_compute_email_normalized',
         index=True, store=True)
-    mail_group_id = fields.Many2one('mail.group', string='Group', required=True, ondelete='cascade')
+    mail_group_id = fields.Many2one('mail.group', string='Group', required=True, index=True, ondelete='cascade')
     partner_id = fields.Many2one('res.partner', 'Partner', ondelete='cascade')
 
-    _sql_constraints = [(
-        'unique_partner',
+    _unique_partner = models.Constraint(
         'UNIQUE(partner_id, mail_group_id)',
         'This partner is already subscribed to the group',
-    )]
+    )
 
     @api.depends('partner_id.email')
     def _compute_email(self):

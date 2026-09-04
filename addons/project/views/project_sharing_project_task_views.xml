@@ -4,7 +4,7 @@
         <field name="name">project.task.form.quick_create</field>
         <field name="model">project.task</field>
         <field name="priority">999</field>
-        <field name="groups_id" eval="[(4, ref('base.group_portal')), (4, ref('base.group_user'))]"/>
+        <field name="group_ids" eval="[(4, ref('base.group_portal')), (4, ref('base.group_user'))]"/>
         <field name="arch" type="xml">
             <form>
                 <group>
@@ -18,7 +18,7 @@
         <field name="name">project.sharing.project.task.view.kanban</field>
         <field name="model">project.task</field>
         <field name="priority">999</field>
-        <field name="groups_id" eval="[(4, ref('base.group_portal')), (4, ref('base.group_user'))]"/>
+        <field name="group_ids" eval="[(4, ref('base.group_portal')), (4, ref('base.group_user'))]"/>
         <field name="arch" type="xml">
             <kanban
                 highlight_color="color"
@@ -29,12 +29,13 @@
                 archivable="0"
                 import="0"
                 groups_draggable="0"
+                group_edit="0"
                 default_order="priority desc, sequence, state, date_deadline asc, id desc"
             >
                 <field name="state"/>
                 <field name="allow_milestones" />
                 <field name="has_late_and_unreached_milestone"/>
-                <progressbar field="state" colors='{"1_done": "success", "03_approved": "success", "02_changes_requested": "warning", "1_canceled": "danger", "04_waiting_normal": "200", "01_in_progress": "200"}'/>
+                <progressbar field="state" colors='{"1_done": "success-done", "1_canceled": "danger", "03_approved": "success", "02_changes_requested": "warning", "04_waiting_normal": "info", "01_in_progress": "200"}'/>
                 <templates>
                 <t t-name="menu" t-if="!selection_mode">
                     <div role="separator" class="dropdown-divider"></div>
@@ -53,7 +54,7 @@
                     <field t-if="record.date_deadline.raw_value" name="date_deadline" invisible="state in ['1_done', '1_canceled']" widget="remaining_days"/>
                     <field t-if="record.displayed_image_id.value" groups="base.group_user" name="displayed_image_id" widget="attachment_image"/>
                     <footer t-if="!selection_mode">
-                        <field name="priority" class="me-2" widget="priority"/>
+                        <field name="priority" class="pt-1" widget="priority"/>
                         <div class="d-flex ms-auto text-truncate">
                             <span t-if="record.portal_user_names.raw_value.length > 0" class="pe-2 text-truncate" t-att-title="record.portal_user_names.raw_value">
                                 <t t-set="user_count" t-value="record.portal_user_names.raw_value.split(',').length"/>
@@ -79,6 +80,8 @@
             <list position="attributes">
                 <attribute name="delete">0</attribute>
                 <attribute name="import">0</attribute>
+                <attribute name="group_create">0</attribute>
+                <attribute name="default_group_by">stage_id</attribute>
             </list>
             <xpath expr="//field[@widget='res_partner_many2one']" position="attributes">
                 <attribute name="widget">many2one</attribute>
@@ -92,6 +95,11 @@
             <field name="partner_id" position="attributes">
                 <attribute name="column_invisible">0</attribute>
             </field>
+            <field name="is_rotting" position="replace"/>
+            <field name="rotting_days" position="replace"/>
+            <field name="stage_id" position="attributes">
+                <attribute name="widget">selection_badge</attribute>
+            </field>
         </field>
     </record>
 
@@ -99,7 +107,7 @@
         <field name="name">project.sharing.project.task.view.form</field>
         <field name="model">project.task</field>
         <field name="priority">999</field>
-        <field name="groups_id" eval="[(4, ref('base.group_portal')), (4, ref('base.group_user'))]"/>
+        <field name="group_ids" eval="[(4, ref('base.group_portal')), (4, ref('base.group_user'))]"/>
         <field name="arch" type="xml">
             <form string="Project Sharing: Task" class="o_form_project_tasks">
                 <header>
@@ -119,21 +127,20 @@
                                 <span class="o_stat_text">Parent Task</span>
                             </div>
                         </button>
-                        <button name="action_project_sharing_recurring_tasks" type="object" invisible="not active or not recurrence_id"
-                                class="oe_stat_button" icon="fa-repeat" context="{'default_user_ids': [(6, 0, [uid])]}">
+                        <button name="action_project_sharing_recurring_tasks" type="object" invisible="not active or not recurrence_id or not allow_recurring_tasks"
+                            class="oe_stat_button" icon="fa-repeat" context="{'default_user_ids': [(6, 0, [uid])]}">
                             <field name="recurring_count" widget="statinfo" string="Recurring Tasks"/>
                         </button>
                         <button name="action_project_sharing_open_subtasks" type="object" class="oe_stat_button" icon="fa-check"
                             invisible="not id or subtask_count == 0" context="{
                                 'default_user_ids': [(6, 0, [uid])],
                                 'default_project_id': project_id,
-                                'default_display_in_project': False,
                             }"
                         >
                             <field name="subtask_count" widget="statinfo" string="Sub-tasks"/>
                             <field name="display_in_project" invisible="True"/>
                         </button>
-                        <button name="action_project_sharing_open_blocking" type="object" invisible="not dependent_tasks_count" class="oe_stat_button" icon="fa-tasks">
+                        <button name="action_project_sharing_open_blocking" type="object" invisible="not dependent_tasks_count or not allow_task_dependencies" class="oe_stat_button" icon="fa-tasks">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_text">Blocked Tasks</span>
                                 <span class="o_stat_value ">
@@ -143,17 +150,18 @@
                         </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                    <div class="oe_title pe-0">
-                        <h1 class="d-flex flex-row justify-content-between">
-                            <field name="priority" widget="priority" class="me-3"/>
-                            <field name="name" class="o_task_name text-truncate" placeholder="Task Title..."/>
-                            <div class="d-flex justify-content-end o_state_container" invisible="not active">
-                                <field name="state" widget="project_task_state_selection" class="o_task_state_widget"/>
-                            </div>
-                            <div class="d-flex justify-content-start o_state_container w-100 w-md-50 w-lg-25" invisible="active">
-                                <field name="state" widget="project_task_state_selection" class="o_task_state_widget"/>
-                            </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1 class="d-flex w-100">
+                            <field name="name" options="{'line_breaks': False}" widget="text" class="o_task_name text-truncate w-md-75 w-100 pe-2" placeholder="Task Title..."/>
                         </h1>
+                        <div class="d-flex justify-content-end align-items-center px-1" invisible="not active or is_template">
+                            <field name="priority" class="h3 pe-2" widget="priority"/>
+                            <field name="state" widget="project_task_state_selection" class="o_task_state_widget" />
+                        </div>
+                        <div class="d-flex justify-content-start align-items-center w-100 w-md-50 w-lg-25" invisible="active and not is_template">
+                            <field name="priority" class="h3 pe-2" widget="priority"/>
+                            <field name="state" widget="project_task_state_selection" class="o_task_state_widget" />
+                        </div>
                     </div>
                     <group>
                         <group>
@@ -168,7 +176,6 @@
                             <field name="portal_user_names"
                                 string="Assignees"
                                 class="o_task_user_field"/>
-                            <field name="tag_ids" context="{'project_id': project_id}" widget="many2many_tags" options="{'color_field': 'color', 'no_create': True, 'no_edit': True, 'no_edit_color': True}"/>
                         </group>
                         <group>
                             <field name="active" invisible="1"/>
@@ -178,11 +185,12 @@
                             <field name="depend_on_count" invisible="1" />
                             <field name="allow_task_dependencies" invisible="1" />
                             <field name="current_user_same_company_partner" invisible="1"/>
+                            <field name="tag_ids" context="{'project_id': project_id}" widget="many2many_tags" options="{'color_field': 'color', 'no_create': True, 'no_edit': True, 'no_edit_color': True}"/>
                             <field name="partner_id" readonly="not current_user_same_company_partner" options="{'no_open': True, 'no_create': True, 'no_edit': True}" invisible="not project_id"/>
                             <field name="date_deadline" decoration-danger="date_deadline &lt; current_date and state not in ['1_done', '1_canceled']"/>
-                            <field name="recurring_task" groups="project.group_project_recurring_tasks"/>
-                            <label for="repeat_interval" invisible="not recurring_task" groups="project.group_project_recurring_tasks"/>
-                            <div invisible="not recurring_task" class="d-flex" groups="project.group_project_recurring_tasks">
+                            <field name="recurring_task" invisible="not allow_recurring_tasks or not active or parent_id" groups="project.group_project_recurring_tasks"/>
+                            <label for="repeat_interval" invisible="not recurring_task or not allow_recurring_tasks" groups="project.group_project_recurring_tasks"/>
+                            <div invisible="not recurring_task or not allow_recurring_tasks" class="d-flex" groups="project.group_project_recurring_tasks" name="repeat_intervals">
                                 <field name="repeat_interval" required="recurring_task"
                                        class="me-2" style="max-width: 2rem !important;" />
                                 <field name="repeat_unit" required="recurring_task"
@@ -197,11 +205,11 @@
                     <notebook>
                         <page name="description_page" string="Description">
                             <field name="description" type="html" placeholder="Add details about this task..."
-                                options="{'collaborative': true, 'disableImage': true, 'disableVideo': true, 'disableFile': true}"/>
+                                options="{'collaborative': true, 'allowAttachmentCreation': false, 'allowVideo': false}"/>
                         </page>
                         <page name="sub_tasks_page" string="Sub-tasks">
                             <field name="child_ids" context="{
-                                'default_project_id': project_id, 'default_display_in_project': False, 'default_parent_id': id,
+                                'default_project_id': project_id, 'default_parent_id': id,
                                 'default_milestone_id': allow_milestones and milestone_id, 'default_partner_id': partner_id,
                                 'form_view_ref' : 'project.project_sharing_project_task_view_form',
                             }">
@@ -210,7 +218,6 @@
                                     <field name="display_in_project" column_invisible="True"/>
                                     <field name="state" column_invisible="True"/>
                                     <field name="sequence" widget="handle"/>
-                                    <field name="priority" widget="priority" optional="show" nolabel="1" width="20px"/>
                                     <field name="state" widget="project_task_state_selection" nolabel="1" width="20px"/>
                                     <field name="subtask_count" column_invisible="1"/>
                                     <field name="closed_subtask_count" column_invisible="1"/>
@@ -227,6 +234,7 @@
                                     <field name="user_ids" column_invisible="True" />
                                     <field name="portal_user_names" string="Assignees" optional="show"/>
                                     <field name="date_deadline" decoration-danger="date_deadline &lt; current_date and state not in ['1_done', '1_canceled']" optional="show"/>
+                                    <field name="priority" widget="priority" optional="show" nolabel="1" width="20px"/>
                                     <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
                                     <field name="stage_id" domain="[('user_id', '=', False), ('project_ids', 'in', [project_id])]"/>
                                     <button name="action_open_task" type="object" title="View Task" string="View Task" class="btn btn-link float-end"
@@ -246,7 +254,6 @@
                                 <list editable="bottom" decoration-muted="state in ['1_done','1_canceled']">
                                     <field name="project_id" column_invisible="True"/>
                                     <field name="sequence" widget="handle"/>
-                                    <field name="priority" widget="priority" optional="show" nolabel="1" width="20px" readonly="1"/>
                                     <field name="state" widget="project_task_state_selection" nolabel="1" width="20px" readonly="1"/>
                                     <field name="subtask_count" column_invisible="1"/>
                                     <field name="closed_subtask_count" column_invisible="1"/>
@@ -262,6 +269,7 @@
                                     <field name="partner_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" optional="hide" invisible="not project_id"/>
                                     <field name="portal_user_names" string="Assignees" optional="show"/>
                                     <field name="date_deadline" decoration-danger="date_deadline &lt; current_date and state not in ['1_done', '1_canceled']" optional="show"/>
+                                    <field name="priority" widget="priority" optional="show" nolabel="1" width="20px" readonly="1"/>
                                     <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
                                     <field name="stage_id" optional="show"/>
                                     <button name="action_open_task" type="object" title="View Task" string="View Task" class="btn btn-link float-end"
@@ -287,26 +295,23 @@
         <field name="mode">primary</field>
         <field name="priority">999</field>
         <field name="arch" type="xml">
-            <filter name="date_last_stage_update" position="after">
+            <filter name="creation_date_filter" position="after">
                 <filter string="Deadline" name="date_deadline" date="date_deadline">
-                    <filter name="deadline_future" string="Future" domain="[('date_deadline', '&gt;', datetime.datetime.combine(context_today(), datetime.time(23,59,59)).to_utc())]"/>
+                    <filter name="deadline_future" string="Future" domain="[('date_deadline', '&gt;=', 'today +1d')]"/>
                     <filter name="deadline_this_week" string="This Week" domain="[
-                        ('date_deadline', '&gt;=', datetime.datetime.combine(context_today() + relativedelta(weeks=-1,days=1,weekday=0), datetime.time(0,0,0)).to_utc()),
-                        ('date_deadline', '&lt;', datetime.datetime.combine(context_today() + relativedelta(days=1,weekday=0), datetime.time(0,0,0)).to_utc()),
+                        ('date_deadline', '&gt;=', '=week_start'),
+                        ('date_deadline', '&lt;', '=week_start +1w'),
                     ]"/>
                     <filter name="deadline_today" string="Today" domain="[
-                        ('date_deadline', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)).to_utc()),
-                        ('date_deadline', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)).to_utc()),
+                        ('date_deadline', '&gt;=', 'today'),
+                        ('date_deadline', '&lt;', 'today +1d'),
                     ]"/>
-                    <filter name="deadline_past_due" string="Overdue" domain="[('date_deadline', '&lt;', datetime.datetime.combine(context_today(), datetime.time(0,0,0)).to_utc())]"/>
+                    <filter name="deadline_past_due" string="Overdue" domain="[('date_deadline', '&lt;', 'today')]"/>
                 </filter>
             </filter>
-            <filter name="last_stage_update" position="after">
+            <filter name="create_date" position="after">
                 <filter string="Deadline" name="deadline" context="{'group_by': 'date_deadline'}"/>
             </filter>
-            <xpath expr="//search/filter[@name='inactive']" position='attributes'>
-                <attribute name='invisible'>1</attribute>
-            </xpath>
         </field>
     </record>
 
@@ -325,16 +330,16 @@
             <field name="user_ids" position="after">
                 <field name="portal_user_names" string="Assignees" optional="show"/>
             </field>
-            
         </field>
     </record>
 
     <record id="project_sharing_project_task_action" model="ir.actions.act_window">
         <field name="name">Project Sharing</field>
         <field name="res_model">project.task</field>
+        <field name="path">project_sharing</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="project.project_sharing_project_task_view_search"/>
-        <field name="domain">[('project_id', '=', active_id), ('display_in_project', '=', True)]</field>
+        <field name="domain">[('project_id', '=', active_id), ('has_template_ancestor', '=', False)]</field>
         <field name="context">{
             'default_project_id': active_id,
             'active_id_chatter': active_id,
@@ -352,12 +357,14 @@
     </record>
 
     <record id="project_sharing_kanban_action_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="10"/>
         <field name="view_mode">kanban</field>
         <field name="act_window_id" ref="project.project_sharing_project_task_action"/>
         <field name="view_id" ref="project.project_sharing_project_task_view_kanban"/>
     </record>
 
     <record id="project_sharing_tree_action_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="20"/>
         <field name="view_mode">list</field>
         <field name="act_window_id" ref="project.project_sharing_project_task_action"/>
         <field name="view_id" ref="project.project_sharing_project_task_view_tree"/>

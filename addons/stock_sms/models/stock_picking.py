@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, _
-
-import threading
+from odoo import models, modules, _
 
 
-class Picking(models.Model):
+class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     def _pre_action_done_hook(self):
@@ -20,13 +18,13 @@ class Picking(models.Model):
     def _check_warn_sms(self):
         warn_sms_pickings = self.browse()
         for picking in self:
-            is_delivery = picking.company_id.stock_move_sms_validation \
+            is_delivery = picking.company_id._get_text_validation('sms') \
                     and picking.picking_type_id.code == 'outgoing' \
-                    and (picking.partner_id.mobile or picking.partner_id.phone)
-            if is_delivery and not getattr(threading.current_thread(), 'testing', False) \
-                    and not self.env.registry.in_test_mode() \
+                    and picking.partner_id.phone
+            if is_delivery \
+                    and not modules.module.current_test \
                     and not picking.company_id.has_received_warning_stock_sms \
-                    and picking.company_id.stock_move_sms_validation:
+                    and picking.company_id._get_text_validation('sms'):
                 warn_sms_pickings |= picking
         return warn_sms_pickings
 
@@ -46,9 +44,9 @@ class Picking(models.Model):
         }
 
     def _send_confirmation_email(self):
-        super(Picking, self)._send_confirmation_email()
-        if not self.env.context.get('skip_sms') and not getattr(threading.current_thread(), 'testing', False) and not self.env.registry.in_test_mode():
-            pickings = self.filtered(lambda p: p.company_id.stock_move_sms_validation and p.picking_type_id.code == 'outgoing' and (p.partner_id.mobile or p.partner_id.phone))
+        super()._send_confirmation_email()
+        if not self.env.context.get('skip_sms') and not modules.module.current_test:
+            pickings = self.filtered(lambda p: p.company_id._get_text_validation('sms') and p.picking_type_id.code == 'outgoing' and p.partner_id.phone)
             for picking in pickings:
                 # Sudo as the user has not always the right to read this sms template.
                 template = picking.company_id.sudo().stock_sms_confirmation_template_id

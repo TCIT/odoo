@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models, fields
+from odoo import api, Command, models, fields
 from odoo.http import request
 from odoo.tools import email_normalize, get_lang, html2plaintext, is_html_empty, plaintext2html
+from odoo.addons.mail.tools.discuss import Store
 from odoo.exceptions import ValidationError
 
 
@@ -22,7 +23,7 @@ class ChatbotScript(models.Model):
     script_step_ids = fields.One2many('chatbot.script.step', 'chatbot_script_id',
         copy=True, string='Script Steps')
     operator_partner_id = fields.Many2one('res.partner', string='Bot Operator',
-        ondelete='restrict', required=True, copy=False)
+        ondelete='restrict', required=True, copy=False, index=True)
     livechat_channel_count = fields.Integer(string='Livechat Channel Count', compute='_compute_livechat_channel_count')
     first_step_warning = fields.Selection([
         ('first_step_operator', 'First Step Operator'),
@@ -35,6 +36,12 @@ class ChatbotScript(models.Model):
             if step.step_type == "question_selection" and not step.answer_ids:
                 raise ValidationError(self.env._("Step of type 'Question' must have answers."))
 
+    @api.onchange("script_step_ids")
+    def _onchange_script_step_ids(self):
+        for step in self.script_step_ids:
+            if step.step_type != "question_selection" and step.answer_ids:
+                step.answer_ids = [Command.clear()]
+
     def _compute_livechat_channel_count(self):
         channels_data = self.env['im_livechat.channel.rule']._read_group(
             [('chatbot_script_id', 'in', self.ids)], ['chatbot_script_id'], ['channel_id:count_distinct'])
@@ -42,7 +49,7 @@ class ChatbotScript(models.Model):
         for script in self:
             script.livechat_channel_count = mapped_channels.get(script.id, 0)
 
-    @api.depends('script_step_ids.step_type')
+    @api.depends("script_step_ids.is_forward_operator", "script_step_ids.step_type" )
     def _compute_first_step_warning(self):
         for script in self:
             allowed_first_step_types = [
@@ -53,7 +60,7 @@ class ChatbotScript(models.Model):
                 'free_input_multi',
             ]
             welcome_steps = script.script_step_ids and script._get_welcome_steps()
-            if welcome_steps and welcome_steps[-1].step_type == 'forward_operator':
+            if welcome_steps and welcome_steps[-1].is_forward_operator:
                 script.first_step_warning = 'first_step_operator'
             elif welcome_steps and welcome_steps[-1].step_type not in allowed_first_step_types:
                 script.first_step_warning = 'first_step_invalid'
@@ -171,9 +178,9 @@ class ChatbotScript(models.Model):
             discuss_channel.chatbot_current_step_id = welcome_step.id
 
             if not is_html_empty(welcome_step.message):
-                posted_messages += discuss_channel.with_context(mail_create_nosubscribe=True).message_post(
+                posted_messages += discuss_channel.with_context(mail_post_autofollow_author_skip=True).message_post(
                     author_id=self.operator_partner_id.id,
-                    body=plaintext2html(welcome_step.message),
+                    body=plaintext2html(welcome_step.message, with_paragraph=False),
                     message_type='comment',
                     subtype_xmlid='mail.mt_comment',
                 )
@@ -190,19 +197,8 @@ class ChatbotScript(models.Model):
     # Tooling / Misc
     # --------------------------
 
-    def _format_for_frontend(self):
-        """ Small utility method that formats the script into a dict usable by the frontend code. """
-        self.ensure_one()
-
-        return {
-            'id': self.id,
-            'name': self.title,
-            'partner': {'id': self.operator_partner_id.id, 'type': 'partner', 'name': self.operator_partner_id.name},
-            'welcomeSteps': [
-                step._format_for_frontend()
-                for step in self._get_welcome_steps()
-            ]
-        }
+    def _to_store_defaults(self, target):
+        return [Store.One("operator_partner_id", ["name"]), "title"]
 
     def _validate_email(self, email_address, discuss_channel):
         email_address = html2plaintext(email_address)

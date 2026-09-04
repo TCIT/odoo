@@ -1,4 +1,6 @@
 import { closestElement } from "@html_editor/utils/dom_traversal";
+import { isColorGradient } from "@web/core/utils/colors";
+import { isElement } from "./dom_info";
 
 export const COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES = [
     "primary",
@@ -58,65 +60,21 @@ for (let i = 100; i <= 900; i += 100) {
     EDITOR_COLOR_CSS_VARIABLES.push(`${i}`);
 }
 
-/**
- * Takes a color (rgb, rgba or hex) and returns its hex representation. If the
- * color is given in rgba, the background color of the node whose color we're
- * converting is used in conjunction with the alpha to compute the resulting
- * color (using the formula: `alpha*color + (1 - alpha)*background` for each
- * channel).
- *
- * @param {string} rgb
- * @param {HTMLElement} [node]
- * @returns {string} hexadecimal color (#RRGGBB)
- */
-export function rgbToHex(rgb = "", node = null) {
-    if (rgb.startsWith("#")) {
-        return rgb;
-    } else if (rgb.startsWith("rgba")) {
-        const values = rgb.match(/[\d.]{1,5}/g) || [];
-        const alpha = parseFloat(values.pop());
-        // Retrieve the background color.
-        let bgRgbValues = [];
-        if (node) {
-            let bgColor = getComputedStyle(node).backgroundColor;
-            if (bgColor.startsWith("rgba")) {
-                // The background color is itself rgba so we need to compute
-                // the resulting color using the background color of its
-                // parent.
-                bgColor = rgbToHex(bgColor, node.parentElement);
-            }
-            if (bgColor && bgColor.startsWith("#")) {
-                bgRgbValues = (bgColor.match(/[\da-f]{2}/gi) || []).map((val) => parseInt(val, 16));
-            } else if (bgColor && bgColor.startsWith("rgb")) {
-                bgRgbValues = (bgColor.match(/[\d.]{1,5}/g) || []).map((val) => parseInt(val));
-            }
-        }
-        bgRgbValues = bgRgbValues.length ? bgRgbValues : [255, 255, 255]; // Default to white.
-
-        return (
-            "#" +
-            values
-                .map((value, index) => {
-                    const converted = Math.floor(
-                        alpha * parseInt(value) + (1 - alpha) * bgRgbValues[index]
-                    );
-                    const hex = parseInt(converted).toString(16);
-                    return hex.length === 1 ? "0" + hex : hex;
-                })
-                .join("")
-        );
-    } else {
-        return (
-            "#" +
-            (rgb.match(/\d{1,3}/g) || [])
-                .map((x) => {
-                    x = parseInt(x).toString(16);
-                    return x.length === 1 ? "0" + x : x;
-                })
-                .join("")
-        );
-    }
-}
+// Black, white and their opacity variants.
+// These variables are necessary to prevent the colorpicker from being affected
+// by the backend "Dark Mode".
+EDITOR_COLOR_CSS_VARIABLES.push(
+    "black",
+    "black-15",
+    "black-25",
+    "black-50",
+    "black-75",
+    "white",
+    "white-25",
+    "white-50",
+    "white-75",
+    "white-85"
+);
 
 /**
  * @param {string|number} name
@@ -127,16 +85,30 @@ export function isColorCombinationName(name) {
     return !isNaN(number) && number % 100 !== 0;
 }
 
+export const TEXT_CLASSES_REGEX =
+    /\btext-(primary|secondary|success|danger|warning|info|light|dark|body|muted|white|black|reset|gradient|opacity-\d{1,3}|o-[^\s]+|\d+)\b/;
+export const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
+export const COLOR_COMBINATION_CLASSES_REGEX = /\bo_cc[0-9]+\b/g;
+
 /**
- * @param {string} [value]
+ * Returns true if the given element has a visible color applied
+ * by `TEXT_CLASSES_REGEX` or `BG_CLASSES_REGEX`
+ *
+ * @param {Element} element
+ * @param {string} mode 'color' or 'backgroundColor'
  * @returns {boolean}
  */
-export function isColorGradient(value) {
-    return value && value.includes("-gradient(");
+export function hasTextColorClass(element, mode) {
+    if (!element || !isElement(element)) {
+        return false;
+    }
+    const classRegex = mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX;
+    const parent = element.parentNode;
+    return (
+        classRegex.test(element.className) &&
+        (!parent || getComputedStyle(element)[mode] !== getComputedStyle(parent)[mode])
+    );
 }
-
-export const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
-export const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
 
 /**
  * Returns true if the given element has a visible color (fore- or
@@ -149,7 +121,12 @@ export const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
 export function hasColor(element, mode) {
     const style = element.style;
     const parent = element.parentNode;
-    const classRegex = mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX;
+    // Ignore class applied on links as those are hard coded in the templates
+    // and should not be considered as user defined colors.
+    if (element.classList.contains("btn") || element.tagName === "A") {
+        // Ignore style applied on buttons from color detection.
+        return false;
+    }
     if (isColorGradient(style["background-image"])) {
         if (element.classList.contains("text-gradient")) {
             if (mode === "color") {
@@ -165,8 +142,7 @@ export function hasColor(element, mode) {
         (style[mode] &&
             style[mode] !== "inherit" &&
             (!parent || style[mode] !== parent.style[mode])) ||
-        (classRegex.test(element.className) &&
-            (!parent || getComputedStyle(element)[mode] !== getComputedStyle(parent)[mode]))
+        hasTextColorClass(element, mode)
     );
 }
 
@@ -185,4 +161,18 @@ export function hasAnyNodesColor(nodes, mode) {
         }
     }
     return false;
+}
+
+export function getTextColorOrClass(node) {
+    if (!node) {
+        return null;
+    }
+    if (node.style.color) {
+        return { type: "style", value: node.style.color };
+    }
+    const textColorClass = [...node.classList].find((cls) => TEXT_CLASSES_REGEX.test(cls));
+    if (textColorClass) {
+        return { type: "class", value: textColorClass };
+    }
+    return null;
 }

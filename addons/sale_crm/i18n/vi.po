@@ -1,24 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_crm
-# 
+# * sale_crm
+#
 # Translators:
-# Wil Odoo, 2024
-# Thi Huong Nguyen, 2024
-# 
+# Martin Trigaux, 2022
+# Thi Huong Nguyen, 2023
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2024\n"
-"Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-05 14:51+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-19/"
+"sale_crm/vi/>\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: vi\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_crm
 #: model_terms:ir.ui.view,arch_db:sale_crm.crm_case_form_view_oppor
@@ -46,6 +49,11 @@ msgid "Create a new customer"
 msgstr "Tạo khách hàng mới"
 
 #. module: sale_crm
+#: model:ir.model,website_form_label:sale_crm.model_crm_lead
+msgid "Create an Opportunity"
+msgstr "Tạo cơ hội"
+
+#. module: sale_crm
 #: model:ir.model,name:sale_crm.model_crm_quotation_partner
 msgid "Create new or use existing Customer on new Quotation"
 msgstr "Tạo mới hoặc dùng một Khách hàng có sẵn cho báo giá mới"
@@ -71,7 +79,10 @@ msgid "Customer"
 msgstr "Khách hàng"
 
 #. module: sale_crm
+#: model:ir.model.fields,field_description:sale_crm.field_crm_lead__display_name
 #: model:ir.model.fields,field_description:sale_crm.field_crm_quotation_partner__display_name
+#: model:ir.model.fields,field_description:sale_crm.field_crm_team__display_name
+#: model:ir.model.fields,field_description:sale_crm.field_sale_order__display_name
 msgid "Display Name"
 msgstr "Tên hiển thị"
 
@@ -84,18 +95,15 @@ msgstr "Không liên kết với một khách hàng"
 #. odoo-python
 #: code:addons/sale_crm/models/crm_lead.py:0
 msgid "Expected revenue has been updated based on the linked Sales Orders."
-msgstr ""
-"Doanh thu dự kiến ​​đã được cập nhật dựa trên các Đơn bán hàng liên kết."
+msgstr "Doanh thu dự kiến đã được cập nhật dựa trên các Đơn bán hàng liên kết."
 
 #. module: sale_crm
+#: model:ir.model.fields,field_description:sale_crm.field_crm_lead__id
 #: model:ir.model.fields,field_description:sale_crm.field_crm_quotation_partner__id
+#: model:ir.model.fields,field_description:sale_crm.field_crm_team__id
+#: model:ir.model.fields,field_description:sale_crm.field_sale_order__id
 msgid "ID"
 msgstr "ID"
-
-#. module: sale_crm
-#: model:ir.model.fields,field_description:sale_crm.field_res_users__target_sales_invoiced
-msgid "Invoiced in Sales Orders Target"
-msgstr "Đã xuất hóa đơn trong mục tiêu đơn bán hàng"
 
 #. module: sale_crm
 #: model:ir.model.fields,field_description:sale_crm.field_crm_quotation_partner__write_uid
@@ -109,8 +117,8 @@ msgstr "Cập nhật lần cuối vào"
 
 #. module: sale_crm
 #: model:ir.model,name:sale_crm.model_crm_lead
-msgid "Lead/Opportunity"
-msgstr "Lead/Cơ hội"
+msgid "Lead"
+msgstr "Lead"
 
 #. module: sale_crm
 #: model:ir.model.fields.selection,name:sale_crm.selection__crm_quotation_partner__action__exist
@@ -186,12 +194,6 @@ msgid "Sales Team"
 msgstr "Bộ phận sales"
 
 #. module: sale_crm
-#. odoo-python
-#: code:addons/sale_crm/models/crm_team.py:0
-msgid "Sales: Untaxed Total"
-msgstr "Doanh số: Tổng trước thuế"
-
-#. module: sale_crm
 #: model:ir.model.fields,field_description:sale_crm.field_crm_lead__sale_amount_total
 msgid "Sum of Orders"
 msgstr "Tổng đơn hàng"
@@ -199,15 +201,28 @@ msgstr "Tổng đơn hàng"
 #. module: sale_crm
 #: model:ir.model.fields,help:sale_crm.field_crm_lead__sale_amount_total
 msgid "Untaxed Total of Confirmed Orders"
-msgstr "Tổng tiền chưa gồm thuế của đơn hàng đã xác nhận"
-
-#. module: sale_crm
-#: model:ir.model,name:sale_crm.model_res_users
-msgid "User"
-msgstr "Người dùng"
+msgstr "Tổng trước thuế của đơn hàng đã xác nhận"
 
 #. module: sale_crm
 #. odoo-python
 #: code:addons/sale_crm/wizard/crm_opportunity_to_quotation.py:0
 msgid "You can only apply this action from a lead."
 msgstr "Bạn chỉ có thể áp dụng tác vụ này từ lead."
+
+#~ msgid "Invoiced in Sales Orders Target"
+#~ msgstr "Đã xuất hóa đơn trong mục tiêu đơn bán hàng"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Chỉnh sửa lần cuối vào"
+
+#~ msgid "Lead/Opportunity"
+#~ msgstr "Lead/Cơ hội"
+
+#~ msgid "Log in the chatter from which opportunity the order originates"
+#~ msgstr "Đăng nhập vào cuộc trò chuyện bắt nguồn cho cơ hội của đơn hàng"
+
+#~ msgid "Sales: Untaxed Total"
+#~ msgstr "Doanh số: Tổng trước thuế"
+
+#~ msgid "User"
+#~ msgstr "Người dùng"

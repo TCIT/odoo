@@ -3,6 +3,7 @@
 import logging
 import re
 
+from odoo import _
 from odoo.exceptions import UserError
 from odoo.http import Controller, request, route
 
@@ -11,7 +12,7 @@ _logger = logging.getLogger(__name__)
 
 class SmsController(Controller):
 
-    @route('/sms/status', type='json', auth='public')
+    @route('/sms/status', type='jsonrpc', auth='public')
     def update_sms_status(self, message_statuses):
         """Receive a batch of delivery reports from IAP
 
@@ -45,4 +46,4 @@ class SmsController(Controller):
         if (not uuids or not iap_status or not re.match(r'^\w+$', iap_status)
                 or any(not re.match(r'^[0-9a-f]{32}$', uuid) for uuid in uuids)):
             _logger.warning('Received ill-formatted SMS delivery report event: \n%s', message_statuses)
-            raise UserError("Bad parameters")
+            raise UserError(_("Bad parameters"), status=400)

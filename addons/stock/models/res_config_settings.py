@@ -32,14 +32,15 @@ class ResConfigSettings(models.TransientModel):
     module_stock_sms = fields.Boolean("SMS Confirmation")
     module_delivery = fields.Boolean("Delivery Methods")
     module_delivery_dhl = fields.Boolean("DHL Express Connector")
-    module_delivery_fedex = fields.Boolean("FedEx Connector")
-    module_delivery_ups = fields.Boolean("UPS Connector")
-    module_delivery_usps = fields.Boolean("USPS Connector")
+    module_delivery_fedex_rest = fields.Boolean("FedEx Connector")
+    module_delivery_ups_rest = fields.Boolean("UPS Connector")
+    module_delivery_usps_rest = fields.Boolean("USPS Connector")
     module_delivery_bpost = fields.Boolean("bpost Connector")
     module_delivery_easypost = fields.Boolean("Easypost Connector")
     module_delivery_sendcloud = fields.Boolean("Sendcloud Connector")
     module_delivery_shiprocket = fields.Boolean("Shiprocket Connector")
     module_delivery_starshipit = fields.Boolean("Starshipit Connector")
+    module_delivery_envia = fields.Boolean("Envia.com Connector")
     module_quality_control = fields.Boolean("Quality")
     module_quality_control_worksheet = fields.Boolean("Quality Worksheet")
     group_stock_multi_locations = fields.Boolean('Storage Locations', implied_group='stock.group_stock_multi_locations',
@@ -52,6 +53,20 @@ class ResConfigSettings(models.TransientModel):
         "Separator", config_parameter='stock.barcode_separator',
         help="Character(s) used to separate data contained within an aggregate barcode (i.e. a barcode containing multiple barcode encodings)")
     module_stock_fleet = fields.Boolean("Dispatch Management System")
+    replenish_on_order = fields.Boolean("Replenish on Order (MTO)", compute='_compute_replenish_on_order', inverse='_inverse_replenish_on_order')
+    stock_text_confirmation = fields.Boolean(related='company_id.stock_text_confirmation', string='Stock Text Validation with stock move', readonly=False)
+    stock_confirmation_type = fields.Selection(related='company_id.stock_confirmation_type', string='Stock Text Validation type', readonly=False)
+    horizon_days = fields.Float(related='company_id.horizon_days', readonly=False)
+
+    def _compute_replenish_on_order(self):
+        route = self.env.ref('stock.route_warehouse0_mto', raise_if_not_found=False)
+        if route:
+            self.replenish_on_order = route.active
+
+    def _inverse_replenish_on_order(self):
+        route = self.env.ref('stock.route_warehouse0_mto', raise_if_not_found=False)
+        if route:
+            route.active = self.replenish_on_order
 
     @api.onchange('group_stock_multi_locations')
     def _onchange_group_stock_multi_locations(self):
@@ -63,6 +78,11 @@ class ResConfigSettings(models.TransientModel):
         if not self.group_stock_production_lot:
             self.group_lot_on_delivery_slip = False
             self.module_product_expiry = False
+
+    @api.onchange('stock_confirmation_type', 'stock_text_confirmation')
+    def _onchange_stock_confirmation_fields(self):
+        if self.stock_text_confirmation and self.stock_confirmation_type == 'sms':
+            self.module_stock_sms = True
 
     @api.onchange('group_stock_adv_location')
     def onchange_adv_location(self):

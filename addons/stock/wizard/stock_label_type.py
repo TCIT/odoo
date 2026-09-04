@@ -4,7 +4,7 @@
 from odoo import _, fields, models
 
 
-class ProductLabelLayout(models.TransientModel):
+class PickingLabelType(models.TransientModel):
     _name = 'picking.label.type'
     _description = 'Choose whether to print product or lot/sn labels'
 

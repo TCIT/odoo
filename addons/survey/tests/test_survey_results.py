@@ -2,11 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import json
 
+from odoo.tests import tagged
+
 from odoo.addons.survey.controllers.main import Survey
 from odoo.addons.survey.tests import common
-from odoo.addons.website.tools import MockRequest
+from odoo.addons.http_routing.tests.common import MockRequest
 
 
+@tagged("is_query_count")
 class TestSurveyResults(common.TestSurveyResultsCommon):
     """ Check the results and the performance of the different filters combinations.
     The filters can be combined but their query count doesn't add up if their
@@ -127,7 +130,8 @@ class TestSurveyResults(common.TestSurveyResultsCommon):
         self.assertEqual(data['table_data'],
                          [{'value': str(value),
                            'suggested_answer': self.env['survey.question.answer'],
-                           'count': 1 if value in (5, 7) else 0}
+                           'count': 1 if value in (5, 7) else 0,
+                           'count_text': f"{1 if value in (5, 7) else 0} Votes"}
                           for value in range(11)])
         self.assertEqual(json.loads(data['graph_data']),
                          [{'key': self.question_scale.title,
@@ -147,7 +151,8 @@ class TestSurveyResults(common.TestSurveyResultsCommon):
         self.assertEqual(data['table_data'],
                          [{'value': str(value),
                            'suggested_answer': self.env['survey.question.answer'],
-                           'count': 1 if value == 5 else 0}
+                           'count': 1 if value == 5 else 0,
+                           'count_text': f"{1 if value == 5 else 0} Votes"}
                           for value in range(11)])
         self.assertEqual(data['numerical_max'], 5)
         self.assertEqual(data['numerical_min'], 5)

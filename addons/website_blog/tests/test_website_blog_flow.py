@@ -1,9 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import json
 
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests.common import users, HttpCase, tagged
-from odoo.addons.website.tools import MockRequest
+from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.addons.website_blog.tests.common import TestWebsiteBlogCommon
 from odoo.addons.mail.controllers.thread import ThreadController
 
@@ -17,7 +17,7 @@ class TestWebsiteBlogFlow(TestWebsiteBlogCommon):
             'login': 'portal_user',
             'email': 'portal_user@example.com',
             'notification_type': 'email',
-            'groups_id': [(6, 0, [group_portal.id])]
+            'group_ids': [(6, 0, [group_portal.id])]
         })
 
     def test_website_blog_followers(self):
@@ -74,15 +74,17 @@ class TestWebsiteBlogFlow(TestWebsiteBlogCommon):
             'res_model': 'mail.compose.message',
             'datas': 'test',
             'type': 'binary',
-            'access_token': 'azerty',
         })
 
         with MockRequest(self.env):
             ThreadController().mail_message_post(
-                'blog.post',
+                "blog.post",
                 self.test_blog_post.id,
-                {'body': 'Test message blog post', 'attachment_ids': [attachment.id]},
-                attachment_tokens=[attachment.access_token]
+                {
+                    "body": "Test message blog post",
+                    "attachment_ids": [attachment.id],
+                    "attachment_tokens": [attachment._get_ownership_token()],
+                },
             )
 
         self.assertTrue(self.env['mail.message'].sudo().search(
@@ -93,15 +95,17 @@ class TestWebsiteBlogFlow(TestWebsiteBlogCommon):
             'res_model': 'mail.compose.message',
             'datas': 'test',
             'type': 'binary',
-            'access_token': 'azerty',
         })
 
         with self.assertRaises(UserError), MockRequest(self.env):
             ThreadController().mail_message_post(
-                'blog.post',
+                "blog.post",
                 self.test_blog_post.id,
-                {'body': 'Test message blog post', 'attachment_ids': [second_attachment.id]},
-                attachment_tokens=['wrong_token']
+                {
+                    "body": "Test message blog post",
+                    "attachment_ids": [second_attachment.id],
+                    "attachment_tokens": ["wrong_token"],
+                },
             )
 
         self.assertFalse(self.env['mail.message'].sudo().search(
@@ -133,17 +137,6 @@ class TestWebsiteBlogTranslationFlow(HttpCase, TestWebsiteBlogCommon):
             'lang_ids': [(6, 0, [cls.parseltongue.id])],
         }).lang_install()
         cls.headers = {"Content-Type": "application/json"}
-
-    def _build_payload(self, params=None):
-        """
-        Helper to properly build jsonrpc payload
-        """
-        return {
-            "jsonrpc": "2.0",
-            "method": "call",
-            "id": 0,
-            "params": params or {},
-        }
 
     def test_teaser_manual(self):
         blog_post_parseltongue = self.test_blog_post.with_context(lang=self.parseltongue.code)
@@ -215,12 +208,33 @@ class TestWebsiteBlogTranslationFlow(HttpCase, TestWebsiteBlogCommon):
         self.assertEqual('All blogs', blog_post.with_context(lang=en_lang.code).content)
         
         # Test updating translation
-        payload = self._build_payload({
+        payload = self.build_rpc_payload({
             'model': blog_post._name,
             'record_id': blog_post.id,
             'field_name': 'content',
             'translations': {en_lang.code: {sha: 'Updated blogs'}},
         })
-        self.url_open('/web_editor/field/translation/update', data=json.dumps(payload), headers=self.headers)
+        self.url_open('/website/field/translation/update', data=json.dumps(payload), headers=self.headers)
         self.assertEqual('Todos os blogs', blog_post.with_context(lang=br_lang.code).content)
         self.assertEqual('Updated blogs', blog_post.with_context(lang=en_lang.code).content)
+
+    def test_cannot_delete_field_used_in_website_blog(self):
+        self.partner_model = self.env['ir.model'].search([('model', '=', 'res.partner')])
+        self.test_field = self.env['ir.model.fields'].create({
+            'name': 'x_test_field',
+            'model_id': self.partner_model.id,
+            'ttype': 'char',
+            'field_description': 'test',
+        })
+        self.env['blog.post'].create({
+            'name': 'Test Blog',
+            'content': f'''
+                <form data-model_name="res.partner">
+                    <input name="{self.test_field.name}">
+                </form>
+            ''',
+        })
+        with self.assertRaisesRegex(ValidationError, f"The field '{self.test_field.name}' cannot be deleted because it is referenced in a website view."):
+            self.test_field.unlink()
+
+        self.assertTrue(self.test_field.exists())

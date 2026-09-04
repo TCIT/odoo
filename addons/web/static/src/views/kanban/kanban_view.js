@@ -20,17 +20,14 @@ export const kanbanView = {
         const { arch, relatedModels, resModel } = genericProps;
         const { ArchParser } = view;
         const archInfo = new ArchParser().parse(arch, relatedModels, resModel);
-        const defaultGroupBy =
-            genericProps.searchMenuTypes.includes("groupBy") && archInfo.defaultGroupBy;
-
         return {
             ...genericProps,
-            // Compiler: view.Compiler, // don't pass it automatically in stable, for backward compat
+            readonly: genericProps.readonly || !archInfo.activeActions?.edit,
+            Compiler: view.Compiler,
             Model: view.Model,
             Renderer: view.Renderer,
             buttonTemplate: view.buttonTemplate,
             archInfo,
-            defaultGroupBy,
         };
     },
 };

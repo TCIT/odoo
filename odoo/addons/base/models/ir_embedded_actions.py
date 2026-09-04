@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 from ast import literal_eval
 
@@ -28,22 +28,17 @@ class IrEmbeddedActions(models.Model):
     context = fields.Char(default="{}", help="Context dictionary as Python expression, empty by default (Default: {})")
     groups_ids = fields.Many2many('res.groups', help='Groups that can execute the embedded action. Leave empty to allow everybody.')
 
-    _sql_constraints = [
-        (
-            'check_only_one_action_defined',
-            """CHECK(
-                (action_id IS NOT NULL AND python_method IS NULL) OR
-                (action_id IS NULL AND python_method IS NOT NULL)
-            )""",
-            'Constraint to ensure that either an XML action or a python_method is defined, but not both.'
-        ), (
-            'check_python_method_requires_name',
-            """CHECK(
-                NOT (python_method IS NOT NULL AND name IS NULL)
-            )""",
-            'Constraint to ensure that if a python_method is defined, then the name must also be defined.'
-        )
-    ]
+    _check_only_one_action_defined = models.Constraint(
+        '''CHECK(
+            (action_id IS NOT NULL AND python_method IS NULL)
+            OR (action_id IS NULL AND python_method IS NOT NULL)
+        )''',
+        "Constraint to ensure that either an XML action or a python_method is defined, but not both.",
+    )
+    _check_python_method_requires_name = models.Constraint(
+        'CHECK(NOT (python_method IS NOT NULL AND name IS NULL))',
+        "Constraint to ensure that if a python_method is defined, then the name must also be defined.",
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -58,6 +53,15 @@ class IrEmbeddedActions(models.Model):
                 else:  # remove python_method in the vals since the vals is falsy.
                     del vals["python_method"]
         return super().create(vals_list)
+
+    @api.depends('action_id.display_name', 'name')
+    def _compute_display_name(self):
+        for record in self:
+            if record.action_id:
+                # User might not have access to the linked action, so we need to use sudo to read the display_name.
+                record.display_name = record.action_id.sudo().display_name
+            else:
+                record.display_name = record.name
 
     # The record is deletable if it hasn't been created from a xml record (i.e. is not a default embedded action)
     def _compute_is_deletable(self):
@@ -80,8 +84,9 @@ class IrEmbeddedActions(models.Model):
             active_model_record = self.env[parent_res_model].search(domain_id, order='id')
             for record in records:
                 action_groups = record.groups_ids
-                if not action_groups or (action_groups & self.env.user.groups_id):
-                    domain_model = literal_eval(record.domain)
+                is_valid_method = not record.python_method or hasattr(self.env[parent_res_model], record.python_method)
+                if is_valid_method and (not action_groups or (action_groups & self.env.user.all_group_ids)):
+                    domain_model = literal_eval(record.domain or '[]')
                     record.is_visible = (
                         record.parent_res_id in (False, self.env.context.get('active_id', False))
                         and record.user_id.id in (False, self.env.uid)
@@ -95,7 +100,7 @@ class IrEmbeddedActions(models.Model):
     def _unlink_if_action_deletable(self):
         for record in self:
             if not record.is_deletable:
-                raise UserError(_('You cannot delete a default embedded action'))
+                raise UserError(self.env._('You cannot delete a default embedded action'))
 
     def _get_readable_fields(self):
         """ return the list of fields that are safe to read

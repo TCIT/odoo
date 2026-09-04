@@ -3,7 +3,7 @@ import { mockDate, mockTimeZone } from "@odoo/hoot-mock";
 import {
     defineParams,
     makeMockEnv,
-    patchTranslations,
+    allowTranslations,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 
@@ -12,6 +12,7 @@ import {
     deserializeDateTime,
     formatDate,
     formatDateTime,
+    getLocalYearAndWeek,
     parseDate,
     parseDateTime,
     serializeDate,
@@ -30,7 +31,22 @@ const dateFormat = strftimeToLuxonFormat(formats.date);
 const timeFormat = strftimeToLuxonFormat(formats.time);
 
 beforeEach(() => {
-    patchTranslations();
+    allowTranslations();
+});
+
+test("getLocalYearAndWeek", async () => {
+    patchWithCleanup(localization, { weekStart: 1, });
+    const dates_expected = {
+        "2026-12-25": {year: 2026, week: 52, startDate: "2026-12-21"},
+        "2026-12-31": {year: 2026, week: 53, startDate: "2026-12-28"},
+        "2027-01-01": {year: 2026, week: 53, startDate: "2026-12-28"},
+        "2027-01-04": {year: 2027, week: 1, startDate: "2027-01-04"},
+    }
+    for (let key in dates_expected) {
+        const date_actual = getLocalYearAndWeek(new Date(key))
+        date_actual.startDate = date_actual.startDate.toISODate()
+        expect(date_actual).toEqual(dates_expected[key]);
+    }
 });
 
 test("formatDate/formatDateTime specs", async () => {
@@ -75,25 +91,6 @@ test("formatDate/formatDateTime specs, at midnight", async () => {
     expect(formatDateTime(utc)).toBe("05/04/2009 00:00:00");
     expect(formatDateTime(local)).toBe("05/04/2009 00:00:00");
     expect(formatDateTime(minus13FromLocalTZ)).toBe("05/04/2009 00:00:00");
-});
-
-test("formatDate/formatDateTime with condensed option", async () => {
-    mockDate("2009-05-03 08:00:00");
-    mockTimeZone(0);
-    const now = DateTime.now();
-
-    patchWithCleanup(localization, {
-        dateFormat: "MM/dd/yyyy",
-        dateTimeFormat: "MM/dd/yyyy HH:mm:ss",
-    });
-    expect(formatDate(now, { condensed: true })).toBe("5/3/2009");
-    expect(formatDateTime(now, { condensed: true })).toBe("5/3/2009 8:00:00");
-
-    patchWithCleanup(localization, { dateFormat: "yyyy-MM-dd" });
-    expect(formatDate(now, { condensed: true })).toBe("2009-5-3");
-
-    patchWithCleanup(localization, { dateFormat: "dd MMM yy" });
-    expect(formatDate(now, { condensed: true })).toBe("3 May 09");
 });
 
 test("formatDateTime in different timezone", async () => {
@@ -247,6 +244,11 @@ test("parseDateTime with escaped characters (eg. Basque locale)", async () => {
 });
 
 test("parse smart date input", async () => {
+    patchWithCleanup(localization, {
+        dateFormat: "MM/dd/yyyy",
+        dateTimeFormat: "MM/dd/yyyy HH:mm:ss",
+        weekStart: 1, // Monday
+    });
     mockDate("2020-01-01 00:00:00", 0);
 
     const format = "yyyy-MM-dd HH:mm";
@@ -276,6 +278,43 @@ test("parse smart date input", async () => {
     expect(parseDateTime("-3m").toFormat(format)).toBe("2019-10-01 00:00");
     expect(parseDateTime("-2w").toFormat(format)).toBe("2019-12-18 00:00");
     expect(parseDateTime("-1d").toFormat(format)).toBe("2019-12-31 00:00");
+
+    // continue with only parseDateTime (which uses the same underlaying function)
+    mockDate("2020-01-01 00:01:00", 0);
+
+    expect(parseDateTime("=3d").toFormat(format)).toBe("2020-01-03 00:00");
+    expect(parseDateTime("+3d +1m").toFormat(format)).toBe("2020-02-04 00:01");
+    expect(parseDateTime("=11d +2H +15M").toFormat(format)).toBe("2020-01-11 02:15");
+    expect(parseDateTime("=11d =3H +2H +15M").toFormat(format)).toBe("2020-01-11 05:15");
+
+    expect(parseDateTime("now").toFormat(format)).toBe("2020-01-01 00:01");
+    expect(parseDateTime("today").toFormat(format)).toBe("2020-01-01 00:00");
+    expect(parseDateTime("today +1w").toFormat(format)).toBe("2020-01-08 00:00");
+
+    expect(parseDateTime("=monday").toFormat(format)).toBe("2019-12-30 00:00");
+    expect(parseDateTime("=sunday").toFormat(format)).toBe("2020-01-05 00:00");
+    expect(parseDateTime("+monday").toFormat(format)).toBe("2020-01-06 00:01");
+
+    // reset after setting the day
+    expect(parseDateTime("=3H =11d").toFormat(format)).toBe("2020-01-11 00:00");
+    expect(parseDateTime("=3H =sunday").toFormat(format)).toBe("2020-01-05 00:00");
+
+    expect(parseDateTime("=week_start").toFormat(format)).toBe("2019-12-30 00:00");
+    expect(parseDateTime("-week_start").toFormat(format)).toBe("2019-12-30 00:01");
+    expect(parseDateTime("+week_start").toFormat(format)).toBe("2020-01-06 00:01");
+
+    patchWithCleanup(localization, { weekStart: 7 }); // Sunday
+    expect(parseDateTime("=week_start").toFormat(format)).toBe("2019-12-29 00:00");
+    expect(parseDateTime("-week_start").toFormat(format)).toBe("2019-12-29 00:01");
+    expect(parseDateTime("+week_start").toFormat(format)).toBe("2020-01-05 00:01");
+    expect(parseDateTime("=sunday").toFormat(format)).toBe("2019-12-29 00:00");
+
+    patchWithCleanup(localization, { weekStart: 3 }); // Wednesday
+    expect(parseDateTime("=week_start").toFormat(format)).toBe("2020-01-01 00:00");
+    expect(parseDateTime("-week_start").toFormat(format)).toBe("2020-01-01 00:01");
+    expect(parseDateTime("+week_start").toFormat(format)).toBe("2020-01-01 00:01");
+    expect(parseDateTime("=tuesday").toFormat(format)).toBe("2020-01-07 00:00");
+    expect(parseDateTime("=wednesday").toFormat(format)).toBe("2020-01-01 00:00");
 });
 
 test("parseDateTime ISO8601 Format", async () => {

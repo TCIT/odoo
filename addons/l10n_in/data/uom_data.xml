@@ -28,7 +28,7 @@
         <field name="l10n_in_code">MTR-METERS</field>
     </record>
     <record id="uom.product_uom_millimeter" model="uom.uom">
-        <field name="l10n_in_code">MLT-MILILITRE</field>
+        <field name="l10n_in_code">OTH-OTHERS</field>
     </record>
     <record id="uom.product_uom_km" model="uom.uom">
         <field name="l10n_in_code">KME-KILOMETRE</field>
@@ -36,7 +36,7 @@
     <record id="uom.product_uom_cm" model="uom.uom">
         <field name="l10n_in_code">CMS-CENTIMETERS</field>
     </record>
-    <record id="uom.uom_square_meter" model="uom.uom">
+    <record id="uom.product_uom_square_meter" model="uom.uom">
         <field name="l10n_in_code">SQM-SQUARE METERS</field>
     </record>
     <record id="uom.product_uom_litre" model="uom.uom">
@@ -63,8 +63,8 @@
     <record id="uom.product_uom_mile" model="uom.uom">
         <field name="l10n_in_code">OTH-OTHERS</field>
     </record>
-    <record id="uom.uom_square_foot" model="uom.uom">
-        <field name="l10n_in_code">SQF-SQUARE FOOT</field>
+    <record id="uom.product_uom_square_foot" model="uom.uom">
+        <field name="l10n_in_code">SQF-SQUARE FEET</field>
     </record>
     <record id="uom.product_uom_floz" model="uom.uom">
         <field name="l10n_in_code">OTH-OTHERS</field>
@@ -80,5 +80,8 @@
     </record>
     <record id="uom.product_uom_cubic_foot" model="uom.uom">
         <field name="l10n_in_code">OTH-OTHERS</field>
+    </record>
+    <record id="uom.product_uom_milliliter" model="uom.uom">
+        <field name="l10n_in_code">MLT-MILILITRE</field>
     </record>
 </odoo>

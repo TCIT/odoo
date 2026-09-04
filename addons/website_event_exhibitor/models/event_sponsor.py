@@ -1,17 +1,16 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime, timedelta
 from pytz import timezone, utc
 
-from odoo import api, fields, models, _
-from odoo.addons.resource.models.utils import float_to_time
+from odoo import api, fields, models
 from odoo.tools import is_html_empty
+from odoo.tools.date_utils import float_to_time
 from odoo.tools.translate import html_translate
 
 
-class Sponsor(models.Model):
-    _name = "event.sponsor"
+class EventSponsor(models.Model):
+    _name = 'event.sponsor'
     _description = 'Event Sponsor'
     _order = "sequence, sponsor_type_id"
     # _order = 'sponsor_type_id, sequence' TDE FIXME
@@ -20,16 +19,16 @@ class Sponsor(models.Model):
         'mail.thread',
         'mail.activity.mixin',
         'website.published.mixin',
-        'chat.room.mixin'
+        'website.searchable.mixin',
     ]
 
     def _default_sponsor_type_id(self):
         return self.env['event.sponsor.type'].search([], order="sequence desc", limit=1).id
 
-    event_id = fields.Many2one('event.event', 'Event', required=True)
+    event_id = fields.Many2one('event.event', 'Event', required=True, index=True)
     sponsor_type_id = fields.Many2one(
         'event.sponsor.type', 'Sponsorship Level',
-        default=lambda self: self._default_sponsor_type_id(), required=True, auto_join=True)
+        default=lambda self: self._default_sponsor_type_id(), required=True, bypass_search_access=True)
     url = fields.Char('Sponsor Website', compute='_compute_url', readonly=False, store=True)
     sequence = fields.Integer('Sequence')
     active = fields.Boolean(default=True)
@@ -43,16 +42,15 @@ class Sponsor(models.Model):
         sanitize_overridable=True,
         sanitize_attributes=False, sanitize_form=True, translate=html_translate,
         readonly=False, store=True)
+    show_on_ticket = fields.Boolean("Show on ticket", default=True)
     # contact information
-    partner_id = fields.Many2one('res.partner', 'Partner', required=True, auto_join=True)
+    partner_id = fields.Many2one('res.partner', 'Partner', required=True, bypass_search_access=True)
     partner_name = fields.Char('Name', related='partner_id.name')
     partner_email = fields.Char('Email', related='partner_id.email')
     partner_phone = fields.Char('Phone', related='partner_id.phone')
-    partner_mobile = fields.Char('Mobile', related='partner_id.mobile')
     name = fields.Char('Sponsor Name', compute='_compute_name', readonly=False, store=True)
     email = fields.Char('Sponsor Email', compute='_compute_email', readonly=False, store=True)
     phone = fields.Char('Sponsor Phone', compute='_compute_phone', readonly=False, store=True)
-    mobile = fields.Char('Sponsor Mobile', compute='_compute_mobile', readonly=False, store=True)
     # image
     image_512 = fields.Image(
         string="Logo", max_width=512, max_height=512,
@@ -68,9 +66,6 @@ class Sponsor(models.Model):
     event_date_tz = fields.Selection(string='Timezone', related='event_id.date_tz', readonly=True)
     is_in_opening_hours = fields.Boolean(
         'Within opening hours', compute='_compute_is_in_opening_hours')
-    # chat room
-    chat_room_id = fields.Many2one(readonly=False)
-    room_name = fields.Char(readonly=False)
     # country information (related to ease frontend templates)
     country_id = fields.Many2one(
         'res.country', string='Country',
@@ -98,10 +93,6 @@ class Sponsor(models.Model):
         self._synchronize_with_partner('phone')
 
     @api.depends('partner_id')
-    def _compute_mobile(self):
-        self._synchronize_with_partner('mobile')
-
-    @api.depends('partner_id')
     def _compute_image_512(self):
         self._synchronize_with_partner('image_512')
 
@@ -123,20 +114,6 @@ class Sponsor(models.Model):
             if not sponsor[fname]:
                 sponsor[fname] = sponsor.partner_id[fname]
 
-    @api.onchange('exhibitor_type')
-    def _onchange_exhibitor_type(self):
-        """ Keep an explicit onchange to allow configuration of room names, even
-        if this field is normally a related on chat_room_id.name. It is not a real
-        computed field, an onchange used in form view is sufficient. """
-        for sponsor in self:
-            if sponsor.exhibitor_type == 'online' and not sponsor.room_name:
-                if sponsor.name:
-                    room_name = "odoo-exhibitor-%s" % sponsor.name
-                else:
-                    room_name = self.env['chat.room']._default_name(objname='exhibitor')
-                sponsor.room_name = self._jitsi_sanitize_name(room_name)
-            if sponsor.exhibitor_type == 'online' and not sponsor.room_max_capacity:
-                sponsor.room_max_capacity = '8'
 
     @api.depends('partner_id')
     def _compute_website_description(self):
@@ -187,34 +164,32 @@ class Sponsor(models.Model):
 
     @api.depends('name', 'event_id.name')
     def _compute_website_url(self):
-        super(Sponsor, self)._compute_website_url()
+        super()._compute_website_url()
         for sponsor in self:
             if sponsor.id:  # avoid to perform a slug on a not yet saved record in case of an onchange.
-                base_url = sponsor.event_id.get_base_url()
-                sponsor.website_url = '%s/event/%s/exhibitor/%s' % (base_url, self.env["ir.http"]._slug(sponsor.event_id), self.env["ir.http"]._slug(sponsor))
+                sponsor.website_url = f'/event/{self.env["ir.http"]._slug(sponsor.event_id)}/exhibitor/{self.env["ir.http"]._slug(sponsor)}'
 
-    # ------------------------------------------------------------
-    # CRUD
-    # ------------------------------------------------------------
+    @api.depends('event_id.website_id.domain')
+    def _compute_website_absolute_url(self):
+        super()._compute_website_absolute_url()
 
-    @api.model_create_multi
-    def create(self, values_list):
-        for values in values_list:
-            if values.get('is_exhibitor') and not values.get('room_name'):
-                exhibitor_name = values['name'] if values.get('name') else self.env['res.partner'].browse(values['partner_id']).name
-                name = 'odoo-exhibitor-%s' % exhibitor_name or 'sponsor'
-                values['room_name'] = name
-        return super(Sponsor, self).create(values_list)
-
-    def write(self, values):
-        toupdate = self.env['event.sponsor']
-        if values.get('is_exhibitor') and not values.get('chat_room_id') and not values.get('room_name'):
-            toupdate = self.filtered(lambda exhibitor: not exhibitor.chat_room_id)
-            # go into sequential update in order to create a custom room name for each sponsor
-            for exhibitor in toupdate:
-                values['room_name'] = 'odoo-exhibitor-%s' % exhibitor.name
-                super(Sponsor, exhibitor).write(values)
-        return super(Sponsor, self - toupdate).write(values)
+    @api.model
+    def _search_get_detail(self, website, order, options):
+        event_id = self.env['ir.http']._unslug(options['event'])[1]
+        mapping = {
+            'name': {'name': 'name', 'type': 'text', 'match': True},
+            'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
+            'description': {'name': 'website_description', 'type': 'text', 'truncate': True, 'html': True},
+        }
+        return {
+            'model': 'event.sponsor',
+            'base_domain': [[('event_id', '=', event_id), ('exhibitor_type', '!=', 'sponsor')]],
+            'search_fields': ['name', 'website_description'],
+            'fetch_fields': ['name', 'website_url', 'website_description'],
+            'mapping': mapping,
+            'icon': 'fa-black-tie',
+            'order': order,
+        }
 
     # ------------------------------------------------------------
     # ACTIONS
@@ -223,22 +198,10 @@ class Sponsor(models.Model):
     def get_backend_menu_id(self):
         return self.env.ref('event.event_main_menu').id
 
-    def open_website_url(self):
-        """ Overridden to use a relative URL instead of an absolute when website_id is False. """
-        if self.event_id.website_id:
-            return super().open_website_url()
-        return self.env['website'].get_client_action(f'/event/{self.env["ir.http"]._slug(self.event_id)}/exhibitor/{self.env["ir.http"]._slug(self)}')
-
     # ------------------------------------------------------------
-    # MESSAGING
+    # Misc
     # ------------------------------------------------------------
 
-    def _message_get_suggested_recipients(self):
-        recipients = super()._message_get_suggested_recipients()
-        if self.partner_id:
-            self._message_add_suggested_recipient(
-                recipients,
-                partner=self.partner_id,
-                reason=_('Sponsor')
-            )
-        return recipients
+    def get_base_url(self):
+        """As website_id is not defined on this record, we rely on event website_id for base URL."""
+        return self.event_id.get_base_url()

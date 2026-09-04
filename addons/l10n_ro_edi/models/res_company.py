@@ -4,18 +4,16 @@ import requests
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from werkzeug.urls import url_join
 
 from odoo import fields, models, api, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.http import request
 from odoo.tools.safe_eval import json
 
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    l10n_ro_edi_client_id = fields.Char(string='Client ID')
+    l10n_ro_edi_client_id = fields.Char(string='eFactura Client ID')
     l10n_ro_edi_client_secret = fields.Char(string='Client Secret')
     l10n_ro_edi_access_token = fields.Char(string='Access Token')
     l10n_ro_edi_refresh_token = fields.Char(string='Refresh Token')
@@ -23,16 +21,33 @@ class ResCompany(models.Model):
     l10n_ro_edi_refresh_expiry_date = fields.Date(string='Refresh Token Expiry Date')
     l10n_ro_edi_callback_url = fields.Char(compute='_compute_l10n_ro_edi_callback_url')
     l10n_ro_edi_test_env = fields.Boolean(string='Use Test Environment', default=True)
-    l10n_ro_edi_oauth_error = fields.Char()  # Error field to be shown in case of error from the authentication process
+    l10n_ro_edi_anaf_imported_inv_journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        string="Select journal for SPV imported bills",
+        domain="[('type', '=', 'purchase')]",
+        compute="_compute_l10n_ro_edi_anaf_imported_inv_journal",
+        store=True,
+        readonly=False,
+    )
 
     @api.depends('country_code')
     def _compute_l10n_ro_edi_callback_url(self):
         """ Callback URLs are used for generating client_id and client_secret from l10n_ro_edi's setting. """
         for company in self:
             if company.country_code == 'RO':
-                company.l10n_ro_edi_callback_url = url_join(request.httprequest.url_root, 'l10n_ro_edi/callback/%s' % company.id)
+                company.l10n_ro_edi_callback_url = company.get_base_url() + ('/l10n_ro_edi/callback/%s' % company.id)
             else:
                 company.l10n_ro_edi_callback_url = False
+
+    @api.depends('country_code')
+    def _compute_l10n_ro_edi_anaf_imported_inv_journal(self):
+        for company in self:
+            company.l10n_ro_edi_anaf_imported_inv_journal_id = False
+            if company.country_code == 'RO':
+                company.l10n_ro_edi_anaf_imported_inv_journal_id = self.env['account.journal'].search([
+                    ('type', '=', 'purchase'),
+                    *self.env['account.journal']._check_company_domain(company.id),
+                ], limit=1)
 
     def _l10n_ro_edi_log_message(self, message: str, func: str):
         with self.pool.cursor() as cr:
@@ -72,7 +87,6 @@ class ResCompany(models.Model):
             'l10n_ro_edi_refresh_token': response_json['refresh_token'],
             'l10n_ro_edi_access_expiry_date': access_expiry_date,
             'l10n_ro_edi_refresh_expiry_date': refresh_expiry_date,
-            'l10n_ro_edi_oauth_error': False,
         })
 
     def _l10n_ro_edi_refresh_access_token(self, session):
@@ -134,4 +148,22 @@ class ResCompany(models.Model):
                 self._l10n_ro_edi_log_message(
                     message=f'{error_header}\n{error_cause}',
                     func='_cron_l10n_ro_edi_refresh_access_token',
+                )
+
+    def _cron_l10n_ro_edi_synchronize_invoices(self):
+        """
+        This CRON method will be run every 24 hours to synchronize the invoices and the bills with the ANAF
+        """
+        ro_companies = self.env['res.company'].sudo().search([
+            ('l10n_ro_edi_refresh_token', '!=', False),
+            ('l10n_ro_edi_client_id', '!=', False),
+            ('l10n_ro_edi_client_secret', '!=', False),
+        ])
+        for company in ro_companies:
+            try:
+                self.env['account.move'].with_company(company)._l10n_ro_edi_fetch_invoices()
+            except UserError as e:
+                self._l10n_ro_edi_log_message(
+                    message=f'{company.id}\n{e}',
+                    func='_cron_l10n_ro_edi_synchronize_invoices',
                 )

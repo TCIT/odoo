@@ -15,14 +15,26 @@ const { DateTime, Settings } = luxon;
  * @property {string} [format]
  *  Format used to format a DateTime or to parse a formatted string.
  *  > Default: the session localization format.
- * @property {boolean} [condensed] if true, months, days and hours will be formatted without
- *  leading 0.
  *
  * @typedef {luxon.DateTime} DateTime
  *
  * @typedef {[NullableDateTime, NullableDateTime]} NullableDateRange
  *
  * @typedef {DateTime | false | null | undefined} NullableDateTime
+ */
+
+/**
+ * @typedef ConversionLocalOptions
+ *
+ * @property {boolean} [showSeconds]
+ *  Show the seconds in the final result.
+ *  > Default: false.
+ * @property {boolean} [showTime]
+ *  Show the time in the final result.
+ *  > Default: true.
+ * @property {boolean} [showDate]
+ *  Show the date in the final result.
+ *  > Default: true.
  */
 
 /**
@@ -70,11 +82,19 @@ const smartDateUnits = {
     m: "months",
     w: "weeks",
     y: "years",
+    H: "hours",
+    M: "minutes",
+    S: "seconds",
 };
-const smartDateRegex = new RegExp(
-    ["^", "([+-])", "(\\d+)", `([${Object.keys(smartDateUnits).join("")}]?)`, "$"].join("\\s*"),
-    "i"
-);
+const smartWeekdays = {
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+    sunday: 7,
+};
 
 /** @type {WeakMap<DateTime, string>} */
 const dateCache = new WeakMap();
@@ -129,21 +149,11 @@ export function clampDate(desired, minDate, maxDate) {
 }
 
 /**
- * Get the week number of a given date, in the user's locale settings.
+ * Get the week year and week number of a given date as well as the starting
+ * date of the week, in the user's locale settings.
  *
  * @param {Date | luxon.DateTime} date
- * @returns {number}
- *  the ISO week number (1-53) of the Monday nearest to the locale's first day of the week
- */
-export function getLocalWeekNumber(date) {
-    return getLocalYearAndWeek(date).week;
-}
-
-/**
- * Get the week year and week number of a given date, in the user's locale settings.
- *
- * @param {Date | luxon.DateTime} date
- * @returns {{ year: number, week: number }}
+ * @returns {{ year: number, week: number, startDate: luxon.DateTime }}
  *  the year the week is part of, and
  *  the ISO week number (1-53) of the Monday nearest to the locale's first day of the week
  */
@@ -153,18 +163,28 @@ export function getLocalYearAndWeek(date) {
     }
     const { weekStart } = localization;
     // go to start of week
-    date = date.minus({ days: (date.weekday + 7 - weekStart) % 7 });
+    const startDate = date.minus({ days: (date.weekday + 7 - weekStart) % 7 });
     // go to nearest Monday, up to 3 days back- or forwards
     date =
         weekStart > 1 && weekStart < 5 // if firstDay after Mon & before Fri
-            ? date.minus({ days: (date.weekday + 6) % 7 }) // then go back 1-3 days
-            : date.plus({ days: (8 - date.weekday) % 7 }); // else go forwards 0-3 days
+            ? startDate.minus({ days: (startDate.weekday + 6) % 7 }) // then go back 1-3 days
+            : startDate.plus({ days: (8 - startDate.weekday) % 7 }); // else go forwards 0-3 days
     date = date.plus({ days: 6 }); // go to last weekday of ISO week
     const jan4 = DateTime.local(date.year, 1, 4);
-    // count from previous year if week falls before Jan 4
-    const diffDays =
-        date < jan4 ? date.diff(jan4.minus({ years: 1 }), "day").days : date.diff(jan4, "day").days;
-    return { year: date.year, week: Math.trunc(diffDays / 7) + 1 };
+    let diffDays, year;
+    if (date < jan4) {
+        // count from previous year if week falls before Jan 4
+        diffDays = date.diff(jan4.minus({ years: 1 }), "day").days
+        year = date.year - 1
+    } else {
+        diffDays = date.diff(jan4, "day").days;
+        year = date.year
+    }
+    return {
+        year: year,
+        week: Math.trunc(diffDays / 7) + 1,
+        startDate,
+    };
 }
 
 /**
@@ -202,16 +222,6 @@ export function getEndOfLocalWeek(date) {
 }
 
 /**
- * Returns whether the given format is a 24-hour format.
- * Falls back to localization time format if none is given.
- *
- * @param {string} format
- */
-export function is24HourFormat(format) {
-    return /H/.test(format || localization.timeFormat);
-}
-
-/**
  * @param {NullableDateTime | NullableDateRange} value
  * @param {NullableDateRange} range
  * @returns {boolean}
@@ -221,27 +231,17 @@ export function isInRange(value, range) {
         return false;
     }
     if (Array.isArray(value)) {
-        const actualValues = value.filter(Boolean);
+        const actualValues = value.filter(Boolean).sort();
         if (actualValues.length < 2) {
             return isInRange(actualValues[0], range);
         }
         return (
-            (value[0] <= range[0] && range[0] <= value[1]) ||
-            (range[0] <= value[0] && value[0] <= range[1])
+            (actualValues[0] <= range[0] && range[0] <= actualValues[1]) ||
+            (range[0] <= actualValues[0] && actualValues[0] <= range[1])
         );
     } else {
         return range[0] <= value && value <= range[1];
     }
-}
-
-/**
- * Returns whether the given format uses a meridiem suffix (AM/PM).
- * Falls back to localization time format if none is given.
- *
- * @param {string} format
- */
-export function isMeridiemFormat(format) {
-    return /a/.test(format || localization.timeFormat);
 }
 
 /**
@@ -261,31 +261,99 @@ function isValidDate(date) {
 
 /**
  * Smart date inputs are shortcuts to write dates quicker.
- * These shortcuts should respect the format ^[+-]\d+[dmwy]?$
+ * These shortcuts are based on python version: `odoo.tools.date_utils.parse_date`.
+ * Starting from now (or "today"), add relative delta to the date.
  *
  * e.g.
  *   "+1d" or "+1" will return now + 1 day
  *   "-2w" will return now - 2 weeks
  *   "+3m" will return now + 3 months
  *   "-4y" will return now + 4 years
+ *   "=monday" will return the previous Monday at midnight
+ *   "=1d" will return the first day of month at midnight
+ *   "+3H" will return now + 3 hours
+ *   "+3M" will return now + 3 minutes
+ *   "+3S" will return now + 3 seconds
+ *   "today -1d" will return yesterday at midnight
+ *   "=week_start" will return the first day of the current week at midnight, according to the locale
+ *
+ * Difference with python version: a simple "+1" means "+1d" for the first term,
+ * the unit is optional and defaults to "d".
  *
  * @param {string} value
  * @returns {NullableDateTime} Luxon datetime object (in the user's local timezone)
  */
 function parseSmartDateInput(value) {
-    const match = value.match(smartDateRegex);
-    if (match) {
-        let date = DateTime.local();
-        const offset = parseInt(match[2], 10);
-        const unit = smartDateUnits[(match[3] || "d").toLowerCase()];
-        if (match[1] === "+") {
-            date = date.plus({ [unit]: offset });
-        } else {
-            date = date.minus({ [unit]: offset });
-        }
-        return date;
+    const terms = value.split(/\s+/);
+    if (!terms.length) {
+        return false;
     }
-    return false;
+    var now = DateTime.local().startOf("second");
+    if (terms[0] == "today") {
+        terms.shift();
+        now = now.startOf("day");
+    } else if (terms[0] == "now") {
+        terms.shift();
+    } else if (terms.length == 1 && /^[=+-]\d+$/.test(terms[0])) {
+        // handle optional unit for simple input
+        terms[0] += "d";
+    }
+
+    for (let i = 0; i < terms.length; i++) {
+        const term = terms[i];
+        const operator = term[0];
+        if (term.length < 3 || !["+", "-", "="].includes(operator)) {
+            return false;
+        }
+
+        // Weekday
+        const dayname = term.slice(1);
+        if (Object.hasOwn(smartWeekdays, dayname) || dayname === "week_start") {
+            const { weekStart } = localization;
+            const weekdayNumber =
+                dayname === "week_start" ? weekStart : smartWeekdays[dayname];
+            let weekdayOffset =
+                ((weekdayNumber - weekStart + 7) % 7) - ((now.weekday - weekStart + 7) % 7);
+            if (operator == "+" || operator == "-") {
+                if (weekdayOffset > 0 && operator == "-") {
+                    weekdayOffset -= 7;
+                } else if (weekdayOffset < 0 && operator == "+") {
+                    weekdayOffset += 7;
+                }
+            } else {
+                now = now.startOf("day");
+            }
+            now = now.plus({ days: weekdayOffset });
+            continue;
+        }
+
+        // Operations on dates
+        try {
+            const field_name = smartDateUnits[term[term.length - 1]];
+            const number = parseInt(term.slice(1, -1), 10);
+            if (!field_name || isNaN(number)) {
+                return false;
+            }
+            if (operator == "+") {
+                now = now.plus({ [field_name]: number });
+            } else if (operator == "-") {
+                now = now.minus({ [field_name]: number });
+            } else if (operator == "=") {
+                if (field_name == "seconds" || field_name == "minutes" || field_name == "hours") {
+                    now = now.startOf(field_name);
+                } else if (field_name == "weeks") {
+                    return false; // unsupported
+                } else {
+                    now = now.startOf("day");
+                }
+                now = now.set({ [field_name]: number });
+            }
+        } catch {
+            return false;
+        }
+    }
+
+    return now;
 }
 
 /**
@@ -338,25 +406,6 @@ export function today() {
 // Formatting
 //-----------------------------------------------------------------------------
 
-const condensedFormats = {};
-/**
- * Given a date(time) format, returns a format where months, days and hours are
- * displayed without the leading 0 (e.g. 03/05/2024 08:00:00 => 3/5/2024 8:00:00).
- *
- * @param {string} format
- * @returns string
- */
-function getCondensedFormat(format) {
-    const originalFormat = format;
-    if (!condensedFormats[originalFormat]) {
-        format = format.replace(/(^|[^M])M{2}([^M]|$)/, "$1M$2");
-        format = format.replace(/(^|[^d])d{2}([^d]|$)/, "$1d$2");
-        format = format.replace(/(^|[^H])H{2}([^H]|$)/, "$1H$2");
-        condensedFormats[originalFormat] = format;
-    }
-    return condensedFormats[originalFormat];
-}
-
 /**
  * Formats a DateTime object to a date string
  *
@@ -367,13 +416,7 @@ export function formatDate(value, options = {}) {
     if (!value) {
         return "";
     }
-    let format = options.format;
-    if (!format) {
-        format = localization.dateFormat;
-        if (options.condensed) {
-            format = getCondensedFormat(format);
-        }
-    }
+    const format = options.format || localization.dateFormat;
     return value.toFormat(format);
 }
 
@@ -387,18 +430,62 @@ export function formatDateTime(value, options = {}) {
     if (!value) {
         return "";
     }
-    let format = options.format;
-    if (!format) {
-        if (options.showSeconds === false) {
-            format = `${localization.dateFormat} ${localization.shortTimeFormat}`;
-        } else {
-            format = localization.dateTimeFormat;
-        }
-        if (options.condensed) {
-            format = getCondensedFormat(format);
-        }
-    }
+    const format = options.format || localization.dateTimeFormat;
     return value.setZone(options.tz || "default").toFormat(format);
+}
+
+/**
+ * Format a DateTime object to a locale date string.
+ * e.g.: Jan 31, 2024
+ * If the year is the current one, then it's omitted
+ * from the result.
+ *
+ * @param {NullableDateTime} value
+ */
+export function toLocaleDateString(value) {
+    if (!value) {
+        return "";
+    }
+    const format = { ...DateTime.DATE_MED };
+    if (today().year === value.year) {
+        delete format.year;
+    }
+    return value.toLocaleString(format);
+}
+
+/**
+ * Format a DateTime object to a locale datetime string
+ * e.g.: Jan 31, 2024, 12:00 AM
+ * If the year is the current one, then it's omitted
+ * from the result.
+ *
+ * @param {NullableDateTime} value
+ * @param {ConversionLocalOptions} [options={}]
+ */
+export function toLocaleDateTimeString(
+    value,
+    options = { showDate: true, showTime: true, showSeconds: false }
+) {
+    if (!value) {
+        return "";
+    }
+    const format = { ...DateTime.DATETIME_MED_WITH_SECONDS };
+    if (!options.showSeconds) {
+        delete format.second;
+    }
+    if (options.showDate === false) {
+        delete format.day;
+        delete format.month;
+        delete format.year;
+    }
+    if (options.showTime === false) {
+        delete format.hour;
+        delete format.minute;
+    }
+    if (today().year === value.year) {
+        delete format.year;
+    }
+    return value.setZone(options.tz || "default").toLocaleString(format);
 }
 
 /**

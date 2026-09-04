@@ -1,6 +1,3 @@
-#  -*- coding: utf-8 -*-
-#  Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from odoo import models
 from odoo.tools import float_compare, float_is_zero, float_round
 
@@ -77,6 +74,7 @@ class AccountAnalyticAccount(models.Model):
         for existing_aal in lines:
             # TODO: recommend something better for this line in review, please
             accounts = sum(map(existing_aal.mapped, line_columns), self.env['account.analytic.account'])
+            existing_aal = existing_aal.sudo()
             if accounts in distribution:
                 # Update the existing AAL for this account
                 percentage = distribution[accounts]

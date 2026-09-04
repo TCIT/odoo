@@ -1,23 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_event_booth_sale
-# 
-# Translators:
-# Wil Odoo, 2024
-# 
+# * website_event_booth_sale
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-03 01:54+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Czech <https://translate.odoo.com/projects/odoo-19/"
+"website_event_booth_sale/cs/>\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_event_booth_sale
 #: model_terms:ir.ui.view,arch_db:website_event_booth_sale.event_booth_registration
@@ -35,6 +35,12 @@ msgid "Confirmed"
 msgstr "Potvrzený"
 
 #. module: website_event_booth_sale
+#: model:ir.model.fields,field_description:website_event_booth_sale.field_product_template__display_name
+#: model:ir.model.fields,field_description:website_event_booth_sale.field_sale_order__display_name
+msgid "Display Name"
+msgstr "Zobrazovací název"
+
+#. module: website_event_booth_sale
 #: model_terms:ir.ui.view,arch_db:website_event_booth_sale.event_booth_registration
 msgid "Free"
 msgstr "Zdarma"
@@ -45,6 +51,12 @@ msgid "Go to Payment"
 msgstr "Přejít na Platby"
 
 #. module: website_event_booth_sale
+#: model:ir.model.fields,field_description:website_event_booth_sale.field_product_template__id
+#: model:ir.model.fields,field_description:website_event_booth_sale.field_sale_order__id
+msgid "ID"
+msgstr "ID"
+
+#. module: website_event_booth_sale
 #: model_terms:ir.ui.view,arch_db:website_event_booth_sale.event_booth_order_progress
 msgid "Payment"
 msgstr "Platba"
@@ -53,11 +65,6 @@ msgstr "Platba"
 #: model:ir.model,name:website_event_booth_sale.model_product_template
 msgid "Product"
 msgstr "Produkt"
-
-#. module: website_event_booth_sale
-#: model:ir.model,name:website_event_booth_sale.model_product_product
-msgid "Product Variant"
-msgstr "Produktová varianta"
 
 #. module: website_event_booth_sale
 #: model:ir.model,name:website_event_booth_sale.model_sale_order

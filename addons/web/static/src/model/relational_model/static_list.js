@@ -1,16 +1,20 @@
 import { x2ManyCommands } from "@web/core/orm_service";
 import { intersection } from "@web/core/utils/arrays";
-import { pick } from "@web/core/utils/objects";
+import { omit, pick } from "@web/core/utils/objects";
 import { completeActiveFields } from "@web/model/relational_model/utils";
 import { DataPoint } from "./datapoint";
 import { fromUnityToServerValues, getBasicEvalContext, getId, patchActiveFields } from "./utils";
 
 import { markRaw } from "@odoo/owl";
 
+/**
+ * @typedef {import("./record").Record} RelationalRecord
+ */
+
 function compareFieldValues(v1, v2, fieldType) {
     if (fieldType === "many2one") {
-        v1 = v1 ? v1[1] : "";
-        v2 = v2 ? v2[1] : "";
+        v1 = v1 ? v1.display_name : "";
+        v2 = v2 ? v2.display_name : "";
     }
     return v1 < v2;
 }
@@ -34,17 +38,53 @@ function compareRecords(r1, r2, orderBy, fields) {
     return 0;
 }
 
+function copyRecordData(record, copyFields = []) {
+    const data = {};
+    for (const [name, value] of Object.entries(record.data)) {
+        if (
+            ![...copyFields, "display_name"].includes(name) &&
+            (record._isReadonly(name) || record._isInvisible(name)) &&
+            !record._isRequired(name)
+        ) {
+            continue;
+        }
+        switch (record.fields[name].type) {
+            case "many2many": {
+                const list = record.data[name];
+                data[name] = list.currentIds.map((id) => {
+                    let data;
+                    if (list._cache[id]) {
+                        data = copyRecordData(list._cache[id]);
+                    }
+                    return [x2ManyCommands.LINK, id, data];
+                });
+                break;
+            }
+            case "many2one":
+            case "many2one_reference":
+            case "reference":
+                data[name] = value && Object.assign({}, value);
+                break;
+            case "one2many":
+                // Not supported => that field is left empty
+                break;
+            default:
+                data[name] = value;
+        }
+    }
+    return data;
+}
+
 export class StaticList extends DataPoint {
     static type = "StaticList";
 
     /**
-     * @param {import("./relational_model").Config} config
-     * @param {Object} data
-     * @param {Object} [options={}]
-     * @param {Function} [options.onUpdate]
-     * @param {Record} [options.parent]
+     * @type {typeof DataPoint.prototype.setup<{
+     *  onUpdate?: () => unknown;
+     *  parent?: RelationalRecord;
+     * }>}
      */
-    setup(config, data, options = {}) {
+    setup(_config, data, options = {}) {
         this._parent = options.parent;
         this._onUpdate = options.onUpdate;
 
@@ -63,6 +103,7 @@ export class StaticList extends DataPoint {
         // config to add the form view's fields in activeFields.
         this._extendedRecords = new Set();
 
+        /** @type {RelationalRecord[]} */
         this.records = data
             .slice(this.offset, this.limit)
             .map((r) => this._createRecordDatapoint(r));
@@ -106,6 +147,10 @@ export class StaticList extends DataPoint {
         return this.config.resIds;
     }
 
+    get selection() {
+        return [];
+    }
+
     // -------------------------------------------------------------------------
     // Public
     // -------------------------------------------------------------------------
@@ -139,6 +184,37 @@ export class StaticList extends DataPoint {
         });
     }
 
+    /**
+     * @param {number} index
+     * @param {Object} [options]
+     * @param {Object} [options.context]
+     * @param {"edit" | "readonly"} [options.mode]
+     */
+    addNewRecordAtIndex(index, options = {}) {
+        return this.model.mutex.exec(async () => {
+            const newRecord = await this._addNewRecordAtIndex(index, options);
+            await this._onUpdate();
+            return newRecord;
+        });
+    }
+
+    /**
+     * @param {[number, any, any][]} commands
+     * @param {Object} [options]
+     * @param {boolean} [options.canAddOverLimit]
+     * @param {boolean} [options.sort]
+     * @returns {Promise<void>}
+     */
+    applyCommands(commands, options = {}) {
+        return this.model.mutex.exec(async () => {
+            await this._applyCommands(commands, omit(options, "sort"));
+            if (options.sort) {
+                await this._sort();
+            }
+            await this._onUpdate();
+        });
+    }
+
     canResequence() {
         return this.handleField && this.orderBy.length && this.orderBy[0].name === this.handleField;
     }
@@ -146,6 +222,23 @@ export class StaticList extends DataPoint {
     delete(record) {
         return this.model.mutex.exec(async () => {
             await this._applyCommands([[x2ManyCommands.DELETE, record.resId || record._virtualId]]);
+            // All records of last page are deleted => reload the new last page
+            if (this.count === this.offset) {
+                await this._load({ offset: Math.max(this.offset - this.limit, 0) });
+            }
+            await this._onUpdate();
+        });
+    }
+
+    /**
+     * @param {RelationalRecord[]} records
+     * @param {Object} [options={}]
+     * @param {number} [options.targetIndex]
+     * @returns {Promise<void>}
+     */
+    duplicateRecords(records = [], options = {}) {
+        return this.model.mutex.exec(async () => {
+            await this._duplicateRecords(records, options);
             await this._onUpdate();
         });
     }
@@ -172,8 +265,8 @@ export class StaticList extends DataPoint {
      * @param {Object} [params.context]
      * @param {boolean} [params.withoutParent]
      * @param {string} [params.mode]
-     * @param {Record} [record]
-     * @returns {Record}
+     * @param {RelationalRecord} [record]
+     * @returns {RelationalRecord}
      */
     extendRecord(params, record) {
         return this.model.mutex.exec(async () => {
@@ -196,6 +289,7 @@ export class StaticList extends DataPoint {
                     ...record.config,
                     ...params,
                     activeFields,
+                    fields: this.fields,
                 };
 
                 // case 1: the record already exists
@@ -336,13 +430,13 @@ export class StaticList extends DataPoint {
         return this.model.mutex.exec(() => this._sortBy(fieldName));
     }
 
-    async addAndRemove({ add, remove, reload } = {}) {
+    async addAndRemove({ add, remove } = {}) {
         return this.model.mutex.exec(async () => {
             const commands = [
                 ...(add || []).map((id) => [x2ManyCommands.LINK, id]),
                 ...(remove || []).map((id) => [x2ManyCommands.UNLINK, id]),
             ];
-            await this._applyCommands(commands, { canAddOverLimit: true, reload });
+            await this._applyCommands(commands, { canAddOverLimit: true });
             await this._onUpdate();
         });
     }
@@ -357,7 +451,7 @@ export class StaticList extends DataPoint {
      * add this record to the list (if it is a new one), and to notify the parent record of the
      * update. We may also want to sort the list.
      *
-     * @param {Record} record
+     * @param {RelationalRecord} record
      */
     validateExtendedRecord(record) {
         return this.model.mutex.exec(async () => {
@@ -368,9 +462,6 @@ export class StaticList extends DataPoint {
                 return;
             }
             await this._onUpdate();
-            if (this.orderBy.length) {
-                await this._sort();
-            }
             record._restoreActiveFields();
             record._savePoint = undefined;
         });
@@ -404,7 +495,7 @@ export class StaticList extends DataPoint {
         }
     }
 
-    async _addRecord(record, { position } = {}) {
+    async _addRecord(record, { position, sort = true } = {}) {
         const command = [x2ManyCommands.CREATE, record._virtualId];
         if (position === "top") {
             this.records.unshift(record);
@@ -424,7 +515,7 @@ export class StaticList extends DataPoint {
             this._commands.push(command);
         } else {
             const currentIds = [...this._currentIds, record._virtualId];
-            if (this.orderBy.length) {
+            if (this.orderBy.length && sort) {
                 await this._sort(currentIds);
             } else {
                 if (this.records.length < this.limit) {
@@ -438,6 +529,23 @@ export class StaticList extends DataPoint {
         this._needsReordering = true;
     }
 
+    async _addNewRecordAtIndex(index, options = {}) {
+        const newRecord = await this._createNewRecordDatapoint({
+            context: options.context,
+            manuallyAdded: true,
+            mode: options.mode || "edit",
+        });
+        if (this.records.length === this.limit) {
+            this._tmpIncreaseLimit++;
+            const nextLimit = this.limit + 1;
+            this.model._updateConfig(this.config, { limit: nextLimit }, { reload: false });
+        }
+        await this._addRecord(newRecord);
+        await this._resequence(newRecord.id, this.records[index].id);
+        newRecord.dirty = false;
+        return newRecord;
+    }
+
     _addSavePoint() {
         for (const id in this._cache) {
             this._cache[id]._addSavePoint();
@@ -449,7 +557,7 @@ export class StaticList extends DataPoint {
         });
     }
 
-    _applyCommands(commands, { canAddOverLimit, reload } = {}) {
+    _applyCommands(commands, { canAddOverLimit } = {}) {
         const { CREATE, UPDATE, DELETE, UNLINK, LINK, SET } = x2ManyCommands;
 
         // For performance reasons, we split commands by record ids, such that we have quick access
@@ -472,6 +580,7 @@ export class StaticList extends DataPoint {
         // For performance reasons, we accumulate removed ids (commands DELETE and UNLINK), and at
         // the end, we filter once this.records and this._currentIds to remove them.
         const removedIds = {};
+        const currentIdsSet = new Set(this._currentIds);
         const recordsToLoad = [];
         for (const command of commands) {
             switch (command[0]) {
@@ -480,7 +589,7 @@ export class StaticList extends DataPoint {
                     const record = this._createRecordDatapoint(command[2], { virtualId });
                     this.records.push(record);
                     addOwnCommand([CREATE, virtualId]);
-                    const index = this.offset + this.limit + this._tmpIncreaseLimit;
+                    const index = this.offset + this.limit;
                     this._currentIds.splice(index, 0, virtualId);
                     this._tmpIncreaseLimit = Math.max(this.records.length - this.limit, 0);
                     const nextLimit = this.limit + this._tmpIncreaseLimit;
@@ -529,7 +638,9 @@ export class StaticList extends DataPoint {
                             }
                             changes[fieldName] = command[2][fieldName];
                         }
-                        record._applyChanges(record._parseServerValues(changes, record.data));
+                        record._applyChanges(
+                            record._parseServerValues(changes, { currentValues: record.data })
+                        );
                     }
                     break;
                 }
@@ -571,6 +682,9 @@ export class StaticList extends DataPoint {
                     } else {
                         record = this._createRecordDatapoint({ ...command[2], id: command[1] });
                     }
+                    if (currentIdsSet.has(record.resId) && !removedIds[record.resId]) {
+                        break;
+                    }
                     if (!this.limit || this.records.length < this.limit || canAddOverLimit) {
                         if (!command[2]) {
                             recordsToLoad.push(record);
@@ -587,6 +701,7 @@ export class StaticList extends DataPoint {
                         }
                     }
                     this._currentIds.push(record.resId);
+                    currentIdsSet.add(record.resId);
                     addOwnCommand([command[0], command[1]]);
                     this.count++;
                     break;
@@ -640,18 +755,9 @@ export class StaticList extends DataPoint {
                 this.records.push(this._cache[id]);
             }
         }
-        if (recordsToLoad.length || reload) {
-            const resIds = reload
-                ? this.records.map((r) => r.resId)
-                : recordsToLoad.map((r) => r.resId);
+        if (recordsToLoad.length) {
+            const resIds = recordsToLoad.map((r) => r.resId);
             return this.model._loadRecords({ ...this.config, resIds }).then((recordValues) => {
-                if (reload) {
-                    for (const record of recordValues) {
-                        this._createRecordDatapoint(record);
-                    }
-                    this.records = resIds.map((id) => this._cache[id]);
-                    return;
-                }
                 for (let i = 0; i < recordsToLoad.length; i++) {
                     const record = recordsToLoad[i];
                     record._applyValues(recordValues[i]);
@@ -741,7 +847,6 @@ export class StaticList extends DataPoint {
             resIds: resId ? [resId] : [],
             mode: params.mode || "readonly",
             isMonoRecord: true,
-            currentCompanyId: this.currentCompanyId,
         };
         const { CREATE, UPDATE } = x2ManyCommands;
         const options = {
@@ -815,6 +920,53 @@ export class StaticList extends DataPoint {
             this._applyCommands(this._initialCommands);
         }
         this._savePoint = undefined;
+    }
+
+    /**
+     * @fixme: this method is naive and ineffective (it triggers a lot of onchange rpcs)
+     */
+    async _duplicateRecords(records, options) {
+        const targetIndex = options.targetIndex ?? this.records.indexOf(records.at(-1)) + 1;
+        const copyFields = options.copyFields || [];
+        let sequence = this.records[targetIndex - 1].data[this.handleField] + 1;
+        const newRecords = await Promise.all(
+            records.map(async () =>
+                this._createNewRecordDatapoint({
+                    mode: "readonly",
+                })
+            )
+        );
+        await Promise.all(
+            records.map((record, index) =>
+                newRecords[index]._update({
+                    ...copyRecordData(record, copyFields),
+                    [this.handleField]: sequence++,
+                })
+            )
+        );
+
+        const localIncreaseLimit = this.records.length + records.length - this.limit;
+        if (localIncreaseLimit > 0) {
+            this._tmpIncreaseLimit += localIncreaseLimit;
+            const nextLimit = this.limit + localIncreaseLimit;
+            this.model._updateConfig(this.config, { limit: nextLimit }, { reload: false });
+        }
+
+        const commands = [];
+        // `this.records.slice(targetIndex)` is wrong
+        // we need to iterate on ALL the next records even the ones on the next pages..
+        for (const record of this.records.slice(targetIndex)) {
+            commands.push(
+                x2ManyCommands.update(record.resId || record._virtualId, {
+                    [this.handleField]: sequence++,
+                })
+            );
+        }
+        await this._applyCommands(commands);
+
+        await Promise.all(newRecords.map((record) => this._addRecord(record, { sort: false })));
+
+        await this._sort();
     }
 
     _getCommands({ withReadonly } = {}) {
@@ -996,9 +1148,9 @@ export class StaticList extends DataPoint {
             }
         }
         const allRecords = currentIds.map((id) => this._cache[id]);
-        const sortedRecords = allRecords.sort((r1, r2) => {
-            return compareRecords(r1, r2, orderBy, this.fields);
-        });
+        const sortedRecords = allRecords.sort((r1, r2) =>
+            compareRecords(r1, r2, orderBy, this.fields)
+        );
         await this._load({
             orderBy,
             nextCurrentIds: sortedRecords.map((r) => r.resId || r._virtualId),
@@ -1011,7 +1163,11 @@ export class StaticList extends DataPoint {
         if (fieldName) {
             if (orderBy.length && orderBy[0].name === fieldName) {
                 if (!this._needsReordering) {
-                    orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
+                    if (orderBy[0].asc) {
+                        orderBy[0] = { name: orderBy[0].name, asc: false };
+                    } else {
+                        orderBy = [{ name: "id", asc: true }];
+                    }
                 }
             } else {
                 orderBy = orderBy.filter((o) => o.name !== fieldName);

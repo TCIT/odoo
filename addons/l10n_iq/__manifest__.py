@@ -15,7 +15,8 @@ Activates:
     "depends": [
         "account",
     ],
-    "data": ["data/res.country.state.csv"],
+    "auto_install": ["account"],
     "demo": ["demo/demo_company.xml"],
+    "author": "Odoo S.A.",
     "license": "LGPL-3",
 }

@@ -28,10 +28,6 @@ This module allows a customer to give rating.
         ],
         'web.assets_unit_tests': [
             'rating/static/tests/**/*',
-            ('remove', 'rating/static/tests/helpers/**/*'),
-        ],
-        'web.tests_assets': [
-            'rating/static/tests/helpers/**/*',
         ],
         "mail.assets_public": [
             "rating/static/src/core/common/**/*",
@@ -40,5 +36,6 @@ This module allows a customer to give rating.
             "rating/static/src/core/common/**/*",
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

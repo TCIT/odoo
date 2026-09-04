@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { evaluateExpr } from "@web/core/py_js/py";
@@ -45,6 +43,8 @@ export class AnalyticDistribution extends Component {
         business_domain_compute: { type: String, optional: true },
         force_applicability: { type: String, optional: true },
         allow_save: { type: Boolean, optional: true },
+        multi_edit: { type: Boolean, optional: true },
+        placeholder: { type: String, optional: true },
     }
 
     setup(){
@@ -54,6 +54,7 @@ export class AnalyticDistribution extends Component {
         this.state = useState({
             showDropdown: false,
             formattedData: [],
+            update_plan: {},
         });
 
         this.widgetRef = useRef("analyticDistribution");
@@ -66,6 +67,7 @@ export class AnalyticDistribution extends Component {
         this.focusSelector = false;
 
         this.currentValue = this.props.record.data[this.props.name];
+        this.initialFormattedData = [];
 
         onWillStart(this.willStart);
         useRecordObserver(this.willUpdateRecord.bind(this));
@@ -95,6 +97,7 @@ export class AnalyticDistribution extends Component {
             fieldString: _t("Analytic Distribution Model"),
         });
         this.allPlans = [];
+        this.planIdToColumn = {};
         this.lastAccount = this.props.account_field && this.props.record.data[this.props.account_field] || false;
         this.lastProduct = this.props.product_field && this.props.record.data[this.props.product_field] || false;
     }
@@ -106,6 +109,10 @@ export class AnalyticDistribution extends Component {
             await this.fetchAllPlans(this.props);
         }
         await this.jsonToData(this.props.record.data[this.props.name]);
+        if (this.props.multi_edit) {
+            this.initialFormattedData = this.state.formattedData;
+            this.state.formattedData = [];
+        }
     }
 
     async willUpdateRecord(record) {
@@ -127,6 +134,10 @@ export class AnalyticDistribution extends Component {
             this.lastAccount = accountChanged && currentAccount || this.lastAccount;
             this.lastProduct = productChanged && currentProduct || this.lastProduct;
             await this.jsonToData(record.data[this.props.name]);
+            if (this.props.multi_edit) {
+                this.initialFormattedData = this.state.formattedData;
+                this.state.formattedData = [];
+            }
         }
         this.currentValue = record.data[this.props.name];
     }
@@ -141,7 +152,8 @@ export class AnalyticDistribution extends Component {
      */
     accountTotalsByPlan() {
         const accountTotals = {};
-        this.state.formattedData.map((line) => {
+        const formattedData = this.props.multi_edit ? this.initialFormattedData : this.state.formattedData;
+        formattedData.map((line) => {
             line.analyticAccounts.map((column) => {
                 if (column.accountId) {
                     let {
@@ -220,13 +232,14 @@ export class AnalyticDistribution extends Component {
     }
 
     async jsonToData(jsonFieldValue) {
-        const analyticAccountIds = jsonFieldValue ? Object.keys(jsonFieldValue).map((key) => key.split(',')).flat().map((id) => parseInt(id)) : [];
+        const analyticAccountIds = jsonFieldValue ? Object.keys(jsonFieldValue).filter((key) => key != '__update__' ).map((key) => key.split(',')).flat().map((id) => parseInt(id)) : [];
         const analyticAccountDict = analyticAccountIds.length ? await this.fetchAnalyticAccounts([["id", "in", analyticAccountIds]]) : [];
 
         let distribution = [];
         let accountNotFound = false;
 
         for (const [accountIds, percentage] of Object.entries(jsonFieldValue)) {
+            if (accountIds == '__update__') continue;
             const defaultVals = this.plansToArray(); // empty if the popup was not opened
             const ids = accountIds.split(',');
 
@@ -254,7 +267,7 @@ export class AnalyticDistribution extends Component {
             })
         }
         this.state.formattedData = distribution;
-        if (accountNotFound) {
+        if (accountNotFound && this.editingRecord) {
             // Analytic accounts in the json were not found, save the json without them
             await this.save();
         }
@@ -272,7 +285,17 @@ export class AnalyticDistribution extends Component {
         const values = {};
         // Analytic Account fields
         line.analyticAccounts.map((account) => {
-            const fieldName = `x_plan${account.planId}_id`;
+            const fieldName = this.planIdToColumn[account.planId];
+            const companyId = this.props.record.data.company_id && this.props.record.data.company_id[0];
+            const domain = companyId
+                ? [
+                    "&",
+                    ["root_plan_id", "=", account.planId],
+                    "|",
+                    ["company_id", "parent_of", companyId],
+                    ["company_id", "=", false],
+                  ]
+                : [["root_plan_id", "=", account.planId]];
             recordFields[fieldName] = {
                 string: account.planName,
                 relation: "account.analytic.account",
@@ -281,10 +304,11 @@ export class AnalyticDistribution extends Component {
                     fields: analyticAccountFields,
                     activeFields: analyticAccountFields,
                 },
-                // company domain might be required here
-                domain: [["root_plan_id", "=", account.planId]],
+                domain,
             };
-            values[fieldName] =  account?.accountId || false;
+            values[fieldName] = account?.accountId
+                ? [account.accountId, account.accountDisplayName]
+                : false;
         });
         // Percentage field
         recordFields['percentage'] = {
@@ -301,17 +325,18 @@ export class AnalyticDistribution extends Component {
             values[name] = this.props.record.data[name] * values['percentage'];
             // Currency field
             if (currency_field) {
-                // TODO: check web_read network request
                 const { string, name, type, relation } = this.props.record.fields[currency_field];
                 recordFields[currency_field] = { name, string, type, relation, invisible: true };
-                values[currency_field] = this.props.record.data[currency_field][0];
+                values[currency_field] = [this.props.record.data[currency_field].id, ""];
             }
         }
         return {
             fields: recordFields,
             values: values,
             activeFields: recordFields,
-            onRecordChanged: async (record, changes) => await this.lineChanged(record, changes, line),
+            hooks: {
+                onRecordChanged: async (record, changes) => await this.lineChanged(record, changes, line),
+            }
         }
     }
 
@@ -333,10 +358,10 @@ export class AnalyticDistribution extends Component {
             args['business_domain'] = this.props.business_domain;
         }
         if (this.props.product_field && record.data[this.props.product_field]) {
-            args['product'] = record.data[this.props.product_field][0];
+            args['product'] = record.data[this.props.product_field].id;
         }
         if (this.props.account_field && record.data[this.props.account_field]) {
-            args['account'] = record.data[this.props.account_field][0];
+            args['account'] = record.data[this.props.account_field].id;
         }
         if (this.props.force_applicability) {
             args['applicability'] = this.props.force_applicability;
@@ -346,7 +371,7 @@ export class AnalyticDistribution extends Component {
             args['existing_account_ids'] = existing_account_ids;
         }
         if (record.data.company_id) {
-            args['company_id'] = record.data.company_id[0];
+            args['company_id'] = record.data.company_id.id;
         }
         return args;
     }
@@ -354,6 +379,12 @@ export class AnalyticDistribution extends Component {
     async fetchAllPlans(props) {
         const argsPlan = this.fetchPlansArgs(props);
         this.allPlans = await this.orm.call("account.analytic.plan", "get_relevant_plans", [], argsPlan);
+        this.planIdToColumn = Object.fromEntries(this.allPlans.map((plan) => [plan.id, plan.column_name]));
+        if (!this.props.multi_edit) {
+            this.allPlans.forEach(plan => {
+                this.state.update_plan[plan.column_name] = true;
+            });
+        }
     }
 
     async fetchAnalyticAccounts(domain) {
@@ -374,9 +405,9 @@ export class AnalyticDistribution extends Component {
     async lineChanged(record, changes, line) {
         // record analytic account changes to the state
         for (const account of line.analyticAccounts) {
-            const selected = record.data[`x_plan${account.planId}_id`];
-            account.accountId = selected[0];
-            account.accountDisplayName = selected[1];
+            const selected = record.data[this.planIdToColumn[account.planId]];
+            account.accountId = selected.id;
+            account.accountDisplayName = selected.display_name;
             account.accountColor = account.planColor;
             account.accountRootPlanId = account.planId;
         }
@@ -446,6 +477,9 @@ export class AnalyticDistribution extends Component {
 
     dataToJson() {
         const result = {};
+        if (this.props.multi_edit) {
+            result.__update__ = Object.entries(this.state.update_plan).filter((e) => e[1]).map((e) => e[0]);
+        }
         this.state.formattedData = this.state.formattedData.filter((line) => this.accountCount(line));
         this.state.formattedData.map((line) => {
             const key = line.analyticAccounts.reduce((p, n) => p.concat(n.accountId ? n.accountId : []), []);
@@ -456,16 +490,22 @@ export class AnalyticDistribution extends Component {
 
     async save() {
         await this.props.record.update({ [this.props.name]: this.dataToJson() });
+        if (this.props.multi_edit) {
+            await this.props.record.model.root.load();
+            await this.jsonToData(this.props.record.data[this.props.name]);
+            this.initialFormattedData = this.state.formattedData;
+            this.state.formattedData = [];
+            this.state.update_plan = {};
+        }
     }
 
     onSaveNew() {
-        this.closeAnalyticEditor();
         const { record, product_field, account_field } = this.props;
         this.openTemplate({ resId: false, context: {
             'default_analytic_distribution': this.dataToJson(),
-            'default_partner_id': record.data['partner_id'] ? record.data['partner_id'][0] : undefined,
-            'default_product_id': product_field ? record.data[product_field][0] : undefined,
-            'default_account_prefix': account_field ? record.data[account_field][1].substr(0, 3) : undefined,
+            'default_partner_id': record.data['partner_id'] ? record.data['partner_id'].id : undefined,
+            'default_product_id': product_field ? record.data[product_field].id : undefined,
+            'default_account_prefix': account_field ? record.data[account_field].display_name.substr(0, 3) : undefined,
         }});
     }
 
@@ -486,6 +526,9 @@ export class AnalyticDistribution extends Component {
         if (!this.allPlans.length) {
             await this.fetchAllPlans(this.props);
             await this.jsonToData(this.props.record.data[this.props.name]);
+            if (this.props.multi_edit) {
+                this.state.formattedData = [];
+            }
         }
         if (!this.state.formattedData.length) {
             await this.addLine();
@@ -621,7 +664,8 @@ export class AnalyticDistribution extends Component {
         ];
         if (this.isDropdownOpen
             && !this.widgetRef.el.contains(ev.target)
-            && !ev.target.closest(selectors.join(","))
+            && (!ev.target.closest(selectors.join(",")) ||
+                document.querySelector(".modal:not(.o_inactive_modal)").contains(this.widgetRef.el))
             && !ev.target.isSameNode(document.documentElement)
            ) {
             this.forceCloseEditor();
@@ -638,12 +682,19 @@ export class AnalyticDistribution extends Component {
 
 export const analyticDistribution = {
     component: AnalyticDistribution,
-    supportedTypes: ["char", "text"],
-    fieldDependencies: [{ name:"analytic_precision", type: "integer" }],
+    supportedTypes: ["json"],
+    fieldDependencies: [
+        { name: "analytic_precision", type: "integer" },
+    ],
     supportedOptions: [
         {
             label: _t("Disable save"),
             name: "disable_save",
+            type: "boolean",
+        },
+        {
+            label: _t("Multi edit"),
+            name: "multi_edit",
             type: "boolean",
         },
         {
@@ -673,9 +724,15 @@ export const analyticDistribution = {
             name: "account_field",
             type: "field",
             availableTypes: ["many2one"],
-        }
+        },
+        {
+            label: _t("Dynamic Placeholder"),
+            name: "placeholder_field",
+            type: "field",
+            availableTypes: ["char"],
+        },
     ],
-    extractProps: ({ attrs, options }) => ({
+    extractProps: ({ attrs, options, placeholder }) => ({
         business_domain: options.business_domain,
         account_field: options.account_field,
         product_field: options.product_field,
@@ -683,6 +740,8 @@ export const analyticDistribution = {
         business_domain_compute: attrs.business_domain_compute,
         force_applicability: options.force_applicability,
         allow_save: !options.disable_save,
+        multi_edit: options.multi_edit,
+        placeholder: placeholder,
     }),
 };
 

@@ -88,11 +88,12 @@ class AccountMove(models.Model):
                 move.l10n_it_edi_doi_amount = 0
                 continue
             declaration_lines = move.invoice_line_ids.filtered(
-                # The declaration tax cannot be used with other taxes on a single line
+                # The declaration tax can be used with other taxes on a single line
                 # (checked in `_post`)
-                lambda line: line.tax_ids.ids == tax.ids
+                lambda line: tax.id in line.tax_ids.ids
             )
-            move.l10n_it_edi_doi_amount = sum(declaration_lines.mapped('price_total')) * -move.direction_sign
+            # Since the declaration tax is always 0% we can take the amount subtotal
+            move.l10n_it_edi_doi_amount = sum(declaration_lines.mapped('price_subtotal')) * -move.direction_sign
 
     @api.depends('l10n_it_edi_doi_id', 'l10n_it_edi_doi_amount', 'state')
     def _compute_l10n_it_edi_doi_warning(self):
@@ -121,7 +122,7 @@ class AccountMove(models.Model):
                         order = sale_line.order_id
                         if order.l10n_it_edi_doi_id == declaration:
                             linked_orders |= order
-                        qty_invoiced = invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, sale_line.product_uom) * -move.direction_sign
+                        qty_invoiced = invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, sale_line.product_uom_id) * -move.direction_sign
                         sale_line_id = sale_line.ids[0]  # do not just use `id` in case of NewId
                         additional_invoiced_qty[sale_line_id] = additional_invoiced_qty.get(sale_line_id, 0) + qty_invoiced
                 for order in linked_orders:
@@ -192,9 +193,6 @@ class AccountMove(models.Model):
             )
             if declaration_lines and not declaration:
                 errors.append(_('Given the tax %s is applied, there should be a Declaration of Intent selected.',
-                                declaration_of_intent_tax.name))
-            if any(line.tax_ids != declaration_of_intent_tax for line in declaration_lines):
-                errors.append(_('A line using tax %s should not contain any other taxes',
                                 declaration_of_intent_tax.name))
         if errors:
             raise UserError('\n'.join(errors))

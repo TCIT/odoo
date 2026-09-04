@@ -6,8 +6,8 @@ from random import randint
 from odoo import fields, models
 
 
-class TrackTag(models.Model):
-    _name = "event.track.tag"
+class EventTrackTag(models.Model):
+    _name = 'event.track.tag'
     _description = 'Event Track Tag'
     _order = "category_id, sequence, name"
 
@@ -20,8 +20,9 @@ class TrackTag(models.Model):
         string='Color Index', default=lambda self: self._default_color(),
         help="Note that colorless tags won't be available on the website.")
     sequence = fields.Integer('Sequence', default=10)
-    category_id = fields.Many2one('event.track.tag.category', string="Category", ondelete="set null")
+    category_id = fields.Many2one('event.track.tag.category', string="Category", ondelete="set null", index='btree_not_null')
 
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', "Tag name already exists!"),
-    ]
+    _name_uniq = models.Constraint(
+        'unique (name)',
+        'Tag name already exists!',
+    )

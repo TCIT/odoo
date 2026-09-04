@@ -7,16 +7,21 @@ from odoo import api, exceptions, fields, models, _
 
 
 class PortalMixin(models.AbstractModel):
-    _name = "portal.mixin"
+    _name = 'portal.mixin'
     _description = 'Portal Mixin'
 
     access_url = fields.Char(
         'Portal Access URL', compute='_compute_access_url',
         help='Customer Portal URL')
-    access_token = fields.Char('Security Token', copy=False)
+    access_token = fields.Char('Security Token', search='_search_access_token', copy=False)
 
     # to display the warning from specific model
     access_warning = fields.Text("Access warning", compute="_compute_access_warning")
+
+    def _search_access_token(self, operator, value):
+        if operator not in ('in', 'not in'):
+            return NotImplemented
+        return [('access_token', operator, value)]
 
     def _compute_access_warning(self):
         for mixin in self:
@@ -56,6 +61,7 @@ class PortalMixin(models.AbstractModel):
         else:
             params = {}
         if share_token and hasattr(self, 'access_token'):
+            self.check_access('read')
             params['access_token'] = self._portal_ensure_token()
         if pid:
             params['pid'] = pid

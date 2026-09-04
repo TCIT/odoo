@@ -1,10 +1,6 @@
-import { toRaw } from "@odoo/owl";
+import { markup, toRaw } from "@odoo/owl";
 import {
-    ATTR_SYM,
-    FIELD_DEFINITION_SYM,
     IS_DELETED_SYM,
-    MANY_SYM,
-    ONE_SYM,
     OR_SYM,
     isCommand,
     isMany,
@@ -16,8 +12,16 @@ import {
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 
 /** @typedef {import("./misc").FieldDefinition} FieldDefinition */
-/** @typedef {import("./misc").RecordField} RecordField */
 /** @typedef {import("./record_list").RecordList} RecordList */
+/**
+ * @typedef {Object} Ongoing
+ * @property {Object} storeData Store insert-able data grouped by model names
+ * @property {Set<string>} seenRecords A set of localIDs to track visited records
+ * @property {boolean} depth Whether to recursively fetch deep data for all related records
+ * @property {string[]} fields An array of field names to fetch, using dot notation (e.g., `"persona.group_ids"`).
+ */
+
+const Markup = markup().constructor;
 
 export class Record {
     /** @type {import("./model_internal").ModelInternal} */
@@ -65,18 +69,21 @@ export class Record {
         }
         return `${Model.getName()},${idStr}`;
     }
+    get localId() {
+        return toRaw(this)._.localId;
+    }
     static _localId(expr, data, { brackets = false } = {}) {
         const Model = toRaw(this);
         if (!Array.isArray(expr)) {
             if (Model._.fields.get(expr)) {
                 if (Model._.fieldsMany.get(expr)) {
-                    throw new Error("Using a Record.Many() as id is not (yet) supported");
+                    throw new Error("Using a fields.Many() as id is not (yet) supported");
                 }
                 if (!isRelation(Model, expr)) {
                     return data[expr];
                 }
                 if (isCommand(data[expr])) {
-                    // Note: only Record.one() is supported
+                    // Note: only fields.One is supported
                     const [cmd, data2] = data[expr].at(-1);
                     if (cmd === "DELETE") {
                         return undefined;
@@ -109,7 +116,7 @@ export class Record {
         function _deepRetrieve(expr2) {
             if (typeof expr2 === "string") {
                 if (isCommand(data[expr2])) {
-                    // Note: only Record.one() is supported
+                    // Note: only fields.One() is supported
                     const [cmd, data2] = data[expr2].at(-1);
                     return Object.assign(res, {
                         [expr2]:
@@ -141,7 +148,7 @@ export class Record {
                 return { [Model.id]: data }; // non-object data => single id
             }
             if (isCommand(data[Model.id])) {
-                // Note: only Record.one() is supported
+                // Note: only fields.One is supported
                 const [cmd, data2] = data[Model.id].at(-1);
                 return Object.assign(res, {
                     [Model.id]:
@@ -203,81 +210,6 @@ export class Record {
             return recordProxy;
         });
     }
-    /**
-     * @template {keyof import("models").Models} M
-     * @param {M} targetModel
-     * @param {Object} [param1={}]
-     * @param {(this: Record) => any} [param1.compute] if set, the value of this relational field is declarative and
-     *   is computed automatically. All reactive accesses recalls that function. The context of
-     *   the function is the record. Returned value is new value assigned to this field.
-     * @param {boolean} [param1.eager=false] when field is computed, determines whether the computation
-     *   of this field is eager or lazy. By default, fields are computed lazily, which means that
-     *   they are computed when dependencies change AND when this field is being used. In eager mode,
-     *   the field is immediately (re-)computed when dependencies changes, which matches the built-in
-     *   behaviour of OWL reactive.
-     * @param {string} [param1.inverse] if set, the name of field in targetModel that acts as the inverse.
-     * @param {(this: Record, r: import("models").Models[M]) => void} [param1.onAdd] function that is called when a record is added
-     *   in the relation.
-     * @param {(this: Record, r: import("models").Models[M]) => void} [param1.onDelete] function that is called when a record is removed
-     *   from the relation.
-     * @param {(this: Record) => void} [param1.onUpdate] function that is called when the field value is updated.
-     *   This is called at least once at record creation.
-     * @returns {import("models").Models[M]}
-     */
-    static one(targetModel, param1) {
-        return { ...param1, targetModel, [FIELD_DEFINITION_SYM]: true, [ONE_SYM]: true };
-    }
-    /**
-     * @template {keyof import("models").Models} M
-     * @param {M} targetModel
-     * @param {Object} [param1={}]
-     * @param {(this: Record) => any} [param1.compute] if set, the value of this relational field is declarative and
-     *   is computed automatically. All reactive accesses recalls that function. The context of
-     *   the function is the record. Returned value is new value assigned to this field.
-     * @param {boolean} [param1.eager=false] when field is computed, determines whether the computation
-     *   of this field is eager or lazy. By default, fields are computed lazily, which means that
-     *   they are computed when dependencies change AND when this field is being used. In eager mode,
-     *   the field is immediately (re-)computed when dependencies changes, which matches the built-in
-     *   behaviour of OWL reactive.
-     * @param {string} [param1.inverse] if set, the name of field in targetModel that acts as the inverse.
-     * @param {(this: Record, r: import("models").Models[M]) => void} [param1.onAdd] function that is called when a record is added
-     *   in the relation.
-     * @param {(this: Record, r: import("models").Models[M]) => void} [param1.onDelete] function that is called when a record is removed
-     *   from the relation.
-     * @param {(this: Record) => void} [param1.onUpdate] function that is called when the field value is updated.
-     *   This is called at least once at record creation.
-     * @param {(this: Record, r1: import("models").Models[M], r2: import("models").Models[M]) => number} [param1.sort] if defined, this field
-     *   is automatically sorted by this function.
-     * @returns {import("models").Models[M][]}
-     */
-    static many(targetModel, param1) {
-        return { ...param1, targetModel, [FIELD_DEFINITION_SYM]: true, [MANY_SYM]: true };
-    }
-    /**
-     * @template T
-     * @param {T} def
-     * @param {Object} [param1={}]
-     * @param {(this: Record) => any} [param1.compute] if set, the value of this attr field is declarative and
-     *   is computed automatically. All reactive accesses recalls that function. The context of
-     *   the function is the record. Returned value is new value assigned to this field.
-     * @param {boolean} [param1.eager=false] when field is computed, determines whether the computation
-     *   of this field is eager or lazy. By default, fields are computed lazily, which means that
-     *   they are computed when dependencies change AND when this field is being used. In eager mode,
-     *   the field is immediately (re-)computed when dependencies changes, which matches the built-in
-     *   behaviour of OWL reactive.
-     * @param {boolean} [param1.html] if set, the field value contains html value.
-     *   Useful to automatically markup when the insert is trusted.
-     * @param {(this: Record) => void} [param1.onUpdate] function that is called when the field value is updated.
-     *   This is called at least once at record creation.
-     * @param {(this: Record, Object, Object) => number} [param1.sort] if defined, this field is automatically sorted
-     *   by this function.
-     * @param {'datetime'|'date'} [param1.type] if defined, automatically transform to a
-     * specific type.
-     * @returns {T}
-     */
-    static attr(def, param1) {
-        return { ...param1, [FIELD_DEFINITION_SYM]: true, [ATTR_SYM]: true, default: def };
-    }
     /** @returns {Record|Record[]} */
     static insert(data, options = {}) {
         const ModelFullProxy = this;
@@ -288,12 +220,9 @@ export class Record {
             if (!isMulti) {
                 data = [data];
             }
-            const oldTrusted = store._.trusted;
-            store._.trusted = options.html ?? store._.trusted;
             const res = data.map(function RecordInsertMap(d) {
                 return Model._insert.call(ModelFullProxy, d, options);
             });
-            store._.trusted = oldTrusted;
             if (!isMulti) {
                 return res[0];
             }
@@ -355,9 +284,6 @@ export class Record {
      */
     Model;
     /** @type {string} */
-    get localId() {
-        return toRaw(this)._.localId;
-    }
     /** @type {this} */
     _raw;
     /** @type {this} */
@@ -374,6 +300,11 @@ export class Record {
             if (typeof data === "object" && data !== null) {
                 store._.updateFields(record, data);
             } else {
+                if (Array.isArray(record.Model.id)) {
+                    throw new Error(
+                        `Cannot insert "${data}" on model "${record.Model.getName()}": this model doesn't support single-id data!`
+                    );
+                }
                 // update on single-id data
                 store._.updateFields(record, { [record.Model.id]: data });
             }
@@ -389,7 +320,7 @@ export class Record {
     }
 
     exists() {
-        return !this._[IS_DELETED_SYM];
+        return !this[IS_DELETED_SYM];
     }
 
     /** @param {Record} record */
@@ -415,45 +346,113 @@ export class Record {
         return !this.in(collection);
     }
 
-    toData() {
+    /**
+     * Converts the current record and its related data into Store insert-able data.
+     * @param {Array<string> | { depth: boolean }} options Configuration options or an array of field names.
+     * @returns {Object} A data object grouped by model names.
+     */
+    toData(options = { depth: false }) {
+        const prefix = this._getActualModelName();
+        const ongoing = {
+            seenRecords: new Set(),
+            storeData: {},
+            depth: options.depth,
+            fields: undefined,
+        };
+        if (Array.isArray(options)) {
+            ongoing.fields = options.map((field) => `${prefix}.${field}`);
+        }
+        this._toData(ongoing, prefix);
+        return ongoing.storeData;
+    }
+
+    _cleanupData(data) {
+        const fieldsToDelete = [
+            "_",
+            "_fieldsValue",
+            "_proxy",
+            "_proxyInternal",
+            "_raw",
+            "env",
+            "Model",
+        ];
+        fieldsToDelete.forEach((field) => delete data[field]);
+    }
+
+    _getActualModelName() {
+        return this.Model.getName();
+    }
+
+    /**
+     * @param {Ongoing} ongoing The ongoing data conversion state.
+     * @param {string} [prefix] The prefix for the current field (used for nested fields).
+     */
+    _toData(ongoing, prefix = undefined) {
+        if (ongoing.depth && ongoing.seenRecords.has(this.localId)) {
+            return;
+        }
+        ongoing.seenRecords.add(this.localId);
+
         const recordProxy = this;
         const record = toRaw(recordProxy)._raw;
         const Model = record.Model;
         const data = { ...recordProxy };
         for (const name of Model._.fields.keys()) {
+            if (Model._.fieldsCompute.has(name)) {
+                delete data[name];
+                continue;
+            }
+            const fullFieldName = prefix ? `${prefix}.${name}` : name;
             if (isMany(Model, name)) {
                 data[name] = record._proxyInternal[name].map((recordProxy) => {
                     const record = toRaw(recordProxy)._raw;
-                    return record.toIdData.call(record._proxyInternal);
+                    return record._toDataRelationalRecord.call(
+                        record._proxyInternal,
+                        ongoing,
+                        fullFieldName
+                    );
                 });
             } else if (isOne(Model, name)) {
                 const otherRecord = toRaw(record._proxyInternal[name])?._raw;
-                data[name] = otherRecord?.toIdData.call(otherRecord._proxyInternal);
+                data[name] = otherRecord?._toDataRelationalRecord.call(
+                    otherRecord._proxyInternal,
+                    ongoing,
+                    fullFieldName
+                );
             } else {
-                // Record.attr()
+                // fields.Attr()
                 const value = recordProxy[name];
                 if (Model._.fieldsType.get(name) === "datetime" && value) {
                     data[name] = serializeDateTime(value);
                 } else if (Model._.fieldsType.get(name) === "date" && value) {
                     data[name] = serializeDate(value);
+                } else if (Model._.fieldsHtml.get(name) && value instanceof Markup) {
+                    data[name] = ["markup", value.toString()];
                 } else {
                     data[name] = value;
                 }
             }
         }
-        delete data._;
-        delete data._fieldsValue;
-        delete data._proxy;
-        delete data._proxyInternal;
-        delete data._raw;
-        delete data.Model;
-        return data;
+
+        this._cleanupData(data);
+        const pyModelName = record._getActualModelName();
+        ongoing.storeData[pyModelName] ||= [];
+        ongoing.storeData[pyModelName].push(data);
     }
-    toIdData() {
+
+    /**
+     * @param {Ongoing} ongoing The ongoing data conversion state.
+     * @param {string} prefix The prefix for the current field (used for nested fields).
+     * @returns {Object} A data object grouped by model names.
+     */
+    _toDataRelationalRecord(ongoing, prefix = undefined) {
         const data = this.Model._retrieveIdFromData(this);
+        if (ongoing.depth || ongoing.fields?.some((field) => field.startsWith(prefix))) {
+            this._toData(ongoing, prefix);
+        }
         for (const [name, val] of Object.entries(data)) {
             if (isRecord(val)) {
-                data[name] = val.toIdData();
+                data[name] = val._toDataRelationalRecord(ongoing, prefix);
             }
         }
         return data;

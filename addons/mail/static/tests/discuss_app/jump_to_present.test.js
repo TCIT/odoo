@@ -1,9 +1,19 @@
+import { describe, expect, test } from "@odoo/hoot";
+import { animationFrame, Deferred, press, queryFirst, tick } from "@odoo/hoot-dom";
+import {
+    asyncStep,
+    patchWithCleanup,
+    serverState,
+    waitForSteps,
+} from "@web/../tests/web_test_helpers";
+
 import {
     SIZES,
     click,
     contains,
     defineMailModels,
     insertText,
+    isInViewportOf,
     onRpcBefore,
     openDiscuss,
     openFormView,
@@ -12,11 +22,7 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { describe, expect, test } from "@odoo/hoot";
-
 import { PRESENT_VIEWPORT_THRESHOLD } from "@mail/core/common/thread";
-import { queryFirst, tick } from "@odoo/hoot-dom";
-import { serverState } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -45,7 +51,7 @@ test("Basic jump to present when scrolling to outdated messages", async () => {
     await contains(".o-mail-Thread", { scroll: "bottom" });
 });
 
-test("Basic jump to present when scrolling to outdated messages (chatter, DESC)", async () => {
+test("Basic jump to present when scrolling to outdated messages (DESC, chatter aside)", async () => {
     patchUiSize({ size: SIZES.XXL });
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Demo User" });
@@ -67,9 +73,38 @@ test("Basic jump to present when scrolling to outdated messages (chatter, DESC)"
     );
     await contains(".o-mail-Chatter", { scroll: 0 });
     await scroll(".o-mail-Chatter", "bottom");
+    await isInViewportOf("[title='Jump to Present']", ".o-mail-Thread");
     await click("[title='Jump to Present']");
     await contains("[title='Jump to Present']", { count: 0 });
     await contains(".o-mail-Chatter", { scroll: 0 });
+});
+
+test("Basic jump to present when scrolling to outdated messages (DESC, chatter non-aside)", async () => {
+    patchUiSize({ size: SIZES.MD });
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo User" });
+    for (let i = 0; i < 20; i++) {
+        pyEnv["mail.message"].create({
+            body: "Non Empty Body ".repeat(100),
+            message_type: "comment",
+            model: "res.partner",
+            res_id: partnerId,
+        });
+    }
+    await start();
+    await openFormView("res.partner", partnerId);
+    await contains(".o-mail-Message", { count: 20 });
+    await contains(".o_content");
+    expect(document.querySelector(".o_content").scrollHeight).toBeGreaterThan(
+        PRESENT_VIEWPORT_THRESHOLD * document.querySelector(".o_content").clientHeight,
+        { message: "should have enough scroll height to trigger jump to present" }
+    );
+    await contains(".o_content", { scroll: 0 });
+    await scroll(".o_content", "bottom");
+    await isInViewportOf("[title='Jump to Present']", ".o_content");
+    await click("[title='Jump to Present']");
+    await contains("[title='Jump to Present']", { count: 0 });
+    await contains(".o_content", { scroll: 0 });
 });
 
 test("Jump to old reply should prompt jump to present", async () => {
@@ -202,7 +237,7 @@ test("Post message when seeing old message should jump to present", async () => 
     await click(".o-mail-MessageInReply .cursor-pointer");
     await contains("[title='Jump to Present']");
     await insertText(".o-mail-Composer-input", "Newly posted");
-    await click(".o-mail-Composer button[aria-label='Send']:enabled");
+    await press("Enter");
     await contains("[title='Jump to Present']", { count: 0 });
     await contains(".o-mail-Thread", { scroll: "bottom" });
     await contains(".o-mail-Message-content", {
@@ -211,52 +246,69 @@ test("Post message when seeing old message should jump to present", async () => 
     });
 });
 
-test("show jump to present banner after scrolling up 10 messages", async () => {
-    // when messages are short, 3 x PRESENT_VIEWPORT_THRESHOLD is used, otherwise
-    // this is 10 x PRESENT_MESSAGE_THRESHOLD
-    const pyEnv = await startServer();
-    const channelId = pyEnv["discuss.channel"].create({
-        channel_type: "channel",
-        name: "General",
+test("when triggering jump to present, keeps showing old messages until recent ones are loaded", async () => {
+    // make scroll behavior instantaneous.
+    patchWithCleanup(Element.prototype, {
+        scrollIntoView() {
+            return super.scrollIntoView(true);
+        },
+        scrollTo(...args) {
+            if (typeof args[0] === "object" && args[0]?.behavior === "smooth") {
+                return super.scrollTo({ ...args[0], behavior: "instant" });
+            }
+            return super.scrollTo(...args);
+        },
     });
-    for (let i = 0; i < 100; i++) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    for (let i = 0; i < 60; i++) {
         pyEnv["mail.message"].create({
-            body: "<p>Non Empty Body</p>".repeat(100),
+            body: i === 0 ? "first-message" : "Non Empty Body ".repeat(100),
             message_type: "comment",
             model: "discuss.channel",
             res_id: channelId,
+            pinned_at: i === 0 ? "2020-02-12 08:30:00" : undefined,
         });
     }
-    const newestMessageId = pyEnv["mail.message"].create({
-        body: "<p>Newest</p>",
-        message_type: "comment",
-        model: "discuss.channel",
-        res_id: channelId,
-    });
-    const [selfMember] = pyEnv["discuss.channel.member"].search_read([
-        ["partner_id", "=", serverState.partnerId],
-        ["channel_id", "=", channelId],
-    ]);
-    pyEnv["discuss.channel.member"].write([selfMember.id], {
-        new_message_separator: newestMessageId + 1,
+    let slowMessageFetchDeferred;
+    onRpcBefore("/discuss/channel/messages", async () => {
+        asyncStep("/discuss/channel/messages");
+        await slowMessageFetchDeferred;
     });
     await start();
     await openDiscuss(channelId);
-    // make a notification in thread, just to make things complicated
-    // pinning a message adds such notification
-    await click(".o-mail-Message:contains(Newest) [title='Expand']");
-    await click(".dropdown-item", { text: "Pin" });
-    await click(".modal-footer button", { text: "Yeah, pin it!" });
-    const top1 = queryFirst(".o-mail-Message").getBoundingClientRect().top;
-    const top2 = queryFirst(".o-mail-Message:eq(1)").getBoundingClientRect().top;
-    const messageHeight = top2 - top1;
-    // scroll slightly (1 long message)
-    await scroll(".o-mail-Thread", queryFirst(".o-mail-Thread").scrollTop - messageHeight);
-    await contains("[title='Jump to Present']", { count: 0 });
-    // scroll to 5th message before newest
-    await scroll(".o-mail-Thread", queryFirst(".o-mail-Thread").scrollTop - 4 * messageHeight);
-    await contains("[title='Jump to Present']", { count: 0 });
-    // scroll to around 10th message before newest
-    await scroll(".o-mail-Thread", queryFirst(".o-mail-Thread").scrollTop - 5 * messageHeight);
-    await contains("[title='Jump to Present']");
+    await waitForSteps(["/discuss/channel/messages"]);
+    await click("[title='Pinned Messages']");
+    await click(".o-discuss-PinnedMessagesPanel a[role='button']", { text: "Jump" });
+    await contains(".o-mail-Thread .o-mail-Message", { text: "first-message" });
+    await animationFrame();
+    slowMessageFetchDeferred = new Deferred();
+    await click("[title='Jump to Present']");
+    await animationFrame();
+    await waitForSteps(["/discuss/channel/messages"]);
+    await contains(".o-mail-Thread .o-mail-Message", { text: "first-message" });
+    slowMessageFetchDeferred.resolve();
+    await contains(".o-mail-Thread .o-mail-Message", { text: "first-message", count: 0 });
+    await contains(".o-mail-Thread", { scroll: "bottom" });
+});
+
+test("focus composer after jump to present", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    pyEnv["mail.message"].create(
+        [...Array(40).keys()].map((i) => ({
+            body: `<p>Non Empty Message ${i}</p>`,
+            message_type: "comment",
+            model: "discuss.channel",
+            res_id: channelId,
+        }))
+    );
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-Message", { count: 30 });
+    await contains(".o-mail-Composer.o-focused");
+    queryFirst(".o-mail-Composer-input").blur();
+    await contains(".o-mail-Composer.o-focused", { count: 0 });
+    await click("[title='Jump to Present']");
+    await contains(".o-mail-Composer.o-focused");
 });

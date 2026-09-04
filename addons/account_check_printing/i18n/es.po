@@ -1,30 +1,40 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_check_printing
-# 
+# * account_check_printing
+#
 # Translators:
-# Wil Odoo, 2025
-# Larissa Manderfeld, 2025
-# 
+# Martin Trigaux, 2022
+# Leonardo J. Caballero G. <leonardocaballero@gmail.com>, 2022
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Larissa Manderfeld, 2025\n"
-"Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 18:26+0000\n"
+"Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
+"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-19/"
+"account_check_printing/es/>\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_check_printing
 #. odoo-python
 #: code:addons/account_check_printing/models/account_journal.py:0
 msgid "%(journal)s: Check Number Sequence"
-msgstr "%(journal)s: secuencia de números de cheque "
+msgstr "%(journal)s: secuencia de números de cheque"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "%(number)s in journal %(journal)s"
+msgstr "%(number)s en el diario %(journal)s"
 
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.account_journal_dashboard_kanban_view_inherited
@@ -167,9 +177,14 @@ msgid "Default"
 msgstr "Por defecto"
 
 #. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment_method__display_name
 #: model:ir.model.fields,field_description:account_check_printing.field_print_prenumbered_checks__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_res_company__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_res_config_settings__display_name
 msgid "Display Name"
-msgstr "Nombre mostrado"
+msgstr "Nombre para mostrar"
 
 #. module: account_check_printing
 #. odoo-python
@@ -178,7 +193,17 @@ msgid "Go to the configuration panel"
 msgstr "Ir al panel de configuración"
 
 #. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__check_layout_available
+msgid "Has Check Layout"
+msgstr "Tiene diseño de cheque"
+
+#. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_journal__id
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__id
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment_method__id
 #: model:ir.model.fields,field_description:account_check_printing.field_print_prenumbered_checks__id
+#: model:ir.model.fields,field_description:account_check_printing.field_res_company__id
+#: model:ir.model.fields,field_description:account_check_printing.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -186,8 +211,8 @@ msgstr "ID"
 #. odoo-python
 #: code:addons/account_check_printing/models/account_payment.py:0
 msgid ""
-"In order to print multiple checks at once, they must belong to the same bank"
-" journal."
+"In order to print multiple checks at once, they must belong to the same bank "
+"journal."
 msgstr ""
 "Para poder imprimir múltiples cheques al mismo tiempo, todos deben "
 "pertenecer al mismo diario bancario."
@@ -217,18 +242,34 @@ msgstr "Numeración manual"
 #: model:ir.model.fields,help:account_check_printing.field_account_payment__payment_method_line_id
 msgid ""
 "Manual: Pay or Get paid by any method outside of Odoo.\n"
-"Payment Providers: Each payment provider has its own Payment Method. Request a transaction on/to a card thanks to a payment token saved by the partner when buying or subscribing online.\n"
+"Payment Providers: Each payment provider has its own Payment Method. Request "
+"a transaction on/to a card thanks to a payment token saved by the partner "
+"when buying or subscribing online.\n"
 "Check: Pay bills by check and print it from Odoo.\n"
-"Batch Deposit: Collect several customer checks at once generating and submitting a batch deposit to your bank. Module account_batch_payment is necessary.\n"
-"SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit Transfer file to your bank. Module account_sepa is necessary.\n"
-"SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your partner will have granted to you. Module account_sepa is necessary.\n"
+"Batch Deposit: Collect several customer checks at once generating and "
+"submitting a batch deposit to your bank. Module account_batch_payment is "
+"necessary.\n"
+"SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit "
+"Transfer file to your bank. Module account_iso20022 is necessary.\n"
+"SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your "
+"partner will have granted to you. Module account_iso20022 is necessary.\n"
+"U.S. ISO20022: Pay in the US by submitting an ISO20022 file to your bank. "
+"Module account_iso20022 is necessary.\n"
 msgstr ""
-"Manual: pague o cobre con cualquier método fuera de Odoo.\n"
-"Proveedores de pago: cada proveedor tiene su propio método de pago. Solicite una transacción en o a una tarjeta gracias al token de pago que el contacto guarda al hacer una compra o suscribirse en línea.\n"
-"Cheque: pague las facturas con un cheque e imprímalo desde Odoo.\n"
-"Depósito por lote: cobre varios cheques de clientes a la vez y genere y envíe un depósito por lote a su banco. Es necesario el módulo account_batch_payment.\n"
-"Transferencia de crédito SEPA: pague en la zona SEPA al enviar un archivo de transferencia de crédito SEPA a su banco. Es necesario el módulo account_sepa.\n"
-"Domiciliación bancaria SEPA: cobre en la zona SEPA gracias a un mandato que le otorgará su contacto. Es necesario el módulo account_sepa.\n"
+"Manual: paga o cobra mediante cualquier método externo a Odoo.\n"
+"Proveedores de pago: cada proveedor de pago tiene su propio método de pago. "
+"Solicita una transacción a una tarjeta mediante un token de pago guardado "
+"por el cliente al comprar o suscribirse en línea.\n"
+"Cheque: paga las facturas con un cheque e imprímelo desde Odoo.\n"
+"Depósito por lote: agrupa varios cheques de clientes y envíalos al banco en "
+"un solo depósito. Se necesita el módulo account_batch_payment.\n"
+"Transferencia de crédito SEPA: efectúa un pago en la zona SEPA al enviar un "
+"archivo de transferencia de crédito SEPA a tu banco. Se necesita el módulo "
+"account_iso20022.\n"
+"Domiciliación bancaria SEPA: cobra en la zona SEPA mediante un mandato "
+"concedido por tu cliente. Se necesita el módulo account_iso20022.\n"
+"ISO20022 EE. UU.: paga en EE.UU. al enviar un archivo ISO20022 a tu banco. "
+"Se necesita el módulo account_iso20022.\n"
 
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_res_company__account_check_printing_multi_stub
@@ -276,14 +317,14 @@ msgid ""
 "Payments to print as a checks must have 'Check' selected as payment method "
 "and not have already been reconciled"
 msgstr ""
-"Los pagos para imprimir como cheques deben tener \"Cheque\" seleccionado "
-"como método de pago y no estar conciliados."
+"Los pagos para imprimir como cheques deben tener «Cheque» seleccionado como "
+"método de pago y no estar conciliados"
 
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.print_pre_numbered_checks_view
 msgid ""
-"Please enter the number of the first pre-printed check that you are about to"
-" print on."
+"Please enter the number of the first pre-printed check that you are about to "
+"print on."
 msgstr "Introduzca el número del primer cheque preimpreso que va a imprimir."
 
 #. module: account_check_printing
@@ -330,7 +371,8 @@ msgstr "Margen derecho"
 #: model:ir.model.fields,help:account_check_printing.field_res_company__account_check_printing_layout
 #: model:ir.model.fields,help:account_check_printing.field_res_config_settings__account_check_printing_layout
 msgid ""
-"Select the format corresponding to the check paper you will be printing your checks on.\n"
+"Select the format corresponding to the check paper you will be printing your "
+"checks on.\n"
 "In order to disable the printing feature, select 'None'."
 msgstr ""
 "Seleccione el tamaño correspondiente al tamaño de cheque que va a imprimir.\n"
@@ -360,6 +402,16 @@ msgid ""
 msgstr ""
 "Se produjo un error con el diseño del cheque, seleccione otro diseño en la "
 "configuración de facturación/contabilidad y vuelva a intentarlo."
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_journal.py:0
+msgid ""
+"The check number you entered (%(num)s) exceeds the maximum allowed value of %"
+"(max)d. Please enter a smaller number."
+msgstr ""
+"El número de cheque que has introducido (%(num)s) supera el valor máximo "
+"permitido de %(max)d. Introduce un número más pequeño."
 
 #. module: account_check_printing
 #. odoo-python
@@ -409,7 +461,8 @@ msgid ""
 "This option allows you to print the date label on the check as per CPA.\n"
 "Disable this if your pre-printed check includes the date label."
 msgstr ""
-"Esta opción le permite imprimir la etiqueta de fecha en el cheque según la CPA.\n"
+"Esta opción le permite imprimir la etiqueta de fecha en el cheque según la "
+"CPA.\n"
 "Desactívela si su cheque preimpreso incluye la etiqueta de fecha."
 
 #. module: account_check_printing
@@ -438,3 +491,71 @@ msgid ""
 msgstr ""
 "Tiene que elegir un diseño de cheque. Para ello, vaya a Configuración de "
 "Facturación/Contabilidad, busque \"Diseño de cheques\" y seleccione uno."
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "check_number"
+msgstr "check_number"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "out_refund"
+msgstr "out_refund"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "sep"
+msgstr "sep"
+
+#~ msgid "Contact"
+#~ msgstr "Contacto"
+
+#~ msgid "Journal Entry"
+#~ msgstr "Asiento contable"
+
+#~ msgid ""
+#~ "Manual: Pay or Get paid by any method outside of Odoo.\n"
+#~ "Payment Providers: Each payment provider has its own Payment Method. "
+#~ "Request a transaction on/to a card thanks to a payment token saved by the "
+#~ "partner when buying or subscribing online.\n"
+#~ "Check: Pay bills by check and print it from Odoo.\n"
+#~ "Batch Deposit: Collect several customer checks at once generating and "
+#~ "submitting a batch deposit to your bank. Module account_batch_payment is "
+#~ "necessary.\n"
+#~ "SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit "
+#~ "Transfer file to your bank. Module account_sepa is necessary.\n"
+#~ "SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your "
+#~ "partner will have granted to you. Module account_sepa is necessary.\n"
+#~ msgstr ""
+#~ "Manual: pague o cobre con cualquier método fuera de Odoo.\n"
+#~ "Métodos de pago: cada sistema tiene su propio método de pago. Solicite "
+#~ "una transacción en/a una tarjeta gracias al token de pago que el partner "
+#~ "guarda al hacer una compra o suscribirse en línea.\n"
+#~ "Cheque: pague las facturas con un cheque e imprímalo desde Odoo.\n"
+#~ "Depósito por lote: recolecte varios cheques de clientes a la vez y genere "
+#~ "y envíe un depósito por lote a su banco. Es necesario el módulo "
+#~ "account_batch_payment.\n"
+#~ "Transferencia de crédito SEPA: pague en la zona SEPA al enviar un archivo "
+#~ "de transferencia de crédito SEPA a su banco. Es necesario el módulo "
+#~ "account_sepa.\n"
+#~ "Domiciliación bancaria SEPA: cobre en la zona SEPA gracias a un mandato "
+#~ "que su partner le otorgará. Es necesario el módulo account_sepa.\n"
+
+#~ msgid "Preferred Payment Method"
+#~ msgstr "Método de pago preferido"
+
+#~ msgid ""
+#~ "Preferred payment method when paying this vendor. This is used to filter "
+#~ "vendor bills by preferred payment method to register payments in mass. "
+#~ "Use cases: create bank files for batch wires, check runs."
+#~ msgstr ""
+#~ "Método de pago preferido al pagar a este proveedor. Se utiliza para "
+#~ "filtrar las facturas de los proveedores por el método de pago preferido "
+#~ "para registrar pagos en masa. Casos de uso: crear archivos bancarios para "
+#~ "transferencias por lotes, verificar ejecuciones."
+
+#~ msgid "Register Payment"
+#~ msgstr "Registrar pago"

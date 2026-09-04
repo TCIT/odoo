@@ -46,34 +46,47 @@ export class LivechatChannel extends models.ServerModel {
         return users.filter((user) => user.im_status === "online");
     }
     /** @param {integer} id */
-    _get_livechat_discuss_channel_vals(id, anonymous_name, previous_operator_id, country_id) {
+    _get_livechat_discuss_channel_vals(id, operator_info) {
+        /** @type {import("mock_models").MailGuest} */
+        const MailGuest = this.env["mail.guest"];
         /** @type {import("mock_models").ResUsers} */
         const ResUsers = this.env["res.users"];
+        const agent = operator_info["agent"];
 
-        const operator = this._get_operator(id, previous_operator_id);
-        if (!operator) {
-            return false;
-        }
-        // partner to add to the discuss.channel
         const membersToAdd = [
             Command.create({
-                unpin_dt: "2021-01-01 12:00:00",
                 last_interest_dt: "2021-01-01 10:00:00",
-                partner_id: operator.partner_id,
+                livechat_member_type: "agent",
+                partner_id: agent.partner_id,
+                unpin_dt: "2021-01-01 12:00:00",
             }),
         ];
+        const guest = ResUsers._is_public(this.env.uid) && MailGuest._get_guest_from_context();
+        if (guest) {
+            membersToAdd.push(
+                Command.create({ guest_id: guest.id, livechat_member_type: "visitor" })
+            );
+        }
+        let visitorUser;
+        if (this.env.user && !ResUsers._is_public(this.env.uid) && this.env.user !== agent) {
+            visitorUser = this.env.user;
+            membersToAdd.push(
+                Command.create({
+                    livechat_member_type: "visitor",
+                    partner_id: visitorUser.partner_id,
+                })
+            );
+        }
         const membersName = [
-            this.env.user ? this.env.user.display_name : anonymous_name,
-            operator.livechat_username ? operator.livechat_username : operator.name,
+            visitorUser ? visitorUser.display_name : guest.name,
+            agent.livechat_username ? agent.livechat_username : agent.name,
         ];
         return {
-            channel_partner_ids: [operator.partner_id],
+            channel_partner_ids: [agent.partner_id],
             channel_member_ids: membersToAdd,
-            livechat_active: true,
-            livechat_operator_id: operator.partner_id,
+            livechat_operator_id: agent.partner_id,
             livechat_channel_id: id,
-            anonymous_name: ResUsers._is_public(this.env.uid) ? false : anonymous_name,
-            country_id: country_id,
+            livechat_status: "in_progress",
             channel_type: "livechat",
             name: membersName.join(" "),
         };
@@ -93,22 +106,19 @@ export class LivechatChannel extends models.ServerModel {
         );
     }
 
-    _to_store(ids, store, fields) {
-        const kwargs = getKwArgs(arguments, "ids", "store", "fields");
+    _to_store(store, fields) {
+        const kwargs = getKwArgs(arguments, "store", "fields");
         fields = kwargs.fields;
-        if (!fields) {
-            fields = [];
-        }
-        for (const livechatChannel of this.browse(ids)) {
-            const [res] = this._read_format(
-                livechatChannel.id,
-                fields.filter((field) => field !== "are_you_inside"),
-                false
-            );
+        store._add_record_fields(
+            this,
+            fields.filter((field) => field !== "are_you_inside")
+        );
+        for (const livechatChannel of this) {
             if (fields.includes("are_you_inside")) {
-                res.are_you_inside = livechatChannel.user_ids.includes(this.env.user.id);
+                store._add_record_fields(this.browse(livechatChannel.id), {
+                    are_you_inside: livechatChannel.user_ids.includes(this.env.user.id),
+                });
             }
-            store.add(this.browse(livechatChannel.id), res);
         }
     }
 }

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import json
 
 from odoo.addons.hr.tests.common import TestHrCommon
 from odoo.tools.misc import file_open
@@ -30,15 +31,27 @@ class TestRecruitmentProcess(TestHrCommon):
             'name': 'HR Recruitment Officer',
             'login': "hrro",
             'email': "hrofcr@yourcompany.com",
-            'groups_id': [(6, 0, [self.env.ref('hr_recruitment.group_hr_recruitment_user').id])]
+            'group_ids': [(6, 0, [self.env.ref('hr_recruitment.group_hr_recruitment_user').id])]
         })
 
         # An applicant is interested in the job position. So he sends a resume by email.
         # In Order to test process of Recruitment so giving HR officer's rights
         with file_open('hr_recruitment/tests/resume.eml', 'rb') as request_file:
             request_message = request_file.read()
-        self.env['mail.thread'].with_user(res_users_hr_recruitment_officer).message_process(
-            'hr.applicant', request_message, custom_values={"job_id": job_developer.id})
+
+        alias_domain = self.env['mail.alias.domain'].create({
+            'name': 'mycompany.com',  # Based on the to email in hr_recruitment/tests/resume.eml
+        })
+        alias_model = self.env['ir.model'].search([('model', '=', 'hr.applicant')], limit=1)
+        alias = self.env['mail.alias'].create({
+            'alias_name': 'hr',  # Based on the to email in hr_recruitment/tests/resume.eml
+            'alias_model_id': alias_model.id,
+            'alias_domain_id': alias_domain.id,
+            'alias_defaults': json.dumps({'job_id': job_developer.id}),
+        })
+        alias.alias_status = 'valid'
+
+        self.env['mail.thread'].with_user(res_users_hr_recruitment_officer).message_process(None, request_message)
 
         # After getting the mail, I check the details of the new applicant.
         applicant = self.env['hr.applicant'].search([('email_from', 'ilike', 'Richard_Anderson@yahoo.com')], limit=1)
@@ -70,7 +83,7 @@ class TestRecruitmentProcess(TestHrCommon):
                 "name": "user_1",
                 "login": "user_1",
                 "email": "user_1@example.com",
-                "groups_id": [
+                "group_ids": [
                     (4, self.env.ref("hr.group_hr_manager").id),
                     (4, self.env.ref("hr_recruitment.group_hr_recruitment_manager").id),
                 ],
@@ -87,7 +100,7 @@ class TestRecruitmentProcess(TestHrCommon):
             }
         )
         application = self.env["hr.applicant"].create(
-            {"candidate_id": self.env['hr.candidate'].create({'partner_name': 'Test Job Application for Notification'}).id, "job_id": job.id}
+            {"partner_name": "Test Job Application for Notification", "job_id": job.id}
         )
         new_application_message = application.message_ids.filtered(
             lambda m: m.subtype_id == new_application_mt
@@ -138,77 +151,52 @@ class TestRecruitmentProcess(TestHrCommon):
             request_message = request_file.read()
         self.env['mail.thread'].message_process('hr.applicant', request_message, custom_values={"job_id": job_developer.id})
 
-        # Make sure the candidate and applicant are created in the right company
+        # Make sure the applicant are created in the right company
         applicant = self.env['hr.applicant'].search([('email_from', 'ilike', 'Richard_Anderson@yahoo.com')], limit=1)
         self.assertEqual(applicant.company_id, other_company, 'Applicant should be created in the right company')
-        self.assertEqual(applicant.candidate_id.company_id, other_company, 'Candidate should be created in the right company')
 
-    def test_multiple_emails_only_one_candidate(self):
-        """Make sure that receiving multiple emails from the same address does not create multiple candidates"""
-        job_developer, job_plumber = self.env["hr.job"].create(
-            [
-                {
-                    "name": "Experienced Developer",
-                },
-                {
-                    "name": "Junior Plumber",
-                },
-            ]
+    def test_email_application_department_with_no_company(self):
+        """
+        Test that applicants created from incoming emails are assigned the job's company when the job's department
+        has no company set.
+        """
+        mystery_company = self.env["res.company"].create({"name": "Mystery Company"})
+        _mail_alias_domain = self.env["mail.alias.domain"].create(
+            {
+                "company_ids": [(4, mystery_company.id)],
+                "name": "test.example.com",
+            }
+        )
+        alias = self.env["mail.alias"].create(
+            {
+                "alias_domain_id": mystery_company.alias_domain_id.id,
+                "alias_name": "mystery_job",
+                "alias_model_id": self.env["ir.model"]._get_id("hr.job"),
+            }
         )
 
-        applicant_1_msg = """MIME-Version: 1.0
-Date: Thu, 19 Dec 2024 10:30:45 +0100
-Message-ID: <application1>
-Subject: Developer Application
-From:  Applicant 1 <applicant_1@example.com>
-To: hr@mycompany.com
+        mystery_department = self.env["hr.department"].create({"name": "Mystery Department", "company_id": False})
+        mystery_job = self.env["hr.job"].create(
+            {
+                "name": "Mystery Job",
+                "company_id": mystery_company.id,
+                "department_id": mystery_department.id,
+                "alias_id": alias.id,
+            }
+        )
+
+        email = f"""MIME-Version: 1.0
+Message-ID: <verymysteriousapplication>
+From: Applicant <test@example.com>
+To: {mystery_job.alias_id.display_name}
+Subject: Job Application
 Content-Type: text/plain; charset="UTF-8"
 
-Hello, I want to be a developer.
-        """
+I want to work for you!"""
 
-        applicant_2_msg = """MIME-Version: 1.0
-Date: Thu, 19 Dec 2024 15:30:00 +0100
-Message-ID: <application2>
-Subject: Plumber Application
-From:  Applicant 1 <applicant_1@example.com>
-To: hr@mycompany.com
-Content-Type: text/plain; charset="UTF-8"
-
-Hello, I want to be a plumber.
-        """
-
-        applicant_3_msg = """MIME-Version: 1.0
-Date: Thu, 19 Dec 2024 18:30:00 +0100
-Message-ID: <application3>
-Subject: Here is my application
-From:  Applicant 2 <applicant_2@example.com>
-To: hr@mycompany.com
-Content-Type: text/plain; charset="UTF-8"
-
-Hello, I want to work for you.
-        """
-
-        application_1_id = self.env["mail.thread"].message_process(
-            "hr.applicant", applicant_1_msg, custom_values={"job_id": job_developer.id}
-        )
-        application_2_id = self.env["mail.thread"].message_process(
-            "hr.applicant", applicant_2_msg, custom_values={"job_id": job_plumber.id}
-        )
-        application_3_id = self.env["mail.thread"].message_process(
-            "hr.applicant", applicant_3_msg, custom_values={"job_id": job_developer.id}
-        )
-
-        application_1 = self.env["hr.applicant"].browse(application_1_id)
-        application_2 = self.env["hr.applicant"].browse(application_2_id)
-        application_3 = self.env["hr.applicant"].browse(application_3_id)
+        applicant_from_email = self.env["mail.thread"].message_process("hr.applicant", email)
+        applicant = self.env["hr.applicant"].browse(applicant_from_email)
         self.assertEqual(
-            application_1.candidate_id,
-            application_2.candidate_id,
-            "Application 1 and 2 should have the same candidate",
+            applicant.department_id, mystery_department, "Applicant should be assigned to the right department"
         )
-        self.assertNotEqual(
-            application_1.candidate_id,
-            application_3.candidate_id,
-            "Application 1 and 3 should not have the same candidate",
-        )
+        self.assertEqual(applicant.company_id, mystery_company, "Applicant should be created in the right company")

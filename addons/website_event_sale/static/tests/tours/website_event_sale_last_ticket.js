@@ -1,15 +1,13 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import * as wsTourUtils from "@website_sale/js/tours/tour_utils";
 
 registry.category("web_tour.tours").add('event_buy_last_ticket', {
     url: '/event',
-    checkDelay: 100,
     steps: () => [{
         content: "Open the Last ticket test event page",
         trigger: '.o_wevent_events_list a:contains("Last ticket test")',
         run: "click",
+        expectUnloadPage: true,
     },
     {
         content: "Open Registration Modal",
@@ -24,12 +22,9 @@ registry.category("web_tour.tours").add('event_buy_last_ticket', {
         trigger: '#wrap:not(:has(a[href*="/event"]:contains("Last ticket test")))',
     },
     {
-        content: "Select 2 units of `VIP` ticket type",
-        trigger: ".modal select:eq(0)",
-        run: "select 2",
-    },
-    {
-        trigger: ".modal select:eq(0):has(option:contains(2):selected)",
+        content: "Edit 2 units of `VIP` ticket type",
+        trigger: ".modal input:eq(1)",
+        run: "edit 2",
     },
     {
         content: "Click on `Register` button",
@@ -56,15 +51,12 @@ registry.category("web_tour.tours").add('event_buy_last_ticket', {
         content: "Validate attendees details",
         trigger: ".modal:contains(Attendees) button[type=submit]:contains(Go to Payment)",
         run: "click",
+        expectUnloadPage: true,
     },
-    ...wsTourUtils.fillAdressForm({
-        name: "test1",
-        phone: "111 111",
-        email: "test@example.com",
-        street: "street test 1",
-        city: "testCity",
-        zip: "123",
+    ...wsTourUtils.payWithTransfer({
+        redirect: true,
+        expectUnloadPage: true,
+        waitFinalizeYourPayment: true,
     }),
-    ...wsTourUtils.payWithTransfer(true),
     ],
 });

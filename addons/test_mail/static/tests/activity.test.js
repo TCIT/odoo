@@ -1,8 +1,4 @@
-import { ActivityController } from "@mail/views/web/activity/activity_controller";
-import { ActivityModel } from "@mail/views/web/activity/activity_model";
-import { ActivityRenderer } from "@mail/views/web/activity/activity_renderer";
 import {
-    assertSteps,
     click,
     contains,
     insertText,
@@ -11,26 +7,32 @@ import {
     registerArchs,
     start,
     startServer,
-    step,
 } from "@mail/../tests/mail_test_helpers";
-import {
-    DEFAULT_MAIL_SEARCH_ID,
-    DEFAULT_MAIL_VIEW_ID,
-} from "@mail/../tests/mock_server/mock_models/constants";
+import { MailActivitySchedule } from "@mail/../tests/mock_server/mock_models/mail_activity_schedule";
+import { ActivityController } from "@mail/views/web/activity/activity_controller";
+import { ActivityModel } from "@mail/views/web/activity/activity_model";
+import { ActivityRenderer } from "@mail/views/web/activity/activity_renderer";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { mockDate, animationFrame } from "@odoo/hoot-mock";
+import { keyDown, waitFor } from "@odoo/hoot-dom";
+import { animationFrame, disableAnimations, mockDate } from "@odoo/hoot-mock";
 import { onMounted, onWillUnmount } from "@odoo/owl";
 import { MailTestActivity } from "@test_mail/../tests/mock_server/models/mail_test_activity";
 import { defineTestMailModels } from "@test_mail/../tests/test_mail_test_helpers";
+import {
+    asyncStep,
+    mockService,
+    onRpc,
+    patchWithCleanup,
+    serverState,
+    waitForSteps,
+    contains as webContains,
+} from "@web/../tests/web_test_helpers";
 import { Domain } from "@web/core/domain";
-import { RelationalModel } from "@web/model/relational_model/relational_model";
-import { DynamicList } from "@web/model/relational_model/dynamic_list"
+import { formatDate, serializeDate } from "@web/core/l10n/dates";
 import { deepEqual, omit } from "@web/core/utils/objects";
 import { getOrigin } from "@web/core/utils/urls";
-import { serializeDate, formatDate } from "@web/core/l10n/dates";
-import { onRpc, patchWithCleanup, serverState, contains as webContains } from "@web/../tests/web_test_helpers";
-import { keyDown, waitFor } from "@odoo/hoot-dom";
-import { MailActivitySchedule } from "@mail/../tests/mock_server/mock_models/mail_activity_schedule";
+import { DynamicList } from "@web/model/relational_model/dynamic_list";
+import { RelationalModel } from "@web/model/relational_model/relational_model";
 
 const { DateTime } = luxon;
 
@@ -63,9 +65,7 @@ function patchActivityDomain(load, params) {
     if (params.domain) {
         // Remove domain term used to filter record having "done" activities (not understood by the getRecords mock)
         const domain = new Domain(params.domain);
-        const newDomain = Domain.removeDomainLeaves(domain.toList(), [
-            "activity_ids.active",
-        ]);
+        const newDomain = Domain.removeDomainLeaves(domain.toList(), ["activity_ids.active"]);
         if (!deepEqual(domain.toList(), newDomain.toList())) {
             return load({
                 ...params,
@@ -82,12 +82,15 @@ function patchActivityDomain(load, params) {
 describe.current.tags("desktop");
 defineTestMailModels();
 beforeEach(async () => {
-    mockDate("2023-4-8 10:00:00", 0);
+    // Because tests implicitly use Popover
+    // and that it uses HTMLElement.animate()
+    disableAnimations();
+    mockDate("2023-04-08 10:00:00", 0);
     patchWithCleanup(DynamicList.prototype, {
         async load(params) {
             return patchActivityDomain(super.load.bind(this), params);
         },
-    })
+    });
     patchWithCleanup(RelationalModel.prototype, {
         async load(params) {
             return patchActivityDomain(super.load.bind(this), params);
@@ -145,7 +148,7 @@ beforeEach(async () => {
 test("activity view: simple activity rendering", async () => {
     const mailTestActivityIds = pyEnv["mail.test.activity"].search([]);
     const mailActivityTypeIds = pyEnv["mail.activity.type"].search([]);
-    const env = await start();
+    await start();
     registerArchs(archs);
     await openView({
         res_model: "mail.test.activity",
@@ -198,14 +201,15 @@ test("activity view: simple activity rendering", async () => {
             },
         ],
     });
-    patchWithCleanup(env.services.action, {
+    mockService("action", {
         doAction(action) {
-            step("doAction");
+            asyncStep("doAction");
             expect(action).toEqual({
                 context: {
                     default_res_id: mailTestActivityIds[1],
                     default_res_model: "mail.test.activity",
                     default_activity_type_id: mailActivityTypeIds[2],
+                    dialog_size: "large",
                 },
                 res_id: false,
                 res_model: "mail.activity",
@@ -225,7 +229,7 @@ test("activity view: simple activity rendering", async () => {
             },
         ],
     });
-    await assertSteps(["doAction"]);
+    await waitForSteps(["doAction"]);
     await contains(".o_activity_view_table tfoot .o_record_selector");
 });
 
@@ -233,7 +237,6 @@ test("activity view: Activity rendering with done activities", async () => {
     const activityTypeUpload = pyEnv["mail.activity.type"].create({
         category: "upload_file",
         name: "Test Upload document",
-        keep_done: true,
     });
     pyEnv["mail.activity"].create(
         Object.entries(["done", "done", "done", "done", "planned", "planned", "planned"]).map(
@@ -444,8 +447,8 @@ test("activity view: no content rendering", async () => {
 test("activity view: batch send mail on activity", async () => {
     const mailTestActivityIds = pyEnv["mail.test.activity"].search([]);
     const mailTemplateIds = pyEnv["mail.template"].search([]);
-    onRpc("activity_send_mail", (args) => {
-        step(JSON.stringify(args.args));
+    onRpc("activity_send_mail", ({ args }) => {
+        asyncStep(args);
         return true;
     });
     await start();
@@ -459,18 +462,18 @@ test("activity view: batch send mail on activity", async () => {
     });
     await contains(".dropdown-menu.show .o_send_mail_template", { count: 2 });
     await click(".o_send_mail_template", { text: "Template1" });
-    await assertSteps([
-        `[[${mailTestActivityIds[0]},${mailTestActivityIds[1]}],${mailTemplateIds[0]}]`, // template 1 sendt on activity 1 and 2
+    await waitForSteps([
+        [[mailTestActivityIds[0], mailTestActivityIds[1]], mailTemplateIds[0]], // template 1 sendt on activity 1 and 2
     ]);
     await click(".o_send_mail_template", { text: "Template2" });
-    await assertSteps([
-        `[[${mailTestActivityIds[0]},${mailTestActivityIds[1]}],${mailTemplateIds[1]}]`, // template 2 sendt on activity 1 and 2
+    await waitForSteps([
+        [[mailTestActivityIds[0], mailTestActivityIds[1]], mailTemplateIds[1]], // template 2 sendt on activity 1 and 2
     ]);
 });
 
 test("activity view: activity_ids condition in domain", async () => {
-    onRpc("get_activity_data", (args) => step(JSON.stringify(args.kwargs.domain)));
-    onRpc("web_search_read", (args) => step(JSON.stringify(args.kwargs.domain)));
+    onRpc("get_activity_data", ({ kwargs }) => asyncStep(kwargs.domain));
+    onRpc("web_search_read", ({ kwargs }) => asyncStep(kwargs.domain));
     await start();
     registerArchs(archs);
     await openView({
@@ -482,13 +485,13 @@ test("activity view: activity_ids condition in domain", async () => {
     await contains(".o_pager_value:focus");
     await keyDown("Enter");
 
-    await assertSteps([
+    await waitForSteps([
         // load view requests
-        JSON.stringify([["activity_ids.active", "in", [true, false]]]),
-        '[[1,"=",1]]', // Due to the relational model patch above that removes it
+        [["activity_ids.active", "in", [true, false]]],
+        [[1, "=", 1]], // Due to the relational model patch above that removes it
         // pager requests
-        JSON.stringify([["activity_ids.active", "in", [true, false]]]),
-        '[[1,"=",1]]', // Due to the dynamic list patch above that removes it
+        [["activity_ids.active", "in", [true, false]]],
+        [[1, "=", 1]], // Due to the dynamic list patch above that removes it
     ]);
 });
 
@@ -500,25 +503,25 @@ test("activity view: activity widget", async () => {
     const [mailTemplateId1] = pyEnv["mail.template"].search([["name", "=", "Template1"]]);
     onRpc("activity_send_mail", (args) => {
         expect(args.args).toEqual([[mailTestActivityId2], mailTemplateId1]);
-        step("activity_send_mail");
+        asyncStep("activity_send_mail");
         return true;
     });
     onRpc("action_feedback_schedule_next", (args) => {
         expect(args.args).toEqual([pyEnv["mail.activity"].search([["state", "=", "overdue"]])]);
         expect(args.kwargs.feedback).toBe("feedback2");
-        step("action_feedback_schedule_next");
+        asyncStep("action_feedback_schedule_next");
         return { serverGeneratedAction: true };
     });
-    const env = await start();
+    await start();
     registerArchs(archs);
     await openView({
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
     });
-    patchWithCleanup(env.services.action, {
+    mockService("action", {
         doAction(action) {
             if (action.serverGeneratedAction) {
-                step("serverGeneratedAction");
+                asyncStep("serverGeneratedAction");
             } else if (action.res_model === "mail.compose.message") {
                 expect(action.context).toEqual({
                     default_model: "mail.test.activity",
@@ -527,7 +530,7 @@ test("activity view: activity widget", async () => {
                     default_template_id: mailTemplateId1,
                     force_email: true,
                 });
-                step("do_action_compose");
+                asyncStep("do_action_compose");
             } else if (action.res_model === "mail.activity.schedule") {
                 expect(action.context).toEqual({
                     default_activity_type_id: mailActivityTypeIds[1],
@@ -535,9 +538,9 @@ test("activity view: activity widget", async () => {
                     active_id: mailTestActivityId2,
                     active_model: "mail.test.activity",
                 });
-                step("do_action_activity");
+                asyncStep("do_action_activity");
             } else {
-                step("Unexpected action" + action.res_model);
+                asyncStep("Unexpected action" + action.res_model);
             }
         },
     });
@@ -547,14 +550,14 @@ test("activity view: activity widget", async () => {
     await contains(".o-mail-ActivityMailTemplate-name", { text: "Template1" });
     await contains(".o-mail-ActivityMailTemplate-name", { text: "Template2" });
     await click(".o-mail-ActivityMailTemplate-preview[data-mail-template-id='1']");
-    await assertSteps(["do_action_compose"]);
+    await waitForSteps(["do_action_compose"]);
     await click(".today .o-mail-ActivityCell-deadline");
     await click(".o-mail-ActivityMailTemplate-send[data-mail-template-id='1']");
-    await assertSteps(["activity_send_mail"]);
+    await waitForSteps(["activity_send_mail"]);
     await click(".overdue .o-mail-ActivityCell-deadline");
     await contains(".o-mail-ActivityMailTemplate-name", { count: 0 });
     await click(".o-mail-ActivityListPopover button", { text: "Schedule an activity" });
-    await assertSteps(["do_action_activity"]);
+    await waitForSteps(["do_action_activity"]);
     await contains(".o-mail-ActivityListPopover", { count: 0 });
     await click(".overdue .o-mail-ActivityCell-deadline");
     await click(".o-mail-ActivityListPopoverItem-markAsDone");
@@ -563,7 +566,7 @@ test("activity view: activity widget", async () => {
         "feedback2"
     );
     await click(".o-mail-ActivityMarkAsDone button[aria-label='Done and Schedule Next']");
-    await assertSteps(["action_feedback_schedule_next", "serverGeneratedAction"]);
+    await waitForSteps(["action_feedback_schedule_next", "serverGeneratedAction"]);
 });
 
 test("activity widget: cancel an activity from the widget", async () => {
@@ -573,11 +576,11 @@ test("activity widget: cancel an activity from the widget", async () => {
         activity_ids: [mailActivityId],
         activity_type_id: mailActivityTypeId,
     });
-    onRpc("unlink", ({ args, route }) => {
+    onRpc("mail.activity", "unlink", ({ args, route }) => {
         expect(args).toEqual([[mailActivityId]]);
-        expect(route.includes("mail.activity")).toBe(true);
-        expect(route.includes("unlink")).toBe(true);
-        step("unlink");
+        expect(route).toInclude("mail.activity");
+        expect(route).toInclude("unlink");
+        asyncStep("unlink");
     });
     await start();
     registerArchs(archs);
@@ -600,15 +603,13 @@ test("activity widget: cancel an activity from the widget", async () => {
 
     // Cancel the activity
     await click(".o-mail-ActivityListPopoverItem .o-mail-ActivityListPopoverItem-cancel");
-    await assertSteps(["unlink"]);
+    await waitForSteps(["unlink"]);
 
     // Verify no activity is scheduled
     await contains(".planned", { count: 0 });
 });
 
 test("activity view: Mark as done with keep done enabled", async () => {
-    const emailActType = pyEnv["mail.activity.type"].search([["name", "=", "Email"]])[0];
-    pyEnv["mail.activity.type"].write([emailActType], { keep_done: true });
     await start();
     registerArchs(archs);
     await openView({
@@ -666,7 +667,7 @@ test("activity view: group_by in the action has no effect", async () => {
     });
     onRpc("get_activity_data", ({ kwargs }) => {
         expect(kwargs.groupby).toBe(undefined);
-        step("get_activity_data");
+        asyncStep("get_activity_data");
     });
     await start();
     registerArchs(archs);
@@ -674,7 +675,21 @@ test("activity view: group_by in the action has no effect", async () => {
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
     });
-    await assertSteps(["get_activity_data"]);
+    await waitForSteps(["get_activity_data"]);
+});
+
+test("activity view: fetchActivityData uses the action limit when provided", async () => {
+    onRpc("get_activity_data", ({ kwargs }) => {
+        asyncStep("get_activity_data:limit:" + kwargs.limit);
+    });
+    await start();
+    registerArchs(archs);
+    await openView({
+        res_model: "mail.test.activity",
+        views: [[false, "activity"]],
+        limit: 80,
+    });
+    await waitForSteps(["get_activity_data:limit:80"]);
 });
 
 test("activity view: search more to schedule an activity for a record of a respecting model", async () => {
@@ -682,18 +697,15 @@ test("activity view: search more to schedule an activity for a record of a respe
         name: "MailTestActivity 3",
     });
     registerArchs(archs);
-    MailTestActivity._views = {
-        ...MailTestActivity._views,
-        "list,false": '<list string="MailTestActivity"><field name="name"/></list>',
-    };
-    const env = await start();
+    MailTestActivity._views.list = '<list string="MailTestActivity"><field name="name"/></list>';
+    await start();
     await openView({
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
     });
-    patchWithCleanup(env.services.action, {
+    mockService("action", {
         doAction(action, options) {
-            step("doAction");
+            asyncStep("doAction");
             const expectedAction = {
                 context: {
                     active_ids: [mailTestActivityId1],
@@ -720,24 +732,21 @@ test("activity view: search more to schedule an activity for a record of a respe
         text: "MailTestActivity 3",
         parent: [".modal-dialog", { text: "Search: MailTestActivity" }],
     });
-    await assertSteps(["doAction"]);
+    await waitForSteps(["doAction"]);
 });
 
 test("activity view: Domain should not reset on load", async () => {
     registerArchs(archs);
-    MailTestActivity._views = {
-        ...MailTestActivity._views,
-        "list,false": '<list string="MailTestActivity"><field name="name"/></list>',
-    };
-    const env = await start();
+    MailTestActivity._views.list = '<list string="MailTestActivity"><field name="name"/></list>';
+    await start();
     await openView({
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
         domain: [["id", "=", 1]],
     });
-    patchWithCleanup(env.services.action, {
+    mockService("action", {
         doAction(action, options) {
-            step("doAction");
+            asyncStep("doAction");
             options.onClose();
         },
     });
@@ -745,7 +754,7 @@ test("activity view: Domain should not reset on load", async () => {
     await click(".o_activity_view .o_record_selector");
     // search create dialog
     await click(".modal-lg .o_data_row .o_data_cell");
-    await assertSteps(["doAction"]);
+    await waitForSteps(["doAction"]);
     await click(".o_activity_view .o_record_selector");
     // again open search create dialog
     await contains(".modal-lg .o_data_row");
@@ -755,20 +764,17 @@ test("activity view: 'scheduleActivity' does not add activity_ids condition as s
     patchWithCleanup(ActivityController.prototype, {
         scheduleActivity() {
             super.scheduleActivity();
-            step(JSON.stringify(this.getSearchProps().domain));
+            asyncStep(this.getSearchProps().domain);
         },
     });
     registerArchs(archs);
-    MailTestActivity._views = {
-        ...MailTestActivity._views,
-        "list,false": '<list string="MailTestActivity"><field name="name"/></list>',
-    };
-    const env = await start();
+    MailTestActivity._views.list = '<list string="MailTestActivity"><field name="name"/></list>';
+    await start();
     await openView({
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
     });
-    patchWithCleanup(env.services.action, {
+    mockService("action", {
         doAction(action, options) {
             options.onClose?.();
         },
@@ -781,27 +787,24 @@ test("activity view: 'scheduleActivity' does not add activity_ids condition as s
 
     // again open search create dialog
     await click(".o_activity_view .o_record_selector");
-    await assertSteps(["[]", "[]"]);
+    await waitForSteps([[], []]);
 });
 
 test("activity view: 'onClose' of 'openActivityFormView' does not add activity_ids condition as selectCreateDialog domain", async () => {
     patchWithCleanup(ActivityController.prototype, {
         openActivityFormView(resId, activityTypeId) {
             super.openActivityFormView(resId, activityTypeId);
-            step(JSON.stringify(this.getSearchProps().domain));
+            asyncStep(this.getSearchProps().domain);
         },
     });
     registerArchs(archs);
-    MailTestActivity._views = {
-        ...MailTestActivity._views,
-        "list,false": '<list string="MailTestActivity"><field name="name"/></list>',
-    };
-    const env = await start();
+    MailTestActivity._views.list = '<list string="MailTestActivity"><field name="name"/></list>';
+    await start();
     await openView({
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
     });
-    patchWithCleanup(env.services.action, {
+    mockService("action", {
         doAction(action, options) {
             options.onClose?.();
         },
@@ -810,28 +813,25 @@ test("activity view: 'onClose' of 'openActivityFormView' does not add activity_i
     await click(
         ".o_activity_view :nth-child(1 of .o_data_row) :nth-child(1 of .o_activity_empty_cell)"
     );
-    await assertSteps(["[]"]);
+    await waitForSteps([[]]);
 });
 
 test("activity view: 'onReloadData' does not add activity_ids condition as selectCreateDialog domain", async () => {
     patchWithCleanup(ActivityController.prototype, {
         get rendererProps() {
             const rendererProps = { ...super.rendererProps };
-            step(JSON.stringify(this.getSearchProps().domain));
+            asyncStep(this.getSearchProps().domain);
             return rendererProps;
         },
     });
     registerArchs(archs);
-    MailTestActivity._views = {
-        ...MailTestActivity._views,
-        "list,false": '<list string="MailTestActivity"><field name="name"/></list>',
-    };
-    const env = await start();
+    MailTestActivity._views.list = '<list string="MailTestActivity"><field name="name"/></list>';
+    await start();
     await openView({
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
     });
-    patchWithCleanup(env.services.action, {
+    mockService("action", {
         doAction(action, options) {
             options.onClose?.();
         },
@@ -840,7 +840,7 @@ test("activity view: 'onReloadData' does not add activity_ids condition as selec
     //schedule another activity on an activity cell with a scheduled activity
     await click(".today .o-mail-ActivityCell-deadline");
     await click(".o-mail-ActivityListPopover button:contains(Schedule an activity)");
-    await assertSteps(["[]", "[]", "[]"]);
+    await waitForSteps([[], [], []]);
 });
 
 test("Activity view: discard an activity creation dialog", async () => {
@@ -883,7 +883,7 @@ test("Activity view: many2one_avatar_user widget in activity view", async () => 
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
     });
-    await contains(".o_m2o_avatar", { count: 2 });
+    await contains(".o_m2o_avatar", { count: 1 });
     await contains(
         `tr:nth-child(2) .o_m2o_avatar > img[data-src="/web/image/res.users/${resUsersId1}/avatar_128"]`
     );
@@ -896,10 +896,10 @@ test("Activity view: on_destroy_callback doesn't crash", async () => {
         setup() {
             super.setup();
             onMounted(() => {
-                step("mounted");
+                asyncStep("mounted");
             });
             onWillUnmount(() => {
-                step("willUnmount");
+                asyncStep("willUnmount");
             });
         },
     });
@@ -911,38 +911,56 @@ test("Activity view: on_destroy_callback doesn't crash", async () => {
     });
     // force the unmounting of the activity view by opening another one
     await openFormView("mail.test.activity");
-    await assertSteps(["mounted", "willUnmount"]);
+    await waitForSteps(["mounted", "willUnmount"]);
 });
 
 test("Schedule activity dialog uses the same search view as activity view", async () => {
     pyEnv["mail.test.activity"].unlink(pyEnv["mail.test.activity"].search([]));
-    MailTestActivity._views = {
-        ...MailTestActivity._views,
-        "list,false": `<list><field name="name"/></list>`,
-    };
+    MailTestActivity._views.list = `<list><field name="name"/></list>`;
     registerArchs(archs);
-    onRpc("get_views", (args) => step(JSON.stringify(args.kwargs.views)));
+    onRpc("get_views", ({ kwargs }) => asyncStep(kwargs.views));
     await start();
     await openView({
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
+        viewId: 18,
+        searchViewId: 19,
     });
-    await assertSteps([
-        `[[${DEFAULT_MAIL_VIEW_ID},"activity"],[${DEFAULT_MAIL_SEARCH_ID},"search"]]`,
+    await waitForSteps([
+        [
+            [18, "activity"],
+            [19, "search"],
+        ],
     ]);
     // click on "Schedule activity"
     await click(".o_activity_view .o_record_selector");
-    await assertSteps([`[[false,"list"],[${DEFAULT_MAIL_SEARCH_ID},"search"]]`]);
+    await waitForSteps([
+        [
+            [false, "list"],
+            [19, "search"],
+        ],
+    ]);
     // open an activity view (with search arch 1)
     await openView({
         res_model: "mail.test.activity",
         views: [[false, "activity"]],
-        searchViewId: 1,
+        viewId: 15,
+        searchViewId: 16,
     });
-    await assertSteps([`[[${DEFAULT_MAIL_VIEW_ID},"activity"],[1,"search"]]`]);
+    await waitForSteps([
+        [
+            [15, "activity"],
+            [16, "search"],
+        ],
+    ]);
     // click on "Schedule activity"
     await click(".o_activity_view .o_record_selector");
-    await assertSteps([`[[false,"list"],[1,"search"]]`]);
+    await waitForSteps([
+        [
+            [false, "list"],
+            [16, "search"],
+        ],
+    ]);
 });
 
 test("Activity view: apply progressbar filter", async () => {
@@ -1094,9 +1112,7 @@ test("test displaying image (write_date field)", async () => {
 
 test("test node visibility depends on invisible attribute on the node and in the context", async () => {
     registerArchs(archs);
-    MailTestActivity._views = {
-        ...MailTestActivity._views,
-        "activity,1": `
+    MailTestActivity._views["activity,1"] = `
                 <activity string="MailTestActivity">
                     <div t-name="activity-box">
                         <span t-att-title="record.name.value">
@@ -1106,8 +1122,7 @@ test("test node visibility depends on invisible attribute on the node and in the
                             Test invisible
                         </span>
                     </div>
-                </activity>`,
-    };
+                </activity>`;
     await start();
     await openView({
         res_model: "mail.test.activity",
@@ -1124,21 +1139,15 @@ test("test node visibility depends on invisible attribute on the node and in the
 
 test("update activity view after creating multiple activities", async () => {
     registerArchs(archs);
-    MailTestActivity._views = {
-        ...MailTestActivity._views,
-        "list,false": '<list string="MailTestActivity"><field name="name"/><field name="activity_ids" widget="list_activity"/></list>',
-    };
-
-    MailActivitySchedule._views = {
-        ...MailActivitySchedule._views,
-        [`form,${DEFAULT_MAIL_VIEW_ID}`]: "<form><field name='summary'/></form>",
-    }
+    MailTestActivity._views.list =
+        '<list string="MailTestActivity"><field name="name"/><field name="activity_ids" widget="list_activity"/></list>';
+    MailActivitySchedule._views.form = "<form><field name='summary'/></form>";
 
     const Activity = pyEnv["mail.activity"];
     const activityToCreate = omit(Activity[0], "id");
     Activity.unlink(Activity.search([]));
 
-    onRpc(({method, model}) => {
+    onRpc(({ method, model }) => {
         if (method === "web_save" && model === "mail.activity.schedule") {
             Activity.create(activityToCreate);
         }
@@ -1159,23 +1168,36 @@ test("update activity view after creating multiple activities", async () => {
     await insertText(`.o_form_view .o_field_widget[name='summary'] input`, "test1", {
         target: modalSchedule,
     });
-    await click(".modal-footer button.o_form_button_save", {target: modalSchedule});
+    await click(".modal-footer button.o_form_button_save", { target: modalSchedule });
     await click(".modal-footer button.o_form_button_cancel");
     await waitFor(".o_activity_summary_cell:not(.o_activity_empty_cell)");
     expect(".o_activity_summary_cell:not(.o_activity_empty_cell)").toHaveCount(1);
 });
 
+test("Activity view: context given to the rpc to fetch data", async () => {
+    registerArchs(archs);
+    const context = { custom_context: true };
+    onRpc("get_activity_data", ({ kwargs }) => {
+        const customContext = kwargs.context?.custom_context;
+        expect(customContext).toBe(true);
+        asyncStep("get_activity_data");
+    });
+    await start();
+    await openView({
+        res_model: "mail.test.activity",
+        views: [[false, "activity"]],
+        context,
+    });
+    await waitForSteps(["get_activity_data"]);
+});
+
 test("Activity View: Hide 'New' button in SelectCreateDialog based on action context", async () => {
     registerArchs(archs);
-    MailTestActivity._views = {
-        ...MailTestActivity._views,
-        "list,false": `
+    MailTestActivity._views.list = `
             <list string="MailTestActivity">
                 <field name="name"/>
                 <field name="activity_ids" widget="list_activity"/>
-            </list>`
-        ,
-    };
+            </list>`;
 
     await start();
     await openView({
@@ -1185,7 +1207,7 @@ test("Activity View: Hide 'New' button in SelectCreateDialog based on action con
     });
     await click("table tfoot tr .o_record_selector");
     await animationFrame();
-    expect('.o_create_button').toHaveCount(0, {
+    expect(".o_create_button").toHaveCount(0, {
         message: "'New' button should be hidden",
     });
 });

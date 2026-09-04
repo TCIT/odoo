@@ -2,14 +2,13 @@
 /** @typedef {import("./record_list").RecordList} RecordList */
 
 import { onChange } from "@mail/utils/common/misc";
-import { IS_DELETED_SYM, IS_DELETING_SYM, IS_RECORD_SYM, isRelation } from "./misc";
+import { IS_DELETED_SYM, IS_RECORD_SYM, isRelation } from "./misc";
 import { RecordList } from "./record_list";
 import { reactive, toRaw } from "@odoo/owl";
 import { RecordUses } from "./record_uses";
 
 export class RecordInternal {
     [IS_RECORD_SYM] = true;
-    [IS_DELETED_SYM] = false;
     // Note: state of fields in Maps rather than object is intentional for improved performance.
     /**
      * For computed field, determines whether the field is computing its value.
@@ -150,7 +149,7 @@ export class RecordInternal {
     }
 
     requestCompute(record, fieldName, { force = false } = {}) {
-        if (record._[IS_DELETING_SYM]) {
+        if (record[IS_DELETED_SYM]) {
             return;
         }
         const Model = record.Model;
@@ -169,7 +168,7 @@ export class RecordInternal {
         }
     }
     requestSort(record, fieldName, { force } = {}) {
-        if (record._[IS_DELETING_SYM]) {
+        if (record[IS_DELETED_SYM]) {
             return;
         }
         const Model = record.Model;
@@ -196,10 +195,16 @@ export class RecordInternal {
         const store = record._rawStore;
         this.fieldsComputing.set(fieldName, true);
         this.fieldsComputeOnNeed.delete(fieldName);
-        store._.updateFields(record, {
-            [fieldName]: Model._.fieldsCompute
+        let computedValue;
+        try {
+            computedValue = Model._.fieldsCompute
                 .get(fieldName)
-                .call(this.fieldsComputeProxy2.get(fieldName)),
+                .call(this.fieldsComputeProxy2.get(fieldName));
+        } catch (err) {
+            store.handleError(err);
+        }
+        store._.updateFields(record, {
+            [fieldName]: computedValue,
         });
         this.fieldsComputing.delete(fieldName);
     }
@@ -218,7 +223,11 @@ export class RecordInternal {
         const proxy2Sort = this.fieldsSortProxy2.get(fieldName);
         const func = Model._.fieldsSort.get(fieldName).bind(proxy2Sort);
         if (isRelation(Model, fieldName)) {
-            store._.sortRecordList(proxy2Sort[fieldName]._proxy, func);
+            try {
+                store._.sortRecordList(proxy2Sort[fieldName]._proxy, func);
+            } catch (err) {
+                store.handleError(err);
+            }
         } else {
             // sort on copy of list so that reactive observers not triggered while sorting
             const copy = [...proxy2Sort[fieldName]];
@@ -231,6 +240,7 @@ export class RecordInternal {
         this.fieldsSorting.delete(fieldName);
     }
     onUpdate(record, fieldName) {
+        const store = record._rawStore;
         const Model = record.Model;
         if (!Model._.fieldsOnUpdate.get(fieldName)) {
             return;
@@ -239,7 +249,11 @@ export class RecordInternal {
          * Forward internal proxy for performance as onUpdate does not
          * need reactive (observe is called separately).
          */
-        Model._.fieldsOnUpdate.get(fieldName).call(record._proxyInternal);
+        try {
+            Model._.fieldsOnUpdate.get(fieldName).call(record._proxyInternal);
+        } catch (err) {
+            store.handleError(err);
+        }
         this.fieldsOnUpdateObserves.get(fieldName)?.();
     }
     /**

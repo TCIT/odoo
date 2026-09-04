@@ -12,12 +12,21 @@ import time
 import email.utils
 from email.utils import getaddresses as orig_getaddresses
 from urllib.parse import urlparse
+from typing import Literal
 import html as htmllib
 
 import idna
 import markupsafe
 from lxml import etree, html
-from lxml.html import clean, defs
+from lxml.html import (
+    XHTML_NAMESPACE,
+    _contains_block_level_tag,
+    _looks_like_full_html_bytes,
+    _looks_like_full_html_unicode,
+    clean,
+    defs,
+    html_parser,
+)
 from werkzeug import urls
 
 from odoo.tools import misc
@@ -61,12 +70,21 @@ safe_attrs = defs.safe_attrs | frozenset(
      'data-o-mail-quote', 'data-o-mail-quote-node',  # quote detection
      'data-oe-model', 'data-oe-id', 'data-oe-field', 'data-oe-type', 'data-oe-expression', 'data-oe-translation-source-sha', 'data-oe-nodeid',
      'data-last-history-steps', 'data-oe-protected', 'data-embedded', 'data-embedded-editable', 'data-embedded-props', 'data-oe-version',
-     'data-oe-transient-content', 'data-behavior-props', 'data-prop-name',  # legacy editor
+     'data-oe-transient-content', 'data-behavior-props', 'data-prop-name', 'data-width', 'data-height', 'data-scale-x', 'data-scale-y', 'data-x', 'data-y',  # legacy editor
+     'data-oe-role', 'data-oe-aria-label',
      'data-publish', 'data-id', 'data-res_id', 'data-interval', 'data-member_id', 'data-scroll-background-ratio', 'data-view-id',
      'data-class', 'data-mimetype', 'data-original-src', 'data-original-id', 'data-gl-filter', 'data-quality', 'data-resize-width',
      'data-shape', 'data-shape-colors', 'data-file-name', 'data-original-mimetype',
+     'data-attachment-id', 'data-format-mimetype',
+     'data-ai-field', 'data-ai-record-id',
+     'data-heading-link-id',
      'data-mimetype-before-conversion',
+     'data-language-id',
+     'data-bs-toggle',  # support nav-tabs
      ])
+
+defs.link_attrs |= {'xlink:href'}
+
 SANITIZE_TAGS = {
     # allow new semantic HTML5 tags
     'allow_tags': defs.tags | frozenset('article bdi section header footer hgroup nav aside figure main'.split() + [etree.Comment]),
@@ -83,10 +101,12 @@ class _Cleaner(clean.Cleaner):
     _style_whitelist = [
         'font-size', 'font-family', 'font-weight', 'font-style', 'background-color', 'color', 'text-align',
         'line-height', 'letter-spacing', 'text-transform', 'text-decoration', 'text-decoration', 'opacity',
-        'float', 'vertical-align', 'display',
+        'float', 'vertical-align', 'display', 'object-fit', 'direction',
         'padding', 'padding-top', 'padding-left', 'padding-bottom', 'padding-right',
         'margin', 'margin-top', 'margin-left', 'margin-bottom', 'margin-right',
         'white-space',
+        # appearance
+        'background-image', 'background-position', 'background-size', 'background-repeat', 'background-origin',
         # box model
         'border', 'border-color', 'border-radius', 'border-style', 'border-width', 'border-top', 'border-bottom',
         'height', 'width', 'max-width', 'min-width', 'min-height',
@@ -259,6 +279,76 @@ def tag_quote(el):
         el.set('data-o-mail-quote', '1')
 
 
+def fromstring(html_, base_url=None, parser=None, **kw):
+    """
+    This function mimics lxml.html.fromstring. It not only returns the parsed
+    element/document but also a flag indicating whether the input is for a
+    a single body element or not.
+
+    This tries to minimally parse the chunk of text, without knowing if it
+    is a fragment or a document.
+
+    base_url will set the document's base_url attribute (and the tree's docinfo.URL)
+    """
+    if parser is None:
+        parser = html_parser
+    if isinstance(html_, bytes):
+        is_full_html = _looks_like_full_html_bytes(html_)
+    else:
+        is_full_html = _looks_like_full_html_unicode(html_)
+    doc = html.document_fromstring(html_, parser=parser, base_url=base_url, **kw)
+    if is_full_html:
+        return doc, False
+    # otherwise, lets parse it out...
+    bodies = doc.findall('body')
+    if not bodies:
+        bodies = doc.findall('{%s}body' % XHTML_NAMESPACE)
+    if bodies:
+        body = bodies[0]
+        if len(bodies) > 1:
+            # Somehow there are multiple bodies, which is bad, but just
+            # smash them into one body
+            for other_body in bodies[1:]:
+                if other_body.text:
+                    if len(body):
+                        body[-1].tail = (body[-1].tail or '') + other_body.text
+                    else:
+                        body.text = (body.text or '') + other_body.text
+                body.extend(other_body)
+                # We'll ignore tail
+                # I guess we are ignoring attributes too
+                other_body.drop_tree()
+    else:
+        body = None
+    heads = doc.findall('head')
+    if not heads:
+        heads = doc.findall('{%s}head' % XHTML_NAMESPACE)
+    if heads:
+        # Well, we have some sort of structure, so lets keep it all
+        head = heads[0]
+        if len(heads) > 1:
+            for other_head in heads[1:]:
+                head.extend(other_head)
+                # We don't care about text or tail in a head
+                other_head.drop_tree()
+        return doc, False
+    if body is None:
+        return doc, False
+    if (len(body) == 1 and (not body.text or not body.text.strip())
+        and (not body[-1].tail or not body[-1].tail.strip())):
+        # The body has just one element, so it was probably a single
+        # element passed in
+        return body[0], True
+    # Now we have a body which represents a bunch of tags which have the
+    # content that was passed in.  We will create a fake container, which
+    # is the body tag, except <body> implies too much structure.
+    if _contains_block_level_tag(body):
+        body.tag = 'div'
+    else:
+        body.tag = 'span'
+    return body, False
+
+
 def html_normalize(src, filter_callback=None, output_method="html"):
     """ Normalize `src` for storage as an html field value.
 
@@ -279,7 +369,7 @@ def html_normalize(src, filter_callback=None, output_method="html"):
         return src
 
     # html: remove encoding attribute inside tags
-    src = re.sub(r'(<[^>]*\s)(encoding=(["\'][^"\']*?["\']|[^\s\n\r>]+)(\s[^>]*|/)?>)', "", src, flags=re.IGNORECASE | re.DOTALL)
+    src = re.sub(r'(<[^>]*\s)(encoding=(["\'][^"\']*?["\']|[^\s\n\r>]+)(\s[^>]*|/)?>)', "", src)
 
     src = src.replace('--!>', '-->')
     src = re.sub(r'(<!-->|<!--->)', '<!-- -->', src)
@@ -288,7 +378,7 @@ def html_normalize(src, filter_callback=None, output_method="html"):
     src = re.sub(r'</?o:.*?>', '', src)
 
     try:
-        doc = html.fromstring(src)
+        doc, single_body_element = fromstring(src)
     except etree.ParserError as e:
         # HTML comment only string, whitespace only..
         if 'empty' in str(e):
@@ -296,18 +386,25 @@ def html_normalize(src, filter_callback=None, output_method="html"):
         raise
 
     # perform quote detection before cleaning and class removal
-    if doc is not None:
-        for el in doc.iter(tag=etree.Element):
-            tag_quote(el)
+    for el in doc.iter(tag=etree.Element):
+        tag_quote(el)
+
+    doc = html.fromstring(html.tostring(doc, method=output_method))
 
     if filter_callback:
         doc = filter_callback(doc)
 
     src = html.tostring(doc, encoding='unicode', method=output_method)
 
-    # this is ugly, but lxml/etree tostring want to put everything in a
-    # 'div' that breaks the editor -> remove that
-    if src.startswith('<div>') and src.endswith('</div>'):
+    if not single_body_element and src.startswith('<div>') and src.endswith('</div>'):
+        # the <div></div> may come from 2 places
+        # 1. the src is parsed as multiple body elements
+        #    <div></div> wraps all elements.
+        # 2. the src is parsed as not only body elements
+        #    <html></html> wraps all elements.
+        #    then the Cleaner as the filter_callback which has 'html' in its
+        #    'remove_tags' will write <html></html> to <div></div> since it
+        #    cannot directly drop the parent-most tag
         src = src[5:-6]
 
     # html considerations so real html content match database value
@@ -390,19 +487,20 @@ def validate_url(url):
     return url
 
 
-def is_html_empty(html_content):
+def is_html_empty(html_content: str | markupsafe.Markup | Literal[False] | None) -> bool:
     """Check if a html content is empty. If there are only formatting tags with style
     attributes or a void content  return True. Famous use case if a
     '<p style="..."><br></p>' added by some web editor.
 
-    :param str html_content: html content, coming from example from an HTML field
-    :returns: bool, True if no content found or if containing only void formatting tags
+    :param html_content: html content, coming from example from an HTML field
+    :returns: True if no content found or if containing only void formatting tags
     """
     if not html_content:
         return True
     icon_re = r'<\s*(i|span)\b(\s+[A-Za-z_-][A-Za-z0-9-_]*(\s*=\s*[\'"][^"\']*[\'"])?)*\s*\bclass\s*=\s*["\'][^"\']*\b(fa|fab|fad|far|oi)\b'
     tag_re = r'<\s*\/?(?:p|div|section|span|br|b|i|font)\b(?:(\s+[A-Za-z_-][A-Za-z0-9-_]*(\s*=\s*[\'"][^"\']*[\'"]))*)(?:\s*>|\s*\/\s*>)'
-    return not bool(re.sub(tag_re, '', html_content).strip()) and not re.search(icon_re, html_content)
+    text_content = htmllib.unescape(re.sub(tag_re, '', html_content))
+    return not bool(text_content.strip()) and not re.search(icon_re, html_content)
 
 
 def html_keep_url(text):
@@ -429,16 +527,21 @@ def html_to_inner_content(html):
     processed = re.sub(HTML_NEWLINES_REGEX, ' ', html)
     processed = re.sub(HTML_TAGS_REGEX, '', processed)
     processed = re.sub(r' {2,}|\t', ' ', processed)
+    processed = processed.replace("\xa0", " ")
     processed = htmllib.unescape(processed)
-    processed = processed.strip()
-    return processed
+    return processed.strip()
 
 
 def create_link(url, label):
     return f'<a href="{url}" target="_blank" rel="noreferrer noopener">{label}</a>'
 
 
-def html2plaintext(html, body_id=None, encoding='utf-8', include_references=True):
+def html2plaintext(
+    html: str | markupsafe.Markup | Literal[False] | None,
+    body_id: str | None = None,
+    encoding: str = 'utf-8',
+    include_references: bool = True
+) -> str:
     """ From an HTML text, convert the HTML to plain text.
     If @param body_id is provided then this is the tag where the
     body (not necessarily <body>) starts.
@@ -477,7 +580,10 @@ def html2plaintext(html, body_id=None, encoding='utf-8', include_references=True
         for img in tree.findall('.//img'):
             if src := img.get('src'):
                 img.tag = 'span'
-                img_name = re.search(r'[^/]+(?=\.[a-zA-Z]+(?:\?|$))', src)
+                if src.startswith('data:'):
+                    img_name = None  # base64 image
+                else:
+                    img_name = re.search(r'[^/]+(?=\.[a-zA-Z]+(?:\?|$))', src)
                 img.text = '%s [%s]' % (img_name[0] if img_name else 'Image', next(linkrefs))
                 url_index.append(src)
 
@@ -512,19 +618,19 @@ def html2plaintext(html, body_id=None, encoding='utf-8', include_references=True
 
     return html.strip()
 
-def plaintext2html(text, container_tag=None):
+
+def plaintext2html(text: str, container_tag: str | None = None, with_paragraph: bool = True) -> markupsafe.Markup:
     r"""Convert plaintext into html. Content of the text is escaped to manage
     html entities, using :func:`~odoo.tools.misc.html_escape`.
 
     - all ``\n``, ``\r`` are replaced by ``<br/>``
-    - enclose content into ``<p>``
     - convert url into clickable link
-    - 2 or more consecutive ``<br/>`` are considered as paragraph breaks
 
-    :param str text: plaintext to convert
-    :param str container_tag: container of the html; by default the content is
+    :param text: plaintext to convert
+    :param container_tag: container of the html; by default the content is
         embedded into a ``<div>``
-    :rtype: markupsafe.Markup
+    :param with_paragraph: whether or not considering 2 or more consecutive ``<br/>``
+        as paragraph breaks and enclosing content in ``<p>``
     """
     assert isinstance(text, str)
     text = misc.html_escape(text)
@@ -536,13 +642,15 @@ def plaintext2html(text, container_tag=None):
     text = html_keep_url(text)
 
     # 3-4: form paragraphs
-    idx = 0
-    final = '<p>'
-    br_tags = re.compile(r'(([<]\s*[bB][rR]\s*/?[>]\s*){2,})')
-    for item in re.finditer(br_tags, text):
-        final += text[idx:item.start()] + '</p><p>'
-        idx = item.end()
-    final += text[idx:] + '</p>'
+    final = text
+    if with_paragraph:
+        idx = 0
+        final = '<p>'
+        br_tags = re.compile(r'(([<]\s*[bB][rR]\s*/?[>]\s*){2,})')
+        for item in re.finditer(br_tags, text):
+            final += text[idx:item.start()] + '</p><p>'
+            idx = item.end()
+        final += text[idx:] + '</p>'
 
     # 5. container
     if container_tag: # FIXME: validate that container_tag is just a simple tag?
@@ -676,18 +784,22 @@ def email_split_tuples(text):
 
     return list(map(_parse_based_on_spaces, valid_pairs))
 
+
 def email_split(text):
     """ Return a list of the email addresses found in ``text`` """
-    if not text:
-        return []
     return [email for (name, email) in email_split_tuples(text)]
+
 
 def email_split_and_format(text):
     """ Return a list of email addresses found in ``text``, formatted using
     formataddr. """
-    if not text:
-        return []
     return [formataddr((name, email)) for (name, email) in email_split_tuples(text)]
+
+
+def email_split_and_normalize(text):
+    """ Same as 'email_split' but normalized email """
+    return [(name, _normalize_email(email)) for (name, email) in email_split_tuples(text)]
+
 
 def email_split_and_format_normalize(text):
     """ Same as 'email_split_and_format' but normalizing email. """
@@ -731,7 +843,6 @@ def email_normalize(text, strict=True):
     emails = email_split(text)
     if not emails or (strict and len(emails) != 1):
         return False
-
     return _normalize_email(emails[0])
 
 def email_normalize_all(text):
@@ -743,8 +854,6 @@ def email_normalize_all(text):
 
     :return list: list of normalized emails found in text
     """
-    if not text:
-        return []
     emails = email_split(text)
     return list(filter(None, [_normalize_email(email) for email in emails]))
 
@@ -776,7 +885,40 @@ def _normalize_email(email):
         pass
     else:
         local_part = local_part.lower()
+
     return local_part + at + domain.lower()
+
+def email_anonymize(normalized_email, *, redact_domain=False):
+    """
+    Replace most charaters in the local part of the email address with
+    '*' to hide the recipient, but keep enough characters for debugging
+    purpose.
+
+    The email address must be normalized already.
+
+    >>> email_anonymize('admin@example.com')
+    'a****@example.com'
+    >>> email_anonymize('portal@example.com')
+    'p***al@example.com'
+    >>> email_anonymize('portal@example.com', redact_domain=True)
+    'p***al@e******.com'
+    """
+    if not normalized_email:
+        return normalized_email
+
+    local, at, domain = normalized_email.partition('@')
+    if len(local) <= 5:
+        anon_local = local[:1] + '*' * (len(local) - 1)
+    else:
+        anon_local = local[:1] + '*' * (len(local) - 3) + local[-2:]
+
+    host, dot, tld = domain.rpartition('.')
+    if redact_domain and not domain.startswith('[') and all((host, dot, tld)):
+        anon_host = host[0] + '*' * (len(host) - 1)
+    else:
+        anon_host = host
+
+    return f'{anon_local}{at}{anon_host}{dot}{tld}'
 
 def email_domain_extract(email):
     """ Extract the company domain to be used by IAP services notably. Domain

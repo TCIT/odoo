@@ -7,7 +7,7 @@ from odoo import _, api, models
 from odoo.tools import float_compare, float_is_zero, format_date
 
 
-class ReceptionReport(models.AbstractModel):
+class ReportStockReport_Reception(models.AbstractModel):
     _name = 'report.stock.report_reception'
     _description = "Stock Reception Report"
 
@@ -96,12 +96,9 @@ class ReceptionReport(models.AbstractModel):
         # show potential moves that can be assigned
         for product_id, outs in products_to_outs.items():
             for out in outs:
-                # we expect len(source) = 2 when picking + origin [e.g. SO] and len() = 1 otherwise [e.g. MO]
-                source = (out._get_source_document(),)
+                source = self._get_report_source(out)
                 if not source:
                     continue
-                if out.picking_id and source[0] != out.picking_id:
-                    source = (out.picking_id, source[0])
 
                 qty_to_reserve = out.product_qty
                 product_uom = out.product_id.uom_id
@@ -111,7 +108,7 @@ class ReceptionReport(models.AbstractModel):
                 quantity = 0
                 for move_in_qty, move_in in product_to_qty_to_assign[out.product_id]:
                     moves_in_ids.append(move_in.id)
-                    if float_compare(quantity + move_in_qty, qty_to_reserve, precision_rounding=product_uom.rounding) <= 0:
+                    if product_uom.compare(quantity + move_in_qty, qty_to_reserve) <= 0:
                         qty_to_add = move_in_qty
                         move_in_qty = 0
                     else:
@@ -122,16 +119,15 @@ class ReceptionReport(models.AbstractModel):
                         product_to_qty_to_assign[out.product_id][0] = (move_in_qty, move_in)
                     else:
                         product_to_qty_to_assign[out.product_id] = product_to_qty_to_assign[out.product_id][1:]
-                    if float_compare(qty_to_reserve, quantity, precision_rounding=product_uom.rounding) == 0:
+                    if product_uom.compare(qty_to_reserve, quantity) == 0:
                         break
 
-                if not float_is_zero(quantity, precision_rounding=product_uom.rounding):
+                if not product_uom.is_zero(quantity):
                     sources_to_lines[source].append(self._prepare_report_line(quantity, product_id, out, source[0], move_ins=self.env['stock.move'].browse(moves_in_ids)))
 
                 # draft qtys can be shown but not assigned
                 qty_expected = product_to_qty_draft.get(product_id, 0)
-                if float_compare(qty_to_reserve, quantity, precision_rounding=product_uom.rounding) > 0 and\
-                        not float_is_zero(qty_expected, precision_rounding=product_uom.rounding):
+                if product_uom.compare(qty_to_reserve, quantity) > 0 and not product_uom.is_zero(qty_expected):
                     to_expect = min(qty_expected, qty_to_reserve - quantity)
                     sources_to_lines[source].append(self._prepare_report_line(to_expect, product_id, out, source[0], is_qty_assignable=False))
                     product_to_qty_draft[product_id] -= to_expect
@@ -143,22 +139,20 @@ class ReceptionReport(models.AbstractModel):
             out_moves = moves_in.move_dest_ids
 
             for out_move in out_moves:
-                if float_is_zero(total_assigned, precision_rounding=out_move.product_id.uom_id.rounding):
+                if out_move.product_id.uom_id.is_zero(total_assigned):
                     # it is possible there are different in moves linked to the same out moves due to batch
                     # => we guess as to which outs correspond to this report...
                     continue
-                source = (out_move._get_source_document(),)
+                source = self._get_report_source(out_move)
                 if not source:
                     continue
-                if out_move.picking_id and source[0] != out_move.picking_id:
-                    source = (out_move.picking_id, source[0])
                 qty_assigned = min(total_assigned, out_move.product_qty)
                 sources_to_lines[source].append(
                     self._prepare_report_line(qty_assigned, product_id, out_move, source[0], is_assigned=True, move_ins=moves_in))
 
         # dates aren't auto-formatted when printed in report :(
         sources_to_formatted_scheduled_date = defaultdict(list)
-        for source, dummy in sources_to_lines.items():
+        for source in sources_to_lines:
             sources_to_formatted_scheduled_date[source] = self._get_formatted_scheduled_date(source[0])
 
         return {
@@ -166,7 +160,7 @@ class ReceptionReport(models.AbstractModel):
             'doc_ids': docids,
             'doc_model': self._get_doc_model(),
             'sources_to_lines': sources_to_lines,
-            'precision': self.env['decimal.precision'].precision_get('Product Unit of Measure'),
+            'precision': self.env['decimal.precision'].precision_get('Product Unit'),
             'docs': docs,
             'sources_to_formatted_scheduled_date': sources_to_formatted_scheduled_date,
         }
@@ -185,6 +179,15 @@ class ReceptionReport(models.AbstractModel):
             'is_assigned': is_assigned,
             'move_ins': move_ins and move_ins.ids or False,
         }
+
+    def _get_report_source(self, move):
+        # We expect len(source) = 2 when picking + origin [e.g. SO] and len() = 1 otherwise [e.g. MO].
+        source = move._get_source_document()
+        if not source:
+            return False
+        if move.picking_id and source != move.picking_id:
+            return (move.picking_id, source)
+        return (source,)
 
     def _get_docs(self, docids):
         docids = self.env.context.get('default_picking_ids', docids)
@@ -222,7 +225,7 @@ class ReceptionReport(models.AbstractModel):
         out_to_new_out = OrderedDict()
         new_move_vals = []
         for out, qty_to_link in zip(outs, qtys):
-            if float_compare(out.product_qty, qty_to_link, precision_rounding=out.product_id.uom_id.rounding) == 1:
+            if out.product_id.uom_id.compare(out.product_qty, qty_to_link) == 1:
                 new_move = out._split(out.product_qty - qty_to_link)
                 if new_move:
                     new_move[0]['reservation_date'] = out.reservation_date
@@ -247,7 +250,8 @@ class ReceptionReport(models.AbstractModel):
                     # need to make sure the reserved qtys still match the demand amount the move (we're assigning).
                     out.move_line_ids.move_id = new_out
                     assigned_amount = 0
-                    for move_line_id in new_out.move_line_ids:
+                    matching_locations = potential_ins.location_dest_id
+                    for move_line_id in new_out.move_line_ids.sorted(lambda ml: ml.location_id not in matching_locations):
                         if assigned_amount + move_line_id.quantity_product_uom > qty_to_link:
                             new_move_line = move_line_id.copy({'quantity': 0})
                             new_move_line.quantity = move_line_id.quantity
@@ -255,13 +259,13 @@ class ReceptionReport(models.AbstractModel):
                             new_move_line.quantity -= out.product_id.uom_id._compute_quantity(move_line_id.quantity_product_uom, out.product_uom, rounding_method='HALF-UP')
                         move_line_id.move_id = out
                         assigned_amount += move_line_id.quantity_product_uom
-                        if float_compare(assigned_amount, qty_to_link, precision_rounding=out.product_id.uom_id.rounding) == 0:
+                        if out.product_id.uom_id.compare(assigned_amount, qty_to_link) == 0:
                             break
 
             for in_move in reversed(potential_ins):
                 move_quantity = in_move.product_qty or in_move.product_uom._compute_quantity(in_move.quantity, in_move.product_id.uom_id, rounding_method='HALF-UP')
                 quantity_remaining = move_quantity - sum(in_move.move_dest_ids.mapped('product_qty'))
-                if in_move.product_id != out.product_id or float_compare(0, quantity_remaining, precision_rounding=in_move.product_id.uom_id.rounding) >= 0:
+                if in_move.product_id != out.product_id or in_move.product_id.uom_id.compare(0, quantity_remaining) >= 0:
                     # in move is already completely linked (e.g. during another assign click) => don't count it again
                     potential_ins = potential_ins[1:]
                     continue
@@ -272,7 +276,7 @@ class ReceptionReport(models.AbstractModel):
                 out.procure_method = 'make_to_order'
                 quantity_remaining -= linked_qty
                 qty_to_link -= linked_qty
-                if float_is_zero(qty_to_link, precision_rounding=out.product_id.uom_id.rounding):
+                if out.product_id.uom_id.is_zero(qty_to_link):
                     break  # we have satistfied the qty_to_link
 
         (outs | new_outs)._recompute_state()
@@ -297,7 +301,7 @@ class ReceptionReport(models.AbstractModel):
             in_move.move_dest_ids -= out
             self._action_unassign(in_move, out)
             amount_unassigned += min(qty, move_quantity)
-            if float_compare(qty, amount_unassigned, precision_rounding=out.product_id.uom_id.rounding) <= 0:
+            if out.product_id.uom_id.compare(qty, amount_unassigned) <= 0:
                 break
         if out.move_orig_ids and out.state != 'done':
             # annoying use cases where we need to split the out move:
@@ -336,12 +340,26 @@ class ReceptionReport(models.AbstractModel):
         return True
 
     def _action_assign(self, in_move, out_move):
-        """ For extension purposes only """
-        return
+        """ share reference across source documents """
+        in_ref = in_move.reference_ids
+        out_ref = out_move.reference_ids
+        in_source = in_move._get_source_document()
+        out_source = out_move._get_source_document()
+        if out_ref and in_source:
+            in_source._add_reference(out_ref)
+        if in_ref and out_source:
+            out_source._add_reference(in_ref)
 
     def _action_unassign(self, in_move, out_move):
-        """ For extension purposes only """
-        return
+        """ remove shared reference across source documents if any"""
+        in_ref = in_move.reference_ids
+        out_ref = out_move.reference_ids
+        in_source = in_move._get_source_document()
+        out_source = out_move._get_source_document()
+        if out_ref and in_source:
+            in_source._remove_reference(out_ref)
+        if in_ref and out_source:
+            out_source._remove_reference(in_ref)
 
     def _format_html_docs(self, docs):
         """ Format docs to be sent in an html request. """

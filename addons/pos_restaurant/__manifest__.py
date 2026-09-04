@@ -20,8 +20,10 @@ This module adds several features to the Point of Sale that are specific to rest
     'website': 'https://www.odoo.com/app/point-of-sale-restaurant',
     'data': [
         'security/ir.model.access.csv',
+        'data/scenarios/restaurant_preset.xml',
         'views/pos_order_views.xml',
         'views/pos_restaurant_views.xml',
+        'views/pos_preset_views.xml',
         'views/res_config_settings_views.xml',
     ],
     'demo': [
@@ -40,9 +42,13 @@ This module adds several features to the Point of Sale that are specific to rest
         'web.assets_tests': [
             'pos_restaurant/static/tests/tours/**/*',
         ],
+        'web.assets_unit_tests': [
+            'pos_restaurant/static/tests/unit/**/*'
+        ],
         'point_of_sale.assets_debug': [
             'pos_restaurant/static/tests/tours/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

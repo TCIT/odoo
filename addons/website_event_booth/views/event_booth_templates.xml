@@ -15,7 +15,7 @@
                 <div t-if="event.is_finished" class="container">
                     <div class="row">
                         <div class="col-12 text-center">
-                            <div t-call="website_event.event_empty_events_svg" class="my-4"/>
+                            <div class="my-4"><t t-call="website_event.event_empty_events_svg"/></div>
                             <h2>Event Finished</h2>
                             <p>It's no longer possible to book a booth.</p>
                         </div>
@@ -24,10 +24,10 @@
                 <div t-elif="not event_booths" class="container">
                     <div class="row">
                         <div class="col-12 text-center">
-                            <div t-call="website_event.event_empty_events_svg" class="my-4"/>
+                            <div class="my-4"><t t-call="website_event.event_empty_events_svg"/></div>
                             <h2>Registration Not Open.</h2>
                             <p>This event is not open to exhibitors registration at this time.</p>
-                            <p>Check our <a href="/event" title="List of Future Events" aria-label="Link to list of future events">list of future events</a>.</p>
+                            <p>Check our <a class="o_translate_inline" href="/event" title="List of Future Events" aria-label="Link to list of future events">list of future events</a>.</p>
                             <div class="o_not_editable my-3" groups="event.group_event_manager">
                                 <a class="btn o_wevent_cta mb-4" target="_blank" t-attf-href="/odoo/event.event/{{event.id}}">
                                     <span class="fa fa-gear me-1"/> Configure Booths
@@ -45,7 +45,7 @@
         <t t-call="website_event_booth.event_booth_layout">
             <t t-if="event_booths and not event.is_finished">
                 <div class="d-flex flex-wrap align-items-center justify-content-between my-3">
-                    <h4 class="my-0">Get A Booth</h4>
+                    <h1 class="my-0 h3-fs">Get A Booth</h1>
                     <t t-call="website_event_booth.event_booth_order_progress">
                         <t t-set="step" t-value="'STEP_BOOTH_SELECTION'"/>
                     </t>

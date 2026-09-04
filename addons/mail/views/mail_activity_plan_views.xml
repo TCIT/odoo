@@ -61,17 +61,18 @@
                                 <field name="res_model"/>
                             </group>
                             <group name="company_id" groups="base.group_multi_company">
-                                <field name="company_id" domain="[('id', '=', allowed_company_ids)]" placeholder="Available for all Companies"/>
+                                <field name="company_id" domain="[('id', '=', allowed_company_ids)]" placeholder="Visible to all"/>
                             </group>
                         </group>
                         <notebook>
                             <page string="Activities To Create">
-                                <field name="template_ids" nolabel="1">
+                                <!-- Pass on the model to ensure the correct dynamic selection (in e.g. hr) on unsaved plans -->
+                                <field name="template_ids" nolabel="1" context="{'default_res_model': res_model}">
                                     <list>
                                         <field name="company_id" column_invisible="1"/>
                                         <field name="note" column_invisible="1"/>
                                         <field name="sequence" widget="handle"/>
-                                        <field name="activity_type_id" context="{'form_view_ref': 'mail.mail_activity_type_form_inherit'}"
+                                        <field name="activity_type_id"
                                                options="{'no_quick_create': True}"/>
                                         <field name="summary" placeholder="e.g. Discuss Proposal"/>
                                         <field name="responsible_type"/>
@@ -80,6 +81,15 @@
                                         <field name="delay_count"/>
                                         <field name="delay_unit" string="Unit"/>
                                         <field name="delay_from"/>
+                                        <field name="next_activity_ids"
+                                            widget="many2many_tags"
+                                            invisible="not next_activity_ids"
+                                            options="{
+                                                'no_quick_create': True,
+                                                'edit_tags': True,
+                                            }"
+                                            optional="hide"
+                                        />
                                     </list>
                                     <kanban class="o_kanban_mobile">
                                         <field name="icon"/>
@@ -96,6 +106,7 @@
                                                     <field name="delay_count"/> <field name="delay_unit"/>
                                                     (<field name="delay_from"/>)
                                                 </div>
+                                                <field name="next_activity_ids" widget="many2many_tags" invisible="not next_activity_ids"/>
                                                 <footer class="p-0">
                                                     <field name="responsible_type"/>
                                                     <field class="ms-auto" name="responsible_id" widget="many2one_avatar_user" readonly="1"/>

@@ -1,35 +1,51 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_customer
-# 
+# * website_customer
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Piotr Strębski <strebski@gmail.com>, 2022
+# Wojciech Warczakowski <w.warczakowski@gmail.com>, 2022
+# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2022
+# Andrzej Wiśniewski <a.wisniewski@hadron.eu.com>, 2022
+# Dariusz Żbikowski <darek@krokus.com.pl>, 2022
+# Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2022
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2022
+# Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2022
+# Martin Trigaux, 2022
+# Łukasz Grzenkowicz <lukasz.grzenkowicz@gmail.com>, 2023
+# Maksym <ms@myodoo.pl>, 2023
+# Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# "Marta (wacm)" <wacm@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-03 02:44+0000\n"
+"Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-19/"
+"website_customer/pl/>\n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: pl\n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
-
-#. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.details
-msgid "<i class=\"fa fa-chevron-left me-2\"/>Back to references"
-msgstr "<i class=\"fa fa-chevron-left me-2\"/>Powrót do odniesień"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
+"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
+"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid ""
 "<i class=\"fa fa-info-circle me-2\"/>\n"
-"                        There are no matching customers found for the selected country. Displaying results across all countries instead."
+"                        There are no matching customers found for the "
+"selected country. Displaying results across all countries instead."
 msgstr ""
+"<i class=\"fa fa-info-circle me-2\"/>\n"
+"                        Nie znaleziono żadnych pasujących klientów dla "
+"wybranego kraju. Zamiast tego wyświetlam wyniki ze wszystkich krajów."
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.opt_country
@@ -37,8 +53,13 @@ msgid ""
 "<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
 "title=\"Open map\"/>"
 msgstr ""
-"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
-"title=\"Open map\"/>"
+"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Otwórz mapę\" "
+"title=\"Otwórz mapę\"/>"
+
+#. module: website_customer
+#: model_terms:ir.ui.view,arch_db:website_customer.details
+msgid "<i class=\"oi oi-chevron-left me-2\"/>Back to references"
+msgstr "<i class=\"oi oi-chevron-left me-2\"/>Powrót do referencji"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -76,7 +97,7 @@ msgstr "Zarchiwizowane"
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.details
 msgid "Back to references list"
-msgstr "Back to references list"
+msgstr "Powrót do listy referencji"
 
 #. module: website_customer
 #: model:ir.model.fields,help:website_customer.field_res_partner_tag__classname
@@ -86,7 +107,7 @@ msgstr "Klasa bootstrap dla dostosowania koloru"
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__can_publish
 msgid "Can Publish"
-msgstr "Można publikować"
+msgstr "Może publikować"
 
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__name
@@ -110,9 +131,15 @@ msgid "Contact"
 msgstr "Kontakt"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Countries Filter"
 msgstr "Filtr krajów"
+
+#. module: website_customer
+#: model:ir.model,website_form_label:website_customer.model_res_partner
+msgid "Create a Customer"
+msgstr "Utwórz klienta"
 
 #. module: website_customer
 #: model_terms:ir.actions.act_window,help:website_customer.action_partner_tag_form
@@ -130,12 +157,26 @@ msgid "Created on"
 msgstr "Data utworzenia"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.details
-msgid "DROP BUILDING BLOCKS HERE TO MAKE THEM AVAILABLE ACROSS ALL CUSTOMERS"
-msgstr ""
+#. odoo-python
+#: code:addons/website_customer/controllers/main.py:0
+msgid "Customers"
+msgstr "Klienci"
 
 #. module: website_customer
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.js:0
+msgid "Customers Page"
+msgstr "Strona klientów"
+
+#. module: website_customer
+#: model_terms:ir.ui.view,arch_db:website_customer.details
+msgid "DROP BUILDING BLOCKS HERE TO MAKE THEM AVAILABLE ACROSS ALL CUSTOMERS"
+msgstr "UPUŚĆ BLOKI W TYM MIEJSCU, ABY BYŁY DOSTĘPNE DLA WSZYSTKICH KLIENTÓW"
+
+#. module: website_customer
+#: model:ir.model.fields,field_description:website_customer.field_res_partner__display_name
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__display_name
+#: model:ir.model.fields,field_description:website_customer.field_website__display_name
 msgid "Display Name"
 msgstr "Nazwa wyświetlana"
 
@@ -160,10 +201,20 @@ msgid "Filter by Tags"
 msgstr "Filtruj według tagów"
 
 #. module: website_customer
+#: model_terms:ir.ui.view,arch_db:website_customer.opt_country_list
+msgid "Filter by country"
+msgstr "Filtruj wg kraju"
+
+#. module: website_customer
+#: model_terms:ir.ui.view,arch_db:website_customer.opt_industry_list
+msgid "Filter by industry"
+msgstr "Filtruj według branży"
+
+#. module: website_customer
 #: model:ir.model.fields,help:website_customer.field_res_partner__website_tag_ids
 #: model:ir.model.fields,help:website_customer.field_res_users__website_tag_ids
 msgid "Filter published customers on the .../customers website page"
-msgstr ""
+msgstr "Filtruj opublikowanych klientów na Stronie internetowej .../customers"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -176,12 +227,15 @@ msgid "Go to customer"
 msgstr "Idź do klienta"
 
 #. module: website_customer
+#: model:ir.model.fields,field_description:website_customer.field_res_partner__id
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__id
+#: model:ir.model.fields,field_description:website_customer.field_website__id
 msgid "ID"
 msgstr "ID"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Industry Filter"
 msgstr "Filtr gałęzi przemysłu"
 
@@ -215,16 +269,6 @@ msgid "No results found for \""
 msgstr "Nie znaleziono żadnych wyników dla \""
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.opt_country_list
-msgid "Open countries dropdown"
-msgstr "Otwórz listę rozwijaną krajów"
-
-#. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.opt_industry_list
-msgid "Open industries dropdown"
-msgstr "Otwórz listę rozwijaną branż"
-
-#. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid "Our references"
 msgstr "Nasze referencje"
@@ -256,11 +300,6 @@ msgid "References"
 msgstr "Referencje"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
-msgid "References Page"
-msgstr "Strona referencji"
-
-#. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid "Search"
 msgstr "Szukaj"
@@ -286,19 +325,28 @@ msgid "See industries filters"
 msgstr "Zobacz filtry branżowe"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Show Map"
 msgstr "Pokaż mapę"
 
 #. module: website_customer
-#: model_terms:ir.ui.view,arch_db:website_customer.snippet_options
+#. odoo-javascript
+#: code:addons/website_customer/static/src/website_builder/customer_filter_option.xml:0
 msgid "Tags Filter"
 msgstr "Filtruj tagi"
 
 #. module: website_customer
+#: model:ir.model.fields,help:website_customer.field_res_partner_tag__website_absolute_url
+msgid "The full absolute URL to access the document through the website."
+msgstr "Pełen adres URL dostępu do dokumentu przez stronę internetową."
+
+#. module: website_customer
 #: model:ir.model.fields,help:website_customer.field_res_partner_tag__website_url
-msgid "The full URL to access the document through the website."
-msgstr "Pełny adres URL dostępu do dokumentu przez stronę."
+msgid "The full relative URL to access the document through the website."
+msgstr ""
+"Pełen względny adres URL umożliwiający dostęp do dokumentu przez stronę "
+"internetową."
 
 #. module: website_customer
 #: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__website_published
@@ -309,6 +357,11 @@ msgstr "Widoczne na obecnej stronie"
 #: model:ir.model,name:website_customer.model_website
 msgid "Website"
 msgstr "Strona internetowa"
+
+#. module: website_customer
+#: model:ir.model.fields,field_description:website_customer.field_res_partner_tag__website_absolute_url
+msgid "Website Absolute URL"
+msgstr "Pełen adres URL strony"
 
 #. module: website_customer
 #: model:ir.actions.act_window,name:website_customer.action_partner_tag_form
@@ -333,3 +386,43 @@ msgstr "Tagi strony"
 #: model_terms:ir.ui.view,arch_db:website_customer.opt_country
 msgid "World Map"
 msgstr "Mapa świata"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-external-link\" role=\"img\" aria-label=\"External "
+#~ "link\" title=\"External link\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-external-link\" role=\"img\" aria-label=\"Zewnętrzny "
+#~ "odnośnik\" title=\"Zewnętrzny odnośnik\"/>"
+
+#~ msgid "Implemented By"
+#~ msgstr "Przygotowane przez"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Data ostatniej modyfikacji"
+
+#~ msgid "No result found"
+#~ msgstr "Nic nie znaleziono"
+
+#~ msgid "Our References"
+#~ msgstr "Nasze referencje"
+
+#~ msgid "References Page"
+#~ msgstr "Strona referencji"
+
+#~ msgid "References by Country"
+#~ msgstr "Referencje według kraju"
+
+#~ msgid "References by Industries"
+#~ msgstr "Referencje według branż"
+
+#~ msgid "References by Tag"
+#~ msgstr "Referencje jako tagi"
+
+#~ msgid "The full URL to access the document through the website."
+#~ msgstr "Pełny adres URL dostępu do dokumentu przez stronę."
+
+#~ msgid "Trusted by millions worldwide"
+#~ msgstr "Zaufanie milionów na całym świecie"
+
+#~ msgid "reference(s))"
+#~ msgstr "referencje"

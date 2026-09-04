@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, models, modules
 
 
-class Users(models.Model):
-    _name = 'res.users'
-    _inherit = ['res.users']
+class ResUsers(models.Model):
+    _inherit = 'res.users'
 
     @api.model
     def _get_activity_groups(self):
@@ -16,5 +14,5 @@ class Users(models.Model):
         for activity in activities:
             if activity['model'] != 'res.partner':
                 continue
-            activity['icon'] = modules.module.get_module_icon('contacts')
+            activity['icon'] = modules.module.Manifest.for_addon('contacts').icon
         return activities

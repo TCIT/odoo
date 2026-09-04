@@ -17,10 +17,10 @@ class TestUBLCommon(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.other_currency = cls.setup_other_currency('USD', rounding=0.001)
+        cls.other_currency = cls.setup_other_currency('USD')
 
         # Required for `product_uom_id` to be visible in the form views
-        cls.env.user.groups_id += cls.env.ref('uom.group_uom')
+        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
 
         # remove this tax, otherwise, at import, this tax with children taxes can be selected and the total is wrong
         cls.tax_armageddon.children_tax_ids.unlink()
@@ -106,7 +106,7 @@ class TestUBLCommon(AccountTestInvoicingCommon):
                 'res_id': invoice.id,
                 'res_model': 'account.move',
             })
-            invoice.message_post(attachment_ids=[attachment.id])
+            invoice.message_post(message_type='comment', attachment_ids=attachment.ids)
 
     def _assert_imported_invoice_from_file(self, subfolder, filename, invoice_vals, move_type='in_invoice'):
         """ Create an empty account.move, update the xml file, and then check the invoice values. """

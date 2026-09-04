@@ -35,254 +35,70 @@ class TestGetFilters(FiltersCase):
     def test_own_filters(self):
         self.build(
             'ir.filters',
-            dict(name='a', user_id=self.USER_ID, model_id='ir.filters'),
-            dict(name='b', user_id=self.USER_ID, model_id='ir.filters'),
-            dict(name='c', user_id=self.USER_ID, model_id='ir.filters'),
-            dict(name='d', user_id=self.USER_ID, model_id='ir.filters'))
+            dict(name='a', user_ids=[self.USER_ID], model_id='ir.filters'),
+            dict(name='b', user_ids=[self.USER_ID], model_id='ir.filters'),
+            dict(name='c', user_ids=[self.USER_ID], model_id='ir.filters'),
+            dict(name='d', user_ids=[self.USER_ID], model_id='ir.filters'))
 
         filters = self.env['ir.filters'].with_user(self.USER_ID).get_filters('ir.filters')
 
         self.assertItemsEqual(noid(filters), [
-            dict(name='a', is_default=False, user_id=self.USER_NG, domain='[]', context='{}', sort='[]'),
-            dict(name='b', is_default=False, user_id=self.USER_NG, domain='[]', context='{}', sort='[]'),
-            dict(name='c', is_default=False, user_id=self.USER_NG, domain='[]', context='{}', sort='[]'),
-            dict(name='d', is_default=False, user_id=self.USER_NG, domain='[]', context='{}', sort='[]'),
+            dict(name='a', is_default=False, user_ids=[self.USER_NG[0]], domain='[]', context='{}', sort='[]'),
+            dict(name='b', is_default=False, user_ids=[self.USER_NG[0]], domain='[]', context='{}', sort='[]'),
+            dict(name='c', is_default=False, user_ids=[self.USER_NG[0]], domain='[]', context='{}', sort='[]'),
+            dict(name='d', is_default=False, user_ids=[self.USER_NG[0]], domain='[]', context='{}', sort='[]'),
         ])
 
     def test_global_filters(self):
         self.build(
             'ir.filters',
-            dict(name='a', user_id=False, model_id='ir.filters'),
-            dict(name='b', user_id=False, model_id='ir.filters'),
-            dict(name='c', user_id=False, model_id='ir.filters'),
-            dict(name='d', user_id=False, model_id='ir.filters'),
+            dict(name='a', user_ids=[], model_id='ir.filters'),
+            dict(name='b', user_ids=[], model_id='ir.filters'),
+            dict(name='c', user_ids=[], model_id='ir.filters'),
+            dict(name='d', user_ids=[], model_id='ir.filters'),
         )
 
         filters = self.env['ir.filters'].with_user(self.USER_ID).get_filters('ir.filters')
 
         self.assertItemsEqual(noid(filters), [
-            dict(name='a', is_default=False, user_id=False, domain='[]', context='{}', sort='[]'),
-            dict(name='b', is_default=False, user_id=False, domain='[]', context='{}', sort='[]'),
-            dict(name='c', is_default=False, user_id=False, domain='[]', context='{}', sort='[]'),
-            dict(name='d', is_default=False, user_id=False, domain='[]', context='{}', sort='[]'),
+            dict(name='a', is_default=False, user_ids=[], domain='[]', context='{}', sort='[]'),
+            dict(name='b', is_default=False, user_ids=[], domain='[]', context='{}', sort='[]'),
+            dict(name='c', is_default=False, user_ids=[], domain='[]', context='{}', sort='[]'),
+            dict(name='d', is_default=False, user_ids=[], domain='[]', context='{}', sort='[]'),
         ])
 
     def test_no_third_party_filters(self):
         self.build(
             'ir.filters',
-            dict(name='a', user_id=False, model_id='ir.filters'),
-            dict(name='b', user_id=ADMIN_USER_ID, model_id='ir.filters'),
-            dict(name='c', user_id=self.USER_ID, model_id='ir.filters'),
-            dict(name='d', user_id=ADMIN_USER_ID, model_id='ir.filters')  )
+            dict(name='a', user_ids=[], model_id='ir.filters'),
+            dict(name='b', user_ids=[ADMIN_USER_ID], model_id='ir.filters'),
+            dict(name='c', user_ids=[self.USER_ID], model_id='ir.filters'),
+            dict(name='d', user_ids=[ADMIN_USER_ID], model_id='ir.filters'))
 
         filters = self.env['ir.filters'].with_user(self.USER_ID).get_filters('ir.filters')
 
         self.assertItemsEqual(noid(filters), [
-            dict(name='a', is_default=False, user_id=False, domain='[]', context='{}', sort='[]'),
-            dict(name='c', is_default=False, user_id=self.USER_NG, domain='[]', context='{}', sort='[]'),
-        ])
-
-
-class TestOwnDefaults(FiltersCase):
-
-    def test_new_no_filter(self):
-        """
-        When creating a @is_default filter with no existing filter, that new
-        filter gets the default flag
-        """
-        Filters = self.env['ir.filters'].with_user(self.USER_ID)
-        Filters.create_or_replace({
-            'name': 'a',
-            'model_id': 'ir.filters',
-            'user_id': self.USER_ID,
-            'is_default': True,
-        })
-        filters = Filters.get_filters('ir.filters')
-
-        self.assertItemsEqual(noid(filters), [
-            dict(name='a', user_id=self.USER_NG, is_default=True,
-                 domain='[]', context='{}', sort='[]'),
-        ])
-
-    def test_new_filter_not_default(self):
-        """
-        When creating a @is_default filter with existing non-default filters,
-        the new filter gets the flag
-        """
-        self.build(
-            'ir.filters',
-            dict(name='a', user_id=self.USER_ID, model_id='ir.filters'),
-            dict(name='b', user_id=self.USER_ID, model_id='ir.filters'),
-        )
-
-        Filters = self.env['ir.filters'].with_user(self.USER_ID)
-        Filters.create_or_replace({
-            'name': 'c',
-            'model_id': 'ir.filters',
-            'user_id': self.USER_ID,
-            'is_default': True,
-        })
-        filters = Filters.get_filters('ir.filters')
-
-        self.assertItemsEqual(noid(filters), [
-            dict(name='a', user_id=self.USER_NG, is_default=False, domain='[]', context='{}', sort='[]'),
-            dict(name='b', user_id=self.USER_NG, is_default=False, domain='[]', context='{}', sort='[]'),
-            dict(name='c', user_id=self.USER_NG, is_default=True, domain='[]', context='{}', sort='[]'),
-        ])
-
-    def test_new_filter_existing_default(self):
-        """
-        When creating a @is_default filter where an existing filter is already
-        @is_default, the flag should be *moved* from the old to the new filter
-        """
-        self.build(
-            'ir.filters',
-            dict(name='a', user_id=self.USER_ID, model_id='ir.filters'),
-            dict(name='b', is_default=True, user_id=self.USER_ID, model_id='ir.filters'),
-        )
-
-        Filters = self.env['ir.filters'].with_user(self.USER_ID)
-        Filters.create_or_replace({
-            'name': 'c',
-            'model_id': 'ir.filters',
-            'user_id': self.USER_ID,
-            'is_default': True,
-        })
-        filters = Filters.get_filters('ir.filters')
-
-        self.assertItemsEqual(noid(filters), [
-            dict(name='a', user_id=self.USER_NG, is_default=False, domain='[]', context='{}', sort='[]'),
-            dict(name='b', user_id=self.USER_NG, is_default=False, domain='[]', context='{}', sort='[]'),
-            dict(name='c', user_id=self.USER_NG, is_default=True, domain='[]', context='{}', sort='[]'),
-        ])
-
-    def test_update_filter_set_default(self):
-        """
-        When updating an existing filter to @is_default, if an other filter
-        already has the flag the flag should be moved
-        """
-        self.build(
-            'ir.filters',
-            dict(name='a', user_id=self.USER_ID, model_id='ir.filters'),
-            dict(name='b', is_default=True, user_id=self.USER_ID, model_id='ir.filters'),
-        )
-
-        Filters = self.env['ir.filters'].with_user(self.USER_ID)
-        Filters.create_or_replace({
-            'name': 'a',
-            'model_id': 'ir.filters',
-            'user_id': self.USER_ID,
-            'is_default': True,
-        })
-        filters = Filters.get_filters('ir.filters')
-
-        self.assertItemsEqual(noid(filters), [
-            dict(name='a', user_id=self.USER_NG, is_default=True, domain='[]', context='{}', sort='[]'),
-            dict(name='b', user_id=self.USER_NG, is_default=False, domain='[]', context='{}', sort='[]'),
-        ])
-
-
-class TestGlobalDefaults(FiltersCase):
-
-    def test_new_filter_not_default(self):
-        """
-        When creating a @is_default filter with existing non-default filters,
-        the new filter gets the flag
-        """
-        self.build(
-            'ir.filters',
-            dict(name='a', user_id=False, model_id='ir.filters'),
-            dict(name='b', user_id=False, model_id='ir.filters'),
-        )
-
-        Filters = self.env['ir.filters'].with_user(self.USER_ID)
-        Filters.create_or_replace({
-            'name': 'c',
-            'model_id': 'ir.filters',
-            'user_id': False,
-            'is_default': True,
-        })
-        filters = Filters.get_filters('ir.filters')
-
-        self.assertItemsEqual(noid(filters), [
-            dict(name='a', user_id=False, is_default=False, domain='[]', context='{}', sort='[]'),
-            dict(name='b', user_id=False, is_default=False, domain='[]', context='{}', sort='[]'),
-            dict(name='c', user_id=False, is_default=True, domain='[]', context='{}', sort='[]'),
-        ])
-
-    def test_new_filter_existing_default(self):
-        """
-        When creating a @is_default filter where an existing filter is already
-        @is_default, an error should be generated
-        """
-        self.build(
-            'ir.filters',
-            dict(name='a', user_id=False, model_id='ir.filters'),
-            dict(name='b', is_default=True, user_id=False, model_id='ir.filters'),
-        )
-
-        Filters = self.env['ir.filters'].with_user(self.USER_ID)
-        with self.assertRaises(exceptions.UserError):
-            Filters.create_or_replace({
-                'name': 'c',
-                'model_id': 'ir.filters',
-                'user_id': False,
-                'is_default': True,
-            })
-
-    def test_update_filter_set_default(self):
-        """
-        When updating an existing filter to @is_default, if an other filter
-        already has the flag an error should be generated
-        """
-        self.build(
-            'ir.filters',
-            dict(name='a', user_id=False, model_id='ir.filters'),
-            dict(name='b', is_default=True, user_id=False, model_id='ir.filters'),
-        )
-
-        Filters = self.env['ir.filters'].with_user(self.USER_ID)
-        with self.assertRaises(exceptions.UserError):
-            Filters.create_or_replace({
-                'name': 'a',
-                'model_id': 'ir.filters',
-                'user_id': False,
-                'is_default': True,
-            })
-
-    def test_update_default_filter(self):
-        """
-        Replacing the current default global filter should not generate any error
-        """
-        self.build(
-            'ir.filters',
-            dict(name='a', user_id=False, model_id='ir.filters'),
-            dict(name='b', is_default=True, user_id=False, model_id='ir.filters'),
-        )
-
-        Filters = self.env['ir.filters'].with_user(self.USER_ID)
-        context_value = "{'some_key': True}"
-        Filters.create_or_replace({
-            'name': 'b',
-            'model_id': 'ir.filters',
-            'user_id': False,
-            'context': context_value,
-            'is_default': True,
-        })
-        filters = Filters.get_filters('ir.filters')
-
-        self.assertItemsEqual(noid(filters), [
-            dict(name='a', user_id=False, is_default=False, domain='[]', context='{}', sort='[]'),
-            dict(name='b', user_id=False, is_default=True, domain='[]', context=context_value, sort='[]'),
+            dict(name='a', is_default=False, user_ids=[], domain='[]', context='{}', sort='[]'),
+            dict(name='c', is_default=False, user_ids=[self.USER_NG[0]], domain='[]', context='{}', sort='[]'),
         ])
 
 
 @tagged('post_install', '-at_install', 'migration')
 class TestAllFilters(TransactionCase):
-    def check_filter(self, name, model, domain, fields, groupby, order, context):
+    def check_filter(self, name, model, domain, aggregates, groupby, order, context):
         if groupby:
             try:
-                self.env[model].with_context(context).read_group(domain, fields, groupby, orderby=order)
+                Model = self.env[model].with_context(context)
+                groupby = [groupby] if isinstance(groupby, str) else groupby
+                groupby = [
+                    f"{group_spec}:month" if (
+                        ":" not in group_spec and
+                        group_spec in Model._fields and
+                        Model._fields[group_spec].type in ('date, datetime')
+                    ) else group_spec
+                    for group_spec in groupby
+                ]
+                Model.formatted_read_group(domain, groupby, aggregates, order=order)
             except ValueError as e:
                 raise self.failureException("Test filter '%s' failed: %s" % (name, e)) from None
             except KeyError as e:
@@ -304,7 +120,7 @@ class TestAllFilters(TransactionCase):
                     name=filter_.name,
                     model=filter_.model_id,
                     domain=filter_._get_eval_domain(),
-                    fields=[field.split(':')[0] for field in (groupby or [])],
+                    aggregates=['__count'],
                     groupby=groupby,
                     order=','.join(ast.literal_eval(filter_.sort)),
                     context=context,
@@ -340,18 +156,18 @@ class TestEmbeddedFilters(FiltersCase):
 
     def test_global_filters_with_embedded_action(self):
         Filters = self.env['ir.filters'].with_user(self.USER_ID)
-        Filters.create_or_replace({
+        Filters.create_filter({
             'name': 'a',
             'model_id': 'ir.filters',
-            'user_id': False,
+            'user_ids': [],
             'is_default': True,
             'embedded_action_id': self.embedded_action_1.id,
             'embedded_parent_res_id': 1
         })
-        Filters.create_or_replace({
+        Filters.create_filter({
             'name': 'b',
             'model_id': 'ir.filters',
-            'user_id': self.USER_ID,
+            'user_ids': [self.USER_ID],
             'is_default': False,
             'embedded_action_id': self.embedded_action_2.id,
             'embedded_parent_res_id': 1
@@ -359,7 +175,7 @@ class TestEmbeddedFilters(FiltersCase):
 
         # If embedded_action_id and embedded_parent_res_id are set, should return the corresponding filter
         filters = self.env['ir.filters'].with_user(self.USER_ID).get_filters('ir.filters', embedded_action_id=self.embedded_action_1.id, embedded_parent_res_id=1)
-        self.assertItemsEqual(noid(filters), [dict(name='a', is_default=True, user_id=False, domain='[]', context='{}', sort='[]')])
+        self.assertItemsEqual(noid(filters), [dict(name='a', is_default=True, user_ids=[], domain='[]', context='{}', sort='[]')])
 
         # Check that the filter is correctly linked to one embedded_parent_res_id and is not returned if another one is set
         filters = self.env['ir.filters'].with_user(self.USER_ID).get_filters('ir.filters', embedded_action_id=self.embedded_action_1.id, embedded_parent_res_id=2)
@@ -367,7 +183,7 @@ class TestEmbeddedFilters(FiltersCase):
 
         # Check that a shared filter can be fetched with another user
         filters = self.env['ir.filters'].with_user(ADMIN_USER_ID).get_filters('ir.filters', embedded_action_id=self.embedded_action_1.id, embedded_parent_res_id=1)
-        self.assertItemsEqual(noid(filters), [dict(name='a', is_default=True, user_id=False, domain='[]', context='{}', sort='[]')])
+        self.assertItemsEqual(noid(filters), [dict(name='a', is_default=True, user_ids=[], domain='[]', context='{}', sort='[]')])
 
         # If embedded_action_id and embedded_parent_res_id are not set, should return no filters
         filters = self.env['ir.filters'].with_user(self.USER_ID).get_filters('ir.filters')
@@ -375,18 +191,18 @@ class TestEmbeddedFilters(FiltersCase):
 
     def test_global_filters_with_no_embedded_action(self):
         Filters = self.env['ir.filters'].with_user(self.USER_ID)
-        filter_a = Filters.create_or_replace({
+        filter_a = Filters.create_filter({
             'name': 'a',
             'model_id': 'ir.filters',
-            'user_id': False,
+            'user_ids': [],
             'is_default': True,
             'embedded_action_id': False,
             'embedded_parent_res_id': 0,
         })
-        filter_b = Filters.create_or_replace({
+        filter_b = Filters.create_filter({
             'name': 'b',
             'model_id': 'ir.filters',
-            'user_id': self.USER_ID,
+            'user_ids': [self.USER_ID],
             'is_default': True,
             'embedded_action_id': False,
             'embedded_parent_res_id': 1,

@@ -115,11 +115,15 @@ function pathFromActionState(state) {
     return path.join("/");
 }
 
+export function startUrl() {
+    return isScopedApp() ? "scoped_app" : "odoo";
+}
+
 /**
  * @param {{ [key: string]: any }} state
  * @returns
  */
-export function stateToUrl(state) {
+function stateToUrl(state) {
     let path = "";
     const pathKeysToOmit = [..._hiddenKeysFromUrl];
     const actionStack = (state.actionStack || [state]).map((a) => ({ ...a }));
@@ -150,11 +154,11 @@ export function stateToUrl(state) {
         pathKeysToOmit.splice(pathKeysToOmit.indexOf("resId"), 1);
     }
     const search = objectToUrlEncodedString(omit(state, ...pathKeysToOmit));
-    const start_url = isScopedApp() ? "scoped_app" : "odoo";
+    const start_url = startUrl();
     return `/${start_url}${path}${search ? `?${search}` : ""}`;
 }
 
-export function urlToState(urlObj) {
+function urlToState(urlObj) {
     const { pathname, hash, search } = urlObj;
     const state = parseSearchQuery(search);
 
@@ -181,7 +185,7 @@ export function urlToState(urlObj) {
 
     const [prefix, ...splitPath] = urlObj.pathname.split("/").filter(Boolean);
 
-    if (prefix === "odoo" || isScopedApp()) {
+    if (["odoo", "scoped_app"].includes(prefix)) {
         const actionParts = [...splitPath.entries()].filter(
             ([_, part]) => !isNumeric(part) && part !== "new"
         );
@@ -225,6 +229,11 @@ export function urlToState(urlObj) {
         if (activeAction) {
             Object.assign(state, activeAction);
             state.actionStack = actions;
+        }
+        if (prefix === "scoped_app" && !isDisplayStandalone()) {
+            // make sure /scoped_app are redirected to /odoo when using the browser instead of the PWA
+            const url = browser.location.origin + router.stateToUrl(state);
+            urlObj.href = url;
         }
     }
     return state;
@@ -301,12 +310,13 @@ browser.addEventListener("click", (ev) => {
     if (ev.defaultPrevented || ev.target.closest("[contenteditable]")) {
         return;
     }
-    const href = ev.target.closest("a")?.getAttribute("href");
+    const a = ev.target.closest("a");
+    const href = a?.getAttribute("href");
     if (href && !href.startsWith("#")) {
         let url;
         try {
             // ev.target.href is the full url including current path
-            url = new URL(ev.target.closest("a").href);
+            url = new URL(a.href);
         } catch {
             return;
         }
@@ -314,7 +324,7 @@ browser.addEventListener("click", (ev) => {
             browser.location.host === url.host &&
             browser.location.pathname.startsWith("/odoo") &&
             (["/web", "/odoo"].includes(url.pathname) || url.pathname.startsWith("/odoo/")) &&
-            ev.target.target !== "_blank"
+            a.target !== "_blank"
         ) {
             ev.preventDefault();
             state = router.urlToState(url);
@@ -368,13 +378,27 @@ function makeDebouncedPush(mode) {
         Object.assign(pushArgs.state, state);
         browser.clearTimeout(pushTimeout);
         const push = () => {
-            doPush();
-            pushTimeout = null;
-            pushArgs = {
-                replace: false,
-                reload: false,
-                state: {},
-            };
+            try {
+                doPush();
+            } catch (e) {
+                // Firefox error: NS_ERROR_ILLEGAL_VALUE
+                // Firefox has a strict hard limit of 640,000 characters for history serialization.
+                // Chrome and Safari error: DataCloneError
+                // Reported (not officially documented) limits: ~500MB on Chrome/Blink, ~64MB on
+                // Safari/WebKit. See https://bugzilla.mozilla.org/show_bug.cgi?id=1522706
+                if (e.name === "NS_ERROR_ILLEGAL_VALUE" || e.name === "DataCloneError") {
+                    console.error(e);
+                } else {
+                    throw e;
+                }
+            } finally {
+                pushTimeout = null;
+                pushArgs = {
+                    replace: false,
+                    reload: false,
+                    state: {},
+                };
+            }
         };
         if (options.sync) {
             push();

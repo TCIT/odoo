@@ -100,8 +100,7 @@ class GamificationBadge(models.Model):
             return
 
         Users = self.env["res.users"]
-        query = Users._where_calc([])
-        Users._apply_ir_rules(query)
+        query = Users._search([])
         badge_alias = query.join("res_users", "id", "gamification_badge_user", "user_id", "badges")
 
         rows = self.env.execute_query(SQL(
@@ -198,8 +197,6 @@ class GamificationBadge(models.Model):
     def _can_grant_badge(self):
         """Check if a user can grant a badge to another user
 
-        :param uid: the id of the res.users trying to send the badge
-        :param badge_id: the granted badge id
         :return: integer representing the permission.
         """
         if self.env.is_admin():

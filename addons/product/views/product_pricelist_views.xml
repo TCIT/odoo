@@ -63,14 +63,14 @@
                         <group name="pricelist_settings">
                             <field name="currency_id" groups="base.group_multi_currency"/>
                             <field name="active" invisible="1"/>
-                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                         </group>
                         <group>
                             <field name="country_group_ids" widget="many2many_tags"/>
                         </group>
                     </group>
                     <notebook>
-                        <page name="pricelist_rules" string="Price Rules">
+                        <page name="pricelist_rules" string="Sales Prices">
                             <field name="item_ids" nolabel="1" context="{'default_base':'list_price'}">
                                 <list string="Pricelist Rules">
                                     <field name="product_tmpl_id" column_invisible="True"/>

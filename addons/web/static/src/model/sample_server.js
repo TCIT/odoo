@@ -1,18 +1,15 @@
 import {
     deserializeDate,
     deserializeDateTime,
-    parseDate,
     serializeDate,
     serializeDateTime,
 } from "@web/core/l10n/dates";
 import { ORM } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
-import { cartesian, sortBy as arraySortBy } from "@web/core/utils/arrays";
+import { cartesian, sortBy as arraySortBy, unique } from "@web/core/utils/arrays";
 import { parseServerValue } from "./relational_model/utils";
 
 class UnimplementedRouteError extends Error {}
-
-let searchReadNumber = 0;
 
 /**
  * Helper function returning the value from a list of sample strings
@@ -29,10 +26,7 @@ function serializeGroupDateValue(range, field) {
     if (!range) {
         return false;
     }
-    let dateValue = parseServerValue(field, range.to);
-    dateValue = dateValue.minus({
-        [field.type === "date" ? "day" : "second"]: 1,
-    });
+    const dateValue = parseServerValue(field, range[0]);
     return field.type === "date" ? serializeDate(dateValue) : serializeDateTime(dateValue);
 }
 
@@ -52,11 +46,12 @@ function fieldNameRegex(...terms) {
     return new RegExp(`\\b((\\w+)?_)?(${terms.join("|")})(_(\\w+)?)?\\b`);
 }
 
-const MEASURE_SPEC_REGEX = /(?<measure>\w+):(?<aggregateFunction>\w+)(\((?<fieldName>\w+)\))?/;
+const MEASURE_SPEC_REGEX = /(?<fieldName>\w+):(?<func>\w+)/;
 const DESCRIPTION_REGEX = fieldNameRegex("description", "label", "title", "subject", "message");
 const EMAIL_REGEX = fieldNameRegex("email");
 const PHONE_REGEX = fieldNameRegex("phone");
 const URL_REGEX = fieldNameRegex("url");
+const MAX_NUMBER_OPENED_GROUPS = 10;
 
 /**
  * Sample server class
@@ -127,8 +122,10 @@ export class SampleServer {
                 return this._mockWebSearchReadUnity(params);
             case "web_read_group":
                 return this._mockWebReadGroup(params);
-            case "read_group":
-                return this._mockReadGroup(params);
+            case "formatted_read_group":
+                return this._mockFormattedReadGroup(params);
+            case "formatted_read_grouping_sets":
+                return this._mockFormattedReadGroupingSets(params);
             case "read_progress_bar":
                 return this._mockReadProgressBar(params);
             case "read":
@@ -167,27 +164,35 @@ export class SampleServer {
      * @returns {Object}
      */
     _aggregateFields(measures, records) {
-        const values = {};
-        for (const { fieldName, type, aggregateFunction } of measures) {
-            if (["float", "integer", "monetary"].includes(type)) {
-                if (aggregateFunction === "array_agg") {
-                    values[fieldName] = (records || []).map((r) => r[fieldName]);
-                } else if (records.length) {
-                    let value = 0;
-                    for (const record of records) {
-                        value += record[fieldName];
-                    }
-                    values[fieldName] = this._sanitizeNumber(value);
+        const group = {};
+        for (const { fieldName, func, name } of measures) {
+            if (["sum", "sum_currency", "avg", "max", "min"].includes(func)) {
+                if (!records.length) {
+                    group[name] = false;
                 } else {
-                    values[fieldName] = null;
+                    group[name] = 0;
+                    for (const record of records) {
+                        group[name] += record[fieldName];
+                    }
                 }
-            }
-            if (type === "many2one") {
-                const ids = new Set(records.map((r) => r[fieldName]));
-                values.fieldName = ids.size || null;
+                group[name] = this._sanitizeNumber(group[name]);
+            } else if (func === "array_agg") {
+                group[name] = records.map((r) => r[fieldName]);
+            } else if (func === "__count") {
+                group[name] = records.length;
+            } else if (func === "count_distinct") {
+                group[name] = unique(records.map((r) => r[fieldName])).filter(Boolean).length;
+            } else if (func === "bool_or") {
+                group[name] = records.some((r) => Boolean(r[fieldName]));
+            } else if (func === "bool_and") {
+                group[name] = records.every((r) => Boolean(r[fieldName]));
+            } else if (func === "array_agg_distinct") {
+                group[name] = unique(records.map((r) => r[fieldName]));
+            } else {
+                throw new Error(`Aggregate "${func}" not implemented in SampleServer`);
             }
         }
-        return values;
+        return group;
     }
 
     /**
@@ -203,9 +208,12 @@ export class SampleServer {
             return false;
         }
         const { type, interval, relation } = options;
-        if (["date", "datetime"].includes(type)) {
+        if (["date", "datetime"].includes(type) && value) {
+            const deserialize = type === "date" ? deserializeDate : deserializeDateTime;
+            const serialize = type === "date" ? serializeDate : serializeDateTime;
+            const from = deserialize(value).startOf(interval);
             const fmt = SampleServer.FORMATS[interval];
-            return parseDate(value).toFormat(fmt);
+            return [serialize(from), from.toFormat(fmt)];
         } else if (["many2one", "many2many"].includes(type)) {
             const rec = this.data[relation].records.find(({ id }) => id === value);
             return [value, rec.display_name];
@@ -395,29 +403,23 @@ export class SampleServer {
     }
 
     /**
-     * Mocks calls to the read_group method.
+     * Mocks calls to the base method of formatted_read_group method.
      *
      * @param {Object} params
      * @param {string} params.model
-     * @param {string[]} [params.fields] defaults to the list of all fields
      * @param {string[]} params.groupBy
-     * @param {boolean} [params.lazy=true]
+     * @param {string[]} params.aggregates
      * @returns {Object[]} Object with keys groups and length
      */
-    _mockReadGroup(params) {
-        const lazy = "lazy" in params ? params.lazy : true;
+    _mockFormattedReadGroup(params) {
         const model = params.model;
+        const groupBy = params.groupBy;
         const fields = this.data[model].fields;
         const records = this.data[model].records;
-
         const normalizedGroupBys = [];
-        let groupBy = [];
-        if (params.groupBy.length) {
-            groupBy = lazy ? [params.groupBy[0]] : params.groupBy;
-        }
+
         for (const groupBySpec of groupBy) {
-            let [fieldName, interval] = groupBySpec.split(":");
-            interval = interval || "month";
+            const [fieldName, interval] = groupBySpec.split(":");
             const { type, relation } = fields[fieldName];
             if (type) {
                 const gb = { fieldName, type, interval, relation, alias: groupBySpec };
@@ -428,7 +430,7 @@ export class SampleServer {
         const groupsFromRecord = (record) => {
             const values = [];
             for (const gb of normalizedGroupBys) {
-                const { fieldName, type } = gb;
+                const { fieldName, type, alias } = gb;
                 let fieldVals;
                 if (["date", "datetime"].includes(type)) {
                     fieldVals = [this._formatValue(record[fieldName], gb)];
@@ -437,7 +439,7 @@ export class SampleServer {
                 } else {
                     fieldVals = [record[fieldName]];
                 }
-                values.push(fieldVals.map((val) => ({ [fieldName]: val })));
+                values.push(fieldVals.map((val) => ({ [alias]: val })));
             }
             const cart = cartesian(...values);
             return cart.map((tuple) => {
@@ -460,37 +462,25 @@ export class SampleServer {
             }
         }
 
+        const aggregates = params.aggregates || [];
         const measures = [];
-        for (const measureSpec of params.fields || Object.keys(fields)) {
+        for (const measureSpec of aggregates) {
+            if (measureSpec === "__count") {
+                measures.push({ fieldName: "__count", func: "__count", name: measureSpec });
+                continue;
+            }
             const matches = measureSpec.match(MEASURE_SPEC_REGEX);
-            let { fieldName, aggregateFunction, measure } = (matches && matches.groups) || {};
-            if (!aggregateFunction && fieldName in fields && fields[fieldName].aggregator) {
-                aggregateFunction = fields[fieldName].aggregator;
-                measure = fieldName;
+            if (!matches) {
+                throw new Error(`Invalidate Aggregate "${measureSpec}" in SampleServer`);
             }
-            if (!fieldName && !measure) {
-                continue; // this is for _count measure
-            }
-            const fName = fieldName || measure;
-            const { type } = fields[fName];
-            if (
-                !params.groupBy.includes(fName) &&
-                type &&
-                (type !== "many2one" || aggregateFunction !== "count_distinct")
-            ) {
-                measures.push({ fieldName: fName, type, aggregateFunction });
-            }
+            const { fieldName, func } = matches.groups;
+            measures.push({ fieldName, func, name: measureSpec });
         }
 
         let result = [];
         for (const id in groups) {
             const records = groups[id];
-            const group = { __domain: [] };
-            let countKey = `__count`;
-            if (normalizedGroupBys.length && lazy) {
-                countKey = `${normalizedGroupBys[0].fieldName}_count`;
-            }
-            group[countKey] = records.length;
+            const group = { __extra_domain: [] };
             const firstElem = records[0];
             const parsedId = JSON.parse(id);
             for (const gb of normalizedGroupBys) {
@@ -499,36 +489,41 @@ export class SampleServer {
                     group[alias] = this._formatValue(parsedId[fieldName], gb);
                 } else {
                     group[alias] = this._formatValue(firstElem[fieldName], gb);
-                    if (["date", "datetime"].includes(type)) {
-                        group.__range = {};
-                        const val = firstElem[fieldName];
-                        if (val) {
-                            const deserialize =
-                                type === "date" ? deserializeDate : deserializeDateTime;
-                            const serialize = type === "date" ? serializeDate : serializeDateTime;
-                            const from = deserialize(val).startOf(gb.interval);
-                            const to = SampleServer.INTERVALS[gb.interval](from);
-                            group.__range[alias] = { from: serialize(from), to: serialize(to) };
-                        } else {
-                            group.__range[alias] = false;
-                        }
-                    }
                 }
             }
             Object.assign(group, this._aggregateFields(measures, records));
             result.push(group);
         }
         if (normalizedGroupBys.length > 0) {
-            const { alias, interval, type } = normalizedGroupBys[0];
+            const { alias, type } = normalizedGroupBys[0];
             result = arraySortBy(result, (group) => {
                 const val = group[alias];
-                if (["date", "datetime"].includes(type)) {
-                    return parseDate(val, { format: SampleServer.FORMATS[interval] });
+                if (type === "datetime") {
+                    return deserializeDateTime(val);
+                } else if (type === "date") {
+                    return deserializeDate(val);
                 }
                 return val;
             });
         }
         return result;
+    }
+
+    /**
+     * Mocks calls to the base method of formatted_read_grouping_sets method.
+     *
+     * @param {Object} params
+     * @param {string} params.model
+     * @param {string[][]} params.grouping_sets
+     * @param {string[]} params.aggregates
+     * @returns {Object[]} Object with keys groups and length
+     */
+    _mockFormattedReadGroupingSets(params) {
+        const res = [];
+        for (const groupBy of params.grouping_sets) {
+            res.push(this._mockFormattedReadGroup({ ...params, groupBy }));
+        }
+        return res;
     }
 
     /**
@@ -541,17 +536,21 @@ export class SampleServer {
      * @return {Object}
      */
     _mockReadProgressBar(params) {
-        const groupBy = params.group_by.split(":")[0];
-        const progress_bar = params.progress_bar;
-        const groupByField = this.data[params.model].fields[groupBy];
+        const groupBy = params.group_by;
+        const progressBar = params.progress_bar;
+        const groups = this._mockFormattedReadGroup({
+            model: params.model,
+            domain: params.domain,
+            groupBy: [groupBy, progressBar.field],
+            aggregates: ["__count"],
+        });
         const data = {};
-        for (const record of this.data[params.model].records) {
-            let groupByValue = record[groupBy];
-            if (groupByField.type === "many2one") {
-                const relatedRecords = this.data[groupByField.relation].records;
-                const relatedRecord = relatedRecords.find((r) => r.id === groupByValue);
-                groupByValue = relatedRecord.display_name;
+        for (const group of groups) {
+            let groupByValue = group[groupBy];
+            if (Array.isArray(groupByValue)) {
+                groupByValue = groupByValue[0];
             }
+
             // special case for bool values: rpc call response with capitalized strings
             if (!(groupByValue in data)) {
                 if (groupByValue === true) {
@@ -560,42 +559,32 @@ export class SampleServer {
                     groupByValue = "False";
                 }
             }
+
             if (!(groupByValue in data)) {
                 data[groupByValue] = {};
-                for (const key in progress_bar.colors) {
+                for (const key in progressBar.colors) {
                     data[groupByValue][key] = 0;
                 }
             }
-            const fieldValue = record[progress_bar.field];
-            if (fieldValue in data[groupByValue]) {
-                data[groupByValue][fieldValue]++;
-            }
+            data[groupByValue][group[progressBar.field]] += group.__count;
         }
         return data;
     }
 
     _mockWebSearchReadUnity(params) {
         const fields = Object.keys(params.specification);
-        let result;
-        if (this.existingGroups) {
-            const groups = this.existingGroups;
-            const group = groups[searchReadNumber++ % groups.length];
-            result = {
-                records: this._mockRead({
-                    model: params.model,
-                    args: [group.__recordIds, fields],
-                }),
-                length: group.__recordIds.length,
-            };
+        const model = this.data[params.model];
+        let rawRecords = model.records;
+        if ("recordIds" in params) {
+            rawRecords = model.records.filter((record) => params.recordIds.includes(record.id));
         } else {
-            const model = this.data[params.model];
-            const rawRecords = model.records.slice(0, SampleServer.SEARCH_READ_LIMIT);
-            const records = this._mockRead({
-                model: params.model,
-                args: [rawRecords.map((r) => r.id), fields],
-            });
-            result = { records, length: records.length };
+            rawRecords = rawRecords.slice(0, SampleServer.SEARCH_READ_LIMIT);
         }
+        const records = this._mockRead({
+            model: params.model,
+            args: [rawRecords.map((r) => r.id), fields],
+        });
+        const result = { records, length: records.length };
         // populate many2one and x2many values
         for (const fieldName in params.specification) {
             const field = this.data[params.model].fields[fieldName];
@@ -642,13 +631,66 @@ export class SampleServer {
      * @returns {{ groups: Object[], length: number }}
      */
     _mockWebReadGroup(params) {
+        const aggregates = [...params.aggregates, "__count"];
+        if (params.unfold_read_specification) {
+            aggregates.push("id:array_agg");
+        }
         let groups;
         if (this.existingGroups) {
-            this._tweakExistingGroups(params);
+            this._tweakExistingGroups({ ...params, aggregates });
             groups = this.existingGroups;
         } else {
-            groups = this._mockReadGroup(params);
+            groups = this._mockFormattedReadGroup({ ...params, aggregates });
         }
+        // Don't care another params - and no subgroup:
+        // order / opening_info / unfold_read_default_limit
+        const openAllGroups = params.auto_unfold && !this.existingGroups;
+        let nbOpenedGroup = 0;
+        if (params.unfold_read_specification) {
+            for (const group of groups) {
+                if (openAllGroups || "__records" in group) {
+                    // if group has a "__records" key, it means that it is an existing group, and
+                    // that the real webReadGroup returned a "__records" key for that group (which
+                    // is empty, otherwise we wouldn't be here), i.e. that group is opened.
+                    if (nbOpenedGroup < MAX_NUMBER_OPENED_GROUPS) {
+                        nbOpenedGroup++;
+                        group.__records = this._mockWebSearchReadUnity({
+                            model: params.model,
+                            specification: params.unfold_read_specification,
+                            recordIds: group["id:array_agg"],
+                        }).records;
+                    }
+                }
+                delete group["id:array_agg"];
+            }
+        }
+        // Handle groupby_read_specification to fetch related field values for group headers
+        if (params.groupby_read_specification && params.groupby.length > 0) {
+            const primaryGroupBy = params.groupby[0].split(":")[0];
+            const readSpec = params.groupby_read_specification[params.groupby[0]];
+            const field = this.data[params.model].fields[primaryGroupBy];
+
+            if (readSpec && field && field.relation) {
+                for (const group of groups) {
+                    const groupbyValue = group[primaryGroupBy];
+
+                    if (Array.isArray(groupbyValue)) {
+                        const id = groupbyValue[0];
+                        const fieldSpecification = readSpec.fields || {};
+                        const result = this._mockWebSearchReadUnity({
+                            model: field.relation,
+                            specification: fieldSpecification,
+                            recordIds: [id],
+                        });
+
+                        group.__values = result.records.length ? result.records[0] : { id: false };
+                    } else {
+                        group.__values = { id: false };
+                    }
+                }
+            }
+        }
+
         return {
             groups,
             length: groups.length,
@@ -672,17 +714,15 @@ export class SampleServer {
         const groupedByM2O = groupByField.type === "many2one";
         if (groupedByM2O) {
             // re-populate co model with relevant records
-            this.data[groupByField.relation].records = groups.map((g) => {
-                return { id: g[groupBy][0], display_name: g[groupBy][1] };
-            });
+            this.data[groupByField.relation].records = groups.map((g) => ({
+                id: g[groupBy][0],
+                display_name: g[groupBy][1],
+            }));
         }
         for (const r of this.data[params.model].records) {
             const group = getSampleFromId(r.id, groups);
             if (["date", "datetime"].includes(groupByField.type)) {
-                r[groupBy] = serializeGroupDateValue(
-                    group.__range[params.groupBy[0]],
-                    groupByField
-                );
+                r[groupBy] = serializeGroupDateValue(group[params.groupBy[0]], groupByField);
             } else if (groupByField.type === "many2one") {
                 r[groupBy] = group[params.groupBy[0]] ? group[params.groupBy[0]][0] : false;
             } else {
@@ -735,7 +775,7 @@ export class SampleServer {
      * @param {Object[]} groups empty groups returned by the server
      * @param {Object} params
      * @param {string} params.model
-     * @param {string[]} params.fields
+     * @param {string[]} params.aggregates
      * @param {string[]} params.groupBy
      * @returns {Object[]} groups with count and aggregate values updated
      *
@@ -750,26 +790,31 @@ export class SampleServer {
         const groupBy = fullGroupBy.split(":")[0];
         const groupByField = this.data[params.model].fields[groupBy];
         const records = this.data[params.model].records;
-        const fields = params.fields.map((aggregate_spec) => aggregate_spec.split(":")[0])
         for (const g of groups) {
             const recordsInGroup = records.filter((r) => {
                 if (["date", "datetime"].includes(groupByField.type)) {
-                    return (
-                        r[groupBy] === serializeGroupDateValue(g.__range[fullGroupBy], groupByField)
-                    );
+                    return r[groupBy] === serializeGroupDateValue(g[fullGroupBy], groupByField);
                 } else if (groupByField.type === "many2one") {
                     return (!r[groupBy] && !g[fullGroupBy]) || r[groupBy] === g[fullGroupBy][0];
                 }
                 return r[groupBy] === g[fullGroupBy];
             });
-            for (const field of fields) {
-                const fieldType = this.data[params.model].fields[field].type;
-                if (["integer, float", "monetary"].includes(fieldType)) {
-                    g[field] = recordsInGroup.reduce((acc, r) => acc + r[field], 0);
+            for (const aggregateSpec of params.aggregates || []) {
+                if (aggregateSpec === "__count") {
+                    g.__count = recordsInGroup.length;
+                    continue;
+                }
+                const [fieldName, func] = aggregateSpec.split(":");
+                if (func === "array_agg") {
+                    g[aggregateSpec] = recordsInGroup.map((r) => r[fieldName]);
+                } else if (
+                    ["integer, float", "monetary"].includes(
+                        this.data[params.model].fields[fieldName].type
+                    )
+                ) {
+                    g[aggregateSpec] = recordsInGroup.reduce((acc, r) => acc + r[fieldName], 0);
                 }
             }
-            g[`${groupBy}_count`] = recordsInGroup.length;
-            g.__recordIds = recordsInGroup.map((r) => r.id);
         }
     }
 }
@@ -836,6 +881,7 @@ export function buildSampleORM(resModel, fields, user) {
     const sampleORM = new ORM(user);
     sampleORM.rpc = fakeRPC;
     sampleORM.isSample = true;
+    sampleORM.cache = () => sampleORM;
     sampleORM.setGroups = (groups) => sampleServer.setExistingGroups(groups);
     return sampleORM;
 }

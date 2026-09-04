@@ -276,8 +276,15 @@ const priorityRestoreStateRules = [
     [
         // Replace a space by &nbsp; when it was visible thanks to a BR which
         // is now gone.
-        { direction: DIRECTIONS.RIGHT, cType1: CTGROUPS.BR, cType2: CTYPES.SPACE | CTGROUPS.BLOCK },
+        { direction: DIRECTIONS.RIGHT, cType1: CTGROUPS.BR, cType2: CTYPES.SPACE },
         { spaceVisibility: true },
+    ],
+    [
+        // Replace a space by &nbsp; when it was visible thanks to a BR which
+        // is now gone and duplicate a BR which was visible thanks to a second
+        // BR which is now gone.
+        { direction: DIRECTIONS.RIGHT, cType1: CTGROUPS.BR, cType2: CTGROUPS.BLOCK },
+        { spaceVisibility: true, brVisibility: true },
     ],
     [
         // Remove all collapsed spaces when a space is removed.
@@ -563,4 +570,22 @@ export function enforceWhitespace(el, offset, direction, rule) {
             spaceVisibility ? "\u00A0" : ""
         );
     }
+}
+
+/**
+ * Call this function to start watching for mutations.
+ * Call the returned function to stop watching and get the mutation records.
+ *
+ * @returns {() => MutationRecord[]}
+ */
+export function observeMutations(target, observerOptions) {
+    const records = [];
+    const observerCallback = (mutations) => records.push(...mutations);
+    const observer = new MutationObserver(observerCallback);
+    observer.observe(target, observerOptions);
+    return () => {
+        observerCallback(observer.takeRecords());
+        observer.disconnect();
+        return records;
+    };
 }

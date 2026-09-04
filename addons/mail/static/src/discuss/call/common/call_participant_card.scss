@@ -3,7 +3,8 @@
     aspect-ratio: 16/9;
 
     &.o-isTalking {
-        box-shadow: inset 0 0 0 map-get($spacers, 1) var(--discuss-talkingColor, $o-discuss-talkingColor);
+        outline: 4px solid var(--discuss-talkingColor, $o-discuss-talkingColor);
+        outline-offset: -4px;
 
         &.o-inset {
             box-shadow: inset 0 0 0 map-get($spacers, 1)/2 var(--discuss-talkingColor, $o-discuss-talkingColor);
@@ -24,6 +25,10 @@
             top: 0;
         }
 
+        .o-mail-ChatWindow & {
+            bottom: 5vh;
+        }
+
         .o-discuss-CallParticipantCard-avatar img {
             max-height: #{"min(70%, 70px)"};
             max-width: #{"min(70%, 70px)"};
@@ -32,7 +37,24 @@
 }
 
 .o-discuss-CallParticipantCard-avatar:not(.o-minimized) {
-    background-color: var(--o-discuss-CallParticipantCard-avatarBgColor, #{$o-gray-700});
+    background-color: var(--o-discuss-CallParticipantCard-avatarBgColor, #{$o-gray-800});
+    &.o-isRemoteVideo {
+        background: linear-gradient(180deg, #144173 0%, #082647 30%, #133c68 60%, #082647 90%);
+        background-size: 200% 200%;
+        animation: gradientAnimation 5s ease-in-out infinite alternate;
+        filter: blur(2px);
+    }
+    @keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 100%;
+    }
+}
 }
 
 .o-discuss-CallParticipantCard-avatar img {
@@ -71,6 +93,19 @@
 
 .o-discuss-CallParticipantCard-overlay {
     margin: Min(5%, map-get($spacers, 2));
+
+    &.o-proportional-container {
+        container-type: inline-size;
+        .o-proportional-text {
+            font-size: #{"min(1rem, 40cqw)"};
+            &.o-video-text {
+                font-size: 5cqw;
+            }
+            &.o-discuss-CallParticipantCard-overlayBottomName {
+                font-size: #{"min(0.8rem, 40cqw)"};
+            }
+        }
+    }
 }
 
 .o-discuss-CallParticipantCard-overlayBottomName {
@@ -85,4 +120,26 @@
     &:active {
         background-color: $o-gray-800;
     }
+}
+
+.o-discuss-CallParticipantCard-contextButton {
+    margin: Min(5%, map-get($spacers, 2));
+    background-color: black;
+    aspect-ratio: 1;
+    color: #F9FAFB !important;
+
+    &:hover {
+        background-color: #4b4b4b;
+    }
+
+    &:active {
+        background-color: #707070 !important;
+    }
+}
+
+.o-discuss-CallParticipantCard-contextMenu {
+    width: 200px;
+    background-color: $o-mail-CallMenu-bgColor;
+    border-color: $o-mail-CallMenu-bgColor-lighter;
+    color: rgba(white, 0.9);
 }

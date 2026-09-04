@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { CodeEditor } from "@web/core/code_editor/code_editor";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -143,9 +141,10 @@ export class ResourceEditor extends Component {
             required: true,
         };
         if (this.state.type === "xml") {
-            const choices = this.state.sortedXML.map((view) => {
-                return { value: view.id, label: view.label };
-            });
+            const choices = this.state.sortedXML.map((view) => ({
+                value: view.id,
+                label: view.label,
+            }));
             const value = this.state.currentResource?.id;
             return { ...props, choices, value };
         } else {
@@ -183,7 +182,7 @@ export class ResourceEditor extends Component {
 
     async loadResources() {
         const resources = await this.keepLast.add(
-            rpc("/web_editor/get_assets_editor_resources", {
+            rpc("/website/get_assets_editor_resources", {
                 key: this.viewKey,
                 bundles: this.state.xmlFilter === "all",
                 bundles_restriction: BUNDLES_RESTRICTION,
@@ -299,7 +298,7 @@ export class ResourceEditor extends Component {
             throw new Error(_t("Reseting views is not supported yet"));
         }
         const resource = this.state.currentResource;
-        await this.orm.call("web_editor.assets", "reset_asset", [resource.url, resource.bundle], {
+        await this.orm.call("website.assets", "reset_asset", [resource.url, resource.bundle], {
             context: this.context,
         });
         await this.loadResources();
@@ -369,7 +368,7 @@ export class ResourceEditor extends Component {
             : this.state.resources.scss[url].bundle;
         const fileType = isJSFile ? "js" : "scss";
         const params = [url, bundle, arch, fileType];
-        await this.orm.call("web_editor.assets", "save_asset", params, { context: this.context });
+        await this.orm.call("website.assets", "save_asset", params, { context: this.context });
         delete resource.dirty;
     }
 
@@ -381,8 +380,10 @@ export class ResourceEditor extends Component {
      */
     async saveXML(resource) {
         const { id, arch } = resource;
-        const context = { ...this.context, lang: false };
-        await this.orm.write("ir.ui.view", [id], { arch }, { context });
+        await rpc("/website/save_xml", {
+            view_id: id,
+            arch: arch,
+        });
         delete resource.dirty;
     }
 
@@ -408,6 +409,10 @@ export class ResourceEditor extends Component {
     }
 
     showErrorLine() {
+        if (!this.editorRef.el) {
+            // Possibly destroyed.
+            return;
+        }
         const resourceId = this.state.currentResource.id;
         const error = this.errors.find(({ resource }) => resource.id === resourceId)?.error;
         if (error) {
@@ -422,6 +427,10 @@ export class ResourceEditor extends Component {
     }
 
     clearErrorLine() {
+        if (!this.editorRef.el) {
+            // Possibly destroyed.
+            return;
+        }
         const allGutterCells = this.editorRef.el.querySelectorAll(".ace_gutter-cell");
         for (const gutterCell of allGutterCells) {
             gutterCell.classList.remove("o_error");

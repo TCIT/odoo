@@ -12,9 +12,12 @@ export class ModelSelector extends Component {
         onModelSelected: Function,
         id: { type: String, optional: true },
         value: { type: String, optional: true },
+        placeholder: { type: String, optional: true },
         // list of models technical name, if not set
         // we will fetch all models we have access to
         models: { type: Array, optional: true },
+        nbVisibleModels: { type: Number, optional: true },
+        autofocus: { type: Boolean, optional: true },
     };
 
     setup() {
@@ -30,11 +33,16 @@ export class ModelSelector extends Component {
             }
 
             this.models = this.models.map((record) => ({
-                label: record.display_name,
-                technical: record.model,
-                classList: {
-                    [`o_model_selector_${record.model}`]: 1,
+                cssClass: `o_model_selector_${record.model.replaceAll(".", "_")}`,
+                data: {
+                    technical: record.model,
                 },
+                label: record.display_name,
+                onSelect: () =>
+                    this.props.onModelSelected({
+                        label: record.display_name,
+                        technical: record.model,
+                    }),
             }));
         });
     }
@@ -42,6 +50,11 @@ export class ModelSelector extends Component {
     get sources() {
         return [this.optionsSource];
     }
+
+    get placeholder() {
+        return this.props.placeholder || _t("Type a model here...");
+    }
+
     get optionsSource() {
         return {
             placeholder: _t("Loading..."),
@@ -49,26 +62,22 @@ export class ModelSelector extends Component {
         };
     }
 
-    onSelect(option) {
-        this.props.onModelSelected({
-            label: option.label,
-            technical: option.technical,
-        });
+    get nbVisibleModels() {
+        return this.props.nbVisibleModels || 8;
     }
 
     filterModels(name) {
         if (!name) {
-            const visibleModels = this.models.slice(0, 8);
+            const visibleModels = this.models.slice(0, this.nbVisibleModels);
             if (this.models.length - visibleModels.length > 0) {
                 visibleModels.push({
                     label: _t("Start typing..."),
-                    unselectable: true,
-                    classList: "o_m2o_start_typing",
+                    cssClass: "o_m2o_start_typing",
                 });
             }
             return visibleModels;
         }
-        return fuzzyLookup(name, this.models, (model) => model.technical + model.label);
+        return fuzzyLookup(name, this.models, (model) => model.data.technical + model.label);
     }
 
     loadOptionsSource(request) {
@@ -77,8 +86,7 @@ export class ModelSelector extends Component {
         if (!options.length) {
             options.push({
                 label: _t("No records"),
-                classList: "o_m2o_no_result",
-                unselectable: true,
+                cssClass: "o_m2o_no_result",
             });
         }
         return options;

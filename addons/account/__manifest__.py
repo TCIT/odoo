@@ -2,8 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Invoicing',
-    'version': '1.3',
-    'summary': 'Invoices, Payments, Follow-ups & Bank Synchronization',
+    'version': '1.4',
+    'summary': 'Invoices & Payments',
     'sequence': 10,
     'description': """
 Invoicing & Payments
@@ -25,6 +25,7 @@ You could use this simplified accounting in case you work with an (external) acc
         'data/onboarding_data.xml',
         'data/account_tour.xml',
         'data/ir_sequence.xml',
+        'data/res_country_group.xml',
         'views/account_payment_view.xml',
         'wizard/account_automatic_entry_wizard_views.xml',
         'wizard/account_autopost_bills_wizard.xml',
@@ -59,6 +60,7 @@ You could use this simplified accounting in case you work with an (external) acc
         'views/account_cash_rounding_view.xml',
         'views/ir_actions_views.xml',
         'views/ir_module_views.xml',
+        'views/base_document_layout_views.xml',
         'views/res_config_settings_views.xml',
         'views/partner_view.xml',
         'views/account_journal_dashboard_view.xml',
@@ -72,6 +74,7 @@ You could use this simplified accounting in case you work with an (external) acc
         'wizard/account_move_send_batch_wizard.xml',
         'report/account_hash_integrity_templates.xml',
         'views/res_currency.xml',
+        'views/res_country_group_view.xml',
         'views/account_menuitem.xml',
         'wizard/account_secure_entries_wizard.xml',
         'views/mail_message_views.xml',
@@ -81,10 +84,10 @@ You could use this simplified accounting in case you work with an (external) acc
         'views/uom_uom_views.xml',
         'views/product_views.xml',
         'views/tests_shared_js_python.xml',
-        'views/base_document_layout_views.xml',
         'views/account_lock_exception_views.xml',
         'views/report_templates.xml',
         'wizard/account_merge_wizard_views.xml',
+        'data/ir_config_parameter_data.xml',
     ],
     'demo': [
         'demo/account_demo.xml',
@@ -100,39 +103,33 @@ You could use this simplified accounting in case you work with an (external) acc
             'account/static/src/css/account_bank_and_cash.css',
             'account/static/src/css/account.css',
             'account/static/src/css/account_payment.scss',
+            'account/static/src/scss/account.scss',
             'account/static/src/scss/account_journal_dashboard.scss',
             'account/static/src/scss/account_searchpanel.scss',
             'account/static/src/scss/account_payment_term.scss',
             'account/static/src/scss/account_reconcile_model.scss',
             'account/static/src/scss/account_multi_ledger.scss',
+            'account/static/src/scss/account_move_send_wizard.scss',
+            'account/static/src/scss/account_type_selection.scss',
             'account/static/src/components/**/*',
             'account/static/src/services/*.js',
             'account/static/src/views/**/*',
-            'account/static/src/js/tours/account.js',
+            'account/static/src/js/tours/*',
             'account/static/src/js/search/search_bar/search_bar.js',
             'account/static/src/helpers/*.js',
-            'account/static/src/core/utils/*.js',
         ],
         # Unit test files
         'web.assets_unit_tests': [
             'account/static/tests/**/*',
-            ('remove', 'account/static/tests/legacy/**/*'),  # to remove when all legacy tests are ported
-            ('remove', 'account/static/tests/helpers/**/*'),
             ('remove', 'account/static/tests/tours/**/*'),
         ],
         'web.assets_frontend': [
-            'account/static/src/js/account_portal_sidebar.js',
-            'account/static/src/js/account_portal.js',
+            'account/static/src/interactions/**/*',
             'account/static/src/components/tests_shared_js_python/*',
             'account/static/src/helpers/*.js',
-            'account/static/src/core/utils/*.js',
         ],
         'web.assets_tests': [
             'account/static/tests/tours/**/*',
-        ],
-        'web.qunit_suite_tests': [
-            'account/static/tests/helpers/*.js',
-            'account/static/tests/legacy/*.js',
         ],
         'web.report_assets_common': [
             'account/static/src/css/report_invoice.css',
@@ -141,5 +138,9 @@ You could use this simplified accounting in case you work with an (external) acc
             'account/static/src/css/report_invoice.css',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
+    'kpi_providers': [
+        'models.kpi_provider:get_kpi_summary',
+    ],
 }

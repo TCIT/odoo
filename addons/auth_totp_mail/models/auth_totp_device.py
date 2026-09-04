@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, models
 from collections import defaultdict
 
 
-class AuthTotpDevice(models.Model):
+class Auth_TotpDevice(models.Model):
     _inherit = "auth_totp.device"
 
     def unlink(self):
@@ -21,23 +20,6 @@ class AuthTotpDevice(models.Model):
             )
 
         return super().unlink()
-
-    def _generate(self, scope, name, expiration_date):
-        """ Notify users when trusted devices are added onto their account.
-        We override this method instead of 'create' as those records are inserted directly into the
-        database using raw SQL. """
-
-        res = super()._generate(scope, name, expiration_date)
-
-        self.env.user._notify_security_setting_update(
-            _("Security Update: Device Added"),
-            _(
-                "A trusted device has just been added to your account: %(device_name)s",
-                device_name=name
-            ),
-        )
-
-        return res
 
     def _classify_by_user(self):
         devices_by_user = defaultdict(lambda: self.env['auth_totp.device'])

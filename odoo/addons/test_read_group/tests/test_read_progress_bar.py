@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from odoo.fields import Command
 from odoo.tests import common
+from odoo.tools import mute_logger
 
 
 @common.tagged('post_install', '-at_install')
@@ -27,7 +29,7 @@ class TestReadProgressBar(common.TransactionCase):
 
     def test_week_grouping(self):
         """The labels associated to each record in read_progress_bar should match
-        the ones from read_group, even in edge cases like en_US locale on sundays
+        the ones from formatted_read_group, even in edge cases like en_US locale on sundays
         """
         context = {"lang": "en_US"}
         groupby = "date:week"
@@ -41,8 +43,8 @@ class TestReadProgressBar(common.TransactionCase):
             }
         }
 
-        groups = self.Model.with_context(context).read_group(
-            [('name', "like", "testWeekGrouping%")], fields=['date', 'name'], groupby=[groupby])
+        groups = self.Model.with_context(context).formatted_read_group(
+            [('name', "like", "testWeekGrouping%")], groupby=[groupby])
         progressbars = self.Model.with_context(context).read_progress_bar(
             [('name', "like", "testWeekGrouping%")], group_by=groupby, progress_bar=progress_bar)
         self.assertEqual(len(groups), 2)
@@ -54,9 +56,8 @@ class TestReadProgressBar(common.TransactionCase):
             next(record_name for record_name, count in data.items() if count): group_name
             for group_name, data in progressbars.items()
         }
-
-        self.assertEqual(groups[0][groupby], pg_groups["testWeekGrouping_first"])
-        self.assertEqual(groups[1][groupby], pg_groups["testWeekGrouping_second"])
+        self.assertEqual(groups[0][groupby][0], pg_groups["testWeekGrouping_first"])
+        self.assertEqual(groups[1][groupby][0], pg_groups["testWeekGrouping_second"])
 
     def test_simple(self):
         model = self.env['ir.model'].create({
@@ -120,9 +121,9 @@ class TestReadProgressBar(common.TransactionCase):
         # check date aggregation and format
         result = self.env['x_progressbar'].read_progress_bar([], 'x_date:week', progress_bar)
         self.assertEqual(result, {
-            'W1 2019': {'foo': 3, 'bar': 1, 'baz': 1},
-            'W2 2019': {'foo': 3, 'bar': 2, 'baz': 2},
-            'W3 2019': {'foo': 0, 'bar': 0, 'baz': 3},
+            '2018-12-30': {'foo': 3, 'bar': 1, 'baz': 1},
+            '2019-01-06': {'foo': 3, 'bar': 2, 'baz': 2},
+            '2019-01-13': {'foo': 0, 'bar': 0, 'baz': 3},
         })
 
         # add a computed field on model
@@ -144,5 +145,56 @@ class TestReadProgressBar(common.TransactionCase):
             'colors': {'foo': 'success', 'bar': 'warning', 'baz': 'danger'},
         }
         # It is not possible to read_progress_bar with ungroupable fields
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError), mute_logger('odoo.domains'):
             self.env['x_progressbar'].read_progress_bar([], 'x_country_id', progress_bar)
+
+    def test_datetime_grouping_with_tz(self):
+        """Test that read_progress_bar keys match formatted_read_group keys
+        when grouping by a datetime field with a time granularity under a
+        non-UTC timezone. formatted_read_group converts the truncated group
+        boundary to UTC before returning it to the web client, so
+        read_progress_bar must go through the same formatter, otherwise the
+        kanban is unable to correlate the per-state counts with their
+        columns and every record falls into the "Other" gray bucket.
+        """
+        ir_model = self.env['ir.model'].create({
+            'model': 'x_progressbar_dt',
+            'name': 'progress_bar datetime',
+            'field_id': [
+                Command.create({
+                    'field_description': 'Planned',
+                    'name': 'x_planned',
+                    'ttype': 'datetime',
+                }),
+                Command.create({
+                    'field_description': 'State',
+                    'name': 'x_state',
+                    'ttype': 'selection',
+                    'selection': "[('foo', 'Foo'), ('bar', 'Bar')]",
+                }),
+            ],
+        })
+        model = self.env[ir_model.model].with_context(tz='Europe/Brussels')
+        model.create([
+            {'x_planned': '2025-01-01 12:00:00', 'x_state': 'foo'},
+            {'x_planned': '2025-01-01 18:00:00', 'x_state': 'bar'},
+            {'x_planned': '2025-06-15 12:00:00', 'x_state': 'foo'},
+        ])
+
+        groupby = 'x_planned:day'
+        progress_bar = {
+            'field': 'x_state',
+            'colors': {'foo': 'success', 'bar': 'warning'},
+        }
+        groups = model.formatted_read_group([], groupby=[groupby])
+        progressbars = model.read_progress_bar(
+            [], group_by=groupby, progress_bar=progress_bar,
+        )
+
+        expected = {group[groupby][0]: group for group in groups}
+        self.assertEqual(set(progressbars), set(expected))
+        day_1, day_2 = sorted(expected)
+        self.assertEqual(dict(progressbars), {
+            day_1: {'foo': 1, 'bar': 1},
+            day_2: {'foo': 1, 'bar': 0},
+        })

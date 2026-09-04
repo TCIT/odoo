@@ -1,7 +1,7 @@
 <odoo>
     <template id="portal_my_home_menu_invoice" name="Portal layout : invoice menu entries" inherit_id="portal.portal_breadcrumbs" priority="30">
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
-            <li t-if="page_name == 'invoice'" t-attf-class="breadcrumb-item #{'active ' if not invoice else ''}">
+            <li name="invoices_breadcrumb" t-if="page_name == 'invoice'" t-attf-class="breadcrumb-item #{'active ' if not invoice else ''}">
                 <a t-if="invoice" t-attf-href="/my/invoices?{{ keep_query() }}">Invoices &amp; Bills</a>
                 <t t-else="">Invoices &amp; Bills</t>
             </li>
@@ -19,7 +19,7 @@
         </xpath>
         <div id="portal_client_category" position="inside">
             <t t-call="portal.portal_docs_entry">
-                <t t-set="icon" t-value="'/account/static/src/img/Bill.svg'"/>
+                <t t-set="icon" t-value="'/account/static/src/img/bill.svg'"/>
                 <t t-set="title">Your Invoices</t>
                 <t t-set="url" t-value="'/my/invoices?filterby=invoices'"/>
                 <t t-set="text">Follow, download or pay your invoices</t>
@@ -28,7 +28,7 @@
         </div>
         <div id="portal_vendor_category" position="inside">
             <t t-call="portal.portal_docs_entry">
-                <t t-set="icon" t-value="'/account/static/src/img/Bill.svg'"/>
+                <t t-set="icon" t-value="'/account/static/src/img/bill.svg'"/>
                 <t t-set="title">Our Invoices</t>
                 <t t-set="url" t-value="'/my/invoices?filterby=bills'"/>
                 <t t-set="text">Follow, download or pay our invoices</t>
@@ -69,10 +69,10 @@
                         </td>
                         <td><span t-field="invoice.invoice_date"/></td>
                         <td class='d-none d-md-table-cell'
-                            t-att-class="'text-danger' if invoice.invoice_date_due and invoice.invoice_date_due &lt; datetime.date.today() and invoice.payment_state in ['not_paid', 'partial'] else ''">
+                            t-att-class="'d-none d-md-table-cell text-danger' if invoice.invoice_date_due and invoice.invoice_date_due &lt; datetime.date.today() and invoice.payment_state in ['not_paid', 'partial'] else 'd-none d-md-table-cell'">
                             <span t-field="invoice.invoice_date_due"/>
                         </td>
-                        <td class="text-end pe-3"><span t-out="-invoice.amount_residual if invoice.move_type == 'out_refund' else invoice.amount_residual" t-options='{"widget": "monetary", "display_currency": invoice.currency_id}'/></td>
+                        <td name="invoice_amount" class="text-end pe-3"><span t-out="-invoice.amount_residual if invoice.move_type == 'out_refund' else invoice.amount_residual" t-options='{"widget": "monetary", "display_currency": invoice.currency_id}'/></td>
                         <td name="invoice_status">
                             <t t-if="invoice.state == 'posted'" name="invoice_status_posted">
                                 <span t-if="invoice.currency_id.is_zero(invoice.amount_residual)"
@@ -109,14 +109,54 @@
       </t>
     </template>
 
+    <template id="portal_my_journal_mail_notifications" name="My journal email notification settings">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Email Notifications</t>
+            </t>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Invoice Notifications</h5>
+                            <p class="card-text">You can unsubscribe from emails received upon invoice sending and reception here.</p>
+                            <t t-if="completed">
+                                <div class="alert alert-success" role="alert">
+                                    Successfully unsubscribed <t t-if="email"><strong t-out="email"/></t> from invoice notifications.
+                                </div>
+                            </t>
+                            <t t-elif="error">
+                                <div class="alert alert-danger" role="alert">
+                                    <t t-out="error"/>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div t-if="email" class="alert alert-info" role="alert">
+                                    You are about to unsubscribe <strong t-out="email"/> from invoice notifications.
+                                </div>
+                                <form method="POST">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <button type="submit" class="btn btn-primary">Unsubscribe</button>
+                                </form>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
     <template id="portal_invoice_page" name="Invoice/Bill" inherit_id="portal.portal_sidebar" primary="True">
-        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+        <t t-call="portal.portal_layout" position="inside">
             <t t-set="o_portal_fullwidth_alert" groups="sales_team.group_sale_salesman,account.group_account_invoice,account.group_account_readonly">
                 <t t-call="portal.portal_back_in_edit_mode">
-                    <t t-set="backend_url" t-value="'/odoo/action-account.action_move_out_invoice_type/%s' % invoice.id"/>
+                    <t t-set="backend_url" t-value="'/odoo/action-account.action_move_out_invoice/%s' % invoice.id"/>
                 </t>
             </t>
+        </t>
 
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
             <div class="row o_portal_invoice_sidebar">
                 <!-- Sidebar -->
                 <t t-call="portal.portal_record_sidebar">
@@ -183,7 +223,6 @@
                                     <t t-set="_contactAvatar" t-value="image_data_uri(invoice.invoice_user_id.avatar_128)"/>
                                     <t t-set="_contactName" t-value="invoice.invoice_user_id.name"/>
                                     <t t-set="_contactLink" t-value="True"/>
-                                    <div t-field="invoice.invoice_user_id" t-options='{"widget": "contact", "fields": ["city", "phone"]}'/>
                                 </t>
                             </div>
                         </div>
@@ -233,7 +272,7 @@
     <!-- Get the fields set in required_fields and display them as form elements. Doesn't create the form itself. -->
     <template id="portal_invoice_required_fields_form">
         <t t-foreach="required_fields" t-as="required_field">
-            <div t-attf-class="mb-3 #{error.get(required_field.name) and 'o_has_error' or ''} col-xl-6">
+            <div t-attf-class="mb-3 col-xl-6">
                 <!-- select by default the value passed in the data or corresponding to the "default" attribute on the field -->
                 <t t-set="field_info" t-value="env[required_field.model]._fields[required_field.name]"/>
                 <t t-set="default_value" t-value="extra_field_values.get(field_prefix + required_field.name) or field_info.default and field_info.default(required_field.model)"/>
@@ -250,38 +289,50 @@
         </t>
     </template>
 
-    <template id="portal_my_details_fields" inherit_id="portal.portal_my_details_fields">
-        <xpath expr="//select[@name='country_id']/.." position="after">
-            <div class="col-12 d-none d-xl-block">
-                <small class="form-text text-muted">
-                    You can choose how you want us to send your invoices, and with which electronic format.
-                </small>
-            </div>
-            <div class="row m-0 p-0" t-if="len(invoice_sending_methods) > 1">
+    <template id="portal_my_details" inherit_id="portal.portal_my_details">
+        <div name="address_details" position="inside">
+            <t t-if="len(invoice_sending_methods) > 1 and invoice_edi_formats">
+                <div class="col-12 d-none d-xl-block">
+                    <small class="form-text text-muted">
+                        You can choose how you want us to send your invoices, and with which electronic format.
+                    </small>
+                </div>
+            </t>
+            <div t-if="len(invoice_sending_methods) > 1" class="row m-0 p-0">
                 <div class="col-xl-6">
-                    <label class="col-form-label" for="invoice_sending_method">Receive invoices</label>
+                    <label class="col-form-label label-optional" for="invoice_sending_method">
+                        Receive invoices
+                    </label>
                     <select name="invoice_sending_method" class="form-select">
-                        <t t-foreach="invoice_sending_methods" t-as="method">
-                            <option t-att-value="method" t-att-selected="(invoice_sending_method or partner.invoice_sending_method) == method">
-                                <t t-esc="method_value"/>
-                            </option>
-                        </t>
+                        <option
+                            t-foreach="invoice_sending_methods"
+                            t-as="method"
+                            t-att-value="method"
+                            t-att-selected="partner_sudo.invoice_sending_method == method"
+                            t-out="method_value"
+                        />
                     </select>
                 </div>
             </div>
-            <div class="row m-0 mb-3 p-0">
-                <div class="col-xl-6">
-                    <label class="col-form-label" for="invoice_edi_format">Electronic format</label>
-                    <select name="invoice_edi_format" class="form-select">
-                        <option value=""/>
-                        <t t-foreach="invoice_edi_formats" t-as="format">
-                            <option t-att-value="format" t-att-selected="(invoice_edi_format or partner.invoice_edi_format) == format">
-                                <t t-esc="format_value"/>
-                            </option>
-                        </t>
-                    </select>
+            <t t-if="invoice_edi_formats">
+                <div class="row m-0 mb-3 p-0">
+                    <div class="col-xl-6">
+                        <label class="col-form-label label-optional" for="invoice_edi_format">
+                            Electronic format
+                        </label>
+                        <select name="invoice_edi_format" class="form-select">
+                            <option value=""/>
+                            <option
+                                t-foreach="invoice_edi_formats"
+                                t-as="format"
+                                t-att-value="format"
+                                t-att-selected="partner_sudo.invoice_edi_format == format"
+                                t-out="format_value"
+                            />
+                        </select>
+                    </div>
                 </div>
-            </div>
-        </xpath>
+            </t>
+        </div>
     </template>
 </odoo>

@@ -150,10 +150,6 @@ export function assertDateTimePicker(expectedParams) {
     assert.containsN(fixture, ".o_today", todayCells);
 }
 
-export function getPickerApplyButton() {
-    return select(".o_datetime_picker .o_datetime_buttons .o_apply").at(0);
-}
-
 /**
  * @param {RegExp | string} expr
  */
@@ -171,23 +167,6 @@ export function getPickerCell(expr) {
  */
 export function getTexts(...selectors) {
     return select(...selectors).map((e) => e.innerText.trim().replace(/\s+/g, " "));
-}
-
-/**
- * @param {Object} [options={}]
- * @param {boolean} [options.parse=false] whether to directly return the parsed
- *  values of the select elements
- * @returns {HTMLSelectElement[] | (number | string)[]}
- */
-export function getTimePickers({ parse = false } = {}) {
-    return select(".o_time_picker").map((timePickerEl) => {
-        const selects = select(timePickerEl, ".o_time_picker_select");
-        if (parse) {
-            return selects.map((sel) => (isNaN(sel.value) ? sel.value : Number(sel.value)));
-        } else {
-            return selects;
-        }
-    });
 }
 
 /**

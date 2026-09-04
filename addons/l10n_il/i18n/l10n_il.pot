@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.0\n"
+"Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-02 14:52+0000\n"
-"PO-Revision-Date: 2022-11-02 14:52+0000\n"
+"POT-Creation-Date: 2025-12-30 19:07+0000\n"
+"PO-Revision-Date: 2025-12-30 19:07+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,104 +16,26 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: l10n_il
-#: model:account.account.tag,name:l10n_il.account_tag_dividend_account
-msgid "Dividend Account"
+#: model:ir.model,name:l10n_il.model_account_chart_template
+msgid "Account Chart Template"
 msgstr ""
 
 #. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_vat_due
-msgid "VAT DUE"
+#: model:account.report.column,name:l10n_il.vat_report_balance
+msgid "Balance"
 msgstr ""
 
 #. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_out_base_exempt
-#: model:account.report.line,name:l10n_il.account_tax_report_line_out_base_exempt_title
-#: model:account.report.line,tag_name:l10n_il.account_tax_report_line_out_base_exempt
-msgid "VAT Exempt Sales (BASE)"
+#: model:ir.model.fields,field_description:l10n_il.field_account_chart_template__display_name
+msgid "Display Name"
 msgstr ""
 
 #. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_in_balance
-msgid "VAT INPUTS (TAX)"
+#: model:ir.model.fields,field_description:l10n_il.field_account_chart_template__id
+msgid "ID"
 msgstr ""
 
 #. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_vat_in_fa
-#: model:account.report.line,name:l10n_il.account_tax_report_line_vat_in_fa_title
-#: model:account.report.line,tag_name:l10n_il.account_tax_report_line_vat_in_fa
-msgid "VAT INPUTS (fixed assets)"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_in_balance_1_4
-#: model:account.report.line,tag_name:l10n_il.account_tax_report_line_in_balance_1_4
-msgid "VAT Inputs 1/4"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_in_balance_17
-#: model:account.report.line,tag_name:l10n_il.account_tax_report_line_in_balance_17
-msgid "VAT Inputs 17%"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_in_balance_18
-#: model:account.report.line,tag_name:l10n_il.account_tax_report_line_in_balance_18
-msgid "VAT Inputs 18%"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_in_balance_2_3
-#: model:account.report.line,tag_name:l10n_il.account_tax_report_line_in_balance_2_3
-msgid "VAT Inputs 2/3"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_in_balance_pa_16
-#: model:account.report.line,tag_name:l10n_il.account_tax_report_line_in_balance_pa_16
-msgid "VAT Inputs PA 16%"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_out_balance_pa
-#: model:account.report.line,tag_name:l10n_il.account_tax_report_line_out_balance_pa
-msgid "VAT PA Sales"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_out_base
-#: model:account.report.line,name:l10n_il.account_tax_report_line_out_base_title
-#: model:account.report.line,tag_name:l10n_il.account_tax_report_line_out_base
-msgid "VAT SALES (BASE)"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_vat_sales_tax
-msgid "VAT SALES (TAX)"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.report.line,name:l10n_il.account_tax_report_line_out_balance
-#: model:account.report.line,tag_name:l10n_il.account_tax_report_line_out_balance
-msgid "VAT Sales"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.account.tag,name:l10n_il.account_tag_retention_tax_customers_account
-msgid "Withholding Customers Tax Account"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.account.tag,name:l10n_il.account_tag_retention_tax_dividend_account
-msgid "Withholding Dividend Tax Account"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.account.tag,name:l10n_il.account_tag_retention_tax_employees_account
-msgid "Withholding Employees Tax Account"
-msgstr ""
-
-#. module: l10n_il
-#: model:account.account.tag,name:l10n_il.account_tag_retention_tax_vendor_account
-msgid "Withholding Vendor Tax Account"
+#: model:account.report,name:l10n_il.vat_report
+msgid "VAT Report (PCN874)"
 msgstr ""

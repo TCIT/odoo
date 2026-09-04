@@ -1,28 +1,45 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* pos_sale
-# 
+# * pos_sale
+#
 # Translators:
-# Wil Odoo, 2024
-# Thi Huong Nguyen, 2024
-# 
+# Martin Trigaux, 2022
+# Thi Huong Nguyen, 2023
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Thi Huong Nguyen (thng)" <thng@odoo.com>, 2025.
+# Deleted User <noreply+31@weblate.org>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2024\n"
-"Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
+"POT-Creation-Date: 2026-04-10 18:38+0000\n"
+"PO-Revision-Date: 2026-08-07 20:18+0000\n"
+"Last-Translator: Deleted User <noreply+31@weblate.org>\n"
+"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-19/"
+"pos_sale/vi/>\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: vi\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/sale_order.py:0
+msgid "%(line_description)s (Cancelled)"
+msgstr ""
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/account_move.py:0
+msgid "%(old_name)s (Cancelled)"
+msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/orderline/orderline.xml:0
+#: code:addons/pos_sale/static/src/app/components/orderline/orderline.xml:0
 msgid "(tax incl.)"
 msgstr "(bao gồm thuế)"
 
@@ -33,31 +50,29 @@ msgstr "<span style=\"margin: 0px 5px;\">:</span>"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "A new order has been created."
 msgstr "Đơn hàng mới đã được tạo."
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_sale_order__amount_unpaid
 msgid "Amount To Pay In POS"
-msgstr "Số tiền cần thanh toán trong POS"
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model.fields,help:pos_sale.field_sale_order__amount_unpaid
 msgid "Amount left to pay in POS to avoid double payment or double invoicing."
 msgstr ""
-"Số tiền còn lại cần thanh toán trong POS để tránh thanh toán hai lần hoặc "
-"lập hóa đơn hai lần."
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Apply a down payment (fixed amount)"
 msgstr "Áp dụng khoản trả trước (số tiền cố định)"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Apply a down payment (percentage)"
 msgstr "Áp dụng khoản trả trước (phần trăm)"
 
@@ -65,6 +80,16 @@ msgstr "Áp dụng khoản trả trước (phần trăm)"
 #: model:ir.model,name:pos_sale.model_res_config_settings
 msgid "Config Settings"
 msgstr "Cài đặt cấu hình"
+
+#. module: pos_sale
+#: model:ir.model,name:pos_sale.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: pos_sale
+#: model:ir.model,website_form_label:pos_sale.model_res_partner
+msgid "Create a Customer"
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_pos_order__currency_rate
@@ -79,17 +104,35 @@ msgstr "Được giao từ"
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_pos_order_line__qty_delivered
 msgid "Delivery Quantity"
-msgstr "Số lượng giao hàng"
+msgstr ""
+
+#. module: pos_sale
+#: model:ir.model.fields,field_description:pos_sale.field_account_move__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_crm_team__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_pos_config__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_pos_order__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_pos_order_line__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_pos_session__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_product_template__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_res_partner__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_sale_order__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_sale_order_line__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_sale_report__display_name
+#: model:ir.model.fields,field_description:pos_sale.field_stock_picking__display_name
+msgid "Display Name"
+msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Do you want to load the SN/Lots linked to the Sales Order?"
-msgstr "Bạn có muốn tải số sê-ri/lô liên kết với đơn bán hàng không? "
+msgstr "Bạn có muốn tải số sê-ri/lô liên kết với đơn bán hàng không?"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Down Payment"
 msgstr "Khoản trả trước"
 
@@ -112,30 +155,40 @@ msgstr "Sản phẩm trả trước"
 
 #. module: pos_sale
 #. odoo-python
-#: code:addons/pos_sale/models/pos_order.py:0
+#: code:addons/pos_sale/models/sale_order.py:0
 msgid ""
 "Down payment (ref: %(order_reference)s on \n"
 " %(date)s)"
 msgstr ""
-"Khoản trả trước (mã: %(order_reference)s vào\n"
-"%(date)s)"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Due balance: %s"
 msgstr "Số tiền đến hạn thanh toán: %s"
-
-#. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
-msgid "Error amount too high"
-msgstr "Số tiền lỗi quá cao"
 
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.report_invoice_document
 msgid "From"
 msgstr "Từ"
+
+#. module: pos_sale
+#: model:ir.model.fields,field_description:pos_sale.field_account_move__id
+#: model:ir.model.fields,field_description:pos_sale.field_account_move_line__id
+#: model:ir.model.fields,field_description:pos_sale.field_crm_team__id
+#: model:ir.model.fields,field_description:pos_sale.field_pos_config__id
+#: model:ir.model.fields,field_description:pos_sale.field_pos_order__id
+#: model:ir.model.fields,field_description:pos_sale.field_pos_order_line__id
+#: model:ir.model.fields,field_description:pos_sale.field_pos_session__id
+#: model:ir.model.fields,field_description:pos_sale.field_product_template__id
+#: model:ir.model.fields,field_description:pos_sale.field_res_config_settings__id
+#: model:ir.model.fields,field_description:pos_sale.field_res_partner__id
+#: model:ir.model.fields,field_description:pos_sale.field_sale_order__id
+#: model:ir.model.fields,field_description:pos_sale.field_sale_order_line__id
+#: model:ir.model.fields,field_description:pos_sale.field_sale_report__id
+#: model:ir.model.fields,field_description:pos_sale.field_stock_picking__id
+msgid "ID"
+msgstr "ID"
 
 #. module: pos_sale
 #: model:ir.model.fields.selection,name:pos_sale.selection__sale_report__state__invoiced
@@ -144,13 +197,24 @@ msgstr "Đã xuất hóa đơn"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
+#, fuzzy
 msgid ""
 "It seems that you didn't configure a down payment product in your point of "
 "sale. You can go to your point of sale configuration to choose one."
 msgstr ""
-"Có vẻ bạn đã không cấu hình sản phẩm trả trước trong điểm bán hàng. Bạn có "
-"thể đi đến cấu hình điểm bán hàng để chọn một sản phẩm."
+"Có vẻ bạn đã không cấu hình sản phẩm trả trước trong POS. Bạn có thể đi đến "
+"cấu hình POS để chọn một sản phẩm."
+
+#. module: pos_sale
+#: model:ir.model,name:pos_sale.model_account_move
+msgid "Journal Entry"
+msgstr ""
+
+#. module: pos_sale
+#: model:ir.model,name:pos_sale.model_account_move_line
+msgid "Journal Item"
+msgstr ""
 
 #. module: pos_sale
 #. odoo-python
@@ -171,25 +235,14 @@ msgstr "Đơn bán hàng đã liên kết"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "No down payment product"
 msgstr "Không có sản phẩm trả trước"
-
-#. module: pos_sale
-#: model:ir.model.fields,field_description:pos_sale.field_crm_team__pos_sessions_open_count
-msgid "Open POS Sessions"
-msgstr "Mở các phiên PoS"
 
 #. module: pos_sale
 #: model:ir.actions.act_window,name:pos_sale.pos_session_action_from_crm_team
 msgid "Open Sessions"
 msgstr "Mở phiên"
-
-#. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/product_info_popup/product_info_popup.xml:0
-msgid "Optional Products:"
-msgstr "Sản phẩm tuỳ chọn:"
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_sale_report__order_reference
@@ -200,12 +253,12 @@ msgstr "Đơn hàng"
 #: model:ir.model.fields,field_description:pos_sale.field_sale_order__pos_order_line_ids
 #: model:ir.model.fields,field_description:pos_sale.field_sale_order_line__pos_order_line_ids
 msgid "Order lines Transfered to Point of Sale"
-msgstr "Chi tiết đơn hàng đã chuyển sang điểm bán hàng"
+msgstr "Chi tiết đơn hàng đã chuyển sang POS"
 
 #. module: pos_sale
 #: model:ir.model.fields.selection,name:pos_sale.selection__sale_report__order_reference__pos_order
 msgid "POS Order"
-msgstr "Đơn hàng POS"
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model.fields.selection,name:pos_sale.selection__sale_report__state__paid
@@ -215,17 +268,17 @@ msgstr "Đã thanh toán"
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_pos_config
 msgid "Point of Sale Configuration"
-msgstr "Cấu hình điểm bán hàng"
+msgstr "Cấu hình POS"
 
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_pos_order_line
 msgid "Point of Sale Order Lines"
-msgstr "Chi tiết đơn hàng điểm bán hàng"
+msgstr "Chi tiết đơn hàng POS"
 
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_pos_order
 msgid "Point of Sale Orders"
-msgstr "Đơn hàng điểm bán hàng"
+msgstr "Đơn hàng POS"
 
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_pos_session
@@ -235,7 +288,7 @@ msgstr "Phiên POS"
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_crm_team__pos_config_ids
 msgid "Point of Sales"
-msgstr "Điểm bán hàng"
+msgstr "POS"
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_sale_order__pos_order_count
@@ -248,32 +301,32 @@ msgid "Posted"
 msgstr "Đã vào sổ"
 
 #. module: pos_sale
-#: model:ir.model,name:pos_sale.model_product_product
-msgid "Product Variant"
-msgstr "Biến thể sản phẩm"
+#: model:ir.model,name:pos_sale.model_product_template
+msgid "Product"
+msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/control_buttons/control_buttons.xml:0
+#: code:addons/pos_sale/static/src/app/components/screens/product_screen/control_buttons/control_buttons.xml:0
 msgid "Quotation/Order"
 msgstr "Báo giá/Đơn hàng"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "SN/Lots Loading"
 msgstr "Đang tải số sê-ri/lô"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/orderline/orderline.xml:0
+#: code:addons/pos_sale/static/src/app/components/orderline/orderline.xml:0
 msgid "SO"
 msgstr "Đơn bán hàng"
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_pos_order__sale_order_count
 msgid "Sale Order Count"
-msgstr " Số đơn bán hàng"
+msgstr "Số đơn bán hàng"
 
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.res_config_settings_view_form
@@ -315,29 +368,14 @@ msgid "Sales are reported to the following sales team"
 msgstr "Bán hàng được báo cáo cho bộ phận sales sau"
 
 #. module: pos_sale
-#: model_terms:ir.ui.view,arch_db:pos_sale.crm_team_view_kanban_dashboard
-msgid "Session Running"
-msgstr "Phiên đang hoạt động"
-
-#. module: pos_sale
-#: model:ir.model.fields,field_description:pos_sale.field_crm_team__pos_order_amount_total
-msgid "Session Sale Amount"
-msgstr "Doanh số phiên"
-
-#. module: pos_sale
-#: model_terms:ir.ui.view,arch_db:pos_sale.crm_team_view_kanban_dashboard
-msgid "Sessions Running"
-msgstr "Phiên đang hoạt động"
-
-#. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/control_buttons/control_buttons.xml:0
+#: code:addons/pos_sale/static/src/app/components/screens/product_screen/control_buttons/control_buttons.xml:0
 msgid "Set Sale Order"
 msgstr "Thiết lập đơn bán hàng"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "Settle the order"
 msgstr "Thanh toán đơn hàng"
 
@@ -363,7 +401,7 @@ msgstr "Tỷ giá tiền tệ của loại tiền tệ đang dùng tại ngày �
 #: model:ir.model.fields,help:pos_sale.field_pos_session__crm_team_id
 #: model:ir.model.fields,help:pos_sale.field_res_config_settings__pos_crm_team_id
 msgid "This Point of sale's sales will be related to this Sales Team."
-msgstr "Doanh thu của điểm bán hàng sẽ được liên kết với bộ phận sales này. "
+msgstr "Doanh thu của POS sẽ được liên kết với bộ phận sales này."
 
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.res_config_settings_view_form
@@ -374,13 +412,12 @@ msgstr "Sản phẩm này sẽ được áp dụng khi khoản trả trước đ
 #: model:ir.model.fields,help:pos_sale.field_pos_config__down_payment_product_id
 #: model:ir.model.fields,help:pos_sale.field_res_config_settings__pos_down_payment_product_id
 msgid "This product will be used as down payment on a sale order."
-msgstr ""
-"Sản phẩm này sẽ được sử dụng làm sản phẩm trả trước trong đơn bán hàng. "
+msgstr "Sản phẩm này sẽ được sử dụng làm sản phẩm trả trước trong đơn bán hàng."
 
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_stock_picking
 msgid "Transfer"
-msgstr "Lệnh chuyển hàng"
+msgstr ""
 
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.view_pos_order_form_inherit_pos_sale
@@ -388,36 +425,158 @@ msgid ""
 "Transferred<br/>\n"
 "                                from Sale"
 msgstr ""
-"Được chuyển<br/>\n"
-"                                từ Bán hàng"
 
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.view_order_form_inherit_pos_sale
 msgid ""
 "Transferred<br/>\n"
-"                                to POS"
+"                            to POS"
 msgstr ""
-"Được chuyển<br/>\n"
-"                                tới POS"
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
+msgid "Warning for %s"
+msgstr ""
+
+#. module: pos_sale
+#. odoo-javascript
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
 msgid "What do you want to do?"
 msgstr "Bạn muốn làm gì?"
 
 #. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/models/pos_store.js:0
-msgid ""
-"You have tried to charge a down payment of %s but only %s remains to be "
-"paid, %s will be applied to the purchase order line."
+#. odoo-python
+#: code:addons/pos_sale/models/pos_order.py:0
+#: code:addons/pos_sale/models/sale_order.py:0
+msgid "id"
 msgstr ""
-"Bạn đã cố gắng tính khoản trả trước là %s nhưng chỉ còn %s cần thanh toán, "
-"%s sẽ được áp dụng cho dòng đơn mua hàng."
 
 #. module: pos_sale
 #. odoo-javascript
-#: code:addons/pos_sale/static/src/overrides/components/product_info_popup/product_info_popup.xml:0
-msgid "from"
-msgstr "từ"
+#: code:addons/pos_sale/static/src/app/components/orderline/orderline.xml:0
+#: model_terms:ir.ui.view,arch_db:pos_sale.report_invoice_document
+msgid "x"
+msgstr ""
+
+#~ msgid "(left:"
+#~ msgstr "(trái:"
+
+#~ msgid "Back"
+#~ msgstr "Quay lại"
+
+#~ msgid "Back to list"
+#~ msgstr "Quay lại danh sách"
+
+#~ msgid "Cancelled"
+#~ msgstr "Đã hủy"
+
+#~ msgid "Customer"
+#~ msgstr "Khách hàng"
+
+#~ msgid "Customer loading error"
+#~ msgstr "Lỗi tải khách hàng"
+
+#~ msgid "Date"
+#~ msgstr "Ngày"
+
+#~ msgid "E.g. customer: Steward, date: 2020-05-09"
+#~ msgstr "VD: khách hàng: Steward, ngày: 2020-05-09"
+
+#~ msgid ""
+#~ "It seems that you didn't configure a down payment product in your point "
+#~ "of sale.\n"
+#~ "                        You can go to your point of sale configuration to "
+#~ "choose one."
+#~ msgstr ""
+#~ "Có vẻ bạn đã không cấu hình sản phẩm trả trước trong điểm bán lẻ.\n"
+#~ "                          Bạn có thể đi đến cấu hình điểm bán lẻ để chọn "
+#~ "một sản phẩm."
+
+#~ msgid "Locked"
+#~ msgstr "Đã khoá"
+
+#~ msgid "New"
+#~ msgstr "Mới"
+
+#~ msgid "Next Order List"
+#~ msgstr "Danh sách đơn hàng tiếp theo"
+
+#~ msgid "No"
+#~ msgstr "Không"
+
+#~ msgid "Open POS Sessions"
+#~ msgstr "Mở các phiên PoS"
+
+#~ msgid "Previous Order List"
+#~ msgstr "Danh sách đơn hàng trước đây"
+
+#~ msgid "Products not available in POS"
+#~ msgstr "Sản phẩm không có trong POS"
+
+#~ msgid "Quotation"
+#~ msgstr "Báo giá"
+
+#~ msgid "Quotation Sent"
+#~ msgstr "Đã gửi báo giá"
+
+#~ msgid "Salesman"
+#~ msgstr "Nhân viên kinh doanh"
+
+#~ msgid "Salesperson"
+#~ msgstr "Nhân viên kinh doanh"
+
+#~ msgid "Session Running"
+#~ msgstr "Phiên đang hoạt động"
+
+#~ msgid "Session Sale Amount"
+#~ msgstr "Doanh số phiên"
+
+#~ msgid "Sessions Running"
+#~ msgstr "Phiên đang hoạt động"
+
+#~ msgid ""
+#~ "Some of the products in your Sale Order are not available in POS, do you "
+#~ "want to import them?"
+#~ msgstr ""
+#~ "Một số sản phẩm trong Đơn bán hàng không có sẵn trong POS, bạn có muốn "
+#~ "nhập các sản phẩm này không? "
+
+#~ msgid "State"
+#~ msgstr "Trạng thái"
+
+#~ msgid "The amount due from the sale order."
+#~ msgstr "Số tiền cần thanh toán từ đơn bán hàng."
+
+#~ msgid "There was a problem in loading the %s customer."
+#~ msgstr "Có vấn đề trong khi tải %s khách hàng."
+
+#~ msgid "Total"
+#~ msgstr "Tổng"
+
+#~ msgid ""
+#~ "Transfered<br/>\n"
+#~ "                                from Sale"
+#~ msgstr ""
+#~ "Được chuyển<br/>\n"
+#~ "                                từ Bán hàng"
+
+#~ msgid ""
+#~ "Transfered<br/>\n"
+#~ "                                to POS"
+#~ msgstr ""
+#~ "Được chuyển<br/>\n"
+#~ "                                tới POS"
+
+#~ msgid "Unpaid Amount"
+#~ msgstr "Số tiền chưa thanh toán"
+
+#~ msgid "Yes"
+#~ msgstr "Có"
+
+#~ msgid ""
+#~ "You have tried to charge a down payment of %s but only %s remains to be "
+#~ "paid, %s will be applied to the purchase order line."
+#~ msgstr ""
+#~ "Bạn đã cố gắng tính khoản trả trước là %s nhưng chỉ còn %s cần thanh "
+#~ "toán, %s sẽ được áp dụng cho mục đơn mua hàng."

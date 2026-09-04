@@ -1,7 +1,7 @@
-import { tourState } from "@web_tour/tour_service/tour_state";
+import { tourState } from "@web_tour/js/tour_state";
 import { TourSelectorPopup } from "../components/tour_selector_popup/tour_selector_popup";
-import { makeAwaitable } from "../store/make_awaitable_dialog";
 import { useService } from "@web/core/utils/hooks";
+import { makeAwaitable } from "../utils/make_awaitable_dialog";
 
 export default function useTours() {
     const tour = useService("tour_service");
@@ -48,7 +48,6 @@ export default function useTours() {
                 states.index = 0;
             }
             await tour.startTour(states.selectedTours[states.index], {
-                stepDelay: 150,
                 throw: false,
             });
 

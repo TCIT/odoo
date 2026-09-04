@@ -7,13 +7,14 @@ import { registry } from "@web/core/registry";
 export class DiscussCorePublicWeb {
     /**
      * @param {import("@web/env").OdooEnv} env
-     * @param {Partial<import("services").Services>} services
+     * @param {import("services").ServiceFactories} services
      */
     constructor(env, services) {
         this.env = env;
         this.store = services["mail.store"];
         this.busService = services.bus_service;
         this.notificationService = services.notification;
+        this.rtcService = services["discuss.rtc"];
         try {
             this.sidebarCategoriesBroadcast = new browser.BroadcastChannel(
                 "discuss_core_public_web.sidebar_categories"
@@ -31,10 +32,21 @@ export class DiscussCorePublicWeb {
             // BroadcastChannel API is not supported (e.g. Safari < 15.4), so disabling it.
         }
         this.busService.subscribe("discuss.channel/joined", async (payload) => {
-            const { channel, invited_by_user_id: invitedByUserId } = payload;
-            const thread = this.store.Thread.insert(channel);
-            await thread.fetchChannelInfo();
-            if (invitedByUserId && invitedByUserId !== this.store.self.userId) {
+            const {
+                data,
+                channel_id,
+                invite_to_rtc_call,
+                invited_by_user_id: invitedByUserId,
+            } = payload;
+            this.store.insert(data);
+            await this.store.fetchChannel(channel_id);
+            const thread = this.store.Thread.get({ id: channel_id, model: "discuss.channel" });
+            if (
+                thread &&
+                invitedByUserId &&
+                invitedByUserId !== this.store.self.main_user_id?.id &&
+                !invite_to_rtc_call
+            ) {
                 this.notificationService.add(
                     _t("You have been invited to #%s", thread.displayName),
                     { type: "info" }
@@ -49,7 +61,26 @@ export class DiscussCorePublicWeb {
                         model: "discuss.channel",
                         id: data.id,
                     });
-                    channel?.open();
+                    channel?.open({ focus: true });
+                    if (!data.joinCall || !channel || this.rtcService.state.channel?.eq(channel)) {
+                        return;
+                    }
+                    if (this.rtcService.state.channel) {
+                        await this.rtcService.leaveCall();
+                    }
+                    this.rtcService.joinCall(channel);
+                } else if (action === "POST_RTC_LOGS") {
+                    const logs = data || {};
+                    logs.odooInfo = odoo.info;
+                    const string = JSON.stringify(logs);
+                    const blob = new Blob([string], { type: "application/json" });
+                    const downloadLink = document.createElement("a");
+                    const now = luxon.DateTime.now().toFormat("yyyy-LL-dd_HH-mm");
+                    downloadLink.download = `RtcLogs_${now}.json`;
+                    const url = URL.createObjectURL(blob);
+                    downloadLink.href = url;
+                    downloadLink.click();
+                    URL.revokeObjectURL(url);
                 }
             }
         );
@@ -66,11 +97,10 @@ export class DiscussCorePublicWeb {
 }
 
 export const discussCorePublicWeb = {
-    dependencies: ["bus_service", "mail.store", "notification"],
-
+    dependencies: ["bus_service", "discuss.rtc", "mail.store", "notification"],
     /**
      * @param {import("@web/env").OdooEnv} env
-     * @param {Partial<import("services").Services>} services
+     * @param {import("services").ServiceFactories} services
      */
     start(env, services) {
         return reactive(new DiscussCorePublicWeb(env, services));

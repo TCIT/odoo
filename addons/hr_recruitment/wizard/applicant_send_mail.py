@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
+from odoo.tools.misc import clean_context
 
 
 class ApplicantSendMail(models.TransientModel):
     _name = 'applicant.send.mail'
-    _inherit = 'mail.composer.mixin'
+    _inherit = ['mail.composer.mixin']
     _description = 'Send mails to applicants'
 
-    applicant_ids = fields.Many2many('hr.applicant', string='Applications', required=True)
+    applicant_ids = fields.Many2many('hr.applicant', string='Applications', required=True, context={'active_test': False})
     author_id = fields.Many2one('res.partner', 'Author', required=True, default=lambda self: self.env.user.partner_id.id)
-    attachment_ids = fields.Many2many('ir.attachment', string='Attachments', readonly=False, store=True)
+    attachment_ids = fields.Many2many('ir.attachment', string='Attachments', readonly=False, store=True, bypass_search_access=True)
 
     @api.depends('subject')
     def _compute_render_model(self):
@@ -31,18 +32,19 @@ class ApplicantSendMail(models.TransientModel):
             }
 
         if self.template_id:
-            subjects = self.template_id._render_field('subject', res_ids=self.applicant_ids.ids)
+            subjects = self._render_field('subject', res_ids=self.applicant_ids.ids)
+            bodies = self._render_field('body', res_ids=self.applicant_ids.ids)
         else:
             subjects = {applicant.id: self.subject for applicant in self.applicant_ids}
+            bodies = {applicant.id: self.body for applicant in self.applicant_ids}
 
         for applicant in self.applicant_ids:
             if not applicant.partner_id:
-                applicant.partner_id = self.env['res.partner'].create({
+                applicant.partner_id = self.env['res.partner'].with_context(clean_context(self.env.context)).create({
                     'is_company': False,
                     'name': applicant.partner_name,
                     'email': applicant.email_from,
                     'phone': applicant.partner_phone,
-                    'mobile': applicant.partner_phone,
                 })
 
             attachment_ids = []
@@ -52,7 +54,7 @@ class ApplicantSendMail(models.TransientModel):
 
             applicant.message_post(
                 author_id=self.author_id.id,
-                body=self.body,
+                body=bodies[applicant.id],
                 email_layout_xmlid='mail.mail_notification_light',
                 message_type='comment',
                 partner_ids=applicant.partner_id.ids,

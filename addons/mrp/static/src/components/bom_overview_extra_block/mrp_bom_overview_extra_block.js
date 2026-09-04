@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { useBus } from "@web/core/utils/hooks";
 import { BomOverviewLine } from "../bom_overview_line/mrp_bom_overview_line";
 import { BomOverviewSpecialLine } from "../bom_overview_special_line/mrp_bom_overview_special_line";
@@ -21,11 +19,6 @@ export class BomOverviewExtraBlock extends Component {
         data: Object,
         precision: Number,
         changeFolded: Function,
-    };
-    static defaultProps = {
-        showAvailabilities: false,
-        showCosts: false,
-        extraColumnCount: 0,
     };
 
     setup() {

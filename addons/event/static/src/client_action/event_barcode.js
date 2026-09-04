@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { BarcodeScanner } from "@barcodes/components/barcode_scanner";
 import { Component, onWillStart } from "@odoo/owl";
@@ -13,7 +11,7 @@ import { scanBarcode } from "@web/core/barcode/barcode_dialog";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 
 export class EventScanView extends Component {
-    static template = "event.EventScanViewNoKiosk";
+    static template = "event.EventScanView";
     static components = { BarcodeScanner };
     static props = { ...standardActionServiceProps };
 
@@ -63,8 +61,10 @@ export class EventScanView extends Component {
      * When scanning a barcode, call Registration.register_attendee() to get
      * formatted registration information, notably its status or event-related
      * information. Open a confirmation / choice Dialog to confirm attendee.
+     * @param {Object} barcode
+     * @param {function} onNextScanTriggered
      */
-    async onBarcodeScanned(barcode) {
+    async onBarcodeScanned(barcode, onNextScanTriggered = () => {}) {
         const result = await this.orm.call("event.registration", "register_attendee", [], {
             barcode: barcode,
             event_id: this.eventId,
@@ -73,7 +73,6 @@ export class EventScanView extends Component {
         if (result.error && result.error === "invalid_ticket") {
             this.playSound("error");
             this.notification.add(_t("Invalid ticket"), {
-                title: _t("Warning"),
                 type: "danger",
             });
         } else {
@@ -83,7 +82,7 @@ export class EventScanView extends Component {
                 EventRegistrationSummaryDialog,
                 {
                     playSound: (type) => this.playSound(type),
-                    doNextScan: () => this.doNextScan(),
+                    doNextScan: onNextScanTriggered,
                     registration: result
                 }
             );
@@ -105,7 +104,7 @@ export class EventScanView extends Component {
         }
 
         if (barcode) {
-            await this.onBarcodeScanned(barcode);
+            await this.onBarcodeScanned(barcode, this.doNextScan.bind(this));
             if ("vibrate" in window.navigator) {
                 window.navigator.vibrate(100);
             }
@@ -118,16 +117,11 @@ export class EventScanView extends Component {
 
     onClickSelectAttendee() {
         if (this.isMultiEvent) {
-            this.actionService.doAction("event.event_registration_action", {
-                additionalContext: {
-                    is_registration_desk_view: true, // To remove in master
-                },
-            });
+            this.actionService.doAction("event.event_registration_action");
         } else {
             this.actionService.doAction("event.event_registration_action_kanban", {
                 additionalContext: {
                     active_id: this.eventId,
-                    is_registration_desk_view: true, // To remove in master
                     search_default_unconfirmed: true,
                     search_default_confirmed: true,
                 },

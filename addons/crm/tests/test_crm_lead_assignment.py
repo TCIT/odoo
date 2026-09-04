@@ -3,14 +3,17 @@
 
 import random
 
-from datetime import datetime
+from ast import literal_eval
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from freezegun import freeze_time
 from unittest.mock import patch
 
 from odoo import fields
 from odoo.addons.crm.tests.common import TestLeadConvertCommon
 from odoo.tests.common import tagged
 from odoo.tools import mute_logger
+from odoo.fields import Datetime
 
 
 class TestLeadAssignCommon(TestLeadConvertCommon):
@@ -142,9 +145,9 @@ class TestLeadAssign(TestLeadAssignCommon):
             count=14,
             suffix='Existing')
         self.assertEqual(existing_leads.team_id, self.sales_team_1, "Team should have lower sequence")
-        existing_leads[0].active = False  # lost
-        existing_leads[1].probability = 100  # not won
-        existing_leads[2].probability = 0  # not lost
+        existing_leads[0].action_set_lost()  # lost
+        existing_leads[1].probability = 100  # not won as stage is not won.
+        existing_leads[2].probability = 0  # not lost as active
         existing_leads.flush_recordset()
 
         self.members.invalidate_model(['lead_month_count'])
@@ -176,8 +179,12 @@ class TestLeadAssign(TestLeadAssignCommon):
             ['TestLeadInitial_0003']
         )
 
+        # TestLeadInitial_0007 has same partner as TestLeadInitial_0003
         self.assertEqual(len(teams_data[self.sales_team_1]['duplicates']), 1)
 
+        # TestLeadInitial_0005 had a 0 auto_proba when its proba was set to 0.
+        # Therefore, it is auto_proba. At this point, its proba is 9x.xx %, and it is selected.
+        # These are the two leads with the highest probabilities, as they are sorted before assignment.
         self.assertEqual(
             sorted(members_data[self.sales_team_1_m3]['assigned'].mapped('name')),
             ['TestLeadInitial_0000', 'TestLeadInitial_0005']
@@ -307,7 +314,7 @@ class TestLeadAssign(TestLeadAssignCommon):
     def test_assign_populated(self):
         """ Test assignment on a more high volume oriented test set in order to
         test more real life use cases. """
-        # fix the seed and avoid randomness (funny: try 1870)
+        # fix the seed and avoid randomness
         random.seed(1871)
 
         # create leads enough to assign one month of work
@@ -380,9 +387,9 @@ class TestLeadAssign(TestLeadAssignCommon):
         leads_st1 = leads.filtered_domain([('team_id', '=', self.sales_team_1.id)])
         leads_st2 = leads.filtered_domain([('team_id', '=', self.sales_team_convert.id)])
         leads_st3 = leads.filtered_domain([('team_id', '=', sales_team_3.id)])
-        self.assertEqual(len(leads_st1), 165)
-        self.assertEqual(len(leads_st2), 126)
-        self.assertEqual(len(leads_st3), 309)
+        self.assertEqual(len(leads_st1), 170)
+        self.assertEqual(len(leads_st2), 116)
+        self.assertEqual(len(leads_st3), 314)
 
         # salespersons assign
         self.members.invalidate_model(['lead_month_count', 'lead_day_count'])
@@ -394,6 +401,66 @@ class TestLeadAssign(TestLeadAssignCommon):
         self.assertMemberAssign(sales_team_3_m1, 2)  # 60 max on one month -> 2 daily
         self.assertMemberAssign(sales_team_3_m2, 2)  # 60 max on one month -> 2 daily
         self.assertMemberAssign(sales_team_3_m3, 1)  # 15 max on one month -> 1 daily
+
+    def test_assign_preferred_domain(self):
+        """ Test preferred domain use """
+        random.seed(1914)
+        preferred_tag = self.env['crm.tag'].create({'name': 'preferred'})
+
+        leads = self._create_leads_batch(
+            lead_type='lead',
+            user_ids=[False],
+            count=11,
+        )
+        leads[:8].write({'tag_ids': [(6, 0, preferred_tag.ids)]})
+        # commit probability and related fields
+        leads.flush_recordset()
+        self.assertInitialData()
+        test_sales_team = self.env['crm.team'].create({
+            'name': 'Sales Team 5',
+            'sequence': 15,
+            'alias_name': False,
+            'use_leads': True,
+            'use_opportunities': True,
+            'company_id': False,
+            'user_id': False,
+        })
+        test_sales_team_m1 = self.env['crm.team.member'].create({
+            'user_id': self.user_sales_manager.id,
+            'crm_team_id': test_sales_team.id,
+            'assignment_max': 150,
+            'assignment_domain': False,
+            'assignment_domain_preferred': "[('tag_ids', 'in', %s)]" % preferred_tag.ids,
+        })
+        test_sales_team_m2 = self.env['crm.team.member'].create({
+            'user_id': self.user_sales_leads.id,
+            'crm_team_id': test_sales_team.id,
+            'assignment_max': 150,
+            'assignment_domain': False,
+            'assignment_domain_preferred': False,
+        })
+        test_sales_team_m3 = self.env['crm.team.member'].create({
+            'user_id': self.user_sales_salesman.id,
+            'crm_team_id': test_sales_team.id,
+            'assignment_max': 150,
+            'assignment_domain': False,
+            'assignment_domain_preferred': False,
+        })
+
+        test_sales_team._action_assign_leads()
+
+        member_leads = self.env['crm.lead'].search([
+            ('user_id', '=', test_sales_team_m1.user_id.id),
+            ('team_id', '=', test_sales_team_m1.crm_team_id.id),
+            ('date_open', '>=', Datetime.now() - timedelta(hours=24)),
+        ])
+        self.assertEqual(
+                member_leads.filtered_domain(literal_eval(test_sales_team_m1.assignment_domain_preferred)),
+                member_leads
+            )
+        self.assertMemberAssign(test_sales_team_m1, 5)
+        self.assertMemberAssign(test_sales_team_m2, 3)
+        self.assertMemberAssign(test_sales_team_m3, 3)
 
     def test_assign_quota(self):
         """ Test quota computation """
@@ -464,6 +531,26 @@ class TestLeadAssign(TestLeadAssignCommon):
         self.assertEqual(leads[5].team_id, self.sales_team_convert, 'Assigned lead should not be reassigned')
         self.assertEqual(leads[5].user_id, self.user_sales_manager, 'Assigned lead should not be reassigned')
 
+    def test_assign_team_and_salesperson_on_duplicate_lead(self):
+        """Ensure leads duplicated from an existing lead are assigned correctly."""
+        duplicate_lead = self.env['crm.lead'].create({
+            'name': 'Test Lead',
+            'type': 'opportunity',
+            'probability': 15,
+            'partner_id': self.contact_1.id,
+            'team_id': False,
+            'user_id': False,
+        }).copy()
+        self.assertFalse(duplicate_lead.date_open)
+
+        sales_team = self.sales_team_1
+        sales_team.assignment_domain = [('user_id', '=', False)]
+        with self.with_user('user_sales_manager'):
+            sales_team._action_assign_leads()
+
+        self.assertEqual(duplicate_lead.team_id, sales_team)
+        self.assertTrue(duplicate_lead.user_id)
+
     @mute_logger('odoo.models.unlink')
     def test_merge_assign_keep_master_team(self):
         """ Check existing opportunity keep its team and salesman when merged with a new lead """
@@ -533,3 +620,52 @@ class TestLeadAssign(TestLeadAssignCommon):
         members_data = sales_team_4._assign_and_convert_leads()
         self.assertFalse(members_data,
             "If team member has lead count greater than max assign,then do not assign any more")
+
+    def test_assign_fairness_member_order_bias(self):
+        """Make sure leads are distributed fairly across team members when all else is equal."""
+        random.seed(1000)
+
+        test_team = self.env['crm.team'].create({'name': 'Sales Team'})
+        senior = self.env['crm.team.member'].create({
+            'user_id': self.user_sales_leads.id,
+            'crm_team_id': test_team.id,
+            'assignment_max': 150,
+        })
+        junior = self.env['crm.team.member'].create({
+            'user_id': self.user_sales_salesman.id,
+            'crm_team_id': test_team.id,
+            'assignment_max': 150,
+        })
+        self.assertEqual(
+            (senior | junior).sorted().ids,
+            (senior | junior).ids,
+            "Senior should come before junior."
+        )
+
+        # Simulate the daily cron for 30 days. Each time there's 1 lead to be assigned.
+        base_time = datetime(2026, 1, 1, 8, 0, 0)
+        for run in range(30):
+            now = base_time + timedelta(hours=25) * run  # 25 hours to be outside of lead_day_count
+            with freeze_time(now), patch.object(self.env.cr, 'now', lambda: now):
+                self.env['crm.lead'].create({
+                    'name': f'TestLead_{run}',
+                    'type': 'lead',
+                    'user_id': False,
+                    'email_from': f'lead_{run}@example.com',
+                    'probability': 50,
+                    'team_id': test_team.id,
+                })
+                with mute_logger('odoo.addons.crm.models.crm_team'):
+                    test_team._assign_and_convert_leads()
+
+        senior_leads = self.env['crm.lead'].search_count([
+            ('user_id', '=', senior.user_id.id),
+            ('team_id', '=', test_team.id),
+        ])
+        junior_leads = self.env['crm.lead'].search_count([
+            ('user_id', '=', junior.user_id.id),
+            ('team_id', '=', test_team.id),
+        ])
+
+        self.assertEqual(senior_leads, 15)
+        self.assertEqual(junior_leads, 15)

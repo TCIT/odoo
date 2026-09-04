@@ -39,7 +39,7 @@
                 t-att-class="{ active: model.metaData.cumulated }"
             />
         </div>
-        <div t-if="model.metaData.mode !== 'pie' and model.metaData.domains.length === 1" class="btn-group" role="toolbar" aria-label="Sort graph" name="toggleOrderToolbar">
+        <div t-if="model.metaData.mode !== 'pie'" class="btn-group" role="toolbar" aria-label="Sort graph" name="toggleOrderToolbar">
             <button class="btn btn-secondary fa fa-sort-amount-desc o_graph_button" data-tooltip="Descending" aria-label="Descending"
                 t-on-click="() => this.toggleOrder('DESC')"
                 t-att-class="{ active: model.metaData.order === 'DESC' }"
@@ -63,21 +63,13 @@
                 <t t-set-slot="control-panel-navigation-additional">
                     <t t-component="searchBarToggler.component" t-props="searchBarToggler.props"/>
                 </t>
-                <t t-if="model.data">
-                    <t t-if="!model.hasData() or model.useSampleModel and props.info.noContentHelp" t-call="web.ActionHelper">
-                        <t t-set="noContentHelp" t-value="props.info.noContentHelp"/>
-                    </t>
-                    <t t-if="model.data.exceeds">
-                        <div class="alert alert-info text-center o_graph_alert" role="status">
-                            There are too many data. The graph only shows a sample. Use the filters to refine the scope.
-                            <a class="o_graph_load_all_btn" href="#" t-on-click="() => this.loadAll()">
-                                Load everything anyway.
-                            </a>
-                        </div>
+                <t t-if="model.isReady and model.data">
+					<t t-if="!model.hasData() or model.useSampleModel and props.info.noContentHelp">
+						<ActionHelper noContentHelp="props.info.noContentHelp" showRibbon="model.useSampleModel"/>
                     </t>
                     <t t-component="props.Renderer" model="model" buttonTemplate="props.buttonTemplate" />
                 </t>
-                <t t-else="" t-call="web.NoContentHelper">
+                <t t-elif="model.isReady" t-call="web.NoContentHelper">
                     <t t-set="title">Invalid data</t>
                     <t t-set="description">Pie chart cannot mix positive and negative numbers. Try to change your domain to only display positive results</t>
                 </t>

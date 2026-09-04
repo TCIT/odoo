@@ -10,6 +10,10 @@ const ClosingMode = {
 export class DropdownItem extends Component {
     static template = "web.DropdownItem";
     static props = {
+        tag: {
+            type: String,
+            optional: true,
+        },
         class: {
             type: [String, Object],
             optional: true,
@@ -41,7 +45,7 @@ export class DropdownItem extends Component {
         if (this.props.attrs && this.props.attrs.href) {
             ev.preventDefault();
         }
-        this.props.onSelected?.();
+        this.props.onSelected?.(ev);
         switch (this.props.closingMode) {
             case ClosingMode.ClosestParent:
                 this.dropdownControl.close();

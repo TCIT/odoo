@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { _t } from '@web/core/l10n/translation';
 import { ConfirmationDialog, deleteConfirmationMessage } from '@web/core/confirmation_dialog/confirmation_dialog';
 import { ListRenderer } from '@web/views/list/list_renderer';
@@ -30,13 +28,15 @@ export class PAVListRenderer extends ListRenderer {
         if (record.isNew) {
             return super.onDeleteRecord(...arguments);
         }
-        this.dialog.add(ConfirmationDialog, {
-            title: _t("Bye-bye, record!"),
-            body: deleteConfirmationMessage,
-            confirmLabel: _t("Delete"),
-            confirm: () => this.onConfirmDelete(record),
-            cancel: () => { },
-            cancelLabel: _t("No, keep it"),
+        return new Promise((resolve) => {
+            this.dialog.add(ConfirmationDialog, {
+                title: _t("Bye-bye, record!"),
+                body: deleteConfirmationMessage,
+                confirmLabel: _t("Delete"),
+                confirm: () => this.onConfirmDelete(record).then(resolve),
+                cancel: resolve,
+                cancelLabel: _t("No, keep it"),
+            });
         });
     }
 

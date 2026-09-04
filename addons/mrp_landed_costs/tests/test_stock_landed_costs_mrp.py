@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
 from odoo.tests import tagged, Form
 
@@ -18,24 +18,21 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
         cls.supplier_location_id = cls.env.ref('stock.stock_location_suppliers')
         cls.stock_location_id = cls.company_data['default_warehouse'].lot_stock_id
         cls.customer_location_id = cls.env.ref('stock.stock_location_customers')
-        cls.categ_all = cls.env.ref('product.product_category_all')
         # Create product refrigerator & oven
         cls.product_component1 = cls.env['product.product'].create({
             'name': 'Component1',
             'is_storable': True,
             'standard_price': 1.0,
-            'categ_id': cls.categ_all.id
         })
         cls.product_component2 = cls.env['product.product'].create({
             'name': 'Component2',
             'is_storable': True,
             'standard_price': 2.0,
-            'categ_id': cls.categ_all.id
         })
         cls.product_refrigerator = cls.env['product.product'].create({
             'name': 'Refrigerator',
             'is_storable': True,
-            'categ_id': cls.categ_all.id
+            'categ_id': cls.env.ref('product.product_category_goods').id,
         })
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.bom_refri = cls.env['mrp.bom'].create({
@@ -64,19 +61,18 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
 
         cls.product_refrigerator.categ_id.property_cost_method = 'fifo'
         cls.product_refrigerator.categ_id.property_valuation = 'real_time'
-        cls.product_refrigerator.categ_id.property_stock_account_input_categ_id = cls.company_data['default_account_stock_in']
-        cls.product_refrigerator.categ_id.property_stock_account_output_categ_id = cls.company_data['default_account_stock_out']
 
         # Create service type product 1.Labour 2.Brokerage 3.Transportation 4.Packaging
         cls.landed_cost = cls.env['product.product'].create({
             'name': 'Landed Cost',
             'type': 'service',
+            'categ_id': cls.env.ref('product.product_category_services').id,
         })
         cls.allow_user = cls.env['res.users'].with_context({'no_reset_password': True}).create({
             'name': "Adviser",
             'login': "fm",
             'email': "accountmanager@yourcompany.com",
-            'groups_id': [(6, 0, [cls.env.ref('account.group_account_manager').id, cls.env.ref('mrp.group_mrp_user').id, cls.env.ref('stock.group_stock_manager').id])]
+            'group_ids': [(6, 0, [cls.env.ref('account.group_account_manager').id, cls.env.ref('mrp.group_mrp_user').id, cls.env.ref('stock.group_stock_manager').id])]
         })
 
     def test_landed_cost_on_mrp(self):
@@ -123,7 +119,7 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
 
         # Check domain of the views
         self.assertTrue(man_order in self.env['mrp.production'].search([
-            ('move_finished_ids.stock_valuation_layer_ids', '!=', False), ('company_id', '=', landed_cost.company_id.id)]))
+            ('move_finished_ids.is_in', '!=', False), ('company_id', '=', landed_cost.company_id.id)]))
 
         landed_cost.mrp_production_ids = [(6, 0, [man_order.id])]
         landed_cost.cost_lines = [(0, 0, {'product_id': self.landed_cost.id, 'price_unit': 5.0, 'split_method': 'equal'})]
@@ -131,10 +127,11 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
 
         self.assertEqual(landed_cost.state, 'done')
         self.assertTrue(landed_cost.account_move_id)
-        # Link to one layer of product_refrigerator
-        self.assertEqual(len(landed_cost.stock_valuation_layer_ids), 1)
-        self.assertEqual(landed_cost.stock_valuation_layer_ids.product_id, self.product_refrigerator)
-        self.assertEqual(landed_cost.stock_valuation_layer_ids.value, 5.0)
+        # Adjustment applied to the single finished move of product_refrigerator
+        self.assertEqual(len(landed_cost.valuation_adjustment_lines), 1)
+        self.assertEqual(landed_cost.valuation_adjustment_lines.product_id, self.product_refrigerator)
+        self.assertEqual(landed_cost.valuation_adjustment_lines.additional_landed_cost, 5.0)
+        self.assertEqual(production_move.value, 15.0)
 
     def test_landed_cost_on_mrp_02(self):
         """
@@ -146,7 +143,7 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
             'name': "Stock Manager",
             'login': "test",
             'email': "test@test.com",
-            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_manager').id])]
+            'group_ids': [(6, 0, [self.env.ref('stock.group_stock_manager').id])]
         })
         # Make some stock and reserve
         self.env['stock.quant']._update_available_quantity(self.product_component1, self.warehouse_1.lot_stock_id, 10)
@@ -173,9 +170,51 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
 
         # Check that the MO can be selected by the stock_manger user
         self.assertTrue(man_order in self.env['mrp.production'].search([
-            ('move_finished_ids.stock_valuation_layer_ids', '!=', False), ('company_id', '=', landed_cost.company_id.id)]))
+            ('move_finished_ids.is_in', '!=', False), ('company_id', '=', landed_cost.company_id.id)]))
         landed_cost.mrp_production_ids = [(6, 0, [man_order.id])]
 
         # Check that he can validate the landed cost without an access error
         landed_cost.with_user(stock_manager).button_validate()
         self.assertEqual(landed_cost.state, 'done')
+
+    def test_landed_cost_on_mrp_03(self):
+        """
+            Do not apply landed costs to byproducts without cost_share
+        """
+        # Create product refrigerator & oven
+        byproduct1 = self.env['product.product'].create({
+            'name': 'Byproduct1',
+            'is_storable': True,
+            'categ_id': self.env.ref('product.product_category_goods').id,
+        })
+        byproduct2 = self.env['product.product'].create({
+            'name': 'Byproduct2',
+            'is_storable': True,
+            'categ_id': self.env.ref('product.product_category_goods').id,
+        })
+        self.bom_refri.write({
+            'byproduct_ids': [
+                (0, 0, {'product_id': byproduct1.id, 'product_qty': 1, 'cost_share': 100}),
+                (0, 0, {'product_id': byproduct2.id, 'product_qty': 1, 'cost_share': 0}),
+            ],
+        })
+        man_order_form = Form(self.env['mrp.production'].with_user(self.allow_user))
+        man_order_form.product_id = self.product_refrigerator
+        man_order_form.bom_id = self.bom_refri
+        man_order_form.product_qty = 2.0
+        man_order = man_order_form.save()
+        man_order.action_confirm()
+        # produce product
+        mo_form = Form(man_order.with_user(self.allow_user))
+        mo_form.qty_producing = 2
+        man_order = mo_form.save()
+        man_order.button_mark_done()
+
+        landed_cost = Form(self.env['stock.landed.cost'].with_user(self.allow_user)).save()
+        landed_cost.target_model = 'manufacturing'
+        landed_cost.mrp_production_ids = [(6, 0, [man_order.id])]
+        landed_cost.cost_lines = [(0, 0, {'product_id': self.landed_cost.id, 'price_unit': 5.0, 'split_method': 'equal'})]
+        landed_cost.compute_landed_cost()
+
+        # check the valuation adjustment lines
+        self.assertFalse(byproduct2 in landed_cost.valuation_adjustment_lines.product_id)

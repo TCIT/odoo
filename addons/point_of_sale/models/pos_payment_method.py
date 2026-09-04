@@ -3,7 +3,7 @@ from odoo.exceptions import UserError, ValidationError
 
 
 class PosPaymentMethod(models.Model):
-    _name = "pos.payment.method"
+    _name = 'pos.payment.method'
     _description = "Point of Sale Payment Methods"
     _order = "sequence, id"
     _inherit = ['pos.load.mixin']
@@ -12,10 +12,13 @@ class PosPaymentMethod(models.Model):
         return []
 
     def _get_payment_method_type(self):
-        selection = [('none', 'None required'), ('terminal', 'Terminal')]
+        selection = [('none', self.env._("None required")), ('terminal', self.env._("Terminal"))]
         if self.env['res.partner.bank'].get_available_qr_methods_in_sequence():
-            selection.append(('qr_code', 'Bank App (QR Code)'))
+            selection.append(('qr_code', self.env._("Bank App (QR Code)")))
         return selection
+
+    def _is_online_payment(self):
+        return False
 
     name = fields.Char(string="Method", required=True, translate=True, help='Defines the name of the payment method that will be displayed in the Point of Sale when the payments are selected.')
     sequence = fields.Integer(copy=False)
@@ -34,6 +37,8 @@ class PosPaymentMethod(models.Model):
         string='Journal',
         domain=['|', '&', ('type', '=', 'cash'), ('pos_payment_method_ids', '=', False), ('type', '=', 'bank')],
         ondelete='restrict',
+        index='btree_not_null',
+        check_company=True,
         help='Leave empty to use the receivable account of customer.\n'
              'Defines the journal where to book the accumulated payments (or individual payment if Identify Customer is true) after closing the session.\n'
              'For cash journal, we directly write to the default account in the journal via statement lines.\n'
@@ -46,13 +51,14 @@ class PosPaymentMethod(models.Model):
     open_session_ids = fields.Many2many('pos.session', string='Pos Sessions', compute='_compute_open_session_ids', help='Open PoS sessions that are using this payment method.')
     config_ids = fields.Many2many('pos.config', string='Point of Sale')
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+    default_pos_receivable_account_name = fields.Char(related="company_id.account_default_pos_receivable_account_id.display_name", string="Default Receivable Account Name")
     use_payment_terminal = fields.Selection(selection=lambda self: self._get_payment_terminal_selection(), string='Use a Payment Terminal', help='Record payments with a terminal on this journal.')
     # used to hide use_payment_terminal when no payment interfaces are installed
     hide_use_payment_terminal = fields.Boolean(compute='_compute_hide_use_payment_terminal')
     active = fields.Boolean(default=True)
     type = fields.Selection(selection=[('cash', 'Cash'), ('bank', 'Bank'), ('pay_later', 'Customer Account')], compute="_compute_type")
     image = fields.Image("Image", max_width=50, max_height=50)
-    payment_method_type = fields.Selection(selection=_get_payment_method_type, string="Integration", default='none', required=True)
+    payment_method_type = fields.Selection(selection=lambda self: self._get_payment_method_type(), string="Integration", default='none', required=True)
     default_qr = fields.Char(compute='_compute_qr')
     qr_code_method = fields.Selection(
         string='QR Code Format', copy=False,
@@ -62,11 +68,17 @@ class PosPaymentMethod(models.Model):
     hide_qr_code_method = fields.Boolean(compute='_compute_hide_qr_code_method')
 
     @api.model
-    def _load_pos_data_domain(self, data):
+    def get_provider_status(self, modules_list):
+        return {
+            'state': self.env['ir.module.module'].search_read([('name', 'in', modules_list)], ['name', 'state']),
+        }
+
+    @api.model
+    def _load_pos_data_domain(self, data, config):
         return ['|', ('active', '=', False), ('active', '=', True)]
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
+    def _load_pos_data_fields(self, config):
         return ['id', 'name', 'is_cash_count', 'use_payment_terminal', 'split_transactions', 'type', 'image', 'sequence', 'payment_method_type', 'default_qr']
 
     @api.depends('type', 'payment_method_type')
@@ -83,12 +95,12 @@ class PosPaymentMethod(models.Model):
     @api.onchange('payment_method_type')
     def _onchange_payment_method_type(self):
         # We don't display the field if there is only one option and cannot set a default on it
+        if self.payment_method_type == 'none':
+            self.use_payment_terminal = False
+
         selection_options = self.env['res.partner.bank'].get_available_qr_methods_in_sequence()
         if len(selection_options) == 1:
             self.qr_code_method = selection_options[0][0]
-        # Unset the use_payment_terminal field when switching to a payment method that doesn't use it
-        if self.payment_method_type != 'terminal':
-            self.use_payment_terminal = None
 
     @api.onchange('use_payment_terminal')
     def _onchange_use_payment_terminal(self):
@@ -113,6 +125,9 @@ class PosPaymentMethod(models.Model):
         for pm in self:
             if pm.journal_id and pm.journal_id.type not in ['cash', 'bank']:
                 raise UserError(_("Only journals of type 'Cash' or 'Bank' could be used with payment methods."))
+            if pm.journal_id and pm.journal_id.type == 'bank':
+                chart_template = self.with_context(allowed_company_ids=self.env.company.root_id.ids).env['account.chart.template']
+                pm.outstanding_account_id = chart_template.ref('account_journal_payment_debit_account_id', raise_if_not_found=False) or self.company_id.transfer_account_id
         if self.is_cash_count:
             self.use_payment_terminal = False
 
@@ -195,6 +210,22 @@ class PosPaymentMethod(models.Model):
                 error_msg = self.journal_id.bank_account_id._get_error_messages_for_qr(self.qr_code_method, False, rec.company_id.currency_id)
                 if error_msg:
                     raise ValidationError(error_msg)
+
+    @api.constrains('config_ids')
+    def _check_company_config(self):
+        for payment in self:
+            if self.env['pos.config'].search_count([('id', 'in', payment.config_ids.ids), ('company_id', '!=', payment.company_id.id)]):
+                raise ValidationError(_("The points of sale for the payment method %s must belong to its company.", payment.name))
+
+    @api.constrains('config_ids', 'is_cash_count', 'journal_id')
+    def _check_cash_method_single_shop(self):
+        for method in self:
+            is_cash = method.is_cash_count or (method.journal_id and method.journal_id.type == 'cash')
+            if is_cash and len(method.config_ids) > 1:
+                raise ValidationError(_(
+                    "Validation Error: You cannot assign the same Cash payment method to multiple POS Shops. "
+                    "Please create a separate Cash payment method for each shop."
+                ))
 
     @api.depends('payment_method_type', 'journal_id')
     def _compute_qr(self):

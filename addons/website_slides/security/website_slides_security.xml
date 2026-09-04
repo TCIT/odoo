@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <record model="ir.module.category" id="base.module_category_website_elearning">
+        <record model="res.groups.privilege" id="res_groups_privilege_elearning">
+            <field name="name">eLearning</field>
             <field name="sequence">21</field>
+            <field name="category_id" ref="base.module_category_website"/>
         </record>
 
         <record id="group_website_slides_officer" model="res.groups">
             <field name="name">Officer</field>
-            <field name="category_id" ref="base.module_category_website_elearning"/>
+            <field name="sequence">10</field>
+            <field name="privilege_id" ref="res_groups_privilege_elearning"/>
             <field name="implied_ids" eval="[(4, ref('website.group_website_restricted_editor'))]"/>
         </record>
 
         <record id="group_website_slides_manager" model="res.groups">
             <field name="name">Manager</field>
-            <field name="category_id" ref="base.module_category_website_elearning"/>
+            <field name="sequence">20</field>
+            <field name="privilege_id" ref="res_groups_privilege_elearning"/>
             <field name="implied_ids" eval="[(4, ref('group_website_slides_officer'))]"/>
-            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
-        </record>
-
-        <record id="base.default_user" model="res.users">
-            <field name="groups_id" eval="[(4,ref('group_website_slides_manager'))]"/>
+            <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         </record>
 
         <data noupdate="1">
@@ -30,10 +30,10 @@
         </record>
 
         <record id="rule_slide_channel_visibility_public_user" model="ir.rule">
-            <field name="name">Channel: public: restricted to public and published</field>
+            <field name="name">Channel: public: restricted to public/link-based and published</field>
             <field name="model_id" ref="model_slide_channel"/>
             <field name="groups" eval="[(4, ref('base.group_public'))]"/>
-            <field name="domain_force">[('website_published', '=', True), ('visibility', '=', 'public')]</field>
+            <field name="domain_force">[('website_published', '=', True), ('visibility', 'in', ['public', 'link'])]</field>
             <field name="perm_unlink" eval="0"/>
             <field name="perm_write" eval="0"/>
             <field name="perm_read" eval="1"/>
@@ -41,14 +41,14 @@
         </record>
 
         <record id="rule_slide_channel_visibility_signed_in_user" model="ir.rule">
-            <field name="name">Channel: portal/user: restricted to published, public or (invited) attendee, connected user</field>
+            <field name="name">Channel: portal/user: restricted to published, public or (invited) attendee or link-based, connected user</field>
             <field name="model_id" ref="model_slide_channel"/>
             <field name="groups" eval="[(4, ref('base.group_portal')), (4, ref('base.group_user'))]"/>
             <field name="domain_force">[
                 '&amp;',
                     ('website_published', '=', True),
                     '|',
-                        ('visibility', 'in', ('public', 'connected')),
+                        ('visibility', 'in', ('public', 'connected', 'link')),
                         '|',
                             ('is_member_invited', '=', True),
                             ('is_member', '=', True),
@@ -111,13 +111,13 @@
         </record>
 
         <record id="rule_slide_slide_public_user" model="ir.rule">
-            <field name="name">Slide: public: restricted to published or public channel &amp; (category or previewable)</field>
+            <field name="name">Slide: public: restricted to published or public/link-based channel &amp; (category or previewable)</field>
             <field name="model_id" ref="model_slide_slide"/>
             <field name="groups" eval="[(4, ref('base.group_public'))]"/>
             <field name="domain_force">[
                     ('channel_id.website_published', '=', True),
                     ('website_published', '=', True),
-                    ('channel_id.visibility', '=', 'public'),
+                    ('channel_id.visibility', 'in', ['public', 'link']),
                     '|',
                         ('is_category','=', True),
                         ('is_preview', '=', True),
@@ -130,7 +130,7 @@
         </record>
 
         <record id="rule_slide_slide_signed_in_user" model="ir.rule">
-            <field name="name">Slide: portal/user: restricted to published and connected user, (invited) attendee if course visible to attendees only</field>
+            <field name="name">Slide: portal/user: restricted to published and connected user, (invited) attendee or link-based, if course visible to attendees only</field>
             <field name="model_id" ref="model_slide_slide"/>
             <field name="groups" eval="[(4, ref('base.group_portal')), (4, ref('base.group_user'))]"/>
             <field name="domain_force">[
@@ -143,7 +143,7 @@
                     '|',
                         '&amp;',
                             '|',
-                                ('channel_id.visibility', 'in', ('public','connected')),
+                                ('channel_id.visibility', 'in', ('public', 'connected',  'link')),
                                 ('channel_id.is_member_invited', '=', True),
                             '|',
                                 ('is_category', '=', True),

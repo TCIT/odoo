@@ -58,7 +58,7 @@
                 <separator/>
                 <filter string="Exhibitors" name="filter_is_exhibitor" domain="[('exhibitor_type', 'in', ['exhibitor', 'online'])]"/>
                 <filter string="Online" name="filter_is_exhibitor" domain="[('exhibitor_type', '=', 'online')]"/>
-                <group string="Group By" expand="0">
+                <group>
                     <filter string="Event" name="group_by_event_id" domain="[]" context="{'group_by': 'event_id'}"/>
                     <filter string="Level" name="group_by_sponsor_type_id" domain="[]" context="{'group_by': 'sponsor_type_id'}"/>
                 </group>
@@ -94,17 +94,16 @@
                             <field name="email" widget="email" string="Email"
                                 placeholder="e.g. : open.wood.decoration@example.com"/>
                             <field name="phone" widget="phone" string="Phone" options="{'enable_sms': True}"/>
-                            <field name="mobile" widget="phone" string="Mobile" options="{'enable_sms': True}"/>
                             <field name="url" widget="url" string="Website"
                                 placeholder="e.g. : https://www.odoo.com"/>
                         </group>
                         <group>
-                            <field name="event_id"/>
+                            <field name="event_id" placeholder="All Events"/>
                             <field name="sponsor_type_id"/>
                             <field name="exhibitor_type" required="1"/>
                             <!-- Use website_published because is_published already used and widget conflicts -->
                             <field name="website_published" widget="boolean_toggle"
-                                string="Display in footer"
+                                string="Display on website footer"
                                 invisible="exhibitor_type != 'sponsor'"/>
                             <label for="hour_from" string="Opening Hours"
                                 invisible="exhibitor_type == 'sponsor'"/>
@@ -114,26 +113,15 @@
                                 <field name="hour_to" widget="float_time" nolabel="1" class="oe_inline"/>
                                 <field name="event_date_tz" nolabel="1" class="oe_inline"/>
                             </div>
+                            <field name="show_on_ticket"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Description"
                             name="page_description"
                             invisible="exhibitor_type == 'sponsor'">
-                            <field name="website_description" nolabel="1" options="{'disableVideo': False}"
+                            <field name="website_description" nolabel="1" options="{'allowVideo': True}"
                                 placeholder='e.g. "Openwood specializes in home decoration..."'/>
-                        </page>
-                        <page string="Online"
-                            name="page_online"
-                            invisible="exhibitor_type != 'online'">
-                            <group>
-                                <group>
-                                    <field name="room_name" required="exhibitor_type == 'online'" string="Jitsi Name"/>
-                                    <field name="room_lang_id"/>
-                                    <field name="room_max_capacity" required="exhibitor_type == 'online'"/>
-                                    <field name="chat_room_id" groups="base.group_no_one"/>
-                                </group>
-                            </group>
                         </page>
                     </notebook>
                 </sheet>
@@ -152,11 +140,11 @@
                 <field name="name"/>
                 <field name="email"/>
                 <field name="phone"/>
-                <field name="mobile"/>
                 <field name="url" string="Website"/>
                 <field name="sponsor_type_id"/>
                 <field name="is_published" optional="show"/>
                 <field name="exhibitor_type"/>
+                <field name="show_on_ticket" optional="hide"/>
             </list>
         </field>
     </record>

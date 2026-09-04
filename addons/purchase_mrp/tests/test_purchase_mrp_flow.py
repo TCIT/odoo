@@ -17,38 +17,18 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         super().setUpClass()
         # Useful models
         cls.UoM = cls.env['uom.uom']
-        cls.categ_unit = cls.env.ref('uom.product_uom_categ_unit')
-        cls.categ_kgm = cls.env.ref('uom.product_uom_categ_kgm')
         cls.warehouse = cls.env['stock.warehouse'].search([('company_id', '=', cls.env.company.id)])
         cls.stock_location = cls.warehouse.lot_stock_id
 
         grp_uom = cls.env.ref('uom.group_uom')
         group_user = cls.env.ref('base.group_user')
         group_user.write({'implied_ids': [(4, grp_uom.id)]})
-        cls.env.user.write({'groups_id': [(4, grp_uom.id)]})
+        cls.env.user.write({'group_ids': [(4, grp_uom.id)]})
 
-        cls.uom_kg = cls.env['uom.uom'].search([('category_id', '=', cls.categ_kgm.id), ('uom_type', '=', 'reference')],
-                                                 limit=1)
-        cls.uom_kg.write({
-            'name': 'Test-KG',
-            'rounding': 0.000001})
-        cls.uom_gm = cls.UoM.create({
-            'name': 'Test-G',
-            'category_id': cls.categ_kgm.id,
-            'uom_type': 'smaller',
-            'factor': 1000.0,
-            'rounding': 0.001})
-        cls.uom_unit = cls.env['uom.uom'].search(
-            [('category_id', '=', cls.categ_unit.id), ('uom_type', '=', 'reference')], limit=1)
-        cls.uom_unit.write({
-            'name': 'Test-Unit',
-            'rounding': 0.01})
-        cls.uom_dozen = cls.UoM.create({
-            'name': 'Test-DozenA',
-            'category_id': cls.categ_unit.id,
-            'factor_inv': 12,
-            'uom_type': 'bigger',
-            'rounding': 0.001})
+        cls.uom_kg = cls.env.ref('uom.product_uom_kgm')
+        cls.uom_gm = cls.env.ref('uom.product_uom_gram')
+        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
+        cls.uom_dozen = cls.env.ref('uom.product_uom_dozen')
 
         # Creating all components
         cls.component_a = cls._create_product_with_form('Comp A', cls.uom_unit)
@@ -155,15 +135,13 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
 
     @classmethod
     def _create_product_with_form(cls, name, uom_id, routes=()):
-        p = Form(cls.env['product.product'])
-        p.name = name
-        p.is_storable = True
-        p.uom_id = uom_id
-        p.uom_po_id = uom_id
-        p.route_ids.clear()
-        for r in routes:
-            p.route_ids.add(r)
-        return p.save()
+        return cls.env['product.product'].create({
+            'name': name,
+            'is_storable': True,
+            'categ_id': cls.env.ref('product.product_category_goods').id,
+            'uom_id': uom_id.id,
+            'route_ids': [Command.set([route.id for route in routes])],
+        })
 
         # Helper to process quantities based on a dict following this structure :
         #
@@ -243,7 +221,28 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             self.component_c,
         ]
 
-        self.assertEqual(sum([k.standard_price * k.qty_available for k in components]), 120 * 1260)
+        self.assertAlmostEqual(sum(k.standard_price * k.qty_available for k in components), 120 * 1260, delta=0.5)
+
+    def test_kit_component_packaging_uom_not_converted_po(self):
+        """ The receipt move of a kit component must keep the component's own
+        UoM as packaging UoM."""
+        kit, component = self.env['product.product'].create([
+            {'name': 'Kit UoM', 'uom_id': self.uom_unit.id},
+            {'name': 'Comp Kg', 'is_storable': True, 'uom_id': self.uom_kg.id},
+        ])
+        self.env['mrp.bom'].create({
+            'product_tmpl_id': kit.product_tmpl_id.id,
+            'type': 'phantom',
+            'bom_line_ids': [Command.create({'product_id': component.id, 'product_qty': 1.0})],
+        })
+        po = self.env['purchase.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({'product_id': kit.id, 'product_qty': 1.0})],
+        })
+        po.button_confirm()
+        component_move = po.picking_ids.move_ids
+        self.assertEqual(component_move.product_uom, self.uom_kg)
+        self.assertEqual(component_move.packaging_uom_id, self.uom_kg)
 
     def test_kit_component_cost_multi_currency(self):
         # Set kit and component product to automated FIFO
@@ -287,8 +286,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         po.button_confirm()
         po.picking_ids.button_validate()
 
-        layer = po.picking_ids.move_ids.stock_valuation_layer_ids
-        self.assertEqual(layer.unit_cost, 1)
+        self.assertEqual(po.picking_ids.move_ids.value, 3)
 
     def test_01_sale_mrp_kit_qty_delivered(self):
         """ Test that the quantities delivered are correct when
@@ -498,16 +496,16 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         manufacture_route = warehouse.manufacture_pull_id.route_id
 
         vendor1 = self.env['res.partner'].create({'name': 'aaa', 'email': 'from.test@example.com'})
-        supplier_info1 = self.env['product.supplierinfo'].create({
-            'partner_id': vendor1.id,
-            'price': 50,
-        })
 
         component = self.env['product.product'].create({
             'name': 'component',
             'is_storable': True,
             'route_ids': [(4, buy_route.id)],
-            'seller_ids': [(6, 0, [supplier_info1.id])],
+        })
+        self.env['product.supplierinfo'].create({
+            'product_id': component.id,
+            'partner_id': vendor1.id,
+            'price': 50,
         })
         finished = self.env['product.product'].create({
             'name': 'finished',
@@ -547,10 +545,10 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # Delivery to trigger replenishment
         picking_form = Form(self.env['stock.picking'])
         picking_form.picking_type_id = warehouse.out_type_id
-        with picking_form.move_ids_without_package.new() as move:
+        with picking_form.move_ids.new() as move:
             move.product_id = finished
             move.product_uom_qty = 3
-        with picking_form.move_ids_without_package.new() as move:
+        with picking_form.move_ids.new() as move:
             move.product_id = component
             move.product_uom_qty = 2
         picking = picking_form.save()
@@ -561,7 +559,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             ('product_id', '=', component.id),
         ]).order_id
         self.assertTrue(purchase)
-        self.assertEqual(purchase.order_line.product_qty, 5)
+        self.assertEqual(len(purchase), 2)
+        self.assertEqual(sum(purchase.order_line.mapped('product_qty')), 5)
 
     def test_01_purchase_mrp_kit_qty_change(self):
         self.partner = self.env['res.partner'].create({'name': 'Test Partner'})
@@ -569,22 +568,22 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # Create a PO with one unit of the kit product
         self.po = self.env['purchase.order'].create({
             'partner_id': self.partner.id,
-            'order_line': [(0, 0, {'name': self.kit_1.name, 'product_id': self.kit_1.id, 'product_qty': 1, 'product_uom': self.kit_1.uom_id.id, 'price_unit': 60.0, 'date_planned': fields.Datetime.now()})],
+            'order_line': [(0, 0, {'name': self.kit_1.name, 'product_id': self.kit_1.id, 'product_qty': 1, 'product_uom_id': self.kit_1.uom_id.id, 'price_unit': 60.0, 'date_planned': fields.Datetime.now()})],
         })
         # Validate the PO
         self.po.button_confirm()
 
         # Check the component qty in the created picking
-        self.assertEqual(self.po.picking_ids.move_ids_without_package[0].product_uom_qty, 2, "The quantity of components must be created according to the BOM")
-        self.assertEqual(self.po.picking_ids.move_ids_without_package[1].product_uom_qty, 1, "The quantity of components must be created according to the BOM")
-        self.assertEqual(self.po.picking_ids.move_ids_without_package[2].product_uom_qty, 3, "The quantity of components must be created according to the BOM")
+        self.assertEqual(self.po.picking_ids.move_ids[0].product_uom_qty, 2, "The quantity of components must be created according to the BOM")
+        self.assertEqual(self.po.picking_ids.move_ids[1].product_uom_qty, 1, "The quantity of components must be created according to the BOM")
+        self.assertEqual(self.po.picking_ids.move_ids[2].product_uom_qty, 3, "The quantity of components must be created according to the BOM")
 
         # Update the kit quantity in the PO
         self.po.order_line[0].product_qty = 2
         # Check the component qty after the update
-        self.assertEqual(self.po.picking_ids.move_ids_without_package[0].product_uom_qty, 4, "The amount of the kit components must be updated when changing the quantity of the kit.")
-        self.assertEqual(self.po.picking_ids.move_ids_without_package[1].product_uom_qty, 2, "The amount of the kit components must be updated when changing the quantity of the kit.")
-        self.assertEqual(self.po.picking_ids.move_ids_without_package[2].product_uom_qty, 6, "The amount of the kit components must be updated when changing the quantity of the kit.")
+        self.assertEqual(self.po.picking_ids.move_ids[0].product_uom_qty, 4, "The amount of the kit components must be updated when changing the quantity of the kit.")
+        self.assertEqual(self.po.picking_ids.move_ids[1].product_uom_qty, 2, "The amount of the kit components must be updated when changing the quantity of the kit.")
+        self.assertEqual(self.po.picking_ids.move_ids[2].product_uom_qty, 6, "The amount of the kit components must be updated when changing the quantity of the kit.")
 
     def test_procurement_with_preferred_route(self):
         """
@@ -653,7 +652,6 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             'location_dest_id': self.env.ref('stock.stock_location_customers').id,
             'picking_type_id': warehouse.out_type_id.id,
             'move_ids': [(0, 0, {
-                'name': product.name,
                 'product_id': product.id,
                 'product_uom': product.uom_id.id,
                 'product_uom_qty': 1,
@@ -665,7 +663,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
         orderpoint_product = self.env['stock.warehouse.orderpoint'].search(
             [('product_id', '=', product.id)])
-        self.assertEqual(orderpoint_product.route_id, buy_route, "The route buy should be set on the orderpoint")
+        self.assertEqual(orderpoint_product.effective_route_id, buy_route, "The buy route set on the product should be the effective route of the orderpoint")
         # Delete the orderpoint to generate a new one with the manufacture route
         orderpoint_product.unlink()
         # switch the product route to manufacture
@@ -673,12 +671,10 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
         orderpoint_product = self.env['stock.warehouse.orderpoint'].search(
             [('product_id', '=', product.id)])
-        self.assertEqual(orderpoint_product.route_id, manu_route, "The route manufacture should be set on the orderpoint")
+        self.assertEqual(orderpoint_product.effective_route_id, manu_route, "The route manufacture should be set on the orderpoint")
 
     def test_compute_bom_days_00(self):
-        """Check Days to prepare Manufacturing Order are correctly computed when
-        Security Lead Time and Days to Purchase are set.
-        """
+        """ Check Days to prepare Manufacturing Order are correctly computed when Days to Purchase is set. """
         purchase_route = self.env.ref("purchase_stock.route_warehouse0_buy")
         manufacture_route = self.env['stock.route'].search([('name', '=', 'Manufacture')])
         vendor = self.env['res.partner'].create({'name': 'super vendor'})
@@ -688,12 +684,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             'name': 'TestCompany2',
         })
 
-        company_1.po_lead = 0
         company_1.days_to_purchase = 0
-        company_1.manufacturing_lead = 0
-        company_2.po_lead = 0
         company_2.days_to_purchase = 0
-        company_2.manufacturing_lead = 0
 
         components = self.component_a | self.component_b | self.component_c | self.component_d | self.component_e | self.component_f | self.component_g
         kits = self.kit_parent | self.kit_1 | self.kit_2 | self.kit_3
@@ -712,37 +704,33 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         bom_kit_parent.action_compute_bom_days()
         self.assertEqual(bom_kit_parent.days_to_prepare_mo, 1)
 
-        # set "Security Lead Time" for Purchase and manufacturing, and "Days to Purchase"
-        company_1.po_lead = 10
+        # set "Days to Purchase"
         company_1.days_to_purchase = 10
-        company_1.manufacturing_lead = 10
-        company_2.po_lead = 20
         company_2.days_to_purchase = 20
-        company_2.manufacturing_lead = 20
 
-        # check "Security Lead Time" and "Days to Purchase" will also be included if bom has company_id
+        # check "Days to Purchase" will also be included if bom has company_id
         bom_kit_parent.action_compute_bom_days()
-        self.assertEqual(bom_kit_parent.days_to_prepare_mo, 10 + 10 + 10 + 10 + 1)
+        self.assertEqual(bom_kit_parent.days_to_prepare_mo, 10 + 1)
 
         self.kit_1.bom_ids.company_id = company_2
         bom_kit_parent.action_compute_bom_days()
-        self.assertEqual(bom_kit_parent.days_to_prepare_mo, 20 + 20 + 20 + 10 + 1)
+        self.assertEqual(bom_kit_parent.days_to_prepare_mo, 20 + 1)
 
-        # check "Security Lead Time" and "Days to Purchase" will won't be included if bom doesn't have company_id
+        # check "Days to Purchase" won't be included if bom doesn't have company_id
         kits.bom_ids.company_id = False
         bom_kit_parent.action_compute_bom_days()
         self.assertEqual(bom_kit_parent.days_to_prepare_mo, 1)
 
+    # TODO: manufacturing_lead doesn't exist anymore, remove?
     def test_orderpoint_with_manufacture_security_lead_time(self):
         """
         Test that a manufacturing order is created with the correct date_start
         when we have an order point with the preferred route set to "manufacture"
         and the current company has a manufacturing security lead time set.
         """
-        # set purchase security lead time to 20 days
-        self.env.company.po_lead = 20
-        # set manufacturing security lead time to 25 days
-        self.env.company.manufacturing_lead = 25
+        # set horizon days to 0
+        self.env.company.horizon_days = 0
+
         product = self.env['product.product'].create({
             'name': 'super product',
             'is_storable': True,
@@ -762,15 +750,15 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             'produce_delay': 1,
             'product_qty': 1,
         })
-        # create a orderpoint to generate a need of the product with perefered route manufacture
+        # create a orderpoint to generate a need of the product with preferred route manufacture
         orderpoint = self.env['stock.warehouse.orderpoint'].create({
             'product_id': product.id,
             'qty_to_order': 5,
             'warehouse_id': self.warehouse.id,
             'route_id': self.env.ref('mrp.route_warehouse0_manufacture').id,
         })
-        # lead_days_date should be today + manufacturing security lead time + product manufacturing lead time
-        self.assertEqual(orderpoint.lead_days_date, (fields.Date.today() + timedelta(days=25) + timedelta(days=1)))
+        # lead_horizon_date should be today + product manufacturing lead time
+        self.assertEqual(orderpoint.lead_horizon_date, (fields.Date.today() + timedelta(days=1)))
         orderpoint.action_replenish()
         mo = self.env['mrp.production'].search([('product_id', '=', product.id)])
         self.assertEqual(mo.product_uom_qty, 5)
@@ -1014,10 +1002,9 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         })
         # Compo D has 1 vendor with a min qty of 1 dozen
         self.component_d.write({
-            'uom_po_id': self.uom_dozen.id,
             'route_ids': [Command.link(buy_route.id)],
             'seller_ids': [
-                Command.create({'partner_id': self.partner_a.id, 'min_qty': 1, 'price': 10}),
+                Command.create({'partner_id': self.partner_a.id, 'min_qty': 12, 'price': 10}),
             ]
         })
 
@@ -1065,20 +1052,25 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         self.assertTrue(compo_d_values['route_alert'], "Should be true as 3 units < 1 dozen for this vendor")
 
     def test_valuation_with_backorder(self):
+        """
+        Check that partially receiving a purchased kit spreads adequatly the kit
+        value over its components by cost share.
+        """
         fifo_category = self.env['product.category'].create({
             'name': 'FIFO',
             'property_cost_method': 'fifo',
             'property_valuation': 'real_time'
         })
-        kit, cmp1, cmp2 = self.env['product.product'].create([{
+        kit, cmp1, cmp2, cmp3 = self.env['product.product'].create([{
             'name': name,
             'standard_price': 0,
             'is_storable': True,
             'categ_id': fifo_category.id,
-        } for name in ['Kit', 'Cmp1', 'Cmp2']])
+        } for name in ['Kit', 'Cmp1', 'Cmp2', 'Cmp3']])
         kit.uom_id = self.uom_gm.id
         cmp1.uom_id = self.uom_gm.id
         cmp2.uom_id = self.uom_kg.id
+        cmp3.uom_id = self.uom_kg.id
 
         self.env['mrp.bom'].create({
             'product_uom_id': self.uom_kg.id,
@@ -1086,8 +1078,10 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             'product_tmpl_id': kit.product_tmpl_id.id,
             'type': 'phantom',
             'bom_line_ids': [
-                (0, 0, {'product_id': cmp1.id, 'product_qty': 2, 'product_uom_id': self.uom_kg.id}),
-                (0, 0, {'product_id': cmp2.id, 'product_qty': 1, 'product_uom_id': self.uom_gm.id})]
+                Command.create({'product_id': cmp1.id, 'product_qty': 2, 'product_uom_id': self.uom_kg.id, 'cost_share': 50}),
+                Command.create({'product_id': cmp2.id, 'product_qty': 1000, 'product_uom_id': self.uom_gm.id, 'cost_share': 50}),
+                Command.create({'product_id': cmp3.id, 'product_qty': 1, 'product_uom_id': self.uom_gm.id, 'cost_share': 0}),
+            ],
         })
 
         po_form = Form(self.env['purchase.order'])
@@ -1096,22 +1090,33 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         with po_form.order_line.new() as pol_form:
             pol_form.product_id = kit
             pol_form.product_qty = 30
-            pol_form.product_uom = self.uom_kg
-            pol_form.price_unit = 90000
-            pol_form.taxes_id.clear()
+            pol_form.product_uom_id = self.uom_kg
+            pol_form.price_unit = 100
+            pol_form.tax_ids.clear()
         po = po_form.save()
         po.button_confirm()
 
         receipt = po.picking_ids
-        receipt.move_line_ids[0].quantity = 4
-        receipt.move_line_ids[1].quantity = 2
+        # Update the quantity on the moves (not the move lines) so the reservation is forced.
+        receipt.move_ids.filtered(lambda m: m.product_id == cmp1).quantity = 4
+        receipt.move_ids.filtered(lambda m: m.product_id == cmp2).quantity = 2000
+        receipt.move_ids.filtered(lambda m: m.product_id == cmp3).quantity = 4
         Form.from_action(self.env, receipt.button_validate()).save().process()
-        # Price Unit for 1 gm of the kit = 90000/1000 = 90
-        # unit_cost for cmp1 = 90 *1000* 3 / 2 / 2 / 1000 = 67.5
-        # unit_cost for cmp2  = 90 *1000* 3 / 2 / 1  * 1000 = 135000000
-        svl = po.picking_ids[0].move_ids.stock_valuation_layer_ids
-        self.assertEqual(svl[0].unit_cost, 67.5)
-        self.assertEqual(svl[1].unit_cost, 135000000)
+
+        # The kit is bought at 100 per kg for 30 kg, so its 3000 value is spread
+        # over the components by cost share (Cmp1 and Cmp2 get half each, Cmp3
+        # none). Only 1/5 th of each component's demand is received here, so
+        # each valued component gets a 1/5 th of its share (300); Cmp3 is unvalued.
+        self.assertRecordValues(receipt.move_ids, [
+            {'product_id': cmp1.id, 'value': 300.0},
+            {'product_id': cmp2.id, 'value': 300.0},
+            {'product_id': cmp3.id, 'value': 0.0},
+        ])
+        self.assertRecordValues((cmp1 + cmp2 + cmp3)._with_valuation_context(), [
+            {'qty_available': 4000.0, 'standard_price': 0.075, 'total_value': 300.0},
+            {'qty_available': 2.0, 'standard_price': 150.0, 'total_value': 300.0},
+            {'qty_available': 0.0, 'standard_price': 0.0, 'total_value': 0.0},
+        ])
 
     def test_mo_overview_mto_purchase_with_backorders(self):
         self.warehouse.reception_steps = 'two_steps'
@@ -1147,7 +1152,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             production = prod_form.save()
         production.action_confirm()
         self.assertEqual(production.purchase_order_count, 1)
-        purchase = production.procurement_group_id.stock_move_ids.created_purchase_line_ids.order_id
+        purchase = production.reference_ids.purchase_ids
         self.assertEqual(len(purchase), 1)
 
         with Form(production) as prod_form:
@@ -1157,7 +1162,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         backorder_wizard = Form(self.env['mrp.production.backorder'].with_context(**backorder_action['context']))
         backorder_wizard.save().action_backorder()
 
-        backorder = production.procurement_group_id.mrp_production_ids - production
+        backorder = production.production_group_id.production_ids - production
         self.assertEqual(len(backorder), 1)
         self.assertEqual(backorder.product_qty, 2)
         report_values = self.env['report.mrp.report_mo_overview']._get_report_data(backorder.id)
@@ -1166,6 +1171,47 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         replenishments = report_values['components'][0]['replenishments']
         self.assertEqual(len(replenishments), 1)
         self.assertEqual(replenishments[0]['summary']['name'], purchase.name)
+
+    def test_cancel_mo_with_mto_purchase_component(self):
+        # Enable MTO route for Component
+        self.env.ref('stock.route_warehouse0_mto').active = True
+        route_buy = self.warehouse.buy_pull_id.route_id
+        route_mto = self.warehouse.mto_pull_id.route_id
+        route_mto.rule_ids.procure_method = "make_to_order"
+        self.component_a.write({
+            'seller_ids': [
+                Command.create({'partner_id': self.partner_a.id},
+            )],
+            'route_ids': [
+                Command.link(route_buy.id),
+                Command.link(route_mto.id),
+            ],
+        })
+
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': self.component_b.product_tmpl_id.id,
+            'product_qty': 1.0,
+            'bom_line_ids': [
+                Command.create({
+                    'product_id': self.component_a.id,
+                    'product_qty': 2.0,
+                }),
+            ],
+        })
+        with Form(self.env['mrp.production']) as prod_form:
+            prod_form.product_id = self.component_b
+            prod_form.bom_id = bom
+            prod_form.product_qty = 3
+            production = prod_form.save()
+        production.action_confirm()
+        self.assertEqual(production.purchase_order_count, 1)
+        purchase = production.reference_ids.purchase_ids
+        self.assertEqual(len(purchase), 1)
+        # Cancel the MO and check that an activity was created on the PO
+        self.assertFalse(purchase.activity_ids)
+        production.action_cancel()
+        self.assertEqual(production.state, 'cancel')
+        self.assertEqual(len(purchase.activity_ids), 1)
 
     def test_total_cost_share_rounded_to_precision(self):
         kit, compo01, compo02 = self.env['product.product'].create([{
@@ -1222,7 +1268,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             pol_form.product_id = prod
             pol_form.product_qty = 1
             pol_form.price_unit = 100
-            pol_form.taxes_id.clear()
+            pol_form.tax_ids.clear()
         po = po_form.save()
         po.button_confirm()
         receipt = po.picking_ids
@@ -1232,8 +1278,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # calculating the unit cost per component: 100 / 12 = 8.33333333333
         # total cost for 12 components: 8.33 * 12 = 99.96
         # however, due to rounding differences, the expected value is 100
-        svl_val = self.env['stock.valuation.layer'].search([('stock_move_id', '=', move.id)]).value
-        self.assertEqual(svl_val, 100)
+        self.assertEqual(move.value, 100)
 
     def test_valuation_by_lot_component_in_kit(self):
         """
@@ -1255,7 +1300,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             'partner_id': self.partner.id,
             'order_line': [Command.create({
                 'product_id': self.kit_1.id,
-                'product_uom': self.kit_1.uom_id.id,
+                'product_uom_id': self.kit_1.uom_id.id,
                 'price_unit': 60.0,
                 'product_qty': 2,
             })],
@@ -1271,7 +1316,238 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # The standard price of the component is updated to $10 because the kit cost
         # is $60, there are 6 units of different components used in this BoM, and since
         # the cost_share is equal, 60/6 = $10.
-        self.assertEqual(self.component_a.standard_price, 10)
-        self.assertEqual(lot_a.standard_price, 10)
-        self.assertEqual(lot_a.quantity_svl, 4)
-        self.assertEqual(lot_a.value_svl, 40)
+        self.assertAlmostEqual(self.component_a.standard_price, 10)
+        self.assertRecordValues(lot_a, [
+            {'product_qty': 4.0, 'total_value': 40.0, 'avg_cost': 10.0, 'standard_price': 10.0}
+        ])
+
+    def test_inter_company_received_qty_with_kit(self):
+        """
+        Test that the received quantity on a purchase order lines gets updated when purchasing a kit
+        through an inter-company transaction.
+        """
+        # Create the purchase order with a partner that uses the inter company location
+        inter_comp_location = self.env.ref('stock.stock_location_inter_company')
+        partner = self.env['res.partner'].create({'name': 'Testing Partner'})
+        partner.property_stock_customer = inter_comp_location
+        partner.property_stock_supplier = inter_comp_location
+        po = self.env['purchase.order'].create({
+            'partner_id': partner.id,
+            'order_line': [
+                (0, 0,
+                 {
+                     'name': self.kit_1.name,
+                     'product_id': self.kit_1.id,
+                     'product_qty': 1,
+                 })
+            ]
+        })
+        po.button_confirm()
+
+        self.assertTrue(po.picking_ids)
+        self.assertEqual(po.order_line.qty_received, 0)
+
+        picking = po.picking_ids
+        for move in picking.move_ids:
+            move.write({'quantity': move.product_uom_qty, 'picked': True})
+        picking.button_validate()
+
+        self.assertEqual(po.order_line.qty_received, 1)
+
+    def test_consumption_warning_mto_buy_serial_pbm_early_serial(self):
+        """ Test that a consumption warning is not triggered when:
+        - warehouse in 2-step manufacturing
+        - finished product tracked by serial number
+        - component tracked by serial number, routed MTO + Buy
+        - the finished product's serial number is generated on the MO
+          *before* the related purchase order is even confirmed
+        - purchase order is confirmed and the component is received
+        - the component is transferred to WH/Pre-Production
+        - Produce All is clicked on the MO
+        """
+        self.warehouse.manufacture_steps = 'pbm'
+        route_buy = self.warehouse.buy_pull_id.route_id
+        route_mto = self.warehouse.mto_pull_id.route_id
+        route_mto.active = True
+
+        component = self.env['product.product'].create({
+            'name': 'Serial Component',
+            'is_storable': True,
+            'tracking': 'serial',
+            'seller_ids': [Command.create({'partner_id': self.partner_a.id})],
+            'route_ids': [Command.link(route_buy.id), Command.link(route_mto.id)],
+        })
+        finished_product = self.env['product.product'].create({
+            'name': 'Serial Finished Product',
+            'is_storable': True,
+            'tracking': 'serial',
+        })
+        self.env['mrp.bom'].create({
+            'product_tmpl_id': finished_product.product_tmpl_id.id,
+            'product_qty': 1.0,
+            'bom_line_ids': [Command.create({
+                'product_id': component.id,
+                'product_qty': 1.0,
+            })],
+        })
+
+        production = self.env['mrp.production'].create({
+            'product_id': finished_product.id,
+            'product_qty': 1.0,
+        })
+        production.action_confirm()
+        production.action_generate_serial()
+        self.assertEqual(production.qty_producing, 1.0)
+
+        # Confirm the PO and receive the component.
+        sn_lot = self.env['stock.lot'].create({
+            'product_id': component.id,
+            'name': 'USN01',
+        })
+        purchase = production._get_purchase_orders()
+        self.assertEqual(len(purchase), 1)
+        purchase.button_confirm()
+        receipt = purchase.picking_ids
+        receipt.move_ids.lot_ids = sn_lot
+        receipt.button_validate()
+        self.assertEqual(receipt.state, 'done')
+
+        # Transfer the component to WH/Pre-Production.
+        pick_picking = production.picking_ids - receipt
+        self.assertEqual(len(pick_picking), 1)
+        pick_picking.button_validate()
+        self.assertEqual(pick_picking.state, 'done')
+
+        production.button_mark_done()
+        self.assertEqual(production.state, 'done')
+
+    def test_purchase_kit_bill_before_reception_component_cost_exactly_aligns_with_kit_product_cost(self):
+        """ When a kit product is invoiced prior to delivery, we want to make sure to reconcile all
+        the AMLs from its explosion together, else we risk re-reconciliation attempts (which will
+        block certain actions from being performed altogether).
+        """
+        avco_category = self.env['product.category'].create({
+            'name': 'AVCO',
+            'property_cost_method': 'average',
+            'property_valuation': 'real_time'
+        })
+        kit_product = self.env['product.product'].create({
+            'name': 'kit prod',
+            'purchase_method': 'purchase',
+            'is_storable': True,
+            'standard_price': 10,
+            'list_price': 20,
+            'categ_id': avco_category.id,
+        })
+        components = self.env['product.product'].create([{
+            'name': f'comp {i}',
+            'is_storable': True,
+            'purchase_method': 'purchase',
+            'standard_price': 5,
+            'list_price': 5,
+            'categ_id': avco_category.id,
+        } for i in (1, 2)])
+        self.env['mrp.bom'].create({
+            'type': 'phantom',
+            'product_id': kit_product.id,
+            'product_tmpl_id': kit_product.product_tmpl_id.id,
+            'product_qty': 1,
+            'bom_line_ids': [Command.create({
+                'product_id': comp.id,
+                'product_qty': 1,
+            }) for comp in components
+        ]})
+        purchase_order = self.env['purchase.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                Command.create({
+                    'product_id': components[0].id,
+                    'product_qty': 1,
+                }),
+                Command.create({
+                    'product_id': kit_product.id,
+                    'product_qty': 1,
+                }),
+            ],
+        })
+        purchase_order.button_confirm()
+        purchase_order.action_create_invoice()
+        bill = purchase_order.invoice_ids
+        bill.invoice_date = fields.Date.today()
+        bill.action_post()
+        receipt = purchase_order.picking_ids
+        # would fail due to attempted re-reconciliation prior to this commit
+        receipt.button_validate()
+        stock_valuation_account, tax_paid_account, account_payable_account = (
+            kit_product.categ_id.property_stock_valuation_account_id,
+            self.company_data['default_account_tax_purchase'],
+            self.company_data['default_account_payable'],
+        )
+        # stock input account move lines should be reconciled
+        self.assertRecordValues(
+            self.env['account.move.line'].search([], order='debit asc'),
+            [
+                {'account_id': account_payable_account.id,   'product_id': False,              'reconciled': False,   'debit':  0.0,   'credit':  17.25},
+                {'account_id': tax_paid_account.id,          'product_id': False,              'reconciled': False,   'debit': 2.25,   'credit':  0.0},
+                {'account_id': stock_valuation_account.id,   'product_id': components[0].id,   'reconciled': False,   'debit':  5.0,   'credit':  0.0},
+                {'account_id': stock_valuation_account.id,   'product_id': kit_product.id,     'reconciled': False,   'debit':  10.0,   'credit':  0.0},
+            ]
+        )
+        self.assertRecordValues(receipt.move_ids.sorted(lambda m: m.product_id.id), [
+            {'product_id': components[0].id, 'value': 5.0},
+            {'product_id': components[0].id, 'value': 5.0},
+            {'product_id': components[1].id, 'value': 5.0},
+        ])
+
+    def test_mto_component_quantity_reduction_propagation(self):
+        '''
+        Create a MO for a product with a component with MTO & Buy routes.
+        Ensure that even after MO confirmation, reducing the component quantity
+        reduces the quantity of the MTO purchase aswell.
+        '''
+        route_buy = self.warehouse.buy_pull_id.route_id
+        route_mto = self.warehouse.mto_pull_id.route_id
+        route_mto.active = True
+        route_mto.rule_ids.procure_method = "make_to_order"
+        self.component_a.write({
+            'seller_ids': [
+                Command.create({'partner_id': self.partner_a.id},
+            )],
+            'route_ids': [
+                Command.link(route_buy.id),
+                Command.link(route_mto.id),
+            ],
+        })
+        mo = self.env['mrp.production'].create({
+            'product_id': self.component_b.id,
+            'product_qty': 1.0,
+            'move_raw_ids': [Command.create({
+                'product_id': self.component_a.id,
+                'product_uom_qty': 5,
+            })],
+        })
+        mo.action_confirm()
+        self.assertEqual(mo.purchase_order_count, 1)
+        self.assertEqual(mo.reference_ids.move_ids.created_purchase_line_ids.product_qty, 5)
+        mo.move_raw_ids.product_uom_qty = 2
+        self.assertEqual(mo.reference_ids.move_ids.created_purchase_line_ids.product_qty, 2)
+
+    def test_monthly_demand_multistep_manufacturing(self):
+        """Ensure that monthly demand is correctly counted for waiting raw
+        material consumption moves in multi-step (2-step/3-step) manufacturing.
+        """
+        self.warehouse.manufacture_steps = 'pbm'
+        component = self.component_a
+
+        mo = self.env['mrp.production'].create({
+            'product_id': self.product.id,
+            'move_raw_ids': [Command.create({
+                'product_id': component.id,
+                'product_uom_qty': 20,
+            })],
+        })
+        mo.action_confirm()
+
+        # Monthly demand of the raw material(component) should be 20.0 with and without warehouse.
+        self.assertEqual(component.with_context(warehouse_id=self.warehouse.id).monthly_demand, 20.0)
+        self.assertEqual(component.monthly_demand, 20.0)

@@ -8,19 +8,23 @@
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:Note>test narration</cbc:Note>
   <cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
+  <cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>
   <cbc:BuyerReference>ref_partner_2</cbc:BuyerReference>
   <cac:OrderReference>
     <cbc:ID>___ignore___</cbc:ID>
   </cac:OrderReference>
   <cac:AdditionalDocumentReference>
     <cbc:ID>___ignore___</cbc:ID>
-    <cbc:Attachment>
+    <cac:Attachment>
       <cbc:EmbeddedDocumentBinaryObject>___ignore___</cbc:EmbeddedDocumentBinaryObject>
-    </cbc:Attachment>
+    </cac:Attachment>
   </cac:AdditionalDocumentReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="0208">0202239951</cbc:EndpointID>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="0208">0202239951</cbc:ID>
+      </cac:PartyIdentification>
       <cac:PartyName>
         <cbc:Name>partner_1</cbc:Name>
       </cac:PartyName>
@@ -40,7 +44,7 @@
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>partner_1</cbc:RegistrationName>
-        <cbc:CompanyID>BE0202239951</cbc:CompanyID>
+        <cbc:CompanyID schemeID="0208">0202239951</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
         <cbc:Name>partner_1</cbc:Name>
@@ -50,6 +54,9 @@
   <cac:AccountingCustomerParty>
     <cac:Party>
       <cbc:EndpointID schemeID="0208">0477472701</cbc:EndpointID>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="0208">0477472701</cbc:ID>
+      </cac:PartyIdentification>
       <cac:PartyName>
         <cbc:Name>partner_2</cbc:Name>
       </cac:PartyName>
@@ -69,7 +76,7 @@
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>partner_2</cbc:RegistrationName>
-        <cbc:CompanyID>BE0477472701</cbc:CompanyID>
+        <cbc:CompanyID schemeID="0208">0477472701</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
         <cbc:Name>partner_2</cbc:Name>
@@ -77,7 +84,7 @@
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:Delivery>
-    <cac:ActualDeliveryDate>2017-01-15</cac:ActualDeliveryDate>
+    <cbc:ActualDeliveryDate>2017-01-15</cbc:ActualDeliveryDate>
     <cac:DeliveryLocation>
       <cac:Address>
         <cbc:StreetName>Rue des Bourlottes 9</cbc:StreetName>
@@ -88,6 +95,11 @@
         </cac:Country>
       </cac:Address>
     </cac:DeliveryLocation>
+    <cac:DeliveryParty>
+      <cac:PartyName>
+        <cbc:Name>partner_2</cbc:Name>
+      </cac:PartyName>
+    </cac:DeliveryParty>
   </cac:Delivery>
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode name="credit transfer">30</cbc:PaymentMeansCode>
@@ -124,6 +136,9 @@
       </cac:TaxCategory>
     </cac:TaxSubtotal>
   </cac:TaxTotal>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="EUR">241.11</cbc:TaxAmount>
+  </cac:TaxTotal>
   <cac:LegalMonetaryTotal>
     <cbc:LineExtensionAmount currencyID="USD">2682.00</cbc:LineExtensionAmount>
     <cbc:TaxExclusiveAmount currencyID="USD">2682.00</cbc:TaxExclusiveAmount>
@@ -138,10 +153,12 @@
     <cac:AllowanceCharge>
       <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
       <cbc:AllowanceChargeReasonCode>95</cbc:AllowanceChargeReasonCode>
+      <cbc:AllowanceChargeReason>Discount</cbc:AllowanceChargeReason>
+      <cbc:MultiplierFactorNumeric>10.0</cbc:MultiplierFactorNumeric>
       <cbc:Amount currencyID="USD">198.00</cbc:Amount>
+      <cbc:BaseAmount currencyID="USD">1980.00</cbc:BaseAmount>
     </cac:AllowanceCharge>
     <cac:Item>
-      <cbc:Description>product_a</cbc:Description>
       <cbc:Name>product_a</cbc:Name>
       <cac:ClassifiedTaxCategory>
         <cbc:ID>S</cbc:ID>
@@ -160,7 +177,6 @@
     <cbc:InvoicedQuantity unitCode="C62">10.0</cbc:InvoicedQuantity>
     <cbc:LineExtensionAmount currencyID="USD">1000.00</cbc:LineExtensionAmount>
     <cac:Item>
-      <cbc:Description>product_b</cbc:Description>
       <cbc:Name>product_b</cbc:Name>
       <cac:ClassifiedTaxCategory>
         <cbc:ID>S</cbc:ID>
@@ -179,7 +195,6 @@
     <cbc:InvoicedQuantity unitCode="C62">-1.0</cbc:InvoicedQuantity>
     <cbc:LineExtensionAmount currencyID="USD">-100.00</cbc:LineExtensionAmount>
     <cac:Item>
-      <cbc:Description>product_b</cbc:Description>
       <cbc:Name>product_b</cbc:Name>
       <cac:ClassifiedTaxCategory>
         <cbc:ID>S</cbc:ID>

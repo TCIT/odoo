@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, _
+from odoo import _, fields, models
 from odoo.exceptions import AccessError
 
 
-class Digest(models.Model):
+class DigestDigest(models.Model):
     _inherit = 'digest.digest'
 
     kpi_all_sale_total = fields.Boolean('All Sales')
@@ -24,6 +23,6 @@ class Digest(models.Model):
         )
 
     def _compute_kpis_actions(self, company, user):
-        res = super(Digest, self)._compute_kpis_actions(company, user)
+        res = super()._compute_kpis_actions(company, user)
         res['kpi_all_sale_total'] = 'sale.report_all_channels_sales_action?menu_id=%s' % self.env.ref('sale.sale_menu_root').id
         return res

@@ -1,147 +1,82 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from collections import defaultdict
+from __future__ import annotations
+
 from datetime import timedelta
+from typing import TYPE_CHECKING, Literal
 
-from odoo import api, fields, tools, models, _
-from odoo.exceptions import UserError, ValidationError
+from odoo import _, api, fields, models, tools
+from odoo.exceptions import UserError
+from odoo.tools import float_round
 
-
-class UoMCategory(models.Model):
-    _name = 'uom.category'
-    _description = 'Product UoM Categories'
-
-    name = fields.Char('Unit of Measure Category', required=True, translate=True)
-
-    uom_ids = fields.One2many('uom.uom', 'category_id')
-    reference_uom_id = fields.Many2one('uom.uom', "Reference UoM", store=False) # Dummy field to keep track of reference uom change
-
-    @api.onchange('uom_ids')
-    def _onchange_uom_ids(self):
-        if len(self.uom_ids) == 1:
-            self.uom_ids[0].uom_type = 'reference'
-            self.uom_ids[0].factor = 1
-        else:
-            reference_count = sum(uom.uom_type == 'reference' for uom in self.uom_ids)
-            if reference_count == 0 and self._origin.id and self.uom_ids:
-                raise UserError(_('UoM category %s must have at least one reference unit of measure.', self.name))
-            if self.reference_uom_id:
-                new_reference = self.uom_ids.filtered(lambda o: o.uom_type == 'reference' and o._origin.id != self.reference_uom_id.id)
-            else:
-                new_reference = self.uom_ids.filtered(lambda o: o.uom_type == 'reference' and o._origin.uom_type != 'reference')
-            if new_reference:
-                other_uoms = self.uom_ids.filtered(lambda u: u._origin.id) - new_reference
-                for uom in other_uoms:
-                    uom.factor = uom._origin.factor / (new_reference._origin.factor or 1)
-                    if uom.factor > 1:
-                        uom.uom_type = 'smaller'
-                    else:
-                        uom.uom_type = 'bigger'
-                self.reference_uom_id = new_reference._origin.id
+if TYPE_CHECKING:
+    from odoo.orm.types import Self
+    from odoo.tools.float_utils import RoundingMethod
 
 
-class UoM(models.Model):
+class UomUom(models.Model):
     _name = 'uom.uom'
     _description = 'Product Unit of Measure'
-    _order = "factor DESC, id"
+    _parent_name = 'relative_uom_id'
+    _parent_store = True
+    _order = 'sequence, relative_uom_id, id'
 
     def _unprotected_uom_xml_ids(self):
+        """ Return a list of UoM XML IDs that are not protected by default.
+        Note: Some of these may be protected via overrides in other modules.
+        """
         return [
-            "product_uom_hour", # NOTE: this uom is protected when hr_timesheet is installed.
+            "product_uom_hour",
             "product_uom_dozen",
+            "product_uom_pack_6",
         ]
 
-    name = fields.Char('Unit of Measure', required=True, translate=True)
-    category_id = fields.Many2one(
-        'uom.category', 'Category', required=True, ondelete='restrict',
-        help="Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios.")
-    factor = fields.Float(
-        'Ratio', default=1.0, digits=0, required=True,  # force NUMERIC with unlimited precision
-        help='How much bigger or smaller this unit is compared to the reference Unit of Measure for this category: 1 * (reference unit) = ratio * (this unit)')
-    factor_inv = fields.Float(
-        'Bigger Ratio', compute='_compute_factor_inv', digits=0,  # force NUMERIC with unlimited precision
-        readonly=True, required=True,
-        help='How many times this Unit of Measure is bigger than the reference Unit of Measure in this category: 1 * (this unit) = ratio * (reference unit)')
-    rounding = fields.Float(
-        'Rounding Precision', default=0.01, digits=0, required=True,
-        help="The computed quantity will be a multiple of this value. "
-             "Use 1.0 for a Unit of Measure that cannot be further split, such as a piece.")
+    name = fields.Char('Unit Name', required=True, translate=True)
+    sequence = fields.Integer(compute="_compute_sequence", store=True, readonly=False, precompute=True)
+    relative_factor = fields.Float(
+        'Contains', default=1.0, digits=0, required=True,  # force NUMERIC with unlimited precision
+        help='How much bigger or smaller this unit is compared to the reference UoM for this unit')
+    rounding = fields.Float('Rounding Precision', compute="_compute_rounding")
     active = fields.Boolean('Active', default=True, help="Uncheck the active field to disable a unit of measure without deleting it.")
-    uom_type = fields.Selection([
-        ('bigger', 'Bigger than the reference Unit of Measure'),
-        ('reference', 'Reference Unit of Measure for this category'),
-        ('smaller', 'Smaller than the reference Unit of Measure')], 'Type',
-        default='reference', required=True)
-    ratio = fields.Float('Combined Ratio', compute='_compute_ratio', inverse='_set_ratio', store=False)
-    color = fields.Integer('Color', compute='_compute_color')
+    relative_uom_id = fields.Many2one('uom.uom', 'Reference Unit', ondelete='cascade', index='btree_not_null')
+    related_uom_ids = fields.One2many('uom.uom', 'relative_uom_id', 'Related UoMs')
+    factor = fields.Float('Absolute Quantity', digits=0, compute='_compute_factor', recursive=True, store=True)
+    parent_path = fields.Char(index=True)
 
-    _sql_constraints = [
-        ('factor_gt_zero', 'CHECK (factor!=0)', 'The conversion ratio for a unit of measure cannot be 0!'),
-        ('rounding_gt_zero', 'CHECK (rounding>0)', 'The rounding precision must be strictly positive.'),
-        ('factor_reference_is_one', "CHECK((uom_type = 'reference' AND factor = 1.0) OR (uom_type != 'reference'))", "The reference unit must have a conversion factor equal to 1.")
-    ]
+    _factor_gt_zero = models.Constraint(
+        'CHECK (relative_factor!=0)',
+        'The conversion ratio for a unit of measure cannot be 0!',
+    )
 
-    def _check_category_reference_uniqueness(self):
-        categ_res = self.read_group(
-            [("category_id", "in", self.category_id.ids)],
-            ["category_id", "uom_type"],
-            ["category_id", "uom_type"],
-            lazy=False,
-        )
-        uom_by_category = defaultdict(int)
-        ref_by_category = {}
-        for res in categ_res:
-            uom_by_category[res["category_id"][0]] += res["__count"]
-            if res["uom_type"] == "reference":
-                ref_by_category[res["category_id"][0]] = res["__count"]
+    # === COMPUTE METHODS === #
 
-        for category in self.category_id:
-            reference_count = ref_by_category.get(category.id, 0)
-            if reference_count > 1:
-                raise ValidationError(_("UoM category %s should only have one reference unit of measure.", category.name))
-            elif reference_count == 0 and uom_by_category.get(category.id, 0) > 0:
-                raise ValidationError(_("UoM category %s should have a reference unit of measure.", category.name))
-
-    @api.depends('factor')
-    def _compute_factor_inv(self):
+    @api.depends('relative_factor')
+    def _compute_sequence(self):
         for uom in self:
-            uom.factor_inv = uom.factor and (1.0 / uom.factor) or 0.0
+            if uom.id and uom.sequence:
+                # Only set a default sequence before the record creation, or on module update if
+                # there is no value.
+                continue
+            uom.sequence = min(int(uom.relative_factor * 100.0), 1000)
 
-    @api.depends('uom_type', 'factor')
-    def _compute_ratio(self):
+    def _compute_rounding(self):
+        """ All Units of Measure share the same rounding precision defined in 'Product Unit'.
+            Set in a compute to ensure compatibility with previous calls to `uom.rounding`.
+        """
+        decimal_precision = self.env['decimal.precision'].precision_get('Product Unit')
+        self.rounding = 10 ** -decimal_precision
+
+    @api.depends('relative_factor', 'relative_uom_id', 'relative_uom_id.factor')
+    def _compute_factor(self):
         for uom in self:
-            if uom.uom_type == 'reference':
-                uom.ratio = 1
-            elif uom.uom_type == 'bigger':
-                uom.ratio = uom.factor_inv
+            if uom.relative_uom_id:
+                uom.factor = uom.relative_factor * uom.relative_uom_id.factor
             else:
-                uom.ratio = uom.factor
+                uom.factor = uom.relative_factor
 
-    def _set_ratio(self):
-        if self.ratio == 0:
-            raise ValidationError(_("The value of ratio could not be Zero"))
-        if self.uom_type == 'reference':
-            self.factor = 1
-        elif self.uom_type == 'bigger':
-            self.factor = 1 / self.ratio
-        else:
-            self.factor = self.ratio
+    # === ONCHANGE METHODS === #
 
-    @api.depends('uom_type')
-    def _compute_color(self):
-        for uom in self:
-            if uom.uom_type == 'reference':
-                uom.color = 7
-            else:
-                uom.color = 0
-
-    @api.onchange('uom_type')
-    def _onchange_uom_type(self):
-        if self.uom_type == 'reference':
-            self.factor = 1
-
-    @api.onchange('factor', 'factor_inv', 'uom_type', 'rounding', 'category_id')
+    @api.onchange('relative_factor')
     def _onchange_critical_fields(self):
         if self._filter_protected_uoms() and self.create_date < (fields.Datetime.now() - timedelta(days=1)):
             return {
@@ -151,33 +86,21 @@ class UoM(models.Model):
                         "Some critical fields have been modified on %s.\n"
                         "Note that existing data WON'T be updated by this change.\n\n"
                         "As units of measure impact the whole system, this may cause critical issues.\n"
-                        "E.g. modifying the rounding could disturb your inventory balance.\n\n"
                         "Therefore, changing core units of measure in a running database is not recommended.",
                         self.name,
                     )
                 }
             }
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for values in vals_list:
-            if 'factor_inv' in values:
-                factor_inv = values.pop('factor_inv')
-                values['factor'] = factor_inv and (1.0 / factor_inv) or 0.0
-        res = super(UoM, self).create(vals_list)
-        res._check_category_reference_uniqueness()
-        return res
+    # === CONSTRAINT METHODS === #
 
-    def write(self, values):
-        if 'factor_inv' in values:
-            factor_inv = values.pop('factor_inv')
-            values['factor'] = factor_inv and (1.0 / factor_inv) or 0.0
+    @api.constrains('relative_factor', 'relative_uom_id')
+    def _check_factor(self):
+        for uom in self:
+            if not uom.relative_uom_id and uom.relative_factor != 1.0:
+                raise UserError(_("Reference unit of measure is missing."))
 
-        res = super(UoM, self).write(values)
-        if ('uom_type' not in values or values['uom_type'] != 'reference') and\
-                not self.env.context.get('allow_to_change_reference'):
-            self._check_category_reference_uniqueness()
-        return res
+    # === CRUD METHODS === #
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_master_data(self):
@@ -188,67 +111,95 @@ class UoM(models.Model):
                 ", ".join(locked_uoms.mapped('name')),
             ))
 
-    @api.model
-    def name_create(self, name):
-        """ The UoM category and factor are required, so we'll have to add temporary values
-        for imported UoMs """
-        values = {
-            self._rec_name: name,
-            'factor': 1
-        }
-        # look for the category based on the english name, i.e. no context on purpose!
-        # TODO: should find a way to have it translated but not created until actually used
-        if not self._context.get('default_category_id'):
-            EnglishUoMCateg = self.env['uom.category'].with_context({})
-            misc_category = EnglishUoMCateg.search([('name', '=', 'Unsorted/Imported Units')])
-            if misc_category:
-                values['category_id'] = misc_category.id
-            else:
-                values['category_id'] = EnglishUoMCateg.name_create('Unsorted/Imported Units')[0]
-        new_uom = self.create(values)
-        return new_uom.id, new_uom.display_name
+    # === BUSINESS METHODS === #
 
-    def _compute_quantity(self, qty, to_unit, round=True, rounding_method='UP', raise_if_failure=True):
+    def round(self, value: float, rounding_method: RoundingMethod = 'HALF-UP') -> float:
+        """Round the value using the 'Product Unit' precision"""
+        self.ensure_one()
+        digits = self.env['decimal.precision'].precision_get('Product Unit')
+        return tools.float_round(value, precision_digits=digits, rounding_method=rounding_method)
+
+    def compare(self, value1: float, value2: float) -> Literal[-1, 0, 1]:
+        """Compare two measures after rounding them with the 'Product Unit' precision
+
+        :param value1: origin value to compare
+        :param value2: value to compare to
+        :return: -1, 0 or 1, if ``value1`` is lower than, equal to, or greater than ``value2``.
+        """
+        self.ensure_one()
+        digits = self.env['decimal.precision'].precision_get('Product Unit')
+        return tools.float_compare(value1, value2, precision_digits=digits)
+
+    def is_zero(self, value: float) -> bool:
+        """Check if the value is zero after rounding with the 'Product Unit' precision"""
+        self.ensure_one()
+        digits = self.env['decimal.precision'].precision_get('Product Unit')
+        return tools.float_is_zero(value, precision_digits=digits)
+
+    @api.depends('name', 'relative_factor', 'relative_uom_id')
+    @api.depends_context('formatted_display_name')
+    def _compute_display_name(self):
+        super()._compute_display_name()
+        for uom in self:
+            if uom.env.context.get('formatted_display_name') and uom.relative_uom_id:
+                uom.display_name = f"{uom.name}\t--{uom.relative_factor} {uom.relative_uom_id.name}--"
+
+    def _compute_quantity(
+        self,
+        qty: float,
+        to_unit: Self,
+        round: bool = True,
+        rounding_method: RoundingMethod = 'UP',
+        raise_if_failure: bool = True,
+    ) -> float:
         """ Convert the given quantity from the current UoM `self` into a given one
             :param qty: the quantity to convert
-            :param to_unit: the destination UoM record (uom.uom)
+            :param to_unit: the destination UomUom record (uom.uom)
             :param raise_if_failure: only if the conversion is not possible
-                - if true, raise an exception if the conversion is not possible (different UoM category),
+                - if true, raise an exception if the conversion is not possible (different UomUom category),
                 - otherwise, return the initial quantity
         """
         if not self or not qty:
             return qty
         self.ensure_one()
 
-        if self != to_unit and self.category_id.id != to_unit.category_id.id:
-            if raise_if_failure:
-                raise UserError(_(
-                    'The unit of measure %(unit)s defined on the order line doesn\'t belong to the same category as the unit of measure %(product_unit)s defined on the product. Please correct the unit of measure defined on the order line or on the product. They should belong to the same category.',
-                    unit=self.name, product_unit=to_unit.name))
-            else:
-                return qty
-
         if self == to_unit:
             amount = qty
         else:
-            amount = qty / self.factor
+            amount = qty * self.factor
             if to_unit:
-                amount = amount * to_unit.factor
+                amount = amount / to_unit.factor
 
         if to_unit and round:
             amount = tools.float_round(amount, precision_rounding=to_unit.rounding, rounding_method=rounding_method)
 
         return amount
 
-    def _compute_price(self, price, to_unit):
+    def _check_qty(self, product_qty, uom_id, rounding_method="HALF-UP"):
+        """Check if product_qty in given uom is a multiple of the packaging qty.
+        If not, rounding the product_qty to closest multiple of the packaging qty
+        according to the rounding_method "UP", "HALF-UP or "DOWN".
+        """
+        self.ensure_one()
+        packaging_qty = self._compute_quantity(1, uom_id)
+        if self == uom_id:
+            return product_qty
+        # We do not use the modulo operator to check if qty is a mltiple of q. Indeed the quantity
+        # per package might be a float, leading to incorrect results. For example:
+        # 8 % 1.6 = 1.5999999999999996
+        # 5.4 % 1.8 = 2.220446049250313e-16
+        if product_qty and packaging_qty:
+            product_qty = float_round(product_qty / packaging_qty, precision_rounding=1.0,
+                                  rounding_method=rounding_method) * packaging_qty
+        return product_qty
+
+    def _compute_price(self, price: float, to_unit: Self) -> float:
         self.ensure_one()
         if not self or not price or not to_unit or self == to_unit:
             return price
-        if self.category_id.id != to_unit.category_id.id:
-            return price
-        amount = price * self.factor
+        amount = price * to_unit.factor
         if to_unit:
-            amount = amount / to_unit.factor
+            amount = amount / self.factor
         return amount
 
     def _filter_protected_uoms(self):
@@ -263,3 +214,17 @@ class UoM(models.Model):
             return self.browse()
         else:
             return self.browse(set(linked_model_data.mapped('res_id')))
+
+    def _has_common_reference(self, other_uom: Self) -> bool:
+        """ Check if `self` and `other_uom` have a common reference unit """
+        self.ensure_one()
+        other_uom.ensure_one()
+        self_path = self.parent_path.split('/')
+        other_path = other_uom.parent_path.split('/')
+        common_path = []
+        for self_parent, other_parent in zip(self_path, other_path):
+            if self_parent == other_parent:
+                common_path.append(self_parent)
+            else:
+                break
+        return bool(common_path)

@@ -4,14 +4,11 @@ import json
 import re
 from urllib.parse import unquote, quote
 
-try:
-    from google.oauth2 import service_account
-    from google.auth.transport.requests import Request
-except ImportError:
-    service_account = Request = None
+from google.oauth2 import service_account
 
 from odoo import models
 from odoo.exceptions import ValidationError
+from odoo.http import content_disposition
 
 from ..utils.cloud_storage_google_utils import generate_signed_url_v4
 
@@ -33,12 +30,12 @@ def get_cloud_storage_google_credential(env):
 
 class IrAttachment(models.Model):
     _inherit = 'ir.attachment'
-    _cloud_storage_google_url_pattern = re.compile(r'https://storage\.googleapis\.com/(?P<bucket_name>[\w\-.]+)/(?P<blob_name>[^?]+)')
+    _cloud_storage_google_url_pattern = re.compile(r'^https://storage\.googleapis\.com/(?P<bucket_name>[\w\-.]+)/(?P<blob_name>[^?]+)$')
 
     def _get_cloud_storage_google_info(self):
-        match = self._cloud_storage_google_url_pattern.match(self.url)
+        match = self._cloud_storage_google_url_pattern.fullmatch(self.url or '')
         if not match:
-            raise ValidationError('%s is not a valid Google Cloud Storage URL.', self.url)
+            raise ValidationError(self.env._('%s is not a valid Google Cloud Storage URL.', self.url))
         return {
             'bucket_name': match['bucket_name'],
             'blob_name': unquote(match['blob_name']),
@@ -67,9 +64,16 @@ class IrAttachment(models.Model):
         if self.env['ir.config_parameter'].sudo().get_param('cloud_storage_provider') != 'google':
             return super()._generate_cloud_storage_download_info()
         info = self._get_cloud_storage_google_info()
+        time_to_expiry = self._get_cloud_storage_download_url_time_to_expiry()
         return {
-            'url': self._generate_cloud_storage_google_signed_url(info['bucket_name'], info['blob_name'], method='GET', expiration=self._cloud_storage_download_url_time_to_expiry),
-            'time_to_expiry': self._cloud_storage_download_url_time_to_expiry,
+            'url': self._generate_cloud_storage_google_signed_url(
+                info['bucket_name'], info['blob_name'],
+                method='GET',
+                expiration=time_to_expiry,
+                response_type=self.mimetype or None,
+                response_disposition=content_disposition(self.name) if self.env.context.get('download_attachments') else None,
+            ),
+            'time_to_expiry': time_to_expiry,
         }
 
     def _generate_cloud_storage_upload_info(self):
@@ -80,4 +84,5 @@ class IrAttachment(models.Model):
             'url': self._generate_cloud_storage_google_signed_url(info['bucket_name'], info['blob_name'], method='PUT', expiration=self._cloud_storage_upload_url_time_to_expiry),
             'method': 'PUT',
             'response_status': 200,
+            'headers': {'Content-Type': self.mimetype} if self.mimetype else None,
         }

@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { pick } from "@web/core/utils/objects";
@@ -8,7 +6,7 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 class RedirectField extends Component {
     static template = "website.RedirectField";
-    static props = {...standardFieldProps};
+    static props = { ...standardFieldProps };
     get info() {
         return this.props.record.data[this.props.name] ? _t("Published") : _t("Unpublished");
     }
@@ -24,7 +22,6 @@ class RedirectField extends Component {
         });
     }
 }
-
 
 registry.category("fields").add("website_redirect_button", {
     component: RedirectField,

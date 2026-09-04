@@ -5,6 +5,8 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+import re
+
 
 class UtmMedium(models.Model):
     _name = 'utm.medium'
@@ -14,9 +16,10 @@ class UtmMedium(models.Model):
     name = fields.Char(string='Medium Name', required=True, translate=False)
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ('unique_name', 'UNIQUE(name)', 'The name must be unique'),
-    ]
+    _unique_name = models.Constraint(
+        'UNIQUE(name)',
+        'The name must be unique',
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -48,14 +51,15 @@ class UtmMedium(models.Model):
                 ))
 
     def _fetch_or_create_utm_medium(self, name, module='utm'):
+        name_normalized = re.sub(r"[\s|.]", "_", name.lower())
         try:
-            return self.env.ref(f'{module}.utm_medium_{name}')
+            return self.env.ref(f'{module}.utm_medium_{name_normalized}')
         except ValueError:
             utm_medium = self.sudo().env['utm.medium'].create({
-                'name': self.SELF_REQUIRED_UTM_MEDIUMS_REF.get(f'{module}.utm_medium_{name}', name)
+                'name': self.SELF_REQUIRED_UTM_MEDIUMS_REF.get(f'{module}.utm_medium_{name_normalized}', name)
             })
             self.sudo().env['ir.model.data'].create({
-                'name': f'utm_medium_{name}',
+                'name': f'utm_medium_{name_normalized}',
                 'module': module,
                 'res_id': utm_medium.id,
                 'model': 'utm.medium',

@@ -8,6 +8,7 @@
     'depends': [
         'account',
     ],
+    'auto_install': ['account'],
     'description': """
     Tanzanian localisation containing:
     - COA
@@ -22,5 +23,6 @@
     'demo': [
         'demo/demo_company.xml',
     ],
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

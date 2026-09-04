@@ -1,12 +1,13 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { manuallyDispatchProgrammaticEvent, press, queryFirst } from "@odoo/hoot-dom";
+import { press, queryFirst } from "@odoo/hoot-dom";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { insertText, tripleClick, undo } from "./_helpers/user_actions";
-import { animationFrame, tick } from "@odoo/hoot-mock";
+import { animationFrame } from "@odoo/hoot-mock";
+import { defineStyle } from "@web/../tests/web_test_helpers";
 
 function setTag(tagName) {
-    return (editor) => editor.shared.dom.setTag({ tagName });
+    return (editor) => editor.shared.dom.setBlock({ tagName });
 }
 
 describe("to paragraph", () => {
@@ -34,11 +35,15 @@ describe("to paragraph", () => {
         });
     });
 
-    test.skip("should turn a heading 1 into a paragraph after a triple click", async () => {
+    test.tags("desktop");
+    test("should turn a heading 1 into a paragraph after a triple click", async () => {
         await testEditor({
-            contentBefore: "<h1>[ab</h1><h2>]cd</h2>",
-            stepFunction: setTag("p"),
-            contentAfter: "<p>[ab</p><h2>]cd</h2>",
+            contentBefore: "<h1>ab</h1><h2>cd</h2>",
+            stepFunction: async (editor) => {
+                await tripleClick(editor.editable.querySelector("h1"));
+                setTag("p")(editor);
+            },
+            contentAfter: "<p>[ab]</p><h2>cd</h2>",
         });
     });
 
@@ -47,6 +52,32 @@ describe("to paragraph", () => {
             contentBefore: `<div>[ab]</div>`,
             stepFunction: setTag("p"),
             contentAfter: "<p>[ab]</p>",
+        });
+    });
+
+    test("should turn a block <small> element into a paragraph", async () => {
+        defineStyle("small { display: block; }");
+        await testEditor({
+            contentBefore: "<small>[abc]</small>",
+            stepFunction: setTag("p"),
+            contentAfter: "<p>[abc]</p>",
+        });
+    });
+
+    test("shouldn't turn a normal <small> element into a paragraph", async () => {
+        await testEditor({
+            contentBefore: "<small>[abc]</small>",
+            stepFunction: setTag("p"),
+            contentAfter: "<p><small>[]abc</small></p>",
+        });
+    });
+
+    test("shouldn't turn a div into a paragraph (if div isn't eligible for a baseContainer)", async () => {
+        await testEditor({
+            contentBefore: "<div><small>[abc]</small></div>",
+            stepFunction: setTag("p"),
+            contentAfter: "<div><p><small>[abc]</small></p></div>",
+            config: { baseContainers: ["P"] },
         });
     });
 
@@ -119,6 +150,15 @@ describe("to paragraph", () => {
         await press("enter");
         expect(getContent(el)).toBe("<p>ab[]cd</p>");
     });
+
+    test("should remove current font-size formatting when changing to a paragraph", async () => {
+        await testEditor({
+            contentBefore:
+                '<h3 class="h4-fs" style="text-align: center;">[abc<span style="font-size: 32px;">de</span><strong>fg</strong>]</h3>',
+            stepFunction: setTag("p"),
+            contentAfter: '<p style="text-align: center;">[abcde<strong>fg</strong>]</p>',
+        });
+    });
 });
 
 describe("to heading 1", () => {
@@ -138,19 +178,23 @@ describe("to heading 1", () => {
         });
     });
 
-    test("should just turn the paragraph with selected content into a heading 1", async () => {
+    test.tags("desktop");
+    test("should turn the paragraph into a heading 1 (after triple click)", async () => {
         await testEditor({
-            contentBefore: "<p>[ab</p><p>]cd</p>",
-            stepFunction: setTag("h1"),
-            contentAfter: "<h1>[ab</h1><p>]cd</p>",
+            contentBefore: "<p>ab</p><p>cd</p>",
+            stepFunction: async (editor) => {
+                await tripleClick(editor.editable.querySelector("p"));
+                setTag("h1")(editor);
+            },
+            contentAfter: "<h1>[ab]</h1><p>cd</p>",
         });
     });
 
-    test("should just turn the paragraph with selected content into a heading 1 (2)", async () => {
+    test("should turn two paragraphs into a heading 1 (from right inner edge)", async () => {
         await testEditor({
             contentBefore: "<p>ab[</p><p>cd]</p>",
             stepFunction: setTag("h1"),
-            contentAfter: "<p>ab[</p><h1>cd]</h1>",
+            contentAfter: "<h1>ab[</h1><h1>cd]</h1>",
         });
     });
 
@@ -162,11 +206,41 @@ describe("to heading 1", () => {
         });
     });
 
-    test.skip("should turn a paragraph into a heading 1 after a triple click", async () => {
+    test.tags("desktop");
+    test("should turn a paragraph into a heading 1 after a triple click", async () => {
         await testEditor({
-            contentBefore: "<p>[ab</p><h2>]cd</h2>",
+            contentBefore: "<p>ab</p><h2>cd</h2>",
+            stepFunction: async (editor) => {
+                await tripleClick(editor.editable.querySelector("p"));
+                setTag("h1")(editor);
+            },
+            contentAfter: "<h1>[ab]</h1><h2>cd</h2>",
+        });
+    });
+
+    test("should turn a block <small> element into a heading", async () => {
+        defineStyle("small { display: block; }");
+        await testEditor({
+            contentBefore: "<small>[abc]</small>",
             stepFunction: setTag("h1"),
-            contentAfter: "<h1>[ab</h1><h2>]cd</h2>",
+            contentAfter: "<h1>[abc]</h1>",
+        });
+    });
+
+    test("shouldn't turn a normal <small> element into a heading", async () => {
+        await testEditor({
+            contentBefore: "<small>[abc]</small>",
+            stepFunction: setTag("h1"),
+            contentAfter: "<h1><small>[]abc</small></h1>",
+        });
+    });
+
+    test("shouldn't turn a div into a heading (if div isn't eligible for a baseContainer)", async () => {
+        await testEditor({
+            contentBefore: "<div><small>[abc]</small></div>",
+            stepFunction: setTag("h1"),
+            contentAfter: "<div><h1><small>[abc]</small></h1></div>",
+            config: { baseContainers: ["P"] },
         });
     });
 
@@ -196,6 +270,23 @@ describe("to heading 1", () => {
             contentAfter: '<ul><li class="nav-item"><h1>[abcd]</h1></li></ul>',
         });
     });
+
+    test("should remove current font-size formatting when changing to a heading 1", async () => {
+        await testEditor({
+            contentBefore:
+                '<h2 class="h4-fs" style="text-align: center;">[abc<span style="font-size: 32px;">de</span><strong>fg</strong>]</h2>',
+            stepFunction: setTag("h1"),
+            contentAfter: '<h1 style="text-align: center;">[abcde<strong>fg</strong>]</h1>',
+        });
+    });
+
+    test("should convert h2 to h1 and remove the classes", async () => {
+        await testEditor({
+            contentBefore: '<h2 class="h3-fs">[Enhance] Your <strong>Experience</strong></h2>',
+            stepFunction: setTag("h1"),
+            contentAfter: "<h1>[Enhance] Your <strong>Experience</strong></h1>",
+        });
+    });
 });
 
 describe("to heading 2", () => {
@@ -223,12 +314,12 @@ describe("to heading 2", () => {
         });
     });
 
-    test.skip("should turn a paragraph into a heading 2 after a triple click", async () => {
-        await testEditor({
-            contentBefore: "<p>[ab</p><h1>]cd</h1>",
-            stepFunction: setTag("h2"),
-            contentAfter: "<h2>[ab</h2><h1>]cd</h1>",
-        });
+    test.tags("desktop");
+    test("should turn a paragraph into a heading 2 after a triple click", async () => {
+        const { el, editor } = await setupEditor("<p>ab</p><h1>cd</h1>");
+        await tripleClick(el.querySelector("p"));
+        setTag("h2")(editor);
+        expect(getContent(el)).toBe("<h2>[ab]</h2><h1>cd</h1>");
     });
 
     test("should turn a div into a heading 2 (if div is eligible for a baseContainer)", async () => {
@@ -255,6 +346,15 @@ describe("to heading 2", () => {
             contentBefore: '<ul><li class="nav-item">[abcd]</li></ul>',
             stepFunction: setTag("h2"),
             contentAfter: '<ul><li class="nav-item"><h2>[abcd]</h2></li></ul>',
+        });
+    });
+
+    test("should remove current font-size formatting when changing to a heading 2", async () => {
+        await testEditor({
+            contentBefore:
+                '<h3 class="h4-fs" style="text-align: center;">[abc<span style="font-size: 32px;">de</span><strong>fg</strong>]</h3>',
+            stepFunction: setTag("h2"),
+            contentAfter: '<h2 style="text-align: center;">[abcde<strong>fg</strong>]</h2>',
         });
     });
 });
@@ -284,11 +384,15 @@ describe("to heading 3", () => {
         });
     });
 
-    test.skip("should turn a paragraph into a heading 3 after a triple click", async () => {
+    test.tags("desktop");
+    test("should turn a paragraph into a heading 3 after a triple click", async () => {
         await testEditor({
-            contentBefore: "<p>[ab</p><h1>]cd</h1>",
-            stepFunction: setTag("h3"),
-            contentAfter: "<h3>[ab</h3><h1>]cd</h1>",
+            contentBefore: "<p>ab</p><h1>cd</h1>",
+            stepFunction: async (editor) => {
+                await tripleClick(editor.editable.querySelector("p"));
+                setTag("h3")(editor);
+            },
+            contentAfter: "<h3>[ab]</h3><h1>cd</h1>",
         });
     });
 
@@ -316,6 +420,15 @@ describe("to heading 3", () => {
             contentBefore: '<ul><li class="nav-item">[abcd]</li></ul>',
             stepFunction: setTag("h3"),
             contentAfter: '<ul><li class="nav-item"><h3>[abcd]</h3></li></ul>',
+        });
+    });
+
+    test("should remove current font-size formatting when changing to a heading 3", async () => {
+        await testEditor({
+            contentBefore:
+                '<h2 class="h4-fs" style="text-align: center;">[abc<span style="font-size: 32px;">de</span><strong>fg]</strong></h2>',
+            stepFunction: setTag("h3"),
+            contentAfter: '<h3 style="text-align: center;">[abcde<strong>fg]</strong></h3>',
         });
     });
 });
@@ -381,6 +494,15 @@ describe("to pre", () => {
         await press("enter");
         expect(getContent(el)).toBe("<pre>ab[]cd</pre>");
     });
+
+    test("should remove current font-size formatting when changing to a pre", async () => {
+        await testEditor({
+            contentBefore:
+                '<h3 class="h4-fs" style="text-align: center;">[abc<span style="font-size: 32px;">de</span><strong>fg</strong>]</h3>',
+            stepFunction: setTag("pre"),
+            contentAfter: '<pre style="text-align: center;">[abcde<strong>fg</strong>]</pre>',
+        });
+    });
 });
 
 describe("to blockquote", () => {
@@ -409,11 +531,15 @@ describe("to blockquote", () => {
         });
     });
 
-    test.skip("should turn a heading 1 into a blockquote after a triple click", async () => {
+    test.tags("desktop");
+    test("should turn a heading 1 into a blockquote after a triple click", async () => {
         await testEditor({
-            contentBefore: "<h1>[ab</h1><h2>]cd</h2>",
-            stepFunction: setTag("blockquote"),
-            contentAfter: "<blockquote>[ab</blockquote><h2>]cd</h2>",
+            contentBefore: "<h1>ab</h1><h2>cd</h2>",
+            stepFunction: async (editor) => {
+                await tripleClick(editor.editable.querySelector("h1"));
+                setTag("blockquote")(editor);
+            },
+            contentAfter: "<blockquote>[ab]</blockquote><h2>cd</h2>",
         });
     });
 
@@ -464,10 +590,9 @@ describe("to blockquote", () => {
         expect(getContent(el)).toBe("<h1>abcd</h1>");
     });
 
+    test.tags("desktop");
     test("triple click with setTag should only switch the tag on the selected line", async () => {
         const { editor, el } = await setupEditor("<p>ab[]cd</p><p>Plop</p>");
-        // Simulate selection trigger by triple click
-        // @todo @phoenix need to adapt when hoot add detail => 3 x click
         await tripleClick(queryFirst("div p"));
         expect(getContent(el)).toBe("<p>[abcd]</p><p>Plop</p>");
 
@@ -475,19 +600,12 @@ describe("to blockquote", () => {
         expect(getContent(el)).toBe("<h1>[abcd]</h1><p>Plop</p>");
     });
 
+    test.tags("desktop");
     test("6 click with setTag should only switch the tag on the selected line", async () => {
         const { editor, el } = await setupEditor("<p>ab[]cd</p><p>Plop</p>");
-        // Simulate selection trigger by triple click
-        // @todo @phoenix need to adapt when hoot add detail => 6 x click
         const anchorNode = queryFirst("div p");
-        await manuallyDispatchProgrammaticEvent(anchorNode, "mousedown", { detail: 6 });
-        setSelection({
-            anchorNode,
-            anchorOffset: 0,
-            focusNode: anchorNode.nextSibling,
-            focusOffset: 0,
-        });
-        await tick();
+        await tripleClick(anchorNode);
+        await tripleClick(anchorNode);
         expect(getContent(el)).toBe("<p>[abcd]</p><p>Plop</p>");
 
         setTag("h1")(editor);
@@ -507,9 +625,9 @@ describe("to blockquote", () => {
     test("setTag should work after control+a", async () => {
         const { el, editor } = await setupEditor("<p>[]abcd</p>");
         await press(["ctrl", "a"]);
-        expect(getContent(el)).toBe("[<p>abcd</p>]");
+        expect(getContent(el)).toBe("<p>[abcd]</p>");
         setTag("h1")(editor);
-        expect(getContent(el)).toBe("[<h1>abcd</h1>]");
+        expect(getContent(el)).toBe("<h1>[abcd]</h1>");
     });
 });
 
@@ -517,7 +635,7 @@ describe("transform", () => {
     test("should transform space preceding by a hashtag to heading 1", async () => {
         const { el, editor } = await setupEditor("<p>[]</p>");
         await insertText(editor, "# ");
-        expect(getContent(el)).toBe(`<h1 placeholder="Heading 1" class="o-we-hint">[]<br></h1>`);
+        expect(getContent(el)).toBe(`<h1 o-we-hint-text="Heading 1" class="o-we-hint">[]<br></h1>`);
 
         undo(editor);
         expect(getContent(el)).toBe(`<p># []</p>`);
@@ -526,13 +644,13 @@ describe("transform", () => {
     test("should transform space preceding by two hashtags to heading 2", async () => {
         const { el, editor } = await setupEditor("<p>[]</p>");
         await insertText(editor, "## ");
-        expect(getContent(el)).toBe(`<h2 placeholder="Heading 2" class="o-we-hint">[]<br></h2>`);
+        expect(getContent(el)).toBe(`<h2 o-we-hint-text="Heading 2" class="o-we-hint">[]<br></h2>`);
     });
 
     test("should transform space preceding by three hashtags to heading 3", async () => {
         const { el, editor } = await setupEditor("<p>[]<br></p>");
         await insertText(editor, "### ");
-        expect(getContent(el)).toBe(`<h3 placeholder="Heading 3" class="o-we-hint">[]<br></h3>`);
+        expect(getContent(el)).toBe(`<h3 o-we-hint-text="Heading 3" class="o-we-hint">[]<br></h3>`);
     });
 
     test("should transform space preceding by a hashtag at the starting of text to heading 1", async () => {
@@ -560,5 +678,38 @@ describe("transform", () => {
         const { el, editor } = await setupEditor("<p># a<strong>b[]cd</strong>e</p>");
         await insertText(editor, " ");
         expect(getContent(el)).toBe(`<p># a<strong>b []cd</strong>e</p>`);
+    });
+
+    test("should transform three dashes in an empty block to separator before the block", async () => {
+        const { el, editor } = await setupEditor("<p>[]<br></p>");
+        await insertText(editor, "--- ");
+        expect(getContent(el)).toBe(
+            `<p data-selection-placeholder="" style="margin: 8px 0px -9px;"><br></p><hr contenteditable="false"><p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p>`
+        );
+    });
+
+    test("should transform three dashes at the start of text to separator before the block", async () => {
+        const { el, editor } = await setupEditor("<p>[]abc</p>");
+        await insertText(editor, "--- ");
+        expect(getContent(el)).toBe(
+            `<p data-selection-placeholder="" style="margin: 8px 0px -9px;"><br></p><hr contenteditable="false"><p>[]abc</p>`
+        );
+    });
+
+    test("should transform space preceding by greater-than symbol to blockquote", async () => {
+        const { el, editor } = await setupEditor("<p>[]<br></p>");
+        await insertText(editor, "> ");
+        expect(getContent(el)).toBe(
+            `<blockquote o-we-hint-text="Quote" class="o-we-hint">[]<br></blockquote>`
+        );
+    });
+
+    test("should transform space preceding by a greater-than symbol at the starting of text to blockquote", async () => {
+        const { el, editor } = await setupEditor("<p>[]abc</p>");
+        await insertText(editor, "> ");
+        expect(getContent(el)).toBe(`<blockquote>[]abc</blockquote>`);
+
+        undo(editor);
+        expect(getContent(el)).toBe(`<p>> []abc</p>`);
     });
 });

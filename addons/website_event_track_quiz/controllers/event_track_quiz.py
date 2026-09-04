@@ -13,7 +13,7 @@ class WebsiteEventTrackQuiz(EventTrackController):
     # QUIZZES IN PAGE
     # ----------------------------------------------------------
 
-    @http.route('/event_track/quiz/submit', type="json", auth="public", website=True)
+    @http.route('/event_track/quiz/submit', type="jsonrpc", auth="public", website=True)
     def event_track_quiz_submit(self, event_id, track_id, answer_ids):
         track = self._fetch_track(track_id)
         track_sudo = track.sudo()
@@ -46,7 +46,7 @@ class WebsiteEventTrackQuiz(EventTrackController):
         }
         return result
 
-    @http.route('/event_track/quiz/reset', type="json", auth="public", website=True)
+    @http.route('/event_track/quiz/reset', type="jsonrpc", auth="public", website=True)
     def quiz_reset(self, event_id, track_id):
         track = self._fetch_track(track_id)
         # When the 'unlimited tries' option is disabled and the user is not
@@ -64,7 +64,10 @@ class WebsiteEventTrackQuiz(EventTrackController):
 
     def _get_quiz_answers_details(self, track, answer_ids):
         questions_count = track.quiz_questions_count
-        user_answers = request.env['event.quiz.answer'].sudo().search([('id', 'in', answer_ids)])
+        user_answers = request.env['event.quiz.answer'].sudo().search([
+            ('id', 'in', answer_ids),
+            ('question_id.quiz_id', '=', track.quiz_id.id),
+        ])
 
         if len(user_answers.mapped('question_id')) != questions_count:
             return {'error': 'quiz_incomplete'}

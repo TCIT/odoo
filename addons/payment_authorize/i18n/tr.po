@@ -1,41 +1,54 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_authorize
-# 
+# * payment_authorize
+#
 # Translators:
-# Tiffany Chang, 2024
-# Hüseyin Cem Aras <hcemaras@gmail.com>, 2024
-# 27cb721235bc771895826f594ae4f6eb_a256844 <219b303f361cd550c2362fb7cee8b2e6_513839>, 2024
-# Murat Kaplan <muratk@projetgrup.com>, 2024
-# Nadir Gazioglu <nadirgazioglu@gmail.com>, 2024
-# Ediz Duman <neps1192@gmail.com>, 2024
-# abc Def <hdogan1974@gmail.com>, 2024
-# Martin Trigaux, 2024
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024
-# 
+# Ediz Duman <neps1192@gmail.com>, 2019
+# Martin Trigaux, 2019
+# Murat Kaplan <muratk@projetgrup.com>, 2019
+# Ramiz Deniz Öner <deniz@denizoner.com>, 2019
+# Hüseyin Cem Aras <hcemaras@gmail.com>, 2019
+# Umur Akın <umura@projetgrup.com>, 2019
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~12.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024\n"
-"Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
+"POT-Creation-Date: 2026-03-13 18:39+0000\n"
+"PO-Revision-Date: 2026-08-03 01:56+0000\n"
+"Last-Translator: Odoo Turkish Import <dyki+tr@odoo.com>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
+"payment_authorize/tr/>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: tr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
 msgid ""
-"<select id=\"o_authorize_account_type\" required=\"\" class=\"form-select\">\n"
-"                        <option value=\"checking\">Personal Checking</option>\n"
+"<select id=\"o_authorize_account_type\" required=\"\" class=\"form-"
+"select\">\n"
+"                        <option value=\"checking\">Personal Checking</"
+"option>\n"
 "                        <option value=\"savings\">Personal Savings</option>\n"
-"                        <option value=\"businessChecking\">Business Checking</option>\n"
+"                        <option value=\"businessChecking\">Business "
+"Checking</option>\n"
 "                    </select>"
 msgstr ""
+"<select id=\"o_authorize_account_type\" required=\"\" class=\"form-select\">"
+"\n"
+"                        <option value=\"checking\">Bireysel Vadesiz</option>"
+"\n"
+"                        <option value=\"savings\">Bireysel Vadeli</option>\n"
+"                        <option value=\"businessChecking\">Ticari Vadesiz</"
+"option>\n"
+"                    </select>"
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
@@ -119,6 +132,15 @@ msgid ""
 "Could not retrieve the transaction details. (error code: %(error_code)s; "
 "error_details: %(error_message)s)"
 msgstr ""
+"İşlem ayrıntıları alınamadı. (hata kodu: %(error_code)s; hata_ayrıntıları: %"
+"(error_message)s)"
+
+#. module: payment_authorize
+#: model:ir.model.fields,field_description:payment_authorize.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_authorize.field_payment_token__display_name
+#: model:ir.model.fields,field_description:payment_authorize.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "İsim Göster"
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
@@ -146,6 +168,13 @@ msgid "How to get paid with Authorize.Net"
 msgstr "Authorize.Net ile nasıl ödeme yapılır"
 
 #. module: payment_authorize
+#: model:ir.model.fields,field_description:payment_authorize.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_authorize.field_payment_token__id
+#: model:ir.model.fields,field_description:payment_authorize.field_payment_transaction__id
+msgid "ID"
+msgstr "ID"
+
+#. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
 msgid "MM"
 msgstr "MM"
@@ -157,15 +186,9 @@ msgstr "Hesaptaki Adı"
 
 #. module: payment_authorize
 #. odoo-python
-#: code:addons/payment_authorize/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "Referans %s eşleşen bir işlem bulunamadı."
-
-#. module: payment_authorize
-#. odoo-python
 #: code:addons/payment_authorize/models/payment_provider.py:0
 msgid "Only one currency can be selected by Authorize.Net account."
-msgstr ""
+msgstr "Authorize.Net hesabı yalnızca tek bir para birimi seçimine izin verir."
 
 #. module: payment_authorize
 #: model:ir.model,name:payment_authorize.model_payment_provider
@@ -184,15 +207,17 @@ msgstr "Ödeme İşlemi"
 
 #. module: payment_authorize
 #. odoo-javascript
-#: code:addons/payment_authorize/static/src/js/payment_form.js:0
+#: code:addons/payment_authorize/static/src/interactions/payment_form.js:0
 msgid "Payment processing failed"
-msgstr ""
+msgstr "Ödeme işleme başarısız oldu"
 
 #. module: payment_authorize
 #. odoo-python
 #: code:addons/payment_authorize/models/payment_transaction.py:0
-msgid "Received data with status code \"%(status)s\" and error code \"%(error)s\""
-msgstr "Durum kodu \"%(status)s\" ve hata kodu \"%(error)s\" olan veriler alındı"
+msgid ""
+"Received data with status code \"%(status)s\" and error code \"%(error)s\"."
+msgstr ""
+"Durum kodu \"%(status)s\" ve hata kodu \"%(error)s\" olan veriler alındı."
 
 #. module: payment_authorize
 #. odoo-python
@@ -231,12 +256,8 @@ msgid ""
 "The transaction is not in a status to be refunded. (status: %(status)s, "
 "details: %(message)s)"
 msgstr ""
-
-#. module: payment_authorize
-#. odoo-python
-#: code:addons/payment_authorize/models/payment_transaction.py:0
-msgid "The transaction is not linked to a token."
-msgstr "İşlem bir belirteçle bağlantılı değildir."
+"İşlem, iade edilebilir bir durumda değil. (durum: %(status)s, detay: %"
+"(message)s)"
 
 #. module: payment_authorize
 #: model:ir.model.fields,help:payment_authorize.field_payment_token__authorize_profile
@@ -251,6 +272,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/payment_authorize/models/payment_provider.py:0
 msgid "This action cannot be performed while the provider is disabled."
+msgstr "Bu işlem, sağlayıcı devre dışıyken gerçekleştirilemez."
+
+#. module: payment_authorize
+#. odoo-python
+#: code:addons/payment_authorize/controllers/main.py:0
+msgid "Transaction not found."
 msgstr ""
 
 #. module: payment_authorize

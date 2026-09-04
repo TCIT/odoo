@@ -1,13 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import json
 from contextlib import contextmanager
-from uuid import uuid4
 
 from lxml import etree, objectify
-from werkzeug import urls
 
 from odoo.tests import HttpCase, JsonRpcException
+from odoo.tools import urls
 
 from odoo.addons.payment.tests.common import PaymentCommon
 
@@ -23,7 +21,7 @@ class PaymentHttpCommon(PaymentCommon, HttpCase):
     ###########
 
     def _build_url(self, route):
-        return urls.url_join(self.base_url(), route)
+        return urls.urljoin(self.base_url(), route)
 
     def _make_http_get_request(self, url, params=None):
         """ Make an HTTP GET request to the provided URL.
@@ -34,7 +32,7 @@ class PaymentHttpCommon(PaymentCommon, HttpCase):
         :rtype: :class:`requests.models.Response`
         """
         formatted_params = self._format_http_request_payload(payload=params)
-        return self.opener.get(url, params=formatted_params)
+        return self.url_open(url, params=formatted_params)
 
     def _make_http_post_request(self, url, data=None):
         """ Make an HTTP POST request to the provided URL.
@@ -45,7 +43,7 @@ class PaymentHttpCommon(PaymentCommon, HttpCase):
         :rtype: :class:`requests.models.Response`
         """
         formatted_data = self._format_http_request_payload(payload=data)
-        return self.opener.post(url, data=formatted_data)
+        return self.url_open(url, data=formatted_data, method='POST')
 
     def _format_http_request_payload(self, payload=None):
         """ Format a request payload to replace float values by their string representation.
@@ -68,7 +66,7 @@ class PaymentHttpCommon(PaymentCommon, HttpCase):
         :return: The response of the request
         :rtype: :class:`requests.models.Response`
         """
-        return self.opener.post(url, json=data)
+        return self.url_open(url, json=data)
 
     @contextmanager
     def _assertNotFound(self):

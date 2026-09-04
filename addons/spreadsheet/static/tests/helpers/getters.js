@@ -111,3 +111,16 @@ export function getBorders(model, xc, sheetId = model.getters.getActiveSheetId()
     Object.keys(borders).forEach((key) => borders[key] === undefined && delete borders[key]);
     return borders;
 }
+
+/**
+ * Get the formatted value of the given xc
+ */
+export function getCellFormattedValue(model, xc, sheetId = model.getters.getActiveSheetId()) {
+    const { col, row } = toCartesian(xc);
+    return model.getters.getCellText({ sheetId, col, row }, false);
+}
+
+export function getCellIcons(model, xc) {
+    const sheetId = model.getters.getActiveSheetId();
+    return model.getters.getCellIcons({ ...toCartesian(xc), sheetId });
+}

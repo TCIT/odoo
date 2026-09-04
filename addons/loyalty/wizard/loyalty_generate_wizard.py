@@ -1,27 +1,27 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.osv import expression
+from odoo.fields import Domain
+
 
 class LoyaltyGenerateWizard(models.TransientModel):
     _name = 'loyalty.generate.wizard'
-    _description = 'Generate Coupons'
+    _description = "Generate Coupons"
 
     program_id = fields.Many2one('loyalty.program', required=True, default=lambda self: self.env.context.get('active_id', False) or self.env.context.get('default_program_id', False))
     program_type = fields.Selection(related='program_id.program_type')
 
     mode = fields.Selection([
-        ('anonymous', 'Anonymous Customers'),
-        ('selected', 'Selected Customers')],
+        ('anonymous', "Anonymous Customers"),
+        ('selected', "Selected Customers")],
         string='For', required=True, default='anonymous'
     )
 
     customer_ids = fields.Many2many('res.partner', string='Customers')
     customer_tag_ids = fields.Many2many('res.partner.category', string='Customer Tags')
 
-    coupon_qty = fields.Integer('Quantity',
+    coupon_qty = fields.Integer("Quantity",
         compute='_compute_coupon_qty', readonly=False, store=True)
     points_granted = fields.Float('Grant', required=True, default=1)
     points_name = fields.Char(related='program_id.portal_point_name', readonly=True)
@@ -39,7 +39,7 @@ class LoyaltyGenerateWizard(models.TransientModel):
             domains.append([('id', 'in', self.customer_ids.ids)])
         if self.customer_tag_ids:
             domains.append([('category_id', 'in', self.customer_tag_ids.ids)])
-        return self.env['res.partner'].search(expression.OR(domains) if domains else [])
+        return self.env['res.partner'].search(Domain.OR(domains) if domains else Domain.TRUE)
 
     @api.depends('program_type', 'points_granted', 'coupon_qty')
     def _compute_confirmation_message(self):
@@ -92,4 +92,4 @@ class LoyaltyGenerateWizard(models.TransientModel):
                 'issued': self.points_granted,
             } for coupon in coupons
         ])
-        return True
+        return coupons

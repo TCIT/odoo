@@ -41,6 +41,102 @@ test("StatInfoField formats decimal precision", async () => {
     });
 });
 
+test("StatInfoField widget on a chart fields", async () => {
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <button class="oe_stat_button" name="items" icon="fa-gear">
+                    <field name="foo" widget="statinfo" />
+                </button>
+            </form>
+        `,
+    });
+
+    expect("button.oe_stat_button .o_field_widget .o_stat_value:eq(0)").toHaveText("yop");
+});
+
+test("StatInfoField widget on a char field (unset value)", async () => {
+    Partner._records = [{ id: 1, foo: "" }];
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <button class="oe_stat_button" name="items" icon="fa-gear">
+                    <field name="foo" widget="statinfo" />
+                </button>
+            </form>
+        `,
+    });
+
+    expect("button.oe_stat_button .o_field_widget .o_stat_value:eq(0)").toHaveText("");
+});
+
+test("StatInfoField widget on a one2many field (one record)", async () => {
+    Partner._fields.child_ids = fields.One2many({ string: "one2many field", relation: "partner" });
+    Partner._records.push({ id: 2, foo: "plop", child_ids: [1] });
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: /* xml */ `
+            <form>
+                <button class="oe_stat_button" name="items" icon="fa-gear">
+                    <field name="child_ids" widget="statinfo" />
+                </button>
+            </form>
+        `,
+    });
+
+    expect("button.oe_stat_button .o_field_widget .o_stat_value:eq(0)").toHaveText("1 record");
+});
+
+test("StatInfoField widget on a one2many field (multiple records)", async () => {
+    Partner._fields.child_ids = fields.One2many({ string: "one2many field", relation: "partner" });
+    Partner._records.push({ id: 3, foo: "plop3" });
+    Partner._records.push({ id: 4, foo: "plop4" });
+    Partner._records.push({ id: 2, foo: "plop", child_ids: [1, 3, 4] });
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: /* xml */ `
+            <form>
+                <button class="oe_stat_button" name="items" icon="fa-gear">
+                    <field name="child_ids" widget="statinfo" />
+                </button>
+            </form>
+        `,
+    });
+
+    expect("button.oe_stat_button .o_field_widget .o_stat_value:eq(0)").toHaveText("3 records");
+});
+
+test("StatInfoField widget on a many2one field", async () => {
+    Partner._fields.name = fields.Char();
+    Partner._fields.parent_id = fields.Many2one({ relation: "partner" });
+    Partner._records[0].name = "Parent";
+    Partner._records.push({ id: 2, name: "child", parent_id: 1 });
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 2,
+        arch: /* xml */ `
+            <form>
+                <button class="oe_stat_button" name="items" icon="fa-gear">
+                    <field name="parent_id" widget="statinfo" />
+                </button>
+            </form>
+        `,
+    });
+
+    expect("button.oe_stat_button .o_field_widget .o_stat_value:eq(0)").toHaveText("Parent");
+});
+
 test.tags("desktop");
 test("StatInfoField in form view on desktop", async () => {
     await mountView({

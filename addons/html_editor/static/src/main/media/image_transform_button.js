@@ -3,74 +3,93 @@ import { toolbarButtonProps } from "@html_editor/main/toolbar/toolbar";
 import { registry } from "@web/core/registry";
 import { ImageTransformation } from "./image_transformation";
 
-export class ImageTransformButton extends Component {
-    static template = "html_editor.ImageTransformButton";
-    static props = {
-        icon: String,
-        getSelectedImage: Function,
-        resetImageTransformation: Function,
-        addStep: Function,
-        document: { validate: (p) => p.nodeType === Node.DOCUMENT_NODE },
-        editable: { validate: (p) => p.nodeType === Node.ELEMENT_NODE },
-        ...toolbarButtonProps,
-    };
+export function useImageTransform({ document, closeImageTransformation, buttonSelector }) {
+    let pointerDownInsideTransform = false;
 
-    setup() {
-        this.state = useState({ active: false });
-        this.mouseDownInsideTransform = false;
-        // We close the image transform when we click outside any element not related to it
-        // When the mousedown of the click is inside the image transform and mouseup is outside
-        // while resizing or rotating the image it will consider the click as being done outside
-        // image transform. So we need to keep track if the mousedown is inside or outside to
-        // know if we want to close the image transform component or not.
-        useExternalListener(this.props.document, "mousedown", (ev) => {
-            if (this.isNodeInsideTransform(ev.target)) {
-                this.mouseDownInsisdeTransform = true;
-            } else {
-                this.closeImageTransformation();
-                this.mouseDownInsideTransform = false;
+    // We close the image transform when we click outside any element not
+    // related to it. When the pointerdown of the click is inside the image
+    // transform and pointerup is outside while resizing or rotating the
+    // image it will consider the click as being done outside image transform.
+    // So we need to keep track if the pointerdown is inside or outside to know
+    // if we want to close the image transform component or not.
+    useExternalListener(document, "pointerdown", (ev) => {
+        if (isNodeInsideTransform(ev.target)) {
+            pointerDownInsideTransform = true;
+        } else {
+            closeImageTransformation();
+            pointerDownInsideTransform = false;
+        }
+    });
+    useExternalListener(
+        document,
+        "click",
+        (ev) => {
+            if (!isNodeInsideTransform(ev.target) && !pointerDownInsideTransform) {
+                closeImageTransformation();
             }
-        });
-        useExternalListener(this.props.document, "click", (ev) => {
-            if (!this.isNodeInsideTransform(ev.target) && !this.mouseDownInsideTransform) {
-                this.closeImageTransformation();
-            }
-            this.mouseDownInsideTransform = false;
-        });
-        // When we click on any character the image is deleted and we need to close the image transform
-        // We handle this by selectionchange
-        useExternalListener(this.props.document, "selectionchange", (ev) => {
-            this.closeImageTransformation();
-        });
-    }
+            pointerDownInsideTransform = false;
+        },
+        { capture: true }
+    );
+    // When we click on any character the image is deleted and we need to close
+    // the image transform. We handle this by selectionchange.
+    useExternalListener(document, "selectionchange", (ev) => {
+        closeImageTransformation();
+    });
 
-    isNodeInsideTransform(node) {
+    function isNodeInsideTransform(node) {
         if (!node) {
             return false;
         }
         if (node.nodeType === Node.TEXT_NODE) {
             node = node.parentElement;
         }
-        if (node.matches('[name="image_transform"], [name="image_transform"] *')) {
+        if (node.matches(buttonSelector)) {
             return true;
         }
-        if (
-            this.isImageTransformationOpen() &&
-            node.matches(
-                ".transfo-container, .transfo-container div, .transfo-container i, .transfo-container span"
-            )
-        ) {
+        if (isImageTransformationOpen() && node.matches(".transfo-controls, .transfo-controls *")) {
             return true;
         }
         return false;
     }
 
+    function isImageTransformationOpen() {
+        return registry.category("main_components").contains("ImageTransformation");
+    }
+
+    return { isImageTransformationOpen };
+}
+
+export class ImageTransformButton extends Component {
+    static template = "html_editor.ImageTransformButton";
+    static props = {
+        id: String,
+        icon: String,
+        title: String,
+        getTargetedImage: Function,
+        resetImageTransformation: Function,
+        addStep: Function,
+        document: { validate: (p) => p.nodeType === Node.DOCUMENT_NODE },
+        editable: { validate: (p) => p.nodeType === Node.ELEMENT_NODE },
+        ...toolbarButtonProps,
+        activeTitle: String,
+    };
+
+    setup() {
+        this.state = useState({ active: false });
+        this.transform = useImageTransform({
+            document: this.props.document,
+            closeImageTransformation: this.closeImageTransformation.bind(this),
+            buttonSelector: '[name="image_transform"], [name="image_transform"] *',
+        });
+    }
+
     onButtonClick() {
-        this.handleImageTransformation(this.props.getSelectedImage());
+        this.handleImageTransformation(this.props.getTargetedImage());
     }
 
     handleImageTransformation(image) {
-        if (this.isImageTransformationOpen()) {
+        if (this.transform.isImageTransformationOpen()) {
             this.props.resetImageTransformation(image);
             this.closeImageTransformation();
         } else {
@@ -92,13 +111,9 @@ export class ImageTransformButton extends Component {
         });
     }
 
-    isImageTransformationOpen() {
-        return registry.category("main_components").contains("ImageTransformation");
-    }
-
     closeImageTransformation() {
         this.state.active = false;
-        if (this.isImageTransformationOpen()) {
+        if (this.transform.isImageTransformationOpen()) {
             registry.category("main_components").remove("ImageTransformation");
         }
     }

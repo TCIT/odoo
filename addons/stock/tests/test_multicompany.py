@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from odoo import Command
 
+from odoo.fields import Domain
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import Form, TransactionCase
 
@@ -14,15 +16,21 @@ class TestMultiCompany(TransactionCase):
 
         cls.company_a = cls.env['res.company'].create({'name': 'Company A'})
         cls.company_b = cls.env['res.company'].create({'name': 'Company B'})
+        cls.branch_company_a = cls.env['res.company'].create({
+            'name': 'Branch of company A',
+            'parent_id': cls.company_a.id,
+        })
         cls.warehouse_a = cls.env['stock.warehouse'].search([('company_id', '=', cls.company_a.id)], limit=1)
         cls.warehouse_b = cls.env['stock.warehouse'].search([('company_id', '=', cls.company_b.id)], limit=1)
+        cls.warehouse_branch_a = cls.env['stock.warehouse'].search([('company_id', '=', cls.branch_company_a.id)], limit=1)
         cls.stock_location_a = cls.warehouse_a.lot_stock_id
         cls.stock_location_b = cls.warehouse_b.lot_stock_id
+        cls.stock_location_branch_a = cls.warehouse_branch_a.lot_stock_id
 
         cls.user_a = cls.env['res.users'].create({
             'name': 'user company a with access to company b',
             'login': 'user a',
-            'groups_id': [(6, 0, [
+            'group_ids': [(6, 0, [
                 group_user.id,
                 group_stock_manager.id,
             ])],
@@ -32,7 +40,7 @@ class TestMultiCompany(TransactionCase):
         cls.user_b = cls.env['res.users'].create({
             'name': 'user company b with access to company a',
             'login': 'user b',
-            'groups_id': [(6, 0, [
+            'group_ids': [(6, 0, [
                 group_user.id,
                 group_stock_manager.id,
             ])],
@@ -193,7 +201,6 @@ class TestMultiCompany(TransactionCase):
         })
         self.assertEqual(picking.company_id, self.company_a)
         move1 = self.env['stock.move'].create({
-            'name': 'test_lot_2',
             'picking_type_id': picking.picking_type_id.id,
             'location_id': picking.location_id.id,
             'location_dest_id': picking.location_dest_id.id,
@@ -251,7 +258,7 @@ class TestMultiCompany(TransactionCase):
         """As a user of company A, create an orderpoint for company B. Check itsn't possible to
         use a warehouse of companny A"""
         # Required for `warehouse_id` and `location_id` to be visible in the view
-        self.user_a.groups_id += self.env.ref("stock.group_stock_multi_locations")
+        self.user_a.group_ids += self.env.ref("stock.group_stock_multi_locations")
         product = self.env['product.product'].create({
             'is_storable': True,
             'name': 'shared product',
@@ -272,7 +279,7 @@ class TestMultiCompany(TransactionCase):
         orderpoint to Company B.
         """
         # Required for `warehouse_id` and `location_id` to be visible in the view
-        self.user_a.groups_id += self.env.ref("stock.group_stock_multi_locations")
+        self.user_a.group_ids += self.env.ref("stock.group_stock_multi_locations")
         product = self.env['product.product'].create({
             'is_storable': True,
             'name': 'shared product',
@@ -316,6 +323,7 @@ class TestMultiCompany(TransactionCase):
         depending of its `company_id`."""
         # Creates a new product with no company_id and set a responsible.
         # The product must be created as there is no company on the product.
+        self.user_a.group_ids += self.env.ref("product.group_product_manager")
         product_form = Form(self.env['product.template'].with_user(self.user_a))
         product_form.name = 'Paramite Pie'
         product_form.responsible_id = self.user_b
@@ -380,7 +388,6 @@ class TestMultiCompany(TransactionCase):
             'location_dest_id': self.stock_location_a.id,
             'product_id': product.id,
             'product_uom': product.uom_id.id,
-            'name': 'stock_move',
         })
         with self.assertRaises(UserError):
             move._action_confirm()
@@ -403,7 +410,6 @@ class TestMultiCompany(TransactionCase):
             'location_dest_id': self.stock_location_b.id,
             'product_id': product.id,
             'product_uom': product.uom_id.id,
-            'name': 'stock_move',
         })
         with self.assertRaises(UserError):
             move._action_confirm()
@@ -427,7 +433,6 @@ class TestMultiCompany(TransactionCase):
             'location_dest_id': self.stock_location_a.id,
             'product_id': product.id,
             'product_uom': product.uom_id.id,
-            'name': 'stock_move',
         })
         with self.assertRaises(UserError):
             move._action_confirm()
@@ -480,7 +485,6 @@ class TestMultiCompany(TransactionCase):
 
         move_from_supplier = self.env['stock.move'].with_user(self.user_a).create({
             'company_id': self.company_a.id,
-            'name': 'test_from_supplier',
             'location_id': supplier_location.id,
             'location_dest_id': self.stock_location_a.id,
             'product_id': product_lot.id,
@@ -498,7 +502,6 @@ class TestMultiCompany(TransactionCase):
 
         move_to_transit = self.env['stock.move'].create({
             'company_id': self.company_a.id,
-            'name': 'test_to_transit',
             'location_id': self.stock_location_a.id,
             'location_dest_id': intercom_location.id,
             'product_id': product_lot.id,
@@ -539,7 +542,7 @@ class TestMultiCompany(TransactionCase):
         supplier_location = self.env.ref('stock.stock_location_suppliers')
         intercom_location = self.env.ref('stock.stock_location_inter_company')
         intercom_location.write({'active': True})
-        partner = self.env['res.partner'].create({'name': 'Deco Addict'})
+        partner = self.env['res.partner'].create({'name': 'Acme Corporation'})
         self.warehouse_a.resupply_wh_ids = [(6, 0, [self.warehouse_b.id])]
         resupply_route = self.env['stock.route'].search([
             ('supplier_wh_id', '=', self.warehouse_b.id),
@@ -556,7 +559,6 @@ class TestMultiCompany(TransactionCase):
 
         move_sup_to_whb = self.env['stock.move'].create({
             'company_id': self.company_b.id,
-            'name': 'from_supplier_to_whb',
             'location_id': supplier_location.id,
             'location_dest_id': self.warehouse_b.lot_stock_id.id,
             'product_id': product_lot.id,
@@ -581,7 +583,6 @@ class TestMultiCompany(TransactionCase):
             'state': 'draft',
         })
         move_wha_to_cus = self.env['stock.move'].create({
-            'name': "WH_A to Customer",
             'product_id': product_lot.id,
             'product_uom_qty': 1,
             'product_uom': product_lot.uom_id.id,
@@ -703,3 +704,109 @@ class TestMultiCompany(TransactionCase):
                     'picking_type_id': self.warehouse_b.in_type_id.id,
                 })
             ]})
+
+    def test_intercompany_unpack(self):
+        """Packages are not multi-company: when 'stock.intercompany_auto_unpack' is enabled and
+        the user has access to packages, delivering a package to another company through the
+        inter-company transit location should unpack it so it doesn't carry over to the
+        receiving company.
+        """
+        self.user_a.group_ids += self.env.ref('stock.group_tracking_lot')
+        self.env['ir.config_parameter'].sudo().set_param('stock.intercompany_auto_unpack', True)
+        intercom_location = self.env.ref('stock.stock_location_inter_company')
+        intercom_location.write({'active': True})
+
+        product = self.env['product.product'].create({
+            'name': 'product',
+            'is_storable': True,
+        })
+        package = self.env['stock.package'].create({'name': 'Transfer Package'})
+        self.env['stock.quant']._update_available_quantity(product, self.stock_location_a, 1, package_id=package)
+
+        picking = self.env['stock.picking'].with_user(self.user_a).create({
+            'company_id': self.company_a.id,
+            'partner_id': self.company_b.partner_id.id,
+            'picking_type_id': self.warehouse_a.out_type_id.id,
+            'location_id': self.stock_location_a.id,
+            'location_dest_id': intercom_location.id,
+        })
+        self.env['stock.move'].create({
+            'picking_id': picking.id,
+            'company_id': self.company_a.id,
+            'product_id': product.id,
+            'product_uom': product.uom_id.id,
+            'product_uom_qty': 1.0,
+            'location_id': self.stock_location_a.id,
+            'location_dest_id': intercom_location.id,
+        })
+        picking.with_user(self.user_a).action_confirm()
+        picking.with_user(self.user_a).action_assign()
+        move_line = picking.move_line_ids
+        move_line.result_package_id = package
+        move_line.quantity = 1.0
+        picking.move_ids.picked = True
+        picking.with_user(self.user_a).button_validate()
+
+        self.assertEqual(picking.state, 'done')
+        self.assertFalse(package.quant_ids, "The package should have been unpacked after the intercompany transfer")
+        quant = self.env['stock.quant'].search([
+            ('product_id', '=', product.id),
+            ('location_id', '=', intercom_location.id),
+        ])
+        self.assertRecordValues(quant, [{'quantity': 1, 'package_id': False}])
+
+    def test_quants_visibility_with_multi_company_receipt(self):
+        """Tests that validating a receipt with both companies selected
+        doesn't leak the negative vendor quant to Company B's reports.
+        """
+        product = self.env['product.product'].create({
+            'name': 'Test Storable Product',
+            'type': 'consu',
+            'is_storable': True,
+            'company_id': self.company_a.id,
+        })
+
+        supplier_location = self.env.ref('stock.stock_location_suppliers')
+        receipt = self.env['stock.picking'].with_company(self.company_a).create({
+            'picking_type_id': self.warehouse_a.in_type_id.id,
+            'location_id': supplier_location.id,
+            'location_dest_id': self.stock_location_a.id,
+            'move_ids': [Command.create({
+                'product_id': product.id,
+                'location_id': supplier_location.id,
+                'location_dest_id': self.stock_location_a.id,
+                'product_uom_qty': 1,
+            })],
+        })
+        receipt.button_validate()
+
+        base_domain = [('product_id', '=', product.id)]
+        extra_domain_a = self.env['stock.quant'].with_company(self.company_a)._get_quants_action().get('domain') or []
+        extra_domain_b = self.env['stock.quant'].with_company(self.company_b)._get_quants_action().get('domain') or []
+        domain_a = Domain.AND([base_domain, extra_domain_a])
+        domain_b = Domain.AND([base_domain, extra_domain_b])
+        quants_company_a = self.env['stock.quant'].with_company(self.company_a).search(domain_a)
+        quants_company_b = self.env['stock.quant'].with_company(self.company_b).search(domain_b)
+        self.assertTrue(quants_company_a)
+        self.assertFalse(quants_company_b)
+
+    def test_quants_visibility_in_branch_company(self):
+        '''
+        Ensure quants present in a branch company are visible in its' report, even when the product
+        is set for the parent company.
+        '''
+        product = self.env['product.product'].create({
+            'name': 'Test Storable Product',
+            'type': 'consu',
+            'is_storable': True,
+            'company_id': self.company_a.id,
+        })
+        self.env['stock.quant'].create([{
+            'location_id': self.stock_location_branch_a.id,
+            'product_id': product.id,
+            'inventory_quantity': 10,
+        }])
+        base_domain = [('product_id', '=', product.id)]
+        domain = Domain.AND([base_domain, self.env['stock.quant'].with_company(self.branch_company_a)._get_quants_action()['domain']])
+        quants_branch = self.env['stock.quant'].with_company(self.branch_company_a).search(domain)
+        self.assertTrue(quants_branch)

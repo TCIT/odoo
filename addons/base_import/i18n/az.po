@@ -1,25 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* base_import
-# 
+# * base_import
+#
 # Translators:
-# Nurlan Farajov <coolinuxoid@gmail.com>, 2024
-# Jumshud Sultanov <cumshud@gmail.com>, 2024
-# erpgo translator <jumshud@erpgo.az>, 2025
-# 
+# erpgo translator <jumshud@erpgo.az>, 2022
+# Jumshud Sultanov <cumshud@gmail.com>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: erpgo translator <jumshud@erpgo.az>, 2025\n"
-"Language-Team: Azerbaijani (https://app.transifex.com/odoo/teams/41243/az/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-04 01:55+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Azerbaijani <https://translate.odoo.com/projects/odoo-19/"
+"base_import/az/>\n"
+"Language: az\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: az\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_import
 #. odoo-javascript
@@ -31,7 +33,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid "%(property_string)s (%(parent_name)s)"
-msgstr ""
+msgstr "%(property_string)s (%(parent_name)s)"
 
 #. module: base_import
 #. odoo-javascript
@@ -83,8 +85,8 @@ msgstr ""
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
 "An unknown issue occurred during import (possibly lost connection, data "
-"limit exceeded or memory limits exceeded). Please retry in case the issue is"
-" transient. If the issue still occurs, try to split the file rather than "
+"limit exceeded or memory limits exceeded). Please retry in case the issue is "
+"transient. If the issue still occurs, try to split the file rather than "
 "import it at once."
 msgstr ""
 
@@ -149,8 +151,8 @@ msgstr "%(column)s sütununda səhv dəyərlər var (dəyər:% s)"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Column %(column)s contains incorrect values. Error in line %(line)d: "
-"%(error)s"
+"Column %(column)s contains incorrect values. Error in line %(line)d: %"
+"(error)s"
 msgstr ""
 "%(column)s sütununda səhv dəyərlər var. %(line)d: %(error)s sətrində xəta"
 
@@ -175,11 +177,10 @@ msgstr "şərhlər"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: "
-"%(error)s"
+"Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: %(error)s"
 msgstr ""
-"URL bərpa etmək mümkün olmadı: %(url)s [%(field_name)s: L%(line_number)d]: "
-"%(error)s"
+"URL bərpa etmək mümkün olmadı: %(url)s [%(field_name)s: L%(line_number)d]: %"
+"(error)s"
 
 #. module: base_import
 #. odoo-javascript
@@ -202,8 +203,9 @@ msgstr "Tarixdə yaradıldı"
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
+#, fuzzy
 msgid "Data to import"
-msgstr ""
+msgstr "Daxil ediləcək məlumatlar"
 
 #. module: base_import
 #. odoo-python
@@ -244,8 +246,9 @@ msgstr ""
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__display_name
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__display_name
+#: model:ir.model.fields,field_description:base_import.field_res_users__display_name
 msgid "Display Name"
-msgstr "Göstəriləcək Ad"
+msgstr "Ekran Adı"
 
 #. module: base_import
 #. odoo-javascript
@@ -296,8 +299,8 @@ msgstr ""
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
 "Error while importing records: all rows should be of the same size, but the "
-"title row has %(title_row_entries)d entries while the first row has "
-"%(first_row_entries)d. You may need to change the separator character."
+"title row has %(title_row_entries)d entries while the first row has %"
+"(first_row_entries)d. You may need to change the separator character."
 msgstr ""
 
 #. module: base_import
@@ -325,9 +328,15 @@ msgid "External ID"
 msgstr "Xarici ID"
 
 #. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid "Field '%(field)s' does not accept date/time values."
+msgstr ""
+
+#. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__field_name
 msgid "Field Name"
-msgstr "Xana Adı"
+msgstr "Sahə Adı"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__file
@@ -337,8 +346,9 @@ msgstr "Fayl"
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
+#, fuzzy
 msgid "File Column"
-msgstr ""
+msgstr "Fayl sütunu"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__file_name
@@ -348,19 +358,18 @@ msgstr "Fayl Adı"
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__file_type
 msgid "File Type"
-msgstr "Fayl Növü "
+msgstr "Fayl Növü"
 
 #. module: base_import
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid "File size exceeds configured maximum (%s bytes)"
-msgstr ""
-"Fayl ölçüsü konfiqurasiya edilmiş maksimumdan   (%s bitlər) artıqdır. "
+msgstr "Fayl ölçüsü konfiqurasiya edilmiş maksimumdan   (%s bitlər) artıqdır."
 
 #. module: base_import
 #: model:ir.model.fields,help:base_import.field_base_import_import__file
 msgid "File to check and/or import, raw binary (not base64)"
-msgstr " İkili say ardıcıllığını yükləmək və yoxlamaq üçün fayl (not base64)"
+msgstr "İkili say ardıcıllığını yükləmək və yoxlamaq üçün fayl (not base64)"
 
 #. module: base_import
 #. odoo-javascript
@@ -390,17 +399,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Found invalid image data, images should be imported as either URLs or "
-"base64-encoded data."
+"Found invalid image data, images should be imported as either URLs or base64-"
+"encoded data."
 msgstr ""
-"Tapılmış səhv görüntü təsviri, təsvirlər   ya URL'lər, ya da base64 "
-"-kodlanmış məlumatlar kimi yüklənməlidir."
+"Tapılmış səhv görüntü təsviri, təsvirlər   ya URL'lər, ya da base64 -"
+"kodlanmış məlumatlar kimi yüklənməlidir."
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
+#, fuzzy
 msgid "Go to Import FAQ"
-msgstr ""
+msgstr "İdxalla bağlı tez-tez verilən suallara keçin"
 
 #. module: base_import
 #. odoo-javascript
@@ -417,6 +427,7 @@ msgstr ""
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__id
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__id
+#: model:ir.model.fields,field_description:base_import.field_res_users__id
 msgid "ID"
 msgstr "ID"
 
@@ -460,8 +471,9 @@ msgstr ""
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.js:0
+#, fuzzy
 msgid "Import a File"
-msgstr ""
+msgstr "Fayl daxil edin"
 
 #. module: base_import
 #. odoo-python
@@ -479,6 +491,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_records/import_records.xml:0
 msgid "Import records"
+msgstr "Rekordlar daxil edin"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_action/import_action.js:0
+msgid "Imported records"
 msgstr ""
 
 #. module: base_import
@@ -516,8 +534,9 @@ msgstr "Son Yenilənmə tarixi"
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
+#, fuzzy
 msgid "Load Data File"
-msgstr ""
+msgstr "Məlumat faylını yükləyin"
 
 #. module: base_import
 #. odoo-javascript
@@ -546,7 +565,7 @@ msgstr ""
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__res_model
 msgid "Model"
-msgstr ""
+msgstr "Model"
 
 #. module: base_import
 #. odoo-javascript
@@ -581,8 +600,9 @@ msgstr ""
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
+#, fuzzy
 msgid "Odoo Field"
-msgstr ""
+msgstr "Odoo Xanası"
 
 #. module: base_import
 #. odoo-javascript
@@ -612,7 +632,7 @@ msgstr "İlkin Baxış"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 msgid "Progress bar"
-msgstr ""
+msgstr "İnkişaf çubuğu"
 
 #. module: base_import
 #. odoo-javascript
@@ -634,14 +654,16 @@ msgstr "Res Modeli"
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
+#, fuzzy
 msgid "Resume"
-msgstr ""
+msgstr "Xülasə"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
+#, fuzzy
 msgid "Search a field..."
-msgstr ""
+msgstr "Bir xana axtarın..."
 
 #. module: base_import
 #. odoo-javascript
@@ -770,6 +792,22 @@ msgid "The file will be imported by batches"
 msgstr ""
 
 #. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid ""
+"There was an issue decoding the file using encoding “%s”.\n"
+"This encoding was automatically detected."
+msgstr ""
+
+#. module: base_import
+#. odoo-python
+#: code:addons/base_import/models/base_import.py:0
+msgid ""
+"There was an issue decoding the file using encoding “%s”.\n"
+"This encoding was manually selected."
+msgstr ""
+
+#. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid "This column will be concatenated in field"
@@ -790,8 +828,9 @@ msgstr ""
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
+#, fuzzy
 msgid "To import, select a field..."
-msgstr ""
+msgstr "Daxil etmək üçün bir xana seçin..."
 
 #. module: base_import
 #. odoo-javascript
@@ -802,7 +841,8 @@ msgstr ""
 #. module: base_import
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
-msgid "Unable to load \"{extension}\" file: requires Python module \"{modname}\""
+msgid ""
+"Unable to load \"{extension}\" file: requires Python module \"{modname}\""
 msgstr ""
 "\"{extension}\" faylı yüklənə bilmir: \"{modname}\" Python modulu tələb "
 "olunur"
@@ -820,13 +860,14 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 msgid "Untitled"
-msgstr ""
+msgstr "Başlıqsız"
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
+#, fuzzy
 msgid "Upload Data File"
-msgstr ""
+msgstr "Məlumat faylını yükləyin"
 
 #. module: base_import
 #. odoo-javascript
@@ -839,25 +880,26 @@ msgstr ""
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
 "Use HH for hours in a 24h system, use II in conjonction with 'p' for a 12h "
-"system. You can use a custom format in addition to the suggestions provided."
-" Leave empty to let Odoo guess the format (recommended)"
+"system. You can use a custom format in addition to the suggestions provided. "
+"Leave empty to let Odoo guess the format (recommended)"
 msgstr ""
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_model.js:0
 msgid ""
-"Use YYYY to represent the year, MM for the month and DD for the day. Include"
-" separators such as a dot, forward slash or dash. You can use a custom "
-"format in addition to the suggestions provided. Leave empty to let Odoo "
-"guess the format (recommended)"
+"Use YYYY to represent the year, MM for the month and DD for the day. Include "
+"separators such as a dot, forward slash or dash. You can use a custom format "
+"in addition to the suggestions provided. Leave empty to let Odoo guess the "
+"format (recommended)"
 msgstr ""
 
 #. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
+#, fuzzy
 msgid "Use first row as header"
-msgstr ""
+msgstr "Birinci sıranı başlıq kimi istifadə edin"
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_res_users
@@ -882,11 +924,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"You can not import images via URL, check with your administrator or support "
+"You can not import file via URL, check with your administrator or support "
 "for the reason."
 msgstr ""
-"URL vasitəsilə şəkillər yerləşdirə bilməzsiniz, səbəbi üçün "
-"administratorunuzla və ya dəsttək qrupunuz ilə əlaqə saxlayın."
 
 #. module: base_import
 #. odoo-javascript
@@ -948,3 +988,22 @@ msgstr ""
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "naməlum xəta kodu %s"
+
+#~ msgid "Column %s contains incorrect values (value: %s)"
+#~ msgstr "%s sütununda səhv dəyərlər var (dəyər:% s)"
+
+#~ msgid "Column %s contains incorrect values. Error in line %d: %s"
+#~ msgstr "%s sütununda səhv dəyərlər var. %d: %s sətrində xəta"
+
+#~ msgid "Error Parsing Date [%s:L%d]: %s"
+#~ msgstr "Xəta Qiymətləndirmə Tarixi [%s:L%d]: %s"
+
+#~ msgid "Upload File"
+#~ msgstr "Faylı yüklə"
+
+#~ msgid ""
+#~ "You can not import images via URL, check with your administrator or "
+#~ "support for the reason."
+#~ msgstr ""
+#~ "URL vasitəsilə şəkillər yerləşdirə bilməzsiniz, səbəbi üçün "
+#~ "administratorunuzla və ya dəsttək qrupunuz ilə əlaqə saxlayın."

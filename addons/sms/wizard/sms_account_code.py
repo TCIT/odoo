@@ -5,7 +5,7 @@ from odoo.addons.sms.tools.sms_api import ERROR_MESSAGES, SmsApi
 from odoo.exceptions import ValidationError
 
 
-class SMSAccountCode(models.TransientModel):
+class SmsAccountCode(models.TransientModel):
     _name = 'sms.account.code'
     _description = 'SMS Account Verification Code Wizard'
 

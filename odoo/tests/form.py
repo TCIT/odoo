@@ -7,13 +7,14 @@ from __future__ import annotations
 
 import ast
 import collections
+import collections.abc
 import itertools
 import logging
 from datetime import datetime, date
 
 from lxml import etree
 
-import odoo
+from odoo import api, fields
 from odoo.models import BaseModel
 from odoo.fields import Command
 from odoo.tools.safe_eval import safe_eval
@@ -66,8 +67,8 @@ class Form:
     removing records::
 
         with Form(user) as u:
-            u.groups_id.add(env.ref('account.group_account_manager'))
-            u.groups_id.remove(id=env.ref('base.group_portal').id)
+            u.group_ids.add(env.ref('account.group_account_manager'))
+            u.group_ids.remove(id=env.ref('base.group_portal').id)
 
     Finally :class:`~odoo.fields.One2many` are reified as :class:`~O2MProxy`.
 
@@ -142,7 +143,7 @@ class Form:
             self._init_from_defaults()
 
     @classmethod
-    def from_action(cls, env: odoo.api.Environment, action: dict) -> Form:
+    def from_action(cls, env: api.Environment, action: dict) -> Form:
         assert action['type'] == 'ir.actions.act_window', \
             f"only window actions are valid, got {action['type']}"
         # ensure the first-requested view is a form view
@@ -179,11 +180,13 @@ class Form:
         # retrieve <field> nodes at the current level
         flevel = tree.xpath('count(ancestor::field)')
         daterange_field_names = {}
+        field_infos = self._models_info.get(model._name, {}).get("fields", {})
+
         for node in tree.xpath(f'.//field[count(ancestor::field) = {flevel}]'):
             field_name = node.get('name')
 
             # add field_info into fields
-            field_info = self._models_info.get(model._name, {}).get("fields", {}).get(field_name) or {'type': None}
+            field_info = field_infos.get(field_name) or {'type': None}
             fields[field_name] = field_info
             fields_spec[field_name] = field_spec = {}
 
@@ -255,6 +258,15 @@ class Form:
                     field_info['type'] = 'many2many'
 
         for related_field, start_field in daterange_field_names.items():
+            # If the field doesn't exist in the view add it implicitly
+            if related_field not in modifiers:
+                field_info = field_infos.get(related_field) or {'type': None}
+                fields[related_field] = field_info
+                fields_spec[related_field] = {}
+                modifiers[related_field] = {
+                    'required': field_info.get('required', False),
+                    'readonly': field_info.get('readonly', False),
+                }
             modifiers[related_field]['invisible'] = modifiers[start_field].get('invisible', False)
 
         return {
@@ -568,8 +580,15 @@ class Form:
         self._env.flush_all()
         self._env.clear()  # discard cache and pending recomputations
 
-        if result.get('warning'):
-            _logger.getChild('onchange').warning("%(title)s %(message)s", result['warning'])
+        if w := result.get('warning'):
+            if isinstance(w, collections.abc.Mapping) and w.keys() >= {'title', 'message'}:
+                _logger.getChild('onchange').warning("%(title)s %(message)s", w)
+            else:
+                _logger.getChild('onchange').error(
+                    "received invalid warning %r from onchange on %r (should be a dict with keys `title` and `message`)",
+                    w,
+                    field_names,
+                )
 
         if not field_name:
             # fill in whatever fields are still missing with falsy values
@@ -601,19 +620,20 @@ class Form:
                     subfields = field_info['edition_view']['fields']
                 field_value = values[fname]
                 for cmd in value:
-                    if cmd[0] == Command.CREATE:
-                        vals = UpdateDict(convert_read_to_form(dict.fromkeys(subfields, False), subfields))
-                        self._apply_onchange_(vals, subfields, cmd[2])
-                        field_value.create(vals)
-                    elif cmd[0] == Command.UPDATE:
-                        vals = field_value.get_vals(cmd[1])
-                        self._apply_onchange_(vals, subfields, cmd[2])
-                    elif cmd[0] in (Command.DELETE, Command.UNLINK):
-                        field_value.remove(cmd[1])
-                    elif cmd[0] == Command.LINK:
-                        field_value.add(cmd[1], convert_read_to_form(cmd[2], subfields))
-                    else:
-                        assert False, "Unexpected onchange() result"
+                    match cmd[0]:
+                        case Command.CREATE:
+                            vals = UpdateDict(convert_read_to_form(dict.fromkeys(subfields, False), subfields))
+                            self._apply_onchange_(vals, subfields, cmd[2])
+                            field_value.create(vals)
+                        case Command.UPDATE:
+                            vals = field_value.get_vals(cmd[1])
+                            self._apply_onchange_(vals, subfields, cmd[2])
+                        case Command.DELETE | Command.UNLINK:
+                            field_value.remove(cmd[1])
+                        case Command.LINK:
+                            field_value.add(cmd[1], convert_read_to_form(cmd[2], subfields))
+                        case c:
+                            raise ValueError(f"Unexpected onchange() o2m command {c!r}")
             else:
                 values[fname] = value
             values._changed.add(fname)
@@ -969,10 +989,10 @@ class M2MProxy(X2MProxy, collections.abc.Sequence):
         self._form._perform_onchange(self._field)
 
 
-def convert_read_to_form(values, fields):
+def convert_read_to_form(values, model_fields):
     result = {}
     for fname, value in values.items():
-        field_info = {'type': 'id'} if fname == 'id' else fields[fname]
+        field_info = {'type': 'id'} if fname == 'id' else model_fields[fname]
         if field_info['type'] == 'one2many':
             if 'edition_view' in field_info:
                 subfields = field_info['edition_view']['fields']
@@ -982,9 +1002,9 @@ def convert_read_to_form(values, fields):
         elif field_info['type'] == 'many2many':
             value = M2MValue({'id': id_} for id_ in (value or ()))
         elif field_info['type'] == 'datetime' and isinstance(value, datetime):
-            value = odoo.fields.Datetime.to_string(value)
+            value = fields.Datetime.to_string(value)
         elif field_info['type'] == 'date' and isinstance(value, date):
-            value = odoo.fields.Date.to_string(value)
+            value = fields.Date.to_string(value)
         result[fname] = value
     return result
 
@@ -1000,12 +1020,11 @@ def _cleanup_from_default(type_, value):
         return value
 
     if type_ == 'one2many':
-        assert False, "not implemented yet"
-        return [cmd for cmd in value if cmd[0] != Command.SET]
+        raise NotImplementedError()
     elif type_ == 'datetime' and isinstance(value, datetime):
-        return odoo.fields.Datetime.to_string(value)
+        return fields.Datetime.to_string(value)
     elif type_ == 'date' and isinstance(value, date):
-        return odoo.fields.Date.to_string(value)
+        return fields.Date.to_string(value)
     return value
 
 
@@ -1034,3 +1053,4 @@ class Dotter:
     def __getattr__(self, key):
         val = self.__values[key]
         return Dotter(val) if isinstance(val, dict) else val
+

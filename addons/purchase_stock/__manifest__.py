@@ -4,7 +4,7 @@
 {
     'name': 'Purchase Stock',
     'version': '1.2',
-    'category': 'Inventory/Purchase',
+    'category': 'Supply Chain/Purchase',
     'sequence': 60,
     'summary': 'Purchase Orders, Receipts, Vendor Bills for Stock',
     'depends': ['stock_account', 'purchase'],
@@ -21,6 +21,7 @@
         'views/res_partner_views.xml',
         'views/stock_lot_views.xml',
         'views/stock_orderpoint_views.xml',
+        'views/stock_reference_views.xml',
         'views/product_views.xml',
         'report/purchase_report_views.xml',
         'report/purchase_report_templates.xml',
@@ -36,8 +37,15 @@
     'post_init_hook': '_create_buy_rules',
     'assets': {
         'web.assets_backend': [
-            'purchase_stock/static/**/*',
+            'purchase_stock/static/src/**/*',
+        ],
+        'web.assets_tests': [
+            'purchase_stock/static/tests/tours/**/*',
+        ],
+        'web.assets_unit_tests': [
+            'purchase_stock/static/tests/*.test.js',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

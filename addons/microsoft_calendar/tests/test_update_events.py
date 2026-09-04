@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 import logging
@@ -8,16 +9,17 @@ from freezegun import freeze_time
 
 from odoo import Command
 
-from odoo.addons.microsoft_calendar.models.microsoft_sync import MicrosoftSync
+from odoo.addons.microsoft_calendar.models.microsoft_sync import MicrosoftCalendarSync
 from odoo.addons.microsoft_calendar.utils.microsoft_calendar import MicrosoftCalendarService
 from odoo.addons.microsoft_calendar.utils.microsoft_event import MicrosoftEvent
-from odoo.addons.microsoft_calendar.models.res_users import User
+from odoo.addons.microsoft_calendar.models.res_users import ResUsers
 from odoo.addons.microsoft_calendar.tests.common import TestCommon, mock_get_token, _modified_date_in_the_future, patch_api
 from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
-@patch.object(User, '_get_microsoft_calendar_token', mock_get_token)
+
+@patch.object(ResUsers, '_get_microsoft_calendar_token', mock_get_token)
 class TestUpdateEvents(TestCommon):
 
     @patch_api
@@ -162,11 +164,11 @@ class TestUpdateEvents(TestCommon):
                 'type': 'exception',
                 'start': {
                     'dateTime': pytz.utc.localize(new_date).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'end': {
                     'dateTime': pytz.utc.localize(new_date + timedelta(hours=1)).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'isAllDay': False
             },
@@ -342,11 +344,11 @@ class TestUpdateEvents(TestCommon):
                 'type': 'exception',
                 'start': {
                     'dateTime': pytz.utc.localize(new_date).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'end': {
                     'dateTime': pytz.utc.localize(new_date + timedelta(hours=1)).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'isAllDay': False
             },
@@ -415,11 +417,11 @@ class TestUpdateEvents(TestCommon):
                 'type': 'exception',
                 'start': {
                     'dateTime': pytz.utc.localize(new_date).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'end': {
                     'dateTime': pytz.utc.localize(new_date + timedelta(hours=1)).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'isAllDay': False
             },
@@ -483,11 +485,11 @@ class TestUpdateEvents(TestCommon):
                 'type': 'exception',
                 'start': {
                     'dateTime': pytz.utc.localize(new_date).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'end': {
                     'dateTime': pytz.utc.localize(new_date + timedelta(hours=1)).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'isAllDay': False
             },
@@ -576,11 +578,11 @@ class TestUpdateEvents(TestCommon):
                 'type': 'exception',
                 'start': {
                     'dateTime': pytz.utc.localize(new_date).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'end': {
                     'dateTime': pytz.utc.localize(new_date + timedelta(hours=1)).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'isAllDay': False
             },
@@ -640,11 +642,11 @@ class TestUpdateEvents(TestCommon):
                 'type': 'exception',
                 'start': {
                     'dateTime': pytz.utc.localize(new_date).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'end': {
                     'dateTime': pytz.utc.localize(new_date + timedelta(hours=1)).isoformat(),
-                    'timeZone': 'Europe/London'
+                    'timeZone': 'UTC'
                 },
                 'isAllDay': False
             },
@@ -799,6 +801,109 @@ class TestUpdateEvents(TestCommon):
         updated_event = self.env["calendar.event"].search([('microsoft_id', '=', ms_event_id)])
         self.assertEqual(updated_event.start, new_date)
         self.assertEqual(updated_event.follow_recurrence, False)
+
+    @freeze_time('2021-09-22')
+    @patch.object(MicrosoftCalendarService, 'get_events')
+    def test_update_attendee_of_exception_does_not_recreate_recurrence_events(self, mock_get_events):
+        """
+        In Outlook, the first occurrence of a recurrence (the Odoo base event) is moved,
+        then an attendee is added to this exception. On the second sync, the seriesMaster
+        is rewritten locally and the stored rrule is reserialized with a DTSTART based on
+        the start of the moved exception. This must not be considered as a change of the
+        recurrence: recreating all the events from the base event (the exception) deletes
+        and recreates all the occurrences, and leaks the exception data (e.g. its
+        attendees) on every occurrence.
+        """
+
+        # arrange: drop the recurrence created in setUp and re-import it fresh from Outlook.
+        self.recurrence.with_context(dont_notify=True).calendar_event_ids.unlink()
+        self.recurrence.with_context(dont_notify=True).unlink()
+        events = list(self.recurrent_event_from_outlook_organizer)
+        mock_get_events.return_value = (MicrosoftEvent(events), None)
+        self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
+
+        recurrence = self.env["calendar.recurrence"].search([('microsoft_id', '=', 'REC123')])
+        exception_event = recurrence.base_event_id
+        self.assertEqual(exception_event.start, self.start_date)
+        parsed_rrule = recurrence._rrule_parse(recurrence.rrule, recurrence.dtstart)
+        self.assertEqual(parsed_rrule['rrule_type'], 'daily')
+        self.assertEqual(parsed_rrule['interval'], 2)
+
+        # arrange: the first occurrence (the base event) is moved 1h later in Outlook
+        new_start = self.start_date + timedelta(hours=1)
+        new_end = self.end_date + timedelta(hours=1)
+        events[1] = dict(
+            events[1],
+            type="exception",
+            start={'dateTime': new_start.strftime("%Y-%m-%dT%H:%M:%S.0000000"), 'timeZone': 'UTC'},
+            end={'dateTime': new_end.strftime("%Y-%m-%dT%H:%M:%S.0000000"), 'timeZone': 'UTC'},
+            lastModifiedDateTime=_modified_date_in_the_future(exception_event),
+        )
+        mock_get_events.return_value = (MicrosoftEvent(events), None)
+        self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
+
+        self.assertEqual(exception_event.start, new_start)
+        event_ids = recurrence.calendar_event_ids
+        self.assertEqual(len(event_ids), self.recurrent_events_count)
+
+        # arrange: an attendee is then added to the exception in Outlook
+        new_attendee = {
+            'type': 'required',
+            'status': {'response': 'none', 'time': '0001-01-01T00:00:00Z'},
+            'emailAddress': {'name': "New Attendee", 'address': 'new@attendee.com'},
+        }
+        events[1] = dict(
+            events[1],
+            attendees=events[1]['attendees'] + [new_attendee],
+            lastModifiedDateTime=_modified_date_in_the_future(exception_event),
+        )
+        events[0] = dict(events[0], lastModifiedDateTime=_modified_date_in_the_future(recurrence))
+        mock_get_events.return_value = (MicrosoftEvent(events), None)
+
+        self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
+
+        # assert: no occurrence has been deleted/recreated
+        self.assertEqual(
+            event_ids.exists(), event_ids,
+            "No occurrence should have been deleted",
+        )
+        self.assertEqual(
+            recurrence.calendar_event_ids, event_ids,
+            "No occurrence should have been recreated",
+        )
+        # ... and the added attendee is only on the modified occurrence
+        events_with_new_attendee = recurrence.calendar_event_ids.filtered(
+            lambda e: 'new@attendee.com' in e.attendee_ids.mapped('email'),
+        )
+        self.assertEqual(
+            events_with_new_attendee, exception_event,
+            "The added attendee should only be on the modified occurrence",
+        )
+
+    @patch.object(MicrosoftCalendarSync, '_write_from_microsoft', autospec=True)
+    def test_recreate_recurrence_when_only_serialized_dtstart_changes(self, mock_write_from_microsoft):
+        recurrence = self.recurrence.with_context(dont_notify=True)
+        initial_event_count = len(recurrence.calendar_event_ids)
+        new_start = self.start_date + timedelta(hours=1)
+        new_end = self.end_date + timedelta(hours=1)
+        microsoft_event = MicrosoftEvent([dict(
+            self.recurrent_event_from_outlook_organizer[0],
+            start={'dateTime': new_start.strftime("%Y-%m-%dT%H:%M:%S.0000000"), 'timeZone': 'UTC'},
+            end={'dateTime': new_end.strftime("%Y-%m-%dT%H:%M:%S.0000000"), 'timeZone': 'UTC'},
+        )])
+
+        def reserialize_rrule_with_new_dtstart(recurrence, microsoft_event, vals):
+            recurrence.rrule = str(recurrence._get_rrule(dtstart=new_start))
+
+        mock_write_from_microsoft.side_effect = reserialize_rrule_with_new_dtstart
+
+        recurrence._write_from_microsoft(
+            microsoft_event,
+            recurrence._microsoft_to_odoo_values(microsoft_event),
+        )
+
+        self.assertEqual(len(recurrence.calendar_event_ids), initial_event_count)
+        self.assertEqual(recurrence.base_event_id.start, new_start)
 
     @freeze_time('2021-09-22')
     @patch.object(MicrosoftCalendarService, 'get_events')
@@ -1185,6 +1290,7 @@ class TestUpdateEvents(TestCommon):
         updated_events = self.env["calendar.event"].search([
             ('microsoft_id', 'in', tuple(ms_events_to_update.keys()))
         ])
+        self.assertEqual(len(updated_events), self.recurrent_events_count)
         for e in updated_events:
             self.assertEqual(
                 e.start.strftime("%Y-%m-%dT%H:%M:%S.0000000"),
@@ -1361,6 +1467,9 @@ class TestUpdateEvents(TestCommon):
         self.simple_event_values['user_id'] = self.organizer_user.id
         self.simple_event_values['partner_ids'] = [Command.set([self.organizer_user.partner_id.id])]
         event = self.env['calendar.event'].with_user(self.organizer_user).create(self.simple_event_values)
+        # Simulate sync where the api update the microsoft_id field
+        event.ms_universal_event_id = "test_id_for_event"
+        event.microsoft_id = "test_id_for_organizer"
 
         # Deactivate user B's calendar synchronization. Try changing the event organizer to user B.
         # A ValidationError must be thrown because user B's calendar is not synced.
@@ -1381,8 +1490,6 @@ class TestUpdateEvents(TestCommon):
         mock_get_events.return_value = ([], None)
 
         # Change the event organizer: user B (the organizer) is synced and now listed as an attendee.
-        event.ms_universal_event_id = "test_id_for_event"
-        event.microsoft_id = "test_id_for_organizer"
         event.with_user(self.organizer_user).write({
             'user_id': self.attendee_user.id,
             'partner_ids': [Command.set([self.organizer_user.partner_id.id, self.attendee_user.partner_id.id])]
@@ -1418,7 +1525,84 @@ class TestUpdateEvents(TestCommon):
         self.organizer_user.with_user(self.organizer_user).restart_microsoft_synchronization()
         self.assertTrue(all(ev.need_sync_m for ev in self.recurrent_events))
 
-    @patch.object(MicrosoftSync, '_write_from_microsoft')
+    @freeze_time('2021-09-22')
+    @patch.object(MicrosoftCalendarService, 'get_events')
+    def test_resync_recurrence_with_exception_base_event_preserves_microsoft_ids(self, mock_get_events):
+        """
+        When an attendee syncs a recurrence where the base event is an exception
+        (modified by the organizer), re-syncing the unchanged seriesMaster should NOT
+        trigger the destructive recreation path that clears all Microsoft IDs.
+
+        Scenario:
+        1. Attendee syncs a recurrence (seriesMaster + occurrences) — all events get Microsoft IDs
+        2. Organizer modifies the first occurrence's end time — it becomes an exception
+        3. Attendee syncs again (e.g. after accepting invitation) — the seriesMaster is unchanged
+           but the base event's time no longer matches the pattern → must NOT destroy other events
+        """
+        # ----------- Setup test data and check assumptions -----------
+
+        recurrence = self.recurrence
+        all_events = recurrence.calendar_event_ids.sorted(key=lambda r: r.start)
+        initial_event_count = len(all_events)
+        for event in all_events:
+            self.assertTrue(event.microsoft_id, "All events should have a microsoft_id before the test")
+            self.assertTrue(event.ms_universal_event_id, "All events should have a ms_universal_event_id before the test")
+
+        base_event = recurrence.base_event_id
+
+        # ----------- Sync exception -----------
+
+        # Make the first occurrence an exception with modified end time
+        new_end_time = (self.end_date - timedelta(minutes=30))
+        events = list(self.recurrent_event_from_outlook_organizer)
+        events[1] = dict(
+            events[1],
+            end={
+                'dateTime': new_end_time.strftime("%Y-%m-%dT%H:%M:%S.0000000"),
+                'timeZone': 'UTC',
+            },
+            type="exception",
+            lastModifiedDateTime=_modified_date_in_the_future(base_event),
+        )
+        events[0] = dict(
+            events[0],
+            lastModifiedDateTime=_modified_date_in_the_future(base_event),
+        )
+
+        mock_get_events.return_value = (MicrosoftEvent(events), None)
+        self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
+
+        base_event.invalidate_recordset()
+        self.assertFalse(base_event.follow_recurrence, "Base event should be an exception (follow_recurrence=False)")
+        self.assertEqual(base_event.stop, new_end_time, "Base event end time should be updated")
+
+        # ----------- Re-sync unchanged seriesMaster -----------
+
+        # Same payload again. The base event is now an exception whose time doesn't
+        # match the pattern — this must NOT trigger the destructive recreation path.
+        self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
+
+        recurrence.invalidate_recordset()
+        all_events_after = recurrence.calendar_event_ids.sorted(key=lambda r: r.start)
+
+        self.assertEqual(
+            len(all_events_after), initial_event_count,
+            "Event count should be preserved — no events should be deleted and recreated",
+        )
+
+        for event in all_events_after:
+            self.assertTrue(
+                event.microsoft_id,
+                f"Event {event.id} (start={event.start}) should still have a microsoft_id",
+            )
+            self.assertTrue(
+                event.ms_universal_event_id,
+                f"Event {event.id} (start={event.start}) should still have a ms_universal_event_id",
+            )
+
+        self.assertFalse(base_event.follow_recurrence, "Base event should remain an exception")
+
+    @patch.object(MicrosoftCalendarSync, '_write_from_microsoft')
     @patch.object(MicrosoftCalendarService, 'get_events')
     def test_update_old_event_synced_with_outlook(self, mock_get_events, mock_write_from_microsoft):
         """

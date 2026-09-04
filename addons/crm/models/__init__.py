@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from . import res_users
 from . import calendar
 from . import crm_lead
 from . import crm_lost_reason
@@ -16,3 +15,4 @@ from . import crm_lead_scoring_frequency
 from . import utm
 from . import crm_recurring_plan
 from . import mail_activity
+from . import res_users

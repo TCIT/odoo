@@ -14,7 +14,7 @@ class testAttachmentAccess(TransactionCase):
             'name': "foo",
             'login': "foo",
             'email': "foo@bar.com",
-            'groups_id': [(6, 0, [
+            'group_ids': [(6, 0, [
                 cls.env.ref('base.group_user').id,
                 cls.env.ref('base.group_partner_manager').id,
             ])]
@@ -102,3 +102,32 @@ class testAttachmentAccess(TransactionCase):
         with self.assertRaises(AccessError):
             letter.write({'attachment_id': attachment_forbidden.id})
             letter.attachment_datas
+
+        with self.assertRaises(AccessError):
+            self.env["snailmail.letter"].with_user(self.user).onchange(
+                {"attachment_id": attachment_forbidden.id},
+                ["attachment_id"],
+                {"attachment_datas": {}},
+            )
+
+        with self.assertRaises(AccessError):
+            self.env["snailmail.letter"].with_user(self.user).with_context(
+                default_attachment_id=attachment_forbidden.id,
+            ).onchange(
+                {},
+                [],
+                {"attachment_id": {}, "attachment_datas": {}},
+            )
+
+        self.env["ir.default"].with_user(self.user).set(
+            "snailmail.letter",
+            "attachment_id",
+            attachment_forbidden.id,
+            user_id=True,
+        )
+        with self.assertRaises(AccessError):
+            self.env["snailmail.letter"].with_user(self.user).onchange(
+                {},
+                [],
+                {"attachment_id": {}, "attachment_datas": {}},
+            )

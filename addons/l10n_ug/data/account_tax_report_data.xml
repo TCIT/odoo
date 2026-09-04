@@ -3,7 +3,7 @@
     <record id="section_CD" model="account.report">
         <field name="name">Sections C and D</field>
         <field name="country_id" ref="base.ug"/>
-        <field name="filter_fiscal_position" eval="True"/>
+        <field name="allow_foreign_vat" eval="True"/>
         <field name="availability_condition">country</field>
         <field name="column_ids">
             <record id="section_CD_base" model="account.report.column">
@@ -27,7 +27,7 @@
                             <record id="C1_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C1_base</field>
+                                <field name="formula">-C1_base</field>
                             </record>
                         </field>
                     </record>
@@ -38,7 +38,7 @@
                             <record id="C2_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C2_base</field>
+                                <field name="formula">-C2_base</field>
                             </record>
                         </field>
                     </record>
@@ -49,7 +49,7 @@
                             <record id="C3_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C3_base</field>
+                                <field name="formula">-C3_base</field>
                             </record>
                         </field>
                     </record>
@@ -60,12 +60,12 @@
                             <record id="C4_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C4_base</field>
+                                <field name="formula">-C4_base</field>
                             </record>
                             <record id="C4_tax" model="account.report.expression">
                                 <field name="label">tax</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C4_tax</field>
+                                <field name="formula">-C4_tax</field>
                             </record>
                         </field>
                     </record>
@@ -76,12 +76,12 @@
                         <record id="C5_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C5_base</field>
+                                <field name="formula">-C5_base</field>
                             </record>
                             <record id="C5_tax" model="account.report.expression">
                                 <field name="label">tax</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C5_tax</field>
+                                <field name="formula">-C5_tax</field>
                             </record>
                         </field>
                     </record>
@@ -92,12 +92,12 @@
                             <record id="C6_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C6_base</field>
+                                <field name="formula">-C6_base</field>
                             </record>
                             <record id="C6_tax" model="account.report.expression">
                                 <field name="label">tax</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C6_tax</field>
+                                <field name="formula">-C6_tax</field>
                             </record>
                         </field>
                     </record>
@@ -108,12 +108,12 @@
                             <record id="C7_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C7_base</field>
+                                <field name="formula">-C7_base</field>
                             </record>
                             <record id="C7_tax" model="account.report.expression">
                                 <field name="label">tax</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">C7_tax</field>
+                                <field name="formula">-C7_tax</field>
                             </record>
                         </field>
                     </record>
@@ -138,12 +138,12 @@
                                     <record id="C9_i_base" model="account.report.expression">
                                         <field name="label">base</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">C9_i_base</field>
+                                        <field name="formula">-C9_i_base</field>
                                     </record>
                                     <record id="C9_i_tax" model="account.report.expression">
                                         <field name="label">tax</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">C9_i_tax</field>
+                                        <field name="formula">-C9_i_tax</field>
                                     </record>
                                 </field>
                             </record>
@@ -154,12 +154,12 @@
                                     <record id="C9_ii_base" model="account.report.expression">
                                         <field name="label">base</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">C9_ii_base</field>
+                                        <field name="formula">-C9_ii_base</field>
                                     </record>
                                     <record id="C9_ii_tax" model="account.report.expression">
                                         <field name="label">tax</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">C9_ii_tax</field>
+                                        <field name="formula">-C9_ii_tax</field>
                                     </record>
                                 </field>
                             </record>
@@ -445,7 +445,7 @@
     <record id="section_F" model="account.report">
         <field name="name">Section F</field>
         <field name="country_id" ref="base.ug"/>
-        <field name="filter_fiscal_position" eval="True"/>
+        <field name="allow_foreign_vat" eval="True"/>
         <field name="availability_condition">country</field>
         <field name="column_ids">
             <record id="section_F_base" model="account.report.column">
@@ -520,20 +520,26 @@
                             <record id="F31_normal_tax_part1" model="account.report.expression">
                                 <field name="label">normal_formula_part1</field>
                                 <field name="engine">aggregation</field>
+                                <field name="formula">UG_TAX_F31.result_cross_normal_formula_part1 - UG_TAX_F30.disallowed</field>
+                                <field name="subformula" eval="False"/>
+                            </record>
+                            <record id="F31_normal_tax_result_cross_part1" model="account.report.expression">
+                                <field name="label">result_cross_normal_formula_part1</field>
+                                <field name="engine">aggregation</field>
                                 <field name="formula">UG_TAX_D20.tax - UG_TAX_F30.disallowed</field>
-                                <field name="subformula">cross_report</field>
+                                <field name="subformula">cross_report(l10n_ug.section_CD)</field>
                             </record>
                             <record id="F31_normal_tax_part2" model="account.report.expression">
                                 <field name="label">normal_formula_part2</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">UG_TAX_C1.base + UG_TAX_C2.base + UG_TAX_C4.base + UG_TAX_C5.base + UG_TAX_C6.base + UG_TAX_C7.base</field>
-                                <field name="subformula">cross_report</field>
+                                <field name="subformula">cross_report(l10n_ug.section_CD)</field>
                             </record>
                             <record id="F31_normal_tax_part3" model="account.report.expression">
                                 <field name="label">normal_formula_part3</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">UG_TAX_C1.base + UG_TAX_C2.base + UG_TAX_C3.base + UG_TAX_C4.base + UG_TAX_C5.base + UG_TAX_C6.base + UG_TAX_C7.base</field>
-                                <field name="subformula">cross_report</field>
+                                <field name="subformula">cross_report(l10n_ug.section_CD)</field>
                             </record>
                             <record id="F31_sam_tax" model="account.report.expression">
                                 <field name="label">hidden_computation_of_F31_using_sam_formula</field>
@@ -544,20 +550,26 @@
                             <record id="F31_sam_tax_part1" model="account.report.expression">
                                 <field name="label">sam_formula_part1</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">UG_TAX_D20.tax - UG_TAX_F29.allowed - UG_TAX_F30.disallowed</field>
-                                <field name="subformula">cross_report</field>
+                                <field name="formula">UG_TAX_F31.result_cross_sam_formula_part1 - UG_TAX_F29.allowed - UG_TAX_F30.disallowed</field>
+                                <field name="subformula" eval="False"/>
+                            </record>
+                            <record id="F31_sam_tax_result_cross_part1" model="account.report.expression">
+                                <field name="label">result_cross_sam_formula_part1</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">UG_TAX_D20.tax</field>
+                                <field name="subformula">cross_report(l10n_ug.section_CD)</field>
                             </record>
                             <record id="F31_sam_tax_part2" model="account.report.expression">
                                 <field name="label">sam_formula_part2</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">UG_TAX_C1.base + UG_TAX_C2.base + UG_TAX_C4.base + UG_TAX_C5.base + UG_TAX_C6.base + UG_TAX_C7.base</field>
-                                <field name="subformula">cross_report</field>
+                                <field name="subformula">cross_report(l10n_ug.section_CD)</field>
                             </record>
                             <record id="F31_sam_tax_part3" model="account.report.expression">
                                 <field name="label">sam_formula_part3</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">UG_TAX_C1.base + UG_TAX_C2.base + UG_TAX_C3.base + UG_TAX_C4.base + UG_TAX_C5.base + UG_TAX_C6.base + UG_TAX_C7.base</field>
-                                <field name="subformula">cross_report</field>
+                                <field name="subformula">cross_report(l10n_ug.section_CD)</field>
                             </record>
                         </field>
                     </record>
@@ -592,12 +604,19 @@
                     </record>
                     <record id="F34" model="account.report.line">
                         <field name="name">Total Input tax credit Allowed for the period</field>
+                        <field name="code">UG_TAX_F34</field>
                         <field name="expression_ids">
                             <record id="F34_tax" model="account.report.expression">
                                 <field name="label">allowed</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">UG_TAX_F32.allowed + UG_TAX_F33_a.allowed + UG_TAX_D21_i.tax + UG_TAX_D21_iii.tax + UG_TAX_D21_iv.tax</field>
-                                <field name="subformula">cross_report</field>
+                                <field name="formula">UG_TAX_F32.allowed + UG_TAX_F33_a.allowed + UG_TAX_F34.result_cross</field>
+                                <field name="subformula" eval="False"/>
+                            </record>
+                            <record id="F34_tax_result_cross" model="account.report.expression">
+                                <field name="label">result_cross</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">UG_TAX_D21_i.tax + UG_TAX_D21_iii.tax + UG_TAX_D21_iv.tax</field>
+                                <field name="subformula">cross_report(l10n_ug.section_CD)</field>
                             </record>
                         </field>
                     </record>
@@ -610,7 +629,7 @@
         <field name="name">Tax Report</field>
         <field name="root_report_id" ref="account.generic_tax_report"/>
         <field name="country_id" ref="base.ug"/>
-        <field name="filter_fiscal_position" eval="True"/>
+        <field name="allow_foreign_vat" eval="True"/>
         <field name="availability_condition">country</field>
         <field name="use_sections" eval="True"/>
         <field name="section_report_ids" eval="[Command.set([ref('section_CD'), ref('section_F')])]"/>

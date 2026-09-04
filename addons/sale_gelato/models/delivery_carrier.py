@@ -1,9 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, api, fields, models
+from odoo import _, fields, models
 from odoo.exceptions import UserError
 
-from odoo.addons.sale_gelato import const, utils
+from odoo.addons.sale_gelato import utils
 
 
 class ProviderGelato(models.Model):
@@ -35,17 +35,22 @@ class ProviderGelato(models.Model):
             return False
         return super()._is_available_for_order(order)
 
-    def available_carriers(self, partner, order):
+    def available_carriers(self, partner, source):
         """ Override of `delivery` to filter out regular delivery methods from Gelato orders and
         Gelato delivery methods from non-Gelato orders.
 
         :param res.partner partner: The partner to check.
-        :param sale.order order: The current order.
+        :param sale.order or stock.picking source: The current order or stock transfer.
         :return: The available delivery methods.
         :rtype: delivery.carrier
         """
-        available_delivery_methods = super().available_carriers(partner, order)
-        is_gelato_order = any(order.order_line.product_id.mapped('gelato_product_uid'))
+        available_delivery_methods = super().available_carriers(partner, source)
+        if source._name == 'sale.order':
+            is_gelato_order = any(source.order_line.product_id.mapped('gelato_product_uid'))
+        elif source._name == 'stock.picking':
+            is_gelato_order = any(source.move_ids.product_id.mapped('gelato_product_uid'))
+        else:
+            raise UserError(_("Invalid source document type"))
         if is_gelato_order:
             return available_delivery_methods.filtered(lambda m: m.delivery_type == 'gelato')
         else:
@@ -62,7 +67,7 @@ class ProviderGelato(models.Model):
         :return: The shipment rate request results.
         :rtype: dict
         """
-        if error_message := self._ensure_partner_address_is_complete(order.partner_id):
+        if error_message := order._ensure_partner_address_is_complete():
             return {
                 'success': False,
                 'price': 0,
@@ -109,25 +114,3 @@ class ProviderGelato(models.Model):
             'success': True,
             'price': total_delivery_price,
         }
-
-    @api.model
-    def _ensure_partner_address_is_complete(self, partner):
-        """ Ensure that all partner address fields required by Gelato are set.
-
-        :param res.partner partner: The partner address to check.
-        :return: An error message if the address is incomplete, None otherwise.
-        :rtype: str | None
-        """
-        required_address_fields = ['city', 'country_id', 'street']
-        if partner.country_id.code not in const.COUNTRIES_WITHOUT_ZIPCODE:
-            required_address_fields.append('zip')
-        missing_fields = [
-            partner._fields[field_name]
-            for field_name in required_address_fields if not partner[field_name]
-        ]
-        if missing_fields:
-            translated_field_names = [f._description_string(self.env) for f in missing_fields]
-            return _(
-                "The following required address fields are missing: %s",
-                ", ".join(translated_field_names),
-            )

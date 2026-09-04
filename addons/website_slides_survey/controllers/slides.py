@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import werkzeug
@@ -8,8 +7,8 @@ import werkzeug.exceptions
 from odoo import _
 from odoo import http
 from odoo.exceptions import AccessError
+from odoo.fields import Domain
 from odoo.http import request
-from odoo.osv import expression
 
 from odoo.addons.website_slides.controllers.main import WebsiteSlides
 
@@ -29,7 +28,7 @@ class WebsiteSlidesSurvey(WebsiteSlides):
             raise werkzeug.exceptions.NotFound()
         return request.redirect(certification_url)
 
-    @http.route(['/slides_survey/certification/search_read'], type='json', auth='user', methods=['POST'], website=True)
+    @http.route(['/slides_survey/certification/search_read'], type='jsonrpc', auth='user', methods=['POST'], website=True)
     def slides_certification_search_read(self, fields):
         can_create = request.env['survey.survey'].has_access('create')
         return {
@@ -136,7 +135,7 @@ class WebsiteSlidesSurvey(WebsiteSlides):
         values = super(WebsiteSlidesSurvey, self)._prepare_ranks_badges_values(**kwargs)
 
         # 1. Getting all certification badges, sorted by granted user desc
-        domain = expression.AND([[('survey_id', '!=', False)], self._prepare_badges_domain(**kwargs)])
+        domain = Domain.AND([[('survey_id', '!=', False)], self._prepare_badges_domain(**kwargs)])
         certification_badges = request.env['gamification.badge'].sudo().search(domain)
         # keep only the badge with challenge category = slides (the rest will be displayed under 'normal badges' section
         certification_badges = certification_badges.filtered(
@@ -153,7 +152,7 @@ class WebsiteSlidesSurvey(WebsiteSlides):
 
         # 4. Getting all course url for each badge
         certification_slides = request.env['slide.slide'].sudo().search([('survey_id', 'in', certification_badges.mapped('survey_id').ids)])
-        certification_badge_urls = {slide.survey_id.certification_badge_id.id: slide.channel_id.website_url for slide in certification_slides}
+        certification_badge_urls = {slide.survey_id.certification_badge_id.id: slide.channel_id.website_absolute_url for slide in certification_slides}
 
         # 5. Applying changes
         values.update({

@@ -3,11 +3,12 @@
 
 from datetime import datetime, timedelta, time
 
+from odoo import Command
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo, HttpCaseWithUserPortal
 from odoo.addons.base.tests.test_ir_cron import CronMixinCase
 from odoo.addons.event.tests.common import EventCase
 from odoo.addons.event_crm.tests.common import EventCrmCase
-from odoo.addons.mail.tests.common import mail_new_test_user, MailCommon
+from odoo.addons.mail.tests.common import mail_new_test_user, MailCase
 from odoo.addons.sales_team.tests.common import TestSalesCommon
 from odoo.addons.sms.tests.common import SMSCase
 from odoo.addons.website.tests.test_website_visitor import MockVisitor
@@ -58,7 +59,6 @@ class TestEventFullCommon(EventCrmCase, TestSalesCommon, MockVisitor):
             'country_id': cls.env.ref('base.be').id,
             'email': 'customer.test@example.com',
             'name': 'Test Customer',
-            'mobile': '0456123456',
             'phone': '0456123456',
         })
         # make a SO for a customer, selling some tickets
@@ -280,7 +280,6 @@ class TestEventFullCommon(EventCrmCase, TestSalesCommon, MockVisitor):
         cls.partners = cls.env['res.partner'].create([
             {'email': f'partner.email.{idx:02d}@test.example.com',
              'name': f'PartnerCustomer {idx:02d}',
-             'mobile': f'04569999{idx:02d}',
              'phone': f'04560000{idx:02d}',
             } for idx in range(0, 10)
         ])
@@ -303,7 +302,7 @@ class TestEventFullCommon(EventCrmCase, TestSalesCommon, MockVisitor):
                     self.assertIn(answer.value_text_box, lead.description)  # better: check multi line
 
 
-class TestEventMailCommon(EventCase, SMSCase, MailCommon, CronMixinCase):
+class TestEventMailCommon(EventCase, SMSCase, MailCase, CronMixinCase):
 
     @classmethod
     def setUpClass(cls):
@@ -468,7 +467,6 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, MockVisitor
             'email': 'constantin@test.example.com',
             'country_id': self.env.ref('base.be').id,
             'phone': '0485112233',
-            'mobile': False,
         })
         self.event_speaker = self.env['res.partner'].create({
             'name': 'Brandon Freeman',
@@ -483,7 +481,7 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, MockVisitor
         self.event_question_1 = self.env['event.question'].create({
             'title': 'Which field are you working in',
             'question_type': 'simple_choice',
-            'event_id': self.event.id,
+            'event_ids': [Command.set(self.event.ids)],
             'once_per_order': False,
             'answer_ids': [
                 (0, 0, {'name': 'Consumers'}),
@@ -494,7 +492,7 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, MockVisitor
         self.event_question_2 = self.env['event.question'].create({
             'title': 'How did you hear about us ?',
             'question_type': 'text_box',
-            'event_id': self.event.id,
+            'event_ids': [Command.set(self.event.ids)],
             'once_per_order': True,
         })
 
@@ -512,6 +510,7 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, MockVisitor
             'wishlisted_by_default': True,
             'user_id': self.user_admin.id,
             'partner_id': self.event_speaker.id,
+            'description': 'Performance of Raoul Grosbedon.'
         })
         self.track_1 = self.env['event.track'].create({
             'name': 'Live Testimonial',
@@ -522,6 +521,7 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, MockVisitor
             'is_published': True,
             'user_id': self.user_admin.id,
             'partner_id': self.event_speaker.id,
+            'description': 'Description of the live.'
         })
         self.track_2 = self.env['event.track'].create({
             'name': 'Our Last Day Together!',
@@ -532,22 +532,7 @@ class TestWEventCommon(HttpCaseWithUserDemo, HttpCaseWithUserPortal, MockVisitor
             'is_published': True,
             'user_id': self.user_admin.id,
             'partner_id': self.event_speaker.id,
-        })
-
-        # ------------------------------------------------------------
-        # MEETING ROOMS
-        # ----------------------------------------------------------
-
-        self.env['event.meeting.room'].create({
-            'name': 'Best wood for furniture',
-            'summary': 'Let\'s talk about wood types for furniture',
-            'target_audience': 'wood expert(s)',
-            'is_pinned': True,
-            'website_published': True,
-            'event_id': self.event.id,
-            'room_lang_id': self.env.ref('base.lang_en').id,
-            'room_max_capacity': '12',
-            'room_participant_count': 9,
+            'description': 'Description of our last day together.'
         })
 
         self.env.flush_all()

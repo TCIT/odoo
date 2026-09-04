@@ -1,12 +1,22 @@
+import { hasHardwareAcceleration } from "@mail/utils/common/misc";
 import { _t } from "@web/core/l10n/translation";
-import { sprintf } from "@web/core/utils/strings";
 import { browser } from "@web/core/browser/browser";
-import { Record } from "./record";
+import { fields, Record } from "./record";
 import { debounce } from "@web/core/utils/timing";
 import { rpc } from "@web/core/network/rpc";
 
+export const MESSAGE_SOUND = "mail.user_setting.message_sound";
+export const USE_BLUR_LS = "mail_user_setting_use_blur";
+
 export class Settings extends Record {
     id;
+
+    static new() {
+        const record = super.new(...arguments);
+        record.onStorage = record.onStorage.bind(record);
+        browser.addEventListener("storage", record.onStorage);
+        return record;
+    }
 
     setup() {
         super.setup();
@@ -21,23 +31,50 @@ export class Settings extends Record {
         this._loadLocalSettings();
     }
 
+    delete() {
+        browser.removeEventListener("storage", this.onStorage);
+        super.delete(...arguments);
+    }
+
     // Notification settings
     /**
      * @type {"mentions"|"all"|"no_notif"}
      */
-    channel_notifications = Record.attr("mentions", {
+    channel_notifications = fields.Attr("mentions", {
         compute() {
             return this.channel_notifications === false ? "mentions" : this.channel_notifications;
         },
     });
-    mute_until_dt = Record.attr(false, { type: "datetime" });
+    _recomputeMessageSound = 0;
+    messageSound = fields.Attr(true, {
+        compute() {
+            void this._recomputeMessageSound;
+            return browser.localStorage.getItem(MESSAGE_SOUND) !== "false";
+        },
+    });
+    useCallAutoFocus = fields.Attr(true, {
+        /** @this {import("models").Settings} */
+        compute() {
+            return !browser.localStorage.getItem("mail_user_setting_disable_call_auto_focus");
+        },
+        /** @this {import("models").Settings} */
+        onUpdate() {
+            if (this.useCallAutoFocus) {
+                browser.localStorage.removeItem("mail_user_setting_disable_call_auto_focus");
+                return;
+            }
+            browser.localStorage.setItem("mail_user_setting_disable_call_auto_focus", "true");
+        },
+    });
 
     // Voice settings
     // DeviceId of the audio input selected by the user
     audioInputDeviceId = "";
+    audioOutputDeviceId = "";
+    cameraInputDeviceId = "";
     use_push_to_talk = false;
     voice_active_duration = 200;
-    volumes = Record.many("Volume");
+    volumes = fields.Many("Volume");
     volumeSettingsTimeouts = new Map();
     // Normalized [0, 1] volume at which the voice activation system must consider the user as "talking".
     voiceActivationThreshold = 0.05;
@@ -49,7 +86,23 @@ export class Settings extends Record {
     backgroundBlurAmount = 10;
     edgeBlurAmount = 10;
     showOnlyVideo = false;
-    useBlur = false;
+    _recomputeUseBlur = 0;
+    useBlur = fields.Attr(false, {
+        compute() {
+            void this._recomputeUseBlur;
+            return browser.localStorage.getItem(USE_BLUR_LS) === "true";
+        },
+    });
+    blurPerformanceWarning = fields.Attr(false, {
+        compute() {
+            const rtc = this.store.rtc;
+            if (!rtc || !this.useBlur) {
+                return false;
+            }
+            return this.useBlur && rtc.state?.cameraTrack && !hasHardwareAcceleration();
+        },
+    });
+    cameraFacingMode = undefined;
 
     logRtc = false;
     /**
@@ -62,6 +115,18 @@ export class Settings extends Record {
         };
         if (this.audioInputDeviceId) {
             constraints.deviceId = this.audioInputDeviceId;
+        }
+        return constraints;
+    }
+
+    get cameraConstraints() {
+        const constraints = {
+            width: 1280,
+        };
+        if (this.cameraFacingMode) {
+            constraints.facingMode = this.cameraFacingMode;
+        } else if (this.cameraInputDeviceId) {
+            constraints.deviceId = this.cameraInputDeviceId;
         }
         return constraints;
     }
@@ -118,10 +183,20 @@ export class Settings extends Record {
         ];
     }
 
+    /** @param {boolean} newValue */
+    setUseBlur(newValue) {
+        if (newValue) {
+            browser.localStorage.setItem(USE_BLUR_LS, true);
+        } else {
+            browser.localStorage.removeItem(USE_BLUR_LS);
+        }
+        this._recomputeUseBlur++;
+    }
+
     getMuteUntilText(dt) {
         if (dt) {
             return dt.year <= luxon.DateTime.now().year + 2
-                ? sprintf(_t(`Until %s`), dt.toLocaleString(luxon.DateTime.DATETIME_MED))
+                ? _t(`Until %s`, dt.toLocaleString(luxon.DateTime.DATETIME_MED))
                 : _t("Until I turn it back on");
         }
         return undefined;
@@ -158,6 +233,27 @@ export class Settings extends Record {
         browser.localStorage.setItem("mail_user_setting_audio_input_device_id", audioInputDeviceId);
     }
     /**
+     * @param {String} audioOutputDeviceId
+     */
+    async setAudioOutputDevice(audioOutputDeviceId) {
+        this.audioOutputDeviceId = audioOutputDeviceId;
+        browser.localStorage.setItem(
+            "mail_user_setting_audio_output_device_id",
+            audioOutputDeviceId
+        );
+    }
+    /**
+     * @param {String} cameraInputDeviceId
+     */
+    async setCameraInputDevice(cameraInputDeviceId) {
+        this.cameraFacingMode = undefined;
+        this.cameraInputDeviceId = cameraInputDeviceId;
+        browser.localStorage.setItem(
+            "mail_user_setting_camera_input_device_id",
+            cameraInputDeviceId
+        );
+    }
+    /**
      * @param {string} value
      */
     setDelayValue(value) {
@@ -185,7 +281,7 @@ export class Settings extends Record {
      * @param {number} param0.volume
      */
     async saveVolumeSetting({ partnerId, guestId, volume }) {
-        if (this.store.self.type !== "partner") {
+        if (!this.store.self_partner) {
             return;
         }
         const key = `${partnerId}_${guestId}`;
@@ -277,15 +373,23 @@ export class Settings extends Record {
         this.audioInputDeviceId = browser.localStorage.getItem(
             "mail_user_setting_audio_input_device_id"
         );
+        this.audioOutputDeviceId = browser.localStorage.getItem(
+            "mail_user_setting_audio_output_device_id"
+        );
+        this.cameraInputDeviceId = browser.localStorage.getItem(
+            "mail_user_setting_camera_input_device_id"
+        );
         this.showOnlyVideo =
             browser.localStorage.getItem("mail_user_setting_show_only_video") === "true";
-        this.useBlur = browser.localStorage.getItem("mail_user_setting_use_blur") === "true";
         const backgroundBlurAmount = browser.localStorage.getItem(
             "mail_user_setting_background_blur_amount"
         );
         this.backgroundBlurAmount = backgroundBlurAmount ? parseInt(backgroundBlurAmount) : 10;
         const edgeBlurAmount = browser.localStorage.getItem("mail_user_setting_edge_blur_amount");
         this.edgeBlurAmount = edgeBlurAmount ? parseInt(edgeBlurAmount) : 10;
+        this.useCallAutoFocus = !browser.localStorage.getItem(
+            "mail_user_setting_disable_call_auto_focus"
+        );
     }
     /**
      * @private
@@ -320,11 +424,28 @@ export class Settings extends Record {
             { guest_id: guestId }
         );
     }
+    onStorage(ev) {
+        if (ev.key === MESSAGE_SOUND) {
+            this._recomputeMessageSound++;
+        }
+        if (ev.key === USE_BLUR_LS) {
+            this._recomputeUseBlur++;
+        }
+        if (ev.key === "mail_user_setting_audio_input_device_id") {
+            this.audioInputDeviceId = ev.newValue;
+        }
+        if (ev.key === "mail_user_setting_audio_output_device_id") {
+            this.audioOutputDeviceId = ev.newValue;
+        }
+        if (ev.key === "mail_user_setting_camera_input_device_id") {
+            this.cameraInputDeviceId = ev.newValue;
+        }
+    }
     /**
      * @private
      */
     async _saveSettings() {
-        if (this.store.self.type !== "partner") {
+        if (!this.store.self_partner) {
             return;
         }
         browser.clearTimeout(this.globalSettingsTimeout);

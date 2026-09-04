@@ -4,7 +4,6 @@ from odoo.tools import SQL
 
 
 class AccountInvoiceReport(models.Model):
-
     _inherit = 'account.invoice.report'
 
     l10n_latam_document_type_id = fields.Many2one('l10n_latam.document.type', 'Document Type', index=True)

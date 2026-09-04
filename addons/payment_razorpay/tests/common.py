@@ -24,7 +24,7 @@ class RazorpayCommon(PaymentCommon):
         cls.payment_id = 'pay_123'
         cls.refund_id = 'rfd_456'
         cls.order_id = 'order_789'
-        cls.redirect_notification_data = {
+        cls.redirect_payment_data = {
             'razorpay_payment_id': cls.payment_id,
             'razorpay_order_id': cls.order_id,
             'razorpay_signature': 'dummy',
@@ -34,18 +34,30 @@ class RazorpayCommon(PaymentCommon):
             'id': cls.payment_id,
             'description': cls.reference,
             'status': 'captured',
+            'method': 'upi',
+        }
+        cls.payment_fail_data = {
+            'id': 'pay_987',
+            'description': cls.reference,
+            'status': 'failed',
+            'method': 'netbanking',
         }
         cls.tokenize_payment_data = {
             **cls.payment_data,
             'customer_id': cls.customer_id,
             'token_id': cls.token_id,
         }
+        cls.payment_pending_data = {
+            'id': cls.payment_id,
+            'description': cls.reference,
+            'status': 'pending',
+        }
         cls.refund_data = {
             'id': cls.refund_id,
             'payment_id': cls.payment_id,
             'amount': cls.amount,
         }
-        cls.webhook_notification_data = {
+        cls.webhook_payment_data = {
             'event': 'payment.captured',
             'payload': {
                 'payment': {

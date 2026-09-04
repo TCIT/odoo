@@ -9,25 +9,12 @@ class TestWarnUnwantedReplenish(common.TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
 
+        cls.env.company.horizon_days = 0
         cls.buy_route = cls.env.ref('purchase_stock.route_warehouse0_buy')
 
         # Create a vendor (& suppliers) and a customer
         cls.vendor = cls.env['res.partner'].create(dict(name='Vendor'))
         cls.customer = cls.env['res.partner'].create(dict(name='Customer'))
-
-        cls.supplier_A = cls.env['product.supplierinfo'].create({
-            'partner_id' : cls.vendor.id,
-            'min_qty' : 0.0,
-            'price' : 10.0,
-            'delay' : 0
-        })
-
-        cls.supplier_B = cls.env['product.supplierinfo'].create({
-            'partner_id' : cls.vendor.id,
-            'min_qty' : 0.0,
-            'price' : 12.0,
-            'delay' : 0
-        })
 
         # Create a "A" and a "B" Product :
         # No Stock
@@ -37,12 +24,10 @@ class TestWarnUnwantedReplenish(common.TransactionCase):
         cls.product_A = cls.env['product.product'].create({
             'name': 'Product A',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
             'purchase_method': 'purchase',
             'invoice_policy': 'delivery',
             'standard_price': 5.0,
             'list_price': 10.0,
-            'seller_ids': [Command.link(cls.supplier_A.id)],
             'route_ids': [Command.link(cls.buy_route.id)],
             'sale_delay' : 0,
         })
@@ -50,16 +35,29 @@ class TestWarnUnwantedReplenish(common.TransactionCase):
         cls.product_B = cls.env['product.product'].create({
             'name': 'Product B',
             'is_storable': True,
-            'categ_id': cls.env.ref('product.product_category_all').id,
             'purchase_method': 'purchase',
             'invoice_policy': 'delivery',
             'standard_price': 6.0,
             'list_price': 12.0,
-            'seller_ids': [Command.link(cls.supplier_B.id)],
             'route_ids': [Command.link(cls.buy_route.id)],
             'sale_delay': 0,
         })
 
+        cls.supplier_A = cls.env['product.supplierinfo'].create({
+            'product_id': cls.product_A.id,
+            'partner_id': cls.vendor.id,
+            'min_qty': 0.0,
+            'price': 10.0,
+            'delay': 0
+        })
+
+        cls.supplier_B = cls.env['product.supplierinfo'].create({
+            'product_id': cls.product_B.id,
+            'partner_id': cls.vendor.id,
+            'min_qty': 0.0,
+            'price': 12.0,
+            'delay': 0
+        })
 
         orderpoint_form = Form(cls.env['stock.warehouse.orderpoint'])
         orderpoint_form.product_id = cls.product_A
@@ -126,10 +124,48 @@ class TestWarnUnwantedReplenish(common.TransactionCase):
             Product B
                 unwanted_replenish SHALL be FALSE
             Product A
-                Modify Visible Days past 1 Week -> unwanted_replenish SHALL be FALSE
+                Modify Horizon Days past 1 Week -> unwanted_replenish SHALL be FALSE
         """
         self.assertTrue(self.orderpoint_A.unwanted_replenish, 'Orderpoint A not set to unwanted_replenish')
         self.assertFalse(self.orderpoint_B.unwanted_replenish, 'Orderpoint B is set to unwanted_replenish')
         #Update Orderpoint A
-        self.orderpoint_A.visibility_days = 10
+        self.env.company.horizon_days = 20
+        self.orderpoint_A.invalidate_recordset(fnames=['lead_horizon_date'])
+        self.orderpoint_A._compute_qty_to_order_computed()
         self.assertFalse(self.orderpoint_A.unwanted_replenish, 'Orderpoint A shall not be set to unwanted_replenish')
+
+    def test_rfq_grouping_for_dropshipping(self):
+        # RFQ's should not be grouped when dropshipping.
+        try:
+            dropship_route = self.env.ref('stock_dropshipping.route_drop_shipping')
+        except ValueError:
+            self.skipTest('This test requires the following module: stock_dropshipping')
+
+        dropshipped_product = self.env['product.product'].create({
+            'name': 'Dropshipped Product',
+            'type': 'consu',
+            'is_storable': True,
+            'seller_ids': [(0, 0, {
+                'partner_id': self.vendor.id,
+            })],
+            'route_ids': dropship_route.ids,
+        })
+
+        self.vendor.group_rfq = "all"
+
+        so1 = self.env['sale.order'].create({
+            'partner_id': self.customer.id,
+            'order_line': [Command.create({
+                    'product_id': dropshipped_product.id,
+                    'product_uom_qty': 2,
+                    'price_unit': 200.0,
+                }),
+            ],
+        })
+        so1.action_confirm()
+        so2 = so1.copy()
+        so2.action_confirm()
+
+        po = (so1 | so2)._get_purchase_orders()
+        self.assertTrue(po.button_confirm())
+        self.assertNotEqual(len(po.ids), 1)

@@ -1,13 +1,13 @@
-from odoo import _, api, exceptions, fields, models, osv
+from odoo import _, api, exceptions, fields, models
+from odoo.fields import Domain
 
 
-class MassMailing(models.Model):
-    _name = 'mailing.mailing'
+class MailingMailing(models.Model):
     _inherit = 'mailing.mailing'
 
     mailing_model_id = fields.Many2one(compute="_compute_mailing_model_id", store=True, readonly=False)
     card_requires_sync_count = fields.Integer(compute="_compute_card_requires_sync_count")
-    card_campaign_id = fields.Many2one('card.campaign')
+    card_campaign_id = fields.Many2one('card.campaign', index='btree_not_null')
 
     @api.constrains('card_campaign_id', 'mailing_domain', 'mailing_model_id')
     def _check_mailing_domain(self):
@@ -72,8 +72,8 @@ class MassMailing(models.Model):
 
     def _get_recipients_domain(self):
         """Domain with an additional condition that the card must exist for the records."""
-        domain = super()._get_recipients_domain()
+        domain = Domain(super()._get_recipients_domain())
         if self.card_campaign_id:
             res_ids = self.env['card.card'].search_fetch([('campaign_id', '=', self.card_campaign_id.id)], ['res_id']).mapped('res_id')
-            domain = osv.expression.AND([domain, [('id', 'in', res_ids)]])
+            domain &= Domain('id', 'in', res_ids)
         return domain

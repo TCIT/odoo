@@ -8,8 +8,8 @@
             tabindex="-1"
             t-ref="root"
         >
-            <t t-if="showNoContentHelper" t-call="web.ActionHelper">
-                <t t-set="noContentHelp" t-value="props.noContentHelp"/>
+            <t t-if="showNoContentHelper">
+    			<ActionHelper noContentHelp="props.noContentHelp" showRibbon="props.list.model.useSampleModel"/>
             </t>
             <table t-attf-class="o_list_table table table-sm table-hover position-relative mb-0 {{props.list.isGrouped ? 'o_list_table_grouped' : 'o_list_table_ungrouped table-striped'}}" t-ref="table">
                 <thead>
@@ -28,17 +28,18 @@
                                 tabindex="-1">
                                 <t t-if="column.hasLabel and column.widget !== 'handle'">
                                 <t t-set="isNumeric" t-value="isNumericColumn(column)"/>
-                                    <div class="d-flex"
+                                    <div class="d-flex align-items-center"
                                         t-att-data-tooltip-template="isDebugMode ? 'web.FieldTooltip' : 'web.ListHeaderTooltip'"
                                         t-att-data-tooltip-info="makeTooltip(column)">
                                         <span class="d-block min-w-0 text-truncate flex-grow-1 flex-shrink-1" t-att-class="isNumeric ? 'o_list_number_th' : ''"
                                               t-esc="column.label"/>
                                         <div class="o_list_header_label_spacer"/>
-                                        <i class="o_list_sortable_caret" t-att-class="getSortableIconClass(column)"/>
+                                        <i class="o_list_sortable_icon" t-att-class="getSortableIconClass(column)"/>
                                     </div>
                                     <span
                                           class="o_resize position-absolute top-0 end-0 bottom-0 ps-1 bg-black-25 opacity-0 opacity-50-hover z-1"
-                                          t-on-pointerdown.stop.prevent="this.columnWidths.onStartResize"/>
+                                          t-on-pointerdown.stop.prevent="this.columnWidths.onStartResize"
+                                          t-on-dblclick="this.columnWidths.resetWidths"/>
                                 </t>
                             </th>
                             <th t-else="" t-on-keydown="(ev) => this.onCellKeydown(ev)" t-att-class="{'o_list_button w-print-0 p-print-0': column.type === 'button_group'}"/>
@@ -92,15 +93,41 @@
                 </tbody>
                 <tfoot t-on-click="() => props.list.leaveEditMode()" class="o_list_footer cursor-default" t-att-class="{o_sample_data_disabled: props.list.model.useSampleModel}">
                     <tr>
-                        <td t-if="hasSelectors"/>
-                        <t t-foreach="columns" t-as="column" t-key="column.id">
-                            <t t-set="aggregate" t-value="aggregates[column.name]"/>
-                            <td t-if="aggregate" class="o_list_number" >
-                                <span t-esc="aggregate.value" t-att-data-tooltip="aggregate.help"/>
-                            </td>
-                            <td t-elif="column.type != 'field'" class="w-print-auto"/>
-                            <td t-else=""/>
-                        </t>
+                        <t t-set="groupNameCellColspan" t-value="getGroupNameCellColSpan()"/>
+                        <td t-if="groupNameCellColspan > 0" t-att-colspan="groupNameCellColspan">
+                            <button
+                                t-if="props.list.isGrouped and canCreateGroup and !state.showGroupInput"
+                                class="btn btn-link o_list_group_add d-print-none"
+                                t-on-click.stop.prevent="() => this.state.showGroupInput = true"
+                            >
+                                Add a <t t-out="this.props.list.groupByField.string"/>
+                            </button>
+                            <div t-elif="state.showGroupInput" class="input-group mb-1">
+                                <input type="text"
+                                    class="form-control bg-view o_list_group_input"
+                                    t-attf-placeholder="{{ this.props.list.groupByField.string }}..."
+                                    t-ref="groupInput"
+                                    t-on-keydown="(ev) => this.onGroupInputKeydown(ev)"
+                                />
+                                <button class="btn btn-primary o_list_group_confirm" type="button" t-on-click="addNewGroup">
+                                    <i class="fa fa-check"/>
+                                </button>
+                                <button class="btn btn-danger o_list_group_cancel" type="button" t-on-click="() => this.state.showGroupInput = false">
+                                    <i class="fa fa-times"/>
+                                </button>
+                            </div>
+                        </td>
+                        <td t-foreach="getAggregateColumns()" t-as="column" t-key="column.id" t-att-class="{'o_list_number': column.type === 'field'}">
+                            <span t-if="column.type === 'field' and aggregates[column.name]" t-att-data-tooltip="aggregates[column.name].help">
+                                <t t-esc="aggregates[column.name].value"/>
+                                <sup
+                                    t-if="aggregates[column.name].multiCurrency"
+                                    class="p-1 fw-bolder text-info"
+                                    t-on-mouseover.stop="(ev) => this.openMultiCurrencyPopover(ev, aggregates[column.name].rawValue, column.name)"
+                                    t-on-touchstart.stop="(ev) => this.openMultiCurrencyPopover(ev, aggregates[column.name].rawValue, column.name)"
+                                >?</sup>
+                            </span>
+                        </td>
                         <td t-if="hasOpenFormViewColumn" class="w-print-0 p-print-0"/>
                         <td t-if="displayOptionalFields or activeActions.onDelete" class="w-print-0 p-print-0" />
                     </tr>
@@ -114,32 +141,32 @@
             <t t-foreach="list.records" t-as="record" t-key="record.id">
                 <t t-call="{{ constructor.recordRowTemplate }}"/>
             </t>
-            <tr t-if="displayRowCreates">
+            <tr t-if="displayRowCreates" class="d-print-none">
                 <td t-if="withHandleColumn"/>
                 <td t-att-colspan="withHandleColumn ? nbCols - 1 : nbCols"
                     class="o_field_x2many_list_row_add"
                     t-on-keydown="(ev) => this.onCellKeydown(ev, null)"
                 >
-                    <t t-foreach="creates" t-as="create" t-key="create_index">
+                    <t t-foreach="controls" t-as="control" t-key="control_index">
                         <a
-                            t-if="create.type === 'create'"
+                            t-if="control.type === 'create' and !evalColumnInvisible(control.invisible)"
                             href="#"
                             role="button"
-                            t-att-class="create_index !== 0 ? 'ml16' : ''"
-                            t-att-tabindex="editedRecord ? '-1' : '0'"
-                            t-on-click.stop.prevent="() => this.add({ context: create.context })"
+                            t-att-class="control_index !== 0 ? 'ml16' : ''"
+                            t-att-tabindex="props.list.editedRecord ? '-1' : '0'"
+                            t-on-click.stop.prevent="() => this.add({ context: control.context })"
                         >
-                            <t t-esc="create.string"/>
+                            <t t-esc="control.string"/>
                         </a>
                         <ViewButton
-                            t-if="create.type === 'button'"
-                            className="`${create.className} ${create_index !== 0 ? 'ml16' : ''}`"
-                            clickParams="create.clickParams"
-                            icon="create.icon"
+                            t-if="control.type === 'button' and !evalColumnInvisible(control.invisible)"
+                            className="`${control.className} ${control_index !== 0 ? 'ml16' : ''}`"
+                            clickParams="control.clickParams"
+                            icon="control.icon"
                             record="props.list"
-                            string="create.string"
-                            title="create.title"
-                            tabindex="editedRecord ? '-1' : '0'"
+                            string="control.string"
+                            title="control.title"
+                            tabindex="props.list.editedRecord ? '-1' : '0'"
                         />
                     </t>
                 </td>
@@ -156,6 +183,7 @@
                 <t t-if="!group.isFolded">
                     <t t-call="{{ constructor.rowsTemplate }}">
                         <t t-set="list" t-value="group.list"/>
+                        <t t-set="groupId" t-value="group.id"/>
                     </t>
                     <tr t-if="!group.list.isGrouped and props.editable and canCreate">
                         <td t-if="hasSelectors"/>
@@ -178,22 +206,23 @@
     </t>
 
     <t t-name="web.ListRenderer.GroupRow">
-        <tr t-attf-class="{{group.count > 0 ? 'o_group_has_content' : ''}} o_group_header {{!group.isFolded ? 'o_group_open' : ''}} cursor-pointer"
+        <tr t-attf-class="{{group.count > 0 ? 'o_group_has_content' : ''}} o_group_header {{!group.isFolded ? 'o_group_open' : ''}} cursor-pointer {{ canResequenceRows and group_index > 0 ? 'o_row_draggable' : '' }}"
+            t-att-data-group-id="group.id"
             t-on-click="(ev) => this.onGroupHeaderClicked(ev, group)"
         >
             <th t-on-keydown="(ev) => this.onCellKeydown(ev, group)"
                 tabindex="-1"
-                t-attf-class="o_group_name fs-6 fw-bold {{!group.isFolded ? 'text-900' : 'text-700'}}"
+                t-attf-class="o_group_name fs-6 fw-bold {{!group.isFolded ? 'text-black' : 'text-body'}}"
                 t-att-colspan="getGroupNameCellColSpan(group)">
                 <div class="d-flex align-items-center">
                     <span t-attf-class="o_group_caret fa fa-fw {{group.isFolded ? 'fa-caret-right' : 'fa-caret-down' }} me-1"
                         t-attf-style="--o-list-group-level: {{getGroupLevel(group)}}"/>
-                    <t t-esc="getGroupDisplayName(group)"/> (<t t-esc="group.count"/>)
+                    <t t-esc="group.displayName"/> (<t t-esc="group.count"/>)
                     <div t-if="(groupByButtons[group.groupByField.name] and !group.isFolded and group.record.resId)" class="o_group_buttons">
                         <t t-foreach="groupByButtons[group.groupByField.name]" t-as="button" t-key="button.id">
                             <t t-if="!evalInvisible(button.invisible, group.record)">
                                 <t t-if="button.clickParams.type === 'edit'">
-                                    <button t-att-title="button.title" class="btn" t-on-click="() => this.editGroupRecord(group)" tabindex="-1">
+                                    <button t-att-title="button.title" class="btn" t-on-click.stop="() => this.editGroupRecord(group)" tabindex="-1">
                                         <i t-attf-class="fa fa-fw {{button.icon}} o_button_icon"/>
                                     </button>
                                 </t>
@@ -217,10 +246,24 @@
                 </div>
             </th>
             <td t-on-keydown="(ev) => this.onCellKeydown(ev, group)" t-foreach="getAggregateColumns(group)" t-as="column" t-key="column.id" t-att-class="{'o_list_number': column.type === 'field'}">
-                <t t-if="column.type === 'field'" t-esc="formatAggregateValue(group, column)"/>
+                <t t-if="column.type === 'field'">
+                    <t t-set="groupAggregate" t-value="formatGroupAggregate(group, column)"/>
+                    <span class="fw-bold" t-att-data-tooltip="groupAggregate.help">
+                        <t t-esc="groupAggregate.value"/>
+                        <sup
+                            t-if="groupAggregate.multiCurrency"
+                            class="p-1 fw-bolder text-info"
+                            t-on-mouseover.stop="(ev) => this.openMultiCurrencyPopover(ev, groupAggregate.rawValue, column.name)"
+                            t-on-touchstart.stop="(ev) => this.openMultiCurrencyPopover(ev, groupAggregate.rawValue, column.name)"
+                        >?</sup>
+                    </span>
+                </t>
             </td>
             <t t-set="groupPagerColspan" t-value="getGroupPagerCellColspan(group)"/>
             <th t-on-keydown="(ev) => this.onCellKeydown(ev, group)" t-if="groupPagerColspan > 0" t-att-colspan="groupPagerColspan"/>
+            <th class="p-0" t-on-keydown="(ev) => this.onCellKeydown(ev, group)">
+                <GroupConfigMenu t-if="showGroupConfigMenu(group)" t-props="getGroupConfigMenuProps(group)"/>
+            </th>
         </tr>
     </t>
 
@@ -228,6 +271,7 @@
         <tr class="o_data_row"
             t-att-class="getRowClass(record)"
             t-att-data-id="record.id"
+            t-att-data-group-id="groupId"
             t-on-click.capture="(ev) => this.onClickCapture(record, ev)"
             t-on-mouseover.capture="(ev) => this.ignoreEventInSelectionMode(ev)"
             t-on-mouseout.capture="(ev) => this.ignoreEventInSelectionMode(ev)"
@@ -249,7 +293,8 @@
                         t-att-colspan="column.colspan"
                         t-att-data-tooltip="!isInvisible ? getCellTitle(column, record) : false"
                         data-tooltip-delay="1000"
-                        t-on-click="(ev) => this.onCellClicked(record, column, ev)" tabindex="-1">
+                        t-custom-click="(ev, isMiddleClick) => this.onCellClicked(record, column, ev, isMiddleClick)"
+                        tabindex="-1">
                         <t t-if="!isInvisible">
                             <t t-if="canUseFormatter(column, record)" t-out="getFormattedValue(column, record)"/>
                             <Field t-else="" name="column.name" record="record" type="column.widget" class="getFieldClass(column)" fieldInfo="column" t-props="getFieldProps(record, column)"/>
@@ -286,7 +331,7 @@
             <t t-if="hasOpenFormViewColumn">
                 <td class="o_list_record_open_form_view w-print-0 p-print-0 text-center"
                     t-on-keydown="(ev) => this.onCellKeydown(ev, group, record)"
-                    t-on-click.stop="() => isX2Many and record.isNew ? this.displaySaveNotification() : props.onOpenFormView(record, true)"
+                    t-custom-click.stop="(ev, newWindow) => props.onOpenFormView(record, { force: true, newWindow })"
                     tabindex="-1"
                 >
                     <button class="btn btn-link align-top text-end"
@@ -299,14 +344,16 @@
 
             <t t-set="useUnlink" t-value="'unlink' in activeActions" />
             <t t-set="hasX2ManyAction" t-value="isX2Many and (useUnlink ? activeActions.unlink : activeActions.delete)" />
-            <t t-if="displayOptionalFields or hasX2ManyAction">
+            <t t-if="displayOptionalFields or props.list.isGrouped or hasX2ManyAction">
                 <t t-if="hasX2ManyAction">
+                    <t t-set="hasDeleteButton" t-value="this.displayDeleteIcon(record)"/>
                     <td class="o_list_record_remove w-print-0 p-print-0 text-center"
                         t-on-keydown="(ev) => this.onCellKeydown(ev, group, record)"
-                        t-on-click.stop="(ev) => this.onRemoveCellClicked(record, ev)"
+                        t-on-click.stop="hasDeleteButton ? (ev) => this.onRemoveCellClicked(record, ev) : () => {}"
                         tabindex="-1"
                     >
                         <button class="fa d-print-none"
+                            t-if="hasDeleteButton"
                             t-att-class="{
                                 'fa-trash-o': !useUnlink and activeActions.delete,
                                 'fa-times': useUnlink and activeActions.unlink,

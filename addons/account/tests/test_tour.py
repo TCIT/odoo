@@ -1,8 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import odoo.tests
+from odoo import Command, fields
 
-from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingHttpCommon
 
 
@@ -35,6 +35,7 @@ class TestUi(AccountTestInvoicingHttpCommon):
         self.env.ref('base.user_admin').write({
             'company_id': self.env.company.id,
             'company_ids': [(4, self.env.company.id)],
+            'email': 'mitchell.admin@example.com',
         })
         self.env.company.write({
             'country_id': None, # Also resets account_fiscal_country_id
@@ -87,3 +88,31 @@ class TestUi(AccountTestInvoicingHttpCommon):
         product.supplier_taxes_id = new_tax
 
         self.start_tour("/odoo", 'account_tax_group', login="admin")
+
+    def test_use_product_catalog_on_invoice(self):
+        self.product.write({
+            'is_favorite': True,
+            'default_code': '0',
+        })
+        self.start_tour("/odoo/customer-invoices/new", 'test_use_product_catalog_on_invoice', login="admin")
+
+    def test_deductible_amount_column(self):
+        self.assertFalse(self.env.user.has_group('account.group_partial_purchase_deductibility'))
+        partner = self.env['res.partner'].create({'name': "Test Partner", 'email': "test@test.odoo.com"})
+        move = self.env['account.move'].create({
+            'move_type': 'in_invoice',
+            'partner_id': partner.id,
+            'invoice_date': fields.Date.today(),
+            'line_ids': [Command.create({'name': "T-shirt", 'deductible_amount': 50.0})],
+        })
+        move.action_post()
+        self.assertTrue(self.env.user.has_group('account.group_partial_purchase_deductibility'))
+        self.start_tour("/odoo/vendor-bills/new", 'deductible_amount_column', login=self.env.user.login)
+
+    def test_add_section_from_product_catalog_on_invoice_tour(self):
+        self.product.write({'is_favorite': True})
+        self.start_tour(
+            '/odoo/customer-invoices/new',
+            'test_add_section_from_product_catalog_on_invoice',
+            login='admin',
+        )

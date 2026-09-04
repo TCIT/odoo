@@ -31,44 +31,91 @@ export class DiscussChannelRtcSession extends models.ServerModel {
                 channel,
                 "mail.record/insert",
                 new mailDataHelpers.Store(DiscussChannel.browse(channel.id), {
-                    rtcSessions: mailDataHelpers.Store.many(
+                    rtc_session_ids: mailDataHelpers.Store.many(
                         this.browse(sessions.map((session) => session.id)),
-                        "ADD"
+                        makeKwArgs({ mode: "ADD" })
                     ),
                 }).get_result(),
             ]);
         }
+        for (const record of rtcSessions) {
+            const [channel] = DiscussChannel.browse(record.channel_id);
+            if (channel.rtc_session_ids.length === 1) {
+                DiscussChannel.message_post(
+                    channel.id,
+                    makeKwArgs({
+                        body: `<div data-oe-type="call" class="o_mail_notification"></div>`,
+                        message_type: "notification",
+                        subtype_xmlid: "mail.mt_comment",
+                    })
+                );
+            }
+        }
         BusBus._sendmany(notifications);
         return sessionIds;
+    }
+
+    unlink(ids) {
+        /** @type {import("mock_models").BusBus} */
+        const BusBus = this.env["bus.bus"];
+        /** @type {import("mock_models").ResPartner} */
+        const ResPartner = this.env["res.partner"];
+        /** @type {import("mock_models").DiscussChannel} */
+        const DiscussChannel = this.env["discuss.channel"];
+        const sessions = this.browse(ids);
+        for (const session of sessions) {
+            const [partner] = ResPartner.search_read([["id", "=", session.partner_id]]);
+            BusBus._sendmany([
+                [
+                    partner,
+                    "discuss.channel.rtc.session/ended",
+                    {
+                        sessionId: session.id,
+                    },
+                ],
+                [
+                    partner,
+                    "mail.record/insert",
+                    new mailDataHelpers.Store(DiscussChannel.browse(Number(session.channel_id)), {
+                        rtc_session_ids: mailDataHelpers.Store.many(
+                            sessions,
+                            makeKwArgs({ only_id: true, mode: "DELETE" })
+                        ),
+                    }).get_result(),
+                ],
+            ]);
+        }
+        super.unlink(...arguments);
     }
 
     /**
      * @param {number} id
      * @param {{ extra?; boolean }} options
      */
-    _to_store(ids, store, { extra } = {}) {
-        const kwargs = getKwArgs(arguments, "ids", "store", "extra");
-        ids = kwargs.ids;
-        extra = kwargs.extra;
+    _to_store(store, fields, extra) {
+        const kwargs = getKwArgs(arguments, "store", "fields", "extra");
+        fields = kwargs.fields;
+        extra = kwargs.extra ?? false;
 
-        /** @type {import("mock_models").DiscussChannelMember} */
-        const DiscussChannelMember = this.env["discuss.channel.member"];
-
-        for (const rtcSession of this.browse(ids)) {
-            const [data] = this._read_format(rtcSession.id, [], false);
-            data.channelMember = mailDataHelpers.Store.one(
-                DiscussChannelMember.browse(rtcSession.channel_member_id),
-                makeKwArgs({ fields: { channel: [], persona: ["name", "im_status"] } })
-            );
+        store._add_record_fields(this, []);
+        for (const rtcSession of this) {
+            let data = [
+                mailDataHelpers.Store.one(
+                    "channel_member_id",
+                    makeKwArgs({
+                        fields: ["channel"].concat(
+                            this.env["discuss.channel.member"]._to_store_persona([
+                                "name",
+                                "im_status",
+                            ])
+                        ),
+                    })
+                ),
+            ];
             if (extra) {
-                Object.assign(data, {
-                    isCameraOn: rtcSession.is_camera_on,
-                    isDeaf: rtcSession.is_deaf,
-                    isSelfMuted: rtcSession.is_self_muted,
-                    isScreenSharingOn: rtcSession.is_screen_sharing_on,
-                });
+                data = data.concat(["is_camera_on", "is_deaf", "is_muted", "is_screen_sharing_on"]);
             }
-            store.add(this.browse(rtcSession.id), data);
+            store._add_record_fields(this.browse(rtcSession.id), data);
         }
     }
 
@@ -96,7 +143,10 @@ export class DiscussChannelRtcSession extends models.ServerModel {
         const [member] = DiscussChannelMember.browse(session.channel_member_id);
         const [channel] = DiscussChannel.search_read([["id", "=", member.channel_id]]);
         BusBus._sendone(channel, "discuss.channel.rtc.session/update_and_broadcast", {
-            data: new mailDataHelpers.Store(DiscussChannelRtcSession.browse(id)).get_result(),
+            data: new mailDataHelpers.Store(
+                DiscussChannelRtcSession.browse(id),
+                makeKwArgs({ extra: true })
+            ).get_result(),
             channelId: channel.id,
         });
     }

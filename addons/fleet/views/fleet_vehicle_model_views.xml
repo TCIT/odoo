@@ -42,9 +42,10 @@
                         <page string="Information" name="information">
                             <group>
                                 <group string="Model" invisible="vehicle_type != 'car'">
+                                    <field name="model_year"/>
                                     <field name="seats"/>
                                     <field name="doors"/>
-                                    <field name="model_year"/>
+                                    <field name="color"/>
                                     <field name="trailer_hook"/>
                                 </group>
                                 <group id="vehicle_information" string="Vehicle Information" invisible="vehicle_type != 'bike'">
@@ -52,22 +53,29 @@
                                 </group>
                                 <group string="Engine" invisible="vehicle_type != 'car'" name="group_engine">
                                     <field name="default_fuel_type" required="1"/>
-                                    <label for="vehicle_range"/>
-                                    <div class="o_row" name="vehicle_range">
-                                        <field name="vehicle_range"/><span>km</span>
-                                    </div>
-                                    <label for="default_co2"/>
-                                    <div class="o_row" name="default_co2">
-                                        <field name="default_co2"/><span>g/km</span>
-                                    </div>
-                                    <field name="co2_standard"/>
                                     <field name="transmission"/>
-                                    <field name="power_unit"/>
+                                    <field name="drive_type"/>
                                     <label for="power" invisible="power_unit != 'power'"/>
                                     <div class="o_row" invisible="power_unit != 'power'">
-                                        <field name="power"/><span>kW</span>
+                                        <field name="power"/>
+                                        <field name="power_unit"/>
                                     </div>
-                                    <field name="horsepower" invisible="power_unit != 'horsepower'"/>
+                                    <label for="vehicle_range"/>
+                                    <div class="o_row">
+                                        <field name="vehicle_range"/>
+                                        <field name="range_unit"/>
+                                    </div>
+                                    <label for="default_co2"/>
+                                    <div class="o_row">
+                                        <field name="default_co2"/>
+                                        <field name="co2_emission_unit"/>
+                                    </div>
+                                    <field name="co2_standard" placeholder="eg. WLTP, Euro 6, or EPA, ..."/>
+                                    <label for="horsepower" invisible="power_unit != 'horsepower'"/>
+                                    <div class="o_row" invisible="power_unit != 'horsepower'">
+                                        <field name="horsepower"/>
+                                        <field name="power_unit"/>
+                                    </div>
                                     <field name="horsepower_tax" invisible="power_unit != 'horsepower'"/>
                                 </group>
                             </group>
@@ -132,11 +140,12 @@
                 <field name="name" string="Model" />
                 <field name="brand_id"/>
                 <filter string="Contains Vehicle" name="contains_vehicle" domain="[('vehicle_count', '!=', 0)]"/>
-                <group expand="1" string="Group By">
+                <group>
                     <filter name="groupby_brand" context="{'group_by' : 'brand_id'}" string="Manufacturers"/>
                     <filter name="groupby_category" context="{'group_by' : 'category_id'}" string="Category"/>
                     <filter name="groupby_vehicle_type" context="{'group_by' : 'vehicle_type'}" string="Vehicle Type"/>
                 </group>
+                <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
             </search>
         </field>
     </record>
@@ -196,26 +205,26 @@
         <field name="name">fleet.vehicle.model.brandkanban</field>
         <field name="model">fleet.vehicle.model.brand</field>
         <field name="arch" type="xml">
-            <kanban default_order="name">
+            <kanban action="action_brand_model" type="object" default_order="name">
                 <field name="active"/>
                 <templates>
                     <t t-name="menu">
                         <a role="menuitem" type="open" class="dropdown-item">Configuration</a>
-                        <a role="menuitem" type="object" name="toggle_active" class="dropdown-item">
-                            <t t-if="record.active.raw_value">Archive</t>
-                            <t t-else="">Restore</t>
-                        </a>
+                        <a role="menuitem" type="object" name="action_archive" class="dropdown-item" t-if="record.active.raw_value">Archive</a>
+                        <a role="menuitem" type="object" name="action_unarchive" class="dropdown-item" t-if="!record.active.raw_value">Restore</a>
                         <a role="menuitem" t-if="widget.deletable" type="delete" class="dropdown-item">Delete</a>
                     </t>
                     <t t-name="card" class="flex-row p-1">
                         <aside>
-                            <field name="image_128" widget="image" options="{'img_class': 'object-fit-contain'}"/>
+                            <a type="object" name="action_open_brand_form">
+                                <field name="image_128" widget="image" options="{'img_class': 'object-fit-contain'}"/>
+                            </a>
                         </aside>
                         <main class="ms-2 mt-1">
                             <field class="fw-bold fs-5" name="name"/>
-                            <a type="object" name="action_brand_model" class="mt-2 text-black">
+                            <span class="mt-2 text-black">
                                 <field name="model_count"/> MODELS
-                            </a>
+                            </span>
                         </main>
                     </t>
                 </templates>

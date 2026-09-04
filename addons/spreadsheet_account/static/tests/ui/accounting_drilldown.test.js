@@ -32,13 +32,13 @@ test("Create drill down domain", async () => {
         doAction: async (action, options) => {
             expect.step("drill down action");
             expect(action).toEqual(drillDownAction);
-            expect(options).toBe(undefined);
+            expect(options).toEqual({ newWindow: undefined });
             return true;
         },
     };
     mockService("action", fakeActionService);
 
-    const model = await createModelWithDataSource({
+    const { model } = await createModelWithDataSource({
         serverData,
         mockRPC: async function (route, args) {
             if (args.method === "spreadsheet_move_line_action") {
@@ -89,7 +89,7 @@ test("Create drill down domain", async () => {
 
 test("Create drill down domain when month date is a reference", async () => {
     mockService("action", { doAction: () => {} });
-    const model = await createModelWithDataSource({
+    const { model } = await createModelWithDataSource({
         serverData,
         mockRPC: async function (route, args) {
             if (args.method === "spreadsheet_move_line_action") {
@@ -122,7 +122,7 @@ test("Create drill down domain when month date is a reference", async () => {
 
 test("Create drill down domain when date uses a non-standard locale", async () => {
     mockService("action", { doAction: () => {} });
-    const model = await createModelWithDataSource({
+    const { model } = await createModelWithDataSource({
         serverData,
         mockRPC: async function (route, args) {
             if (args.method === "spreadsheet_move_line_action") {

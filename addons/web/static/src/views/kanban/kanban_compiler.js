@@ -19,7 +19,6 @@ import { toInterpolatedStringExpression, ViewCompiler } from "@web/views/view_co
 const ACTION_TYPES = ["action", "object"];
 const SPECIAL_TYPES = [
     ...ACTION_TYPES,
-    "edit",
     "open",
     "delete",
     "url",
@@ -30,7 +29,6 @@ const SPECIAL_TYPES = [
 
 export class KanbanCompiler extends ViewCompiler {
     setup() {
-        this.ctx.readonly = "read_only_mode";
         this.compilers.push(
             { selector: "t[t-call]", fn: this.compileTCall },
             { selector: "img", fn: this.compileImage }
@@ -101,11 +99,9 @@ export class KanbanCompiler extends ViewCompiler {
      */
     compileField(el, params) {
         let compiled;
-        let isSpan = false;
         const recordExpr = params.recordExpr || "__comp__.props.record";
         const dataPointIdExpr = params.dataPointIdExpr || `${recordExpr}.id`;
         if (!el.hasAttribute("widget")) {
-            isSpan = true;
             // fields without a specified widget are rendered as simple spans in kanban records
             const fieldId = el.getAttribute("field_id");
             compiled = createElement("span", {
@@ -125,25 +121,6 @@ export class KanbanCompiler extends ViewCompiler {
                 compiled.setAttribute("readonly", `${recordExpr}.isInEdition || (${readonlyAttr})`);
             } else {
                 compiled.setAttribute("readonly", `${recordExpr}.isInEdition`);
-            }
-        }
-
-        if (params.isLegacy) {
-            const { bold, display } = extractAttributes(el, ["bold", "display"]);
-            const classNames = [];
-            if (display === "right") {
-                classNames.push("float-end");
-            } else if (display === "full") {
-                classNames.push("o_text_block");
-            }
-            if (bold) {
-                classNames.push("o_text_bold");
-            }
-            if (classNames.length > 0) {
-                const clsFormatted = isSpan
-                    ? classNames.join(" ")
-                    : toStringExpression(classNames.join(" "));
-                compiled.setAttribute("class", clsFormatted);
             }
         }
 
@@ -208,5 +185,4 @@ KanbanCompiler.OWL_DIRECTIVE_WHITELIST = [
     "t-key",
     "t-att.*",
     "t-call",
-    "t-translation",
 ];

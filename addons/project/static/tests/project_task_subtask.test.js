@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { beforeEach, describe, destroy, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { click, edit, queryOne } from "@odoo/hoot-dom";
-import { Command, mountView, MockServer, onRpc } from "@web/../tests/web_test_helpers";
+import { Command, mountView, MockServer, mockService, onRpc } from "@web/../tests/web_test_helpers";
 
 import { defineProjectModels, ProjectTask } from "./project_models";
 
@@ -93,6 +93,7 @@ beforeEach(() => {
                 <field name="project_id"/>
                 <field name="closed_subtask_count"/>
                 <field name="child_ids"/>
+                <field name="sequence"/>
                 <field name="user_ids"/>
                 <field name="state"/>
                 <templates>
@@ -110,9 +111,9 @@ beforeEach(() => {
         `,
         form: `
             <form>
-                <field name="child_ids" widget="subtasks_one2many">
-                    <list editable="bottom">
-                        <field name="display_in_project" force_save="1"/>
+                <field name="parent_id"/>
+                <field name="child_ids" context="{'default_parent_id': id}" widget="subtasks_one2many">
+                    <list editable="bottom" open_form_view="True">
                         <field name="project_id" widget="project"/>
                         <field name="name"/>
                     </list>
@@ -216,17 +217,20 @@ test("project.task (kanban): check subtask creation", async () => {
             expect.step(`${model}/${method}`);
         }
         if (model === "project.task" && method === "create") {
-            const [{ display_name, parent_id }] = args[0];
+            const [{ display_name, parent_id, sequence }] = args[0];
             expect(display_name).toBe("New Subtask");
             expect(parent_id).toBe(1);
+            expect(sequence).toBe(11, { message: "Sequence should be 11" });
             const newSubtaskId = MockServer.env["project.task"].create({
                 name: display_name,
                 parent_id,
                 state: "01_in_progress",
+                sequence: sequence,
             });
             MockServer.env["project.task"].write(parent_id, {
                 child_ids: [Command.link(newSubtaskId)],
             });
+            return [newSubtaskId];
         }
     });
     await mountView({
@@ -285,4 +289,57 @@ test("project.task (form): check focus on new subtask's name", async () => {
     expect(".o_field_char input").toBeFocused({
         message: "Upon clicking on 'Add a line', the new subtask's name should be focused.",
     });
+});
+
+test("project.task (kanban): check subtask creation when input is empty", async () => {
+    await mountView({
+        resModel: "project.task",
+        type: "kanban",
+    });
+    await click(".subtask_list_button");
+    await animationFrame();
+    await click(".subtask_create");
+    await animationFrame();
+    await click(".subtask_create_input input");
+    await edit("");
+    await click(".subtask_create_input button");
+    await animationFrame();
+    expect(".subtask_create_input input").toHaveClass("o_field_invalid", {
+        message: "input field should be displayed as invalid",
+    });
+    expect(".o_notification_content").toHaveInnerHTML("Invalid Display Name", {
+        message: "The content of the notification should contain 'Display Name'.",
+    });
+    expect(".o_notification_bar").toHaveClass("bg-danger", {
+        message: "The notification bar should have type 'danger'.",
+    });
+});
+
+test("project.task: Parent id is set when creating new task from subtask form's 'View' button", async () => {
+    mockService("action", {
+        doAction(params) {
+            return mountView({
+                resModel: params.res_model,
+                resId: params.res_id,
+                type: "form",
+                context: params.context,
+            });
+        },
+    });
+
+    const taskFormView = await mountView({
+        resModel: "project.task",
+        resId: 1,
+        type: "form",
+    });
+    await click("tbody .o_data_row:nth-child(1) .o_list_record_open_form_view button.btn-link");
+    // Destroying this view for sanicity of display
+    destroy(taskFormView);
+    await animationFrame();
+
+    await click(".o_form_view .o_form_button_create");
+    await animationFrame();
+    expect("div[name='parent_id'] input").toHaveValue(
+        MockServer.current._models[ProjectTask._name].find((rec) => rec.id === 1).name
+    );
 });

@@ -6,7 +6,7 @@ from collections import defaultdict
 
 
 class PurchaseRequisition(models.Model):
-    _name = "purchase.requisition"
+    _name = 'purchase.requisition'
     _description = "Purchase Requisition"
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = "id desc"
@@ -120,8 +120,9 @@ class PurchaseRequisition(models.Model):
         for requisition in self:
             for requisition_line in requisition.line_ids:
                 requisition_line.supplier_info_ids.sudo().unlink()
-            requisition.purchase_ids.button_cancel()
-            for po in requisition.purchase_ids:
+            cancellable_pos = requisition.purchase_ids.filtered(lambda po: po.state == 'draft')
+            cancellable_pos.button_cancel()
+            for po in cancellable_pos:
                 po.message_post(body=_('Cancelled by the agreement associated to this quotation.'))
         self.state = 'cancel'
 
@@ -161,24 +162,22 @@ class PurchaseRequisition(models.Model):
 
 
 class PurchaseRequisitionLine(models.Model):
-    _name = "purchase.requisition.line"
-    _inherit = 'analytic.mixin'
+    _name = 'purchase.requisition.line'
+    _inherit = ['analytic.mixin']
     _description = "Purchase Requisition Line"
     _rec_name = 'product_id'
 
     product_id = fields.Many2one('product.product', string='Product', domain=[('purchase_ok', '=', True)], required=True)
     product_uom_id = fields.Many2one(
-        'uom.uom', 'Product Unit of Measure',
-        compute='_compute_product_uom_id', store=True, readonly=False, precompute=True,
-        domain="[('category_id', '=', product_uom_category_id)]")
-    product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
-    product_qty = fields.Float(string='Quantity', digits='Product Unit of Measure')
+        'uom.uom', 'Unit',
+        compute='_compute_product_uom_id', store=True, readonly=False, precompute=True)
+    product_qty = fields.Float(string='Quantity', digits='Product Unit')
     product_description_variants = fields.Char('Description')
     price_unit = fields.Float(
-        string='Unit Price', digits='Product Price', default=0.0,
+        string='Unit Price', min_display_digits='Product Price', default=0.0,
         compute="_compute_price_unit", readonly=False, store=True)
     qty_ordered = fields.Float(compute='_compute_ordered_qty', string='Ordered')
-    requisition_id = fields.Many2one('purchase.requisition', required=True, string='Purchase Agreement', ondelete='cascade')
+    requisition_id = fields.Many2one('purchase.requisition', required=True, string='Purchase Agreement', ondelete='cascade', index=True)
     company_id = fields.Many2one('res.company', related='requisition_id.company_id', string='Company', store=True, readonly=True)
     supplier_info_ids = fields.One2many('product.supplierinfo', 'purchase_requisition_line_id')
 
@@ -187,10 +186,10 @@ class PurchaseRequisitionLine(models.Model):
         line_found = defaultdict(set)
         for line in self:
             total = 0.0
-            for po in line.requisition_id.purchase_ids.filtered(lambda purchase_order: purchase_order.state in ['purchase', 'done']):
+            for po in line.requisition_id.purchase_ids.filtered(lambda purchase_order: purchase_order.state == 'purchase'):
                 for po_line in po.order_line.filtered(lambda order_line: order_line.product_id == line.product_id):
-                    if po_line.product_uom != line.product_uom_id:
-                        total += po_line.product_uom._compute_quantity(po_line.product_qty, line.product_uom_id)
+                    if po_line.product_uom_id != line.product_uom_id:
+                        total += po_line.product_uom_id._compute_quantity(po_line.product_qty, line.product_uom_id)
                     else:
                         total += po_line.product_qty
             if line.product_id not in line_found[line.requisition_id]:
@@ -254,6 +253,7 @@ class PurchaseRequisitionLine(models.Model):
             self.env['product.supplierinfo'].sudo().create({
                 'partner_id': purchase_requisition.vendor_id.id,
                 'product_id': self.product_id.id,
+                'product_uom_id': self.product_uom_id.id,
                 'product_tmpl_id': self.product_id.product_tmpl_id.id,
                 'price': self.price_unit,
                 'currency_id': self.requisition_id.currency_id.id,
@@ -270,10 +270,10 @@ class PurchaseRequisitionLine(models.Model):
         return {
             'name': name,
             'product_id': self.product_id.id,
-            'product_uom': self.product_id.uom_po_id.id,
+            'product_uom_id': self.product_uom_id.id,
             'product_qty': product_qty,
             'price_unit': price_unit,
-            'taxes_id': [(6, 0, taxes_ids)],
+            'tax_ids': [(6, 0, taxes_ids)],
             'date_planned': date_planned,
             'analytic_distribution': self.analytic_distribution,
         }

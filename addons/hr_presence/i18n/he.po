@@ -1,44 +1,51 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_presence
-# 
+# * hr_presence
+#
 # Translators:
-# שהאב חוסיין <shhab89@gmail.com>, 2024
-# Orel Nahmany, 2024
-# Roy Sayag, 2024
-# Yihya Hugirat <hugirat@gmail.com>, 2024
-# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2024
-# דודי מלכה <Dudimalka6@gmail.com>, 2024
-# Amit Spilman <amit@laylinetech.com>, 2024
-# or balmas, 2025
-# 
+# Yihya Hugirat <hugirat@gmail.com>, 2022
+# Martin Trigaux, 2022
+# שהאב חוסיין <shhab89@gmail.com>, 2022
+# דודי מלכה <Dudimalka6@gmail.com>, 2022
+# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2022
+# Yoram Lavi <yoram@digitale.co.il>, 2026.
+# or balmas <or@laylinetech.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:40+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: or balmas, 2025\n"
-"Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-03 03:07+0000\n"
+"Last-Translator: or balmas <or@laylinetech.com>\n"
+"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-19/"
+"hr_presence/he/>\n"
+"Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: he\n"
-"Plural-Forms: nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;\n"
+"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
+"n % 10 == 0) ? 2 : 3));\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_presence
 #. odoo-python
 #: code:addons/hr_presence/models/hr_employee.py:0
 msgid "%(name)s has been noted as %(state)s today"
-msgstr ""
+msgstr "%(name)s סומן/ה כ-%(state)s היום"
 
 #. module: hr_presence
 #: model:mail.template,body_html:hr_presence.mail_template_presence
 msgid ""
 "<div>\n"
-"                    Dear <t t-out=\"object.name or ''\">Abigail Peterson</t>,<br/><br/>\n"
-"We hope this message finds you well. It has come to our attention that you are currently not present at work, and there is no record of a time off request from you. If this absence is due to an oversight on our part, we sincerely apologize for any confusion.\n"
-"Please take the necessary steps to address this unplanned absence. Should you have any questions or need assistance, do not hesitate to reach out to your manager or the HR department at your earliest convenience.\n"
+"                    Dear <t t-out=\"object.name or ''\">Abigail Peterson</t>,"
+"<br/><br/>\n"
+"We hope this message finds you well. It has come to our attention that you "
+"are currently not present at work, and there is no record of a time off "
+"request from you. If this absence is due to an oversight on our part, we "
+"sincerely apologize for any confusion.\n"
+"Please take the necessary steps to address this unplanned absence. Should "
+"you have any questions or need assistance, do not hesitate to reach out to "
+"your manager or the HR department at your earliest convenience.\n"
 "Thank you for your prompt attention to this matter.\n"
 "                    <br/>Best Regards,<br/><br/>\n"
 "                </div>\n"
@@ -47,7 +54,6 @@ msgstr ""
 
 #. module: hr_presence
 #: model:ir.model.fields.selection,name:hr_presence.selection__hr_employee__hr_presence_state_display__absent
-#: model:ir.model.fields.selection,name:hr_presence.selection__hr_employee_base__hr_presence_state_display__absent
 #: model:ir.model.fields.selection,name:hr_presence.selection__hr_employee_public__hr_presence_state_display__absent
 #: model_terms:ir.ui.view,arch_db:hr_presence.hr_employee_view_search
 msgid "Absent"
@@ -59,11 +65,6 @@ msgid "Add a log note"
 msgstr ""
 
 #. module: hr_presence
-#: model:ir.model,name:hr_presence.model_hr_employee_base
-msgid "Basic Employee"
-msgstr "עובד רגיל"
-
-#. module: hr_presence
 #: model:ir.model,name:hr_presence.model_res_company
 msgid "Companies"
 msgstr "חברות"
@@ -71,12 +72,7 @@ msgstr "חברות"
 #. module: hr_presence
 #: model:ir.model,name:hr_presence.model_res_config_settings
 msgid "Config Settings"
-msgstr "הגדרות תצורה"
-
-#. module: hr_presence
-#: model:ir.model.fields,field_description:hr_presence.field_res_users_log__create_uid
-msgid "Create Uid"
-msgstr "צור מזהה ייחודי"
+msgstr ""
 
 #. module: hr_presence
 #: model:ir.actions.server,name:hr_presence.action_hr_employee_presence_time_off
@@ -84,11 +80,25 @@ msgid "Create a Time Off"
 msgstr ""
 
 #. module: hr_presence
+#: model:ir.model.fields,field_description:hr_presence.field_hr_employee__display_name
+#: model:ir.model.fields,field_description:hr_presence.field_hr_employee_public__display_name
+#: model:ir.model.fields,field_description:hr_presence.field_ir_websocket__display_name
+#: model:ir.model.fields,field_description:hr_presence.field_res_company__display_name
+#: model:ir.model.fields,field_description:hr_presence.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:hr_presence.field_res_users_log__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: hr_presence
 #: model:ir.model.fields,field_description:hr_presence.field_hr_employee__email_sent
-#: model:ir.model.fields,field_description:hr_presence.field_hr_employee_base__email_sent
 #: model:ir.model.fields,field_description:hr_presence.field_hr_employee_public__email_sent
 msgid "Email Sent"
 msgstr "דוא\"ל נשלח"
+
+#. module: hr_presence
+#: model:ir.model,name:hr_presence.model_hr_employee
+msgid "Employee"
+msgstr ""
 
 #. module: hr_presence
 #: model:sms.template,name:hr_presence.sms_template_data_hr_presence
@@ -120,10 +130,19 @@ msgstr "תאריך חישוב אחרון נוכחות משאבי אנוש"
 
 #. module: hr_presence
 #: model:ir.model.fields,field_description:hr_presence.field_hr_employee__hr_presence_state_display
-#: model:ir.model.fields,field_description:hr_presence.field_hr_employee_base__hr_presence_state_display
 #: model:ir.model.fields,field_description:hr_presence.field_hr_employee_public__hr_presence_state_display
 msgid "Hr Presence State Display"
 msgstr "תצוגת מצב הנוכחות של משאבי אנוש"
+
+#. module: hr_presence
+#: model:ir.model.fields,field_description:hr_presence.field_hr_employee__id
+#: model:ir.model.fields,field_description:hr_presence.field_hr_employee_public__id
+#: model:ir.model.fields,field_description:hr_presence.field_ir_websocket__id
+#: model:ir.model.fields,field_description:hr_presence.field_res_company__id
+#: model:ir.model.fields,field_description:hr_presence.field_res_config_settings__id
+#: model:ir.model.fields,field_description:hr_presence.field_res_users_log__id
+msgid "ID"
+msgstr ""
 
 #. module: hr_presence
 #: model:ir.model.fields,field_description:hr_presence.field_res_users_log__ip
@@ -132,43 +151,34 @@ msgstr "כתובת IP"
 
 #. module: hr_presence
 #: model:ir.model.fields,field_description:hr_presence.field_hr_employee__ip_connected
-#: model:ir.model.fields,field_description:hr_presence.field_hr_employee_base__ip_connected
 #: model:ir.model.fields,field_description:hr_presence.field_hr_employee_public__ip_connected
 msgid "Ip Connected"
 msgstr "Ip מחובר"
 
 #. module: hr_presence
 #: model:ir.model.fields,field_description:hr_presence.field_hr_employee__manually_set_presence
-#: model:ir.model.fields,field_description:hr_presence.field_hr_employee_base__manually_set_presence
 #: model:ir.model.fields,field_description:hr_presence.field_hr_employee_public__manually_set_presence
 msgid "Manually Set Presence"
 msgstr ""
 
 #. module: hr_presence
 #: model:ir.model.fields,field_description:hr_presence.field_hr_employee__manually_set_present
-#: model:ir.model.fields,field_description:hr_presence.field_hr_employee_base__manually_set_present
 #: model:ir.model.fields,field_description:hr_presence.field_hr_employee_public__manually_set_present
 msgid "Manually Set Present"
 msgstr "הגדר ידנית נוכח"
 
 #. module: hr_presence
 #: model:ir.model.fields.selection,name:hr_presence.selection__hr_employee__hr_presence_state_display__out_of_working_hour
-#: model:ir.model.fields.selection,name:hr_presence.selection__hr_employee_base__hr_presence_state_display__out_of_working_hour
 #: model:ir.model.fields.selection,name:hr_presence.selection__hr_employee_public__hr_presence_state_display__out_of_working_hour
 #: model_terms:ir.ui.view,arch_db:hr_presence.hr_employee_view_search
-msgid "Out of Working Hours"
-msgstr "מחוץ לשעות העבודה"
-
-#. module: hr_presence
-#: model_terms:ir.ui.view,arch_db:hr_presence.hr_employee_view_tree
-msgid "Presence"
-msgstr "נוכחות"
+msgid "Off-Hours"
+msgstr ""
 
 #. module: hr_presence
 #. odoo-javascript
 #: code:addons/hr_presence/static/src/search/hr_presence_cog_menu/hr_presence_cog_menu.xml:0
 msgid "Presence Control"
-msgstr "בקרת נוכחות"
+msgstr ""
 
 #. module: hr_presence
 #: model_terms:ir.ui.view,arch_db:hr_presence.hr_employee_view_search
@@ -177,16 +187,20 @@ msgstr ""
 
 #. module: hr_presence
 #: model:ir.model.fields.selection,name:hr_presence.selection__hr_employee__hr_presence_state_display__present
-#: model:ir.model.fields.selection,name:hr_presence.selection__hr_employee_base__hr_presence_state_display__present
 #: model:ir.model.fields.selection,name:hr_presence.selection__hr_employee_public__hr_presence_state_display__present
 msgid "Present"
 msgstr "נוכח"
 
 #. module: hr_presence
+#: model:ir.model,name:hr_presence.model_hr_employee_public
+msgid "Public Employee"
+msgstr ""
+
+#. module: hr_presence
 #. odoo-python
 #: code:addons/hr_presence/models/hr_employee.py:0
 msgid "Send SMS"
-msgstr "שלח SMS"
+msgstr ""
 
 #. module: hr_presence
 #: model:ir.actions.server,name:hr_presence.action_hr_employee_presence_sms
@@ -196,8 +210,8 @@ msgstr ""
 #. module: hr_presence
 #: model:mail.template,description:hr_presence.mail_template_presence
 msgid ""
-"Sent manually in presence module when an employee wasn't working despite not"
-" being off"
+"Sent manually in presence module when an employee wasn't working despite not "
+"being off"
 msgstr ""
 
 #. module: hr_presence
@@ -230,8 +244,13 @@ msgstr "רישום משתמשים"
 #. odoo-python
 #: code:addons/hr_presence/models/hr_employee.py:0
 msgid ""
-"We hope this message finds you well. It has come to our attention that you are currently not present at work, and there is no record of a time off request from you. If this absence is due to an oversight on our part, we sincerely apologize for any confusion.\n"
-"Please take the necessary steps to address this unplanned absence. Should you have any questions or need assistance, do not hesitate to reach out to your manager or the HR department at your earliest convenience.\n"
+"We hope this message finds you well. It has come to our attention that you "
+"are currently not present at work, and there is no record of a time off "
+"request from you. If this absence is due to an oversight on our part, we "
+"sincerely apologize for any confusion.\n"
+"Please take the necessary steps to address this unplanned absence. Should "
+"you have any questions or need assistance, do not hesitate to reach out to "
+"your manager or the HR department at your earliest convenience.\n"
 "Thank you for your prompt attention to this matter."
 msgstr ""
 
@@ -245,3 +264,42 @@ msgstr "אין לך את הרשאה לעשות זאת. אנא צור קשר עם
 #: model:ir.model,name:hr_presence.model_ir_websocket
 msgid "websocket message handling"
 msgstr ""
+
+#~ msgid "Basic Employee"
+#~ msgstr "עובד רגיל"
+
+#~ msgid "Compose Email"
+#~ msgstr "כתוב דוא\"ל"
+
+#~ msgid "Compute presence and open presence view"
+#~ msgstr "חששב נוכחות ותצוגת נוכחות פתוחה"
+
+#~ msgid "Create Uid"
+#~ msgstr "צור מזהה ייחודי"
+
+#~ msgid "Employees"
+#~ msgstr "עובדים"
+
+#~ msgid "Log"
+#~ msgstr "כתוב"
+
+#~ msgid "Presence"
+#~ msgstr "נוכחות"
+
+#~ msgid "SMS"
+#~ msgstr "SMS"
+
+#~ msgid "Set as present"
+#~ msgstr "הגדר כנוכח"
+
+#~ msgid "There is no professional email address for this employee."
+#~ msgstr "אין לעובד זה דוא\"ל עבודה."
+
+#~ msgid "There is no professional mobile for this employee."
+#~ msgstr "אין לעובד זה מכשיר סלולרי מהעבודה."
+
+#~ msgid "Time Off"
+#~ msgstr "מאשר חופשות"
+
+#~ msgid "To Define"
+#~ msgstr "להגדיר"

@@ -5,7 +5,7 @@ from odoo import api, fields, models
 from collections import defaultdict
 
 
-class Employee(models.Model):
+class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
     @api.model_create_multi
@@ -21,24 +21,26 @@ class Employee(models.Model):
         return employees
 
     def write(self, vals):
-        result = super(Employee, self).write(vals)
+        if vals.get('active'):
+            inactive_emp = self.filtered(lambda e: not e.active)
+        result = super().write(vals)
         self_company = self.with_context(allowed_company_ids=self.company_id.ids)
         if 'active' in vals:
             if vals.get('active'):
                 # Create future holiday timesheets
-                inactive_emp = self_company.filtered(lambda e: not e.active)
-                inactive_emp._create_future_public_holidays_timesheets(self)
+                inactive_emp = inactive_emp.with_env(self_company.env)
+                inactive_emp._create_future_public_holidays_timesheets(inactive_emp)
             else:
                 # Delete future holiday timesheets
                 self_company._delete_future_public_holidays_timesheets()
         elif 'resource_calendar_id' in vals:
             # Update future holiday timesheets
             self_company._delete_future_public_holidays_timesheets()
-            self_company._create_future_public_holidays_timesheets(self)
+            self_company._create_future_public_holidays_timesheets(self_company)
         return result
 
     def _delete_future_public_holidays_timesheets(self):
-        future_timesheets = self.env['account.analytic.line'].sudo().search([('global_leave_id', '!=', False), ('date', '>=', fields.date.today()), ('employee_id', 'in', self.ids)])
+        future_timesheets = self.env['account.analytic.line'].sudo().search([('global_leave_id', '!=', False), ('date', '>=', fields.Date.today()), ('employee_id', 'in', self.ids)])
         future_timesheets.write({'global_leave_id': False})
         future_timesheets.unlink()
 
@@ -47,7 +49,7 @@ class Employee(models.Model):
         today = fields.Datetime.today()
         global_leaves_wo_calendar = defaultdict(lambda: self.env["resource.calendar.leaves"])
         global_leaves_wo_calendar.update(dict(self.env['resource.calendar.leaves']._read_group(
-            [('calendar_id', '=', False), ('date_from', '>=', today)],
+            [('calendar_id', '=', False), ('resource_id', '=', False), ('date_from', '>=', today)],
             groupby=['company_id'],
             aggregates=['id:recordset'],
         )))

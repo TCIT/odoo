@@ -8,13 +8,13 @@ from odoo.exceptions import AccessError
 from pytz import timezone, UTC
 
 
-class Users(models.Model):
+class ResUsers(models.Model):
     _inherit = 'res.users'
 
     calendar_default_privacy = fields.Selection(
-        [('public', 'Public'),
-         ('private', 'Private'),
-         ('confidential', 'Only internal users')],
+        [('public', 'Public by default'),
+         ('private', 'Private by default'),
+         ('confidential', 'Internal users only')],
         compute="_compute_calendar_default_privacy",
         inverse="_inverse_calendar_res_users_settings",
     )
@@ -49,9 +49,7 @@ class Users(models.Model):
     @api.model
     def _default_user_calendar_default_privacy(self):
         """ Get the calendar default privacy from the Default User Template, set public as default. """
-        if default_user := self.env.ref('base.default_user', raise_if_not_found=False):
-            return default_user.sudo().calendar_default_privacy or 'public'
-        return 'public'
+        return self.env['ir.config_parameter'].sudo().get_param('calendar.default_privacy', 'public')
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -68,11 +66,9 @@ class Users(models.Model):
     def write(self, vals):
         """ Forbid the calendar default privacy update from different users for keeping private events secured. """
         privacy_update = 'calendar_default_privacy' in vals
-        default_user = self.env.ref('base.default_user', raise_if_not_found=False)
-        if default_user and privacy_update and any(user not in [default_user, self.env.user] for user in self):
+        if privacy_update and self != self.env.user:
             raise AccessError(_("You are not allowed to change the calendar default privacy of another user due to privacy constraints."))
-        res = super().write(vals)
-        return res
+        return super().write(vals)
 
     @api.depends("res_users_settings_id.calendar_default_privacy")
     def _compute_calendar_default_privacy(self):
@@ -81,11 +77,12 @@ class Users(models.Model):
         When any user doesn't have its setting from ResUsersSettings defined, fallback to Default User Template's.
         """
         fallback_default_privacy = 'public'
-        if any(not user.res_users_settings_id.calendar_default_privacy for user in self):
+        # sudo: any user has access to other users calendar_default_privacy setting
+        if any(not user.sudo().res_users_settings_id.calendar_default_privacy for user in self):
             fallback_default_privacy = self._default_user_calendar_default_privacy()
 
         for user in self:
-            user.calendar_default_privacy = user.res_users_settings_id.calendar_default_privacy or fallback_default_privacy
+            user.calendar_default_privacy = user.sudo().res_users_settings_id.calendar_default_privacy or fallback_default_privacy
 
     def _inverse_calendar_res_users_settings(self):
         """
@@ -173,6 +170,7 @@ class Users(models.Model):
                 'name': meeting_label,
                 'model': 'calendar.event',
                 'icon': modules.module.get_module_icon(EventModel._original_module),
+                'domain': [('active', 'in', [True, False])],
                 'meetings': meetings_lines,
                 "view_type": EventModel._systray_view,
             }
@@ -185,3 +183,11 @@ class Users(models.Model):
 
     def check_synchronization_status(self):
         return {}
+
+    def _has_any_active_synchronization(self):
+        """
+        Overridable method for checking if user has any synchronization active in inherited modules.
+
+        :return: boolean indicating if any synchronization is active.
+        """
+        return False

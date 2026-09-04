@@ -6,7 +6,7 @@ from odoo.addons.sms.tools.sms_api import ERROR_MESSAGES, SmsApi
 from odoo.exceptions import ValidationError
 
 
-class SMSAccountSender(models.TransientModel):
+class SmsAccountSender(models.TransientModel):
     _name = 'sms.account.sender'
     _description = 'SMS Account Sender Name Wizard'
 
@@ -17,7 +17,7 @@ class SMSAccountSender(models.TransientModel):
     def _check_sender_name(self):
         for record in self:
             if not re.match(r"[a-zA-Z0-9\- ]{3,11}", record.sender_name):
-                raise ValidationError("Your sender name must be between 3 and 11 characters long and only contain alphanumeric characters.")
+                raise ValidationError(self.env._("Your sender name must be between 3 and 11 characters long and only contain alphanumeric characters."))
 
     def action_set_sender_name(self):
         status = SmsApi(self.env, self.account_id)._set_sender_name(self.sender_name)['state']

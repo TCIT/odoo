@@ -1,132 +1,53 @@
 import { markEventHandled } from "@web/core/utils/misc";
 
 import {
+    App,
     Component,
     onMounted,
     onPatched,
-    onWillDestroy,
     onWillPatch,
     onWillStart,
     onWillUnmount,
+    reactive,
+    useComponent,
     useEffect,
+    useExternalListener,
     useRef,
     useState,
+    xml,
 } from "@odoo/owl";
 
 import { loadBundle } from "@web/core/assets";
-import { browser } from "@web/core/browser/browser";
-import { _t } from "@web/core/l10n/translation";
+import { _t, appTranslateFn } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { isMobileOS } from "@web/core/browser/feature_detection";
+import { Deferred } from "../utils/concurrency";
+import { Dialog } from "../dialog/dialog";
+import { getTemplate } from "@web/core/templates";
 
 /**
- *
- * @param {import("@web/core/utils/hooks").Ref} [ref]
- * @param {Object} props
- * @param {import("@web/core/popover/popover_service").PopoverServiceAddOptions} [options]
- * @param {function} [props.onSelect]
- * @param {function} [props.onClose]
+ * @typedef Emoji
+ * @property {string} category
+ * @property {string} codepoints the emoji itself to be displayed
+ * @property {string[]} emoticons string substitution (eg: ":p")
+ * @property {string[]} keywords
+ * @property {string} name
+ * @property {string[]} shortcodes
  */
-export function useEmojiPicker(ref, props, options = {}) {
-    const targets = [];
-    const state = useState({ isOpen: false });
-    const newOptions = {
-        ...options,
-        onClose: () => {
-            state.isOpen = false;
-            options.onClose?.();
-        },
-    };
-    const popover = usePopover(EmojiPicker, {
-        ...newOptions,
-        animation: false,
-        popoverClass: "border-secondary",
-    });
-    props.storeScroll = {
-        scrollValue: 0,
-        set: (value) => {
-            props.storeScroll.scrollValue = value;
-        },
-        get: () => {
-            return props.storeScroll.scrollValue;
-        },
-    };
 
-    /**
-     * @param {import("@web/core/utils/hooks").Ref} ref
-     */
-    function add(ref, onSelect, { show = false } = {}) {
-        const toggler = () => toggle(ref, onSelect);
-        targets.push([ref, toggler]);
-        if (!ref.el) {
-            return;
-        }
-        ref.el.addEventListener("click", toggler);
-        ref.el.addEventListener("mouseenter", loadEmoji);
-        if (show) {
-            ref.el.click();
-        }
-    }
-
-    function toggle(ref, onSelect = props.onSelect) {
-        if (popover.isOpen) {
-            popover.close();
-        } else {
-            state.isOpen = true;
-            popover.open(ref.el, { ...props, onSelect });
-        }
-    }
-
-    if (ref) {
-        add(ref);
-    }
-    onMounted(() => {
-        for (const [ref, toggle] of targets) {
-            if (!ref.el) {
-                continue;
-            }
-            ref.el.addEventListener("click", toggle);
-            ref.el.addEventListener("mouseenter", loadEmoji);
-        }
-    });
-    onWillPatch(() => {
-        for (const [ref, toggle] of targets) {
-            if (!ref.el) {
-                continue;
-            }
-            ref.el.removeEventListener("click", toggle);
-            ref.el.removeEventListener("mouseenter", loadEmoji);
-        }
-    });
-    onPatched(() => {
-        for (const [ref, toggle] of targets) {
-            if (!ref.el) {
-                continue;
-            }
-            ref.el.addEventListener("click", toggle);
-            ref.el.addEventListener("mouseenter", loadEmoji);
-        }
-    });
-    Object.assign(state, { add });
-    return state;
+export function useEmojiPicker(...args) {
+    return usePicker(EmojiPicker, ...args);
 }
 
-const loadingListeners = [];
-
-export const loader = {
+export const loader = reactive({
     loadEmoji: () => loadBundle("web.assets_emoji"),
-    /** @type {{ emojiValueToShortcode: Object<string, string> }} */
+    /** @type {{ emojiValueToShortcodes: Object<string, string[]>, emojiRegex: RegExp} }} */
     loaded: undefined,
-    onEmojiLoaded(cb) {
-        loadingListeners.push(cb);
-    },
-};
+});
 
-/**
- * @returns {import("@web/core/emoji_picker/emoji_data")}
- */
+/** @returns {Promise<{ categories: Object[], emojis: Emoji[] }>")} */
 export async function loadEmoji() {
     const res = { categories: [], emojis: [] };
     try {
@@ -142,27 +63,42 @@ export async function loadEmoji() {
         return res;
     } finally {
         if (!loader.loaded) {
-            loader.loaded = { emojiValueToShortcode: {} };
+            const emojiValueToShortcodes = {};
             for (const emoji of res.emojis) {
-                const value = emoji.codepoints;
-                const shortcode = emoji.shortcodes[0];
-                loader.loaded.emojiValueToShortcode[value] = shortcode;
-                for (const listener of loadingListeners) {
-                    listener();
-                }
-                loadingListeners.length = 0;
+                emojiValueToShortcodes[emoji.codepoints] = emoji.shortcodes;
             }
+            loader.loaded = {
+                emojiValueToShortcodes,
+                emojiRegex: new RegExp(
+                    Object.keys(emojiValueToShortcodes).length
+                        ? Object.keys(emojiValueToShortcodes)
+                              .map((c) => c.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"))
+                              .sort((a, b) => b.length - a.length) // Sort to get composed emojis first
+                              .join("|")
+                        : /(?!)/,
+                    "gu"
+                ),
+            };
         }
     }
 }
 
-export const EMOJI_PICKER_PROPS = ["close?", "onClose?", "onSelect", "state?", "storeScroll?"];
+export const PICKER_PROPS = [
+    "PickerComponent?",
+    "close?",
+    "onClose?",
+    "onSelect",
+    "state?",
+    "storeScroll?",
+    "mobile?",
+];
 
 export class EmojiPicker extends Component {
-    static props = EMOJI_PICKER_PROPS;
+    static props = [...PICKER_PROPS, "class?", "initialSearchTerm?"];
     static template = "web.EmojiPicker";
 
     categories = null;
+    /** @type {Emoji[]|null} */
     emojis = null;
     shouldScrollElem = null;
     lastSearchTerm;
@@ -171,25 +107,16 @@ export class EmojiPicker extends Component {
     setup() {
         this.gridRef = useRef("emoji-grid");
         this.navbarRef = useRef("navbar");
-        this.ui = useState(useService("ui"));
+        this.ui = useService("ui");
         this.isMobileOS = isMobileOS();
         this.state = useState({
             activeEmojiIndex: 0,
             categoryId: null,
-            recent: JSON.parse(browser.localStorage.getItem("web.emoji.frequent") || "{}"),
-            searchTerm: "",
+            searchTerm: this.props.initialSearchTerm ?? "",
+            /** @type {Emoji|undefined} */
+            hoveredEmoji: undefined,
         });
-        const onStorage = (ev) => {
-            if (ev.key === "web.emoji.frequent") {
-                this.state.recent = ev.newValue ? JSON.parse(ev.newValue) : {};
-            } else if (ev.key === null) {
-                this.state.recent = {};
-            }
-        };
-        browser.addEventListener("storage", onStorage);
-        onWillDestroy(() => {
-            browser.removeEventListener("storage", onStorage);
-        });
+        this.frequentEmojiService = useService("web.frequent.emoji");
         useAutofocus();
         onWillStart(async () => {
             const { categories, emojis } = await loadEmoji();
@@ -209,16 +136,17 @@ export class EmojiPicker extends Component {
                 : this.categories[0].sortId;
         });
         onMounted(() => {
-            this.navbarResizeObserver = new ResizeObserver(() => this.adaptNavbar());
-            this.navbarResizeObserver.observe(this.navbarRef.el);
-            this.adaptNavbar();
             if (this.emojis.length === 0) {
                 return;
             }
+            this.navbarResizeObserver = new ResizeObserver(() => this.adaptNavbar());
+            this.navbarResizeObserver.observe(this.navbarRef.el);
+            this.adaptNavbar();
             this.highlightActiveCategory();
             if (this.props.storeScroll) {
                 this.gridRef.el.scrollTop = this.props.storeScroll.get();
             }
+            this.state.hoveredEmoji = this.activeEmoji;
         });
         onPatched(() => {
             if (this.emojis.length === 0) {
@@ -244,22 +172,24 @@ export class EmojiPicker extends Component {
         );
         useEffect(
             (el) => {
-                const gridEl = this.gridRef?.el;
+                const gridEl = this.gridRef.el;
                 const activeEl = gridEl?.querySelector(".o-Emoji.o-active");
-                if (
-                    gridEl &&
-                    activeEl &&
-                    this.keyboardNavigated &&
-                    !isElementVisible(activeEl, gridEl)
-                ) {
+                if (!gridEl) {
+                    return;
+                }
+                if (activeEl && this.keyboardNavigated && !isElementVisible(activeEl, gridEl)) {
                     activeEl.scrollIntoView({ block: "center", behavior: "instant" });
                     this.keyboardNavigated = false;
                 }
+                this.state.hoveredEmoji = this.activeEmoji;
             },
-            () => [this.state.activeEmojiIndex, this.gridRef?.el]
+            () => [this.state.activeEmojiIndex, this.gridRef.el]
         );
         useEffect(
             () => {
+                if (!this.gridRef.el) {
+                    return;
+                }
                 if (this.searchTerm) {
                     this.gridRef.el.scrollTop = 0;
                     this.state.categoryId = null;
@@ -274,7 +204,7 @@ export class EmojiPicker extends Component {
             () => [this.searchTerm]
         );
         onWillUnmount(() => {
-            this.navbarResizeObserver.disconnect();
+            this.navbarResizeObserver?.disconnect();
             if (!this.gridRef.el) {
                 return;
             }
@@ -285,6 +215,9 @@ export class EmojiPicker extends Component {
     }
 
     adaptNavbar() {
+        if (!this.navbarRef.el) {
+            return;
+        }
         const computedStyle = getComputedStyle(this.navbarRef.el);
         const availableWidth =
             this.navbarRef.el.getBoundingClientRect().width -
@@ -352,7 +285,7 @@ export class EmojiPicker extends Component {
     }
 
     get recentEmojis() {
-        const recent = Object.entries(this.state.recent)
+        const recent = Object.entries(this.frequentEmojiService.all)
             .sort(([, usage_1], [, usage_2]) => usage_2 - usage_1)
             .map(([codepoints]) => this.emojiByCodepoints[codepoints]);
         if (this.searchTerm && recent.length > 0) {
@@ -364,6 +297,18 @@ export class EmojiPicker extends Component {
             ]);
         }
         return recent.slice(0, 42);
+    }
+
+    get placeholder() {
+        return this.state.hoveredEmoji?.shortcodes.join(" ") ?? _t("Search emoji");
+    }
+
+    onMouseenterEmoji(ev, emoji) {
+        this.state.hoveredEmoji = emoji;
+    }
+
+    onMouseleaveEmoji(ev, emoji) {
+        this.state.hoveredEmoji = this.activeEmoji;
     }
 
     onClick(ev) {
@@ -390,6 +335,9 @@ export class EmojiPicker extends Component {
      * navigation of the emoji picker.
      */
     updateEmojiPickerRepr() {
+        if (this.emojis.length === 0) {
+            return;
+        }
         const emojiEls = Array.from(this.gridRef.el.querySelectorAll(".o-Emoji"));
         const emojiRects = emojiEls.map((el) => el.getBoundingClientRect());
         this.emojiMatrix = [];
@@ -435,11 +383,11 @@ export class EmojiPicker extends Component {
             }
             case "ArrowRight": {
                 const colRight = currentCol + 1;
-                if (colRight === this.emojiMatrix[currentRow].length) {
+                if (colRight === this.emojiMatrix[currentRow]?.length) {
                     const rowBelowRight = this.emojiMatrix[currentRow + 1];
                     newIdx = rowBelowRight?.[0];
                 } else {
-                    newIdx = this.emojiMatrix[currentRow][colRight];
+                    newIdx = this.emojiMatrix[currentRow]?.[colRight];
                 }
                 break;
             }
@@ -457,6 +405,13 @@ export class EmojiPicker extends Component {
         this.state.activeEmojiIndex = newIdx ?? this.state.activeEmojiIndex;
     }
 
+    get activeEmoji() {
+        const activeCodepoints = this.gridRef.el.querySelector(
+            `.o-EmojiPicker-content .o-Emoji[data-index="${this.state.activeEmojiIndex}"]`
+        )?.dataset.codepoints;
+        return activeCodepoints ? this.emojiByCodepoints[activeCodepoints] : undefined;
+    }
+
     onKeydown(ev) {
         switch (ev.key) {
             case "ArrowDown":
@@ -469,7 +424,7 @@ export class EmojiPicker extends Component {
             case "Enter":
                 ev.preventDefault();
                 this.gridRef.el
-                    .querySelector(
+                    ?.querySelector(
                         `.o-EmojiPicker-content .o-Emoji[data-index="${this.state.activeEmojiIndex}"]`
                     )
                     ?.click();
@@ -495,7 +450,7 @@ export class EmojiPicker extends Component {
         if (recentEmojis.length > 0 && this.searchTerm) {
             emojisToDisplay = emojisToDisplay.filter((emoji) => !recentEmojis.includes(emoji));
         }
-        if (this.searchTerm.length > 1) {
+        if (this.searchTerm.length > 0) {
             return fuzzyLookup(this.searchTerm, emojisToDisplay, (emoji) => [
                 emoji.name,
                 ...emoji.keywords,
@@ -518,11 +473,12 @@ export class EmojiPicker extends Component {
 
     selectEmoji(ev) {
         const codepoints = ev.currentTarget.dataset.codepoints;
-        const resetOnSelect = !ev.shiftKey && !this.ui.isSmall;
-        this.props.onSelect(codepoints, resetOnSelect);
-        this.state.recent[codepoints] ??= 0;
-        this.state.recent[codepoints]++;
-        browser.localStorage.setItem("web.emoji.frequent", JSON.stringify(this.state.recent));
+        let resetOnSelect = !ev.shiftKey;
+        const res = this.props.onSelect(codepoints, resetOnSelect);
+        if (res === false) {
+            resetOnSelect = false;
+        }
+        this.frequentEmojiService.incrementEmojiUsage(codepoints);
         if (resetOnSelect) {
             this.gridRef.el.scrollTop = 0;
             this.props.close?.();
@@ -540,6 +496,191 @@ export class EmojiPicker extends Component {
             return;
         }
         this.state.categoryId = parseInt(res.dataset.category);
+    }
+}
+
+/**
+ * @param {() => {}} PickerComponent
+ * @param {import("@web/core/utils/hooks").Ref} [ref]
+ * @param {Object} props
+ * @param {import("@web/core/popover/popover_service").PopoverServiceAddOptions} [options]
+ * @param {function} [props.onSelect] function that is invoked when an item in picker has been selected.
+ *   When explicit value `false` is returned, this will keep the picker open (= it won't auto-close it)
+ * @param {function} [props.onClose]
+ */
+export function usePicker(PickerComponent, ref, props, options = {}) {
+    const component = useComponent();
+    const targets = [];
+    const state = useState({ isOpen: false });
+    const ui = useService("ui");
+    const dialog = useService("dialog");
+    let remove;
+    const newOptions = {
+        ...options,
+        onClose: () => {
+            state.isOpen = false;
+            props.onClose?.();
+        },
+    };
+    const popover = usePopover(PickerComponent, {
+        ...newOptions,
+        animation: false,
+        popoverClass: options.popoverClass ?? "" + " bg-100 border border-secondary",
+    });
+    props.storeScroll = {
+        scrollValue: 0,
+        set: (value) => {
+            props.storeScroll.scrollValue = value;
+        },
+        get: () => props.storeScroll.scrollValue,
+    };
+
+    /**
+     * @param {import("@web/core/utils/hooks").Ref} ref
+     */
+    function add(ref, onSelect, { show = false } = {}) {
+        const toggler = () => toggle(isMobileOS() ? undefined : ref, onSelect);
+        targets.push([ref, toggler]);
+        if (!ref.el) {
+            return;
+        }
+        ref.el.addEventListener("click", toggler);
+        ref.el.addEventListener("mouseenter", loadEmoji);
+        if (show) {
+            ref.el.click();
+        }
+    }
+
+    function open(ref, openProps) {
+        state.isOpen = true;
+        if (ui.isSmall || isMobileOS()) {
+            const def = new Deferred();
+            const pickerMobileProps = {
+                PickerComponent,
+                onSelect: (...args) => {
+                    const func = openProps?.onSelect ?? props?.onSelect;
+                    const res = func?.(...args);
+                    def.resolve(true);
+                    return res;
+                },
+            };
+            if (ref?.el) {
+                pickerMobileProps.close = () => remove();
+                const app = new App(PickerMobile, {
+                    name: "Popout",
+                    env: component.env,
+                    props: pickerMobileProps,
+                    getTemplate,
+                    translatableAttributes: ["data-tooltip"],
+                    translateFn: appTranslateFn,
+                });
+                app.mount(ref.el);
+                remove = () => {
+                    state.isOpen = false;
+                    props.onClose?.();
+                    app.destroy();
+                };
+            } else {
+                remove = dialog.add(PickerMobileInDialog, pickerMobileProps, {
+                    context: component,
+                    onClose: () => {
+                        state.isOpen = false;
+                        props.onClose?.();
+                        return def.resolve(false);
+                    },
+                });
+            }
+            return def;
+        }
+        return popover.open(ref.el, { ...props, ...openProps });
+    }
+
+    function close() {
+        remove?.();
+        popover.close?.();
+    }
+
+    function toggle(ref, onSelect = props.onSelect) {
+        if (state.isOpen) {
+            close();
+        } else {
+            open(ref, { ...props, onSelect });
+        }
+    }
+
+    if (ref) {
+        add(ref);
+    }
+    onMounted(() => {
+        for (const [ref, toggle] of targets) {
+            if (!ref.el) {
+                continue;
+            }
+            ref.el.addEventListener("click", toggle);
+            ref.el.addEventListener("mouseenter", loadEmoji);
+        }
+    });
+    onWillPatch(() => {
+        for (const [ref, toggle] of targets) {
+            if (!ref.el) {
+                continue;
+            }
+            ref.el.removeEventListener("click", toggle);
+            ref.el.removeEventListener("mouseenter", loadEmoji);
+        }
+    });
+    onPatched(() => {
+        for (const [ref, toggle] of targets) {
+            if (!ref.el) {
+                continue;
+            }
+            ref.el.addEventListener("click", toggle);
+            ref.el.addEventListener("mouseenter", loadEmoji);
+        }
+    });
+    Object.assign(state, { open, close, toggle });
+    return state;
+}
+
+class PickerMobile extends Component {
+    static props = [...PICKER_PROPS, "onClose?"];
+    static template = xml`
+        <t t-component="props.PickerComponent" t-props="pickerProps"/>
+    `;
+
+    get pickerProps() {
+        return {
+            ...this.props,
+            onSelect: (...args) => this.props.onSelect(...args),
+            mobile: true,
+        };
+    }
+}
+
+class PickerMobileInDialog extends PickerMobile {
+    static components = { Dialog };
+    static props = [...PICKER_PROPS, "onClose?"];
+    static template = xml`
+        <Dialog size="'lg'" header="false" footer="false" contentClass="'o-discuss-mobileContextMenu d-flex position-absolute bottom-0 rounded-0 h-50 bg-100'" bodyClass="'p-1'">
+            <div class="h-100" t-ref="root">
+                <t t-component="props.PickerComponent" t-props="pickerProps"/>
+            </div>
+        </Dialog>
+    `;
+
+    setup() {
+        super.setup();
+        this.root = useRef("root");
+        useExternalListener(
+            window,
+            "click",
+            (ev) => {
+                if (ev.target !== this.root.el && !this.root.el.contains(ev.target)) {
+                    this.props.close?.();
+                }
+            },
+            { capture: true }
+        );
     }
 }
 

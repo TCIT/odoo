@@ -5,25 +5,6 @@ import { Field } from "@web/views/fields/field";
 import { getActiveActions, processButton } from "@web/views/utils";
 import { Widget } from "@web/views/widgets/widget";
 
-/**
- * NOTE ON 't-name="kanban-box"':
- *
- * "kanban-box" is deprecated. Kanban archs converted to the new (v18) API must
- * define a "card" template instead.
- *
- * Multiple roots are supported in kanban box template definitions, however there
- * are a few things to keep in mind when doing so:
- *
- * - each root will generate its own card, so it would be preferable to make the
- * roots mutually exclusive to avoid rendering multiple cards for the same record;
- *
- * - certain fields such as the kanban 'color' or the 'handle' field are based on
- * the last encountered node, so it is advised to keep the same values for those
- * fields within all roots to avoid inconsistencies.
- */
-
-export const LEGACY_KANBAN_BOX_ATTRIBUTE = "kanban-box";
-export const LEGACY_KANBAN_MENU_ATTRIBUTE = "kanban-menu";
 export const KANBAN_CARD_ATTRIBUTE = "card";
 export const KANBAN_MENU_ATTRIBUTE = "menu";
 
@@ -33,7 +14,6 @@ export class KanbanArchParser {
         const className = xmlDoc.getAttribute("class") || null;
         const canOpenRecords = exprToBoolean(xmlDoc.getAttribute("can_open"), true);
         let defaultOrder = stringToOrderBy(xmlDoc.getAttribute("default_order") || null);
-        const defaultGroupBy = xmlDoc.getAttribute("default_group_by");
         const limit = xmlDoc.getAttribute("limit");
         const countLimit = xmlDoc.getAttribute("count_limit");
         const recordsDraggable = exprToBoolean(xmlDoc.getAttribute("records_draggable"), true);
@@ -45,6 +25,9 @@ export class KanbanArchParser {
         activeActions.editGroup = exprToBoolean(xmlDoc.getAttribute("group_edit"), true);
         activeActions.quickCreate =
             activeActions.create && exprToBoolean(xmlDoc.getAttribute("quick_create"), true);
+        const defaultGroupBy = xmlDoc.hasAttribute("default_group_by")
+            ? xmlDoc.getAttribute("default_group_by").split(",")
+            : null;
         const onCreate = xmlDoc.getAttribute("on_create");
         const quickCreateView = xmlDoc.getAttribute("quick_create_view");
         const tooltipInfo = {};
@@ -59,7 +42,7 @@ export class KanbanArchParser {
         const openAction = action && type ? { action, type } : null;
         const templateDocs = {};
         let headerButtons = [];
-        const creates = [];
+        const controls = [];
         let button_id = 0;
         // Root level of the template
         visitXML(xmlDoc, (node) => {
@@ -71,24 +54,30 @@ export class KanbanArchParser {
                 headerButtons = [...node.children]
                     .filter((node) => node.tagName === "button")
                     .map((node) => ({
-                        ...processButton(node),
+                        ...this.processButton(node),
                         type: "button",
                         id: button_id++,
-                    }))
-                    .filter((button) => button.invisible !== "True" && button.invisible !== "1");
+                    }));
                 return false;
             } else if (node.tagName === "control") {
                 for (const childNode of node.children) {
                     if (childNode.tagName === "button") {
-                        creates.push({
+                        controls.push({
                             type: "button",
                             ...processButton(childNode),
                         });
                     } else if (childNode.tagName === "create") {
-                        creates.push({
+                        controls.push({
                             type: "create",
                             context: childNode.getAttribute("context"),
                             string: childNode.getAttribute("string"),
+                            invisible: childNode.getAttribute("invisible"),
+                            class: childNode.getAttribute("class"),
+                        });
+                    } else if (childNode.tagName === "delete") {
+                        controls.push({
+                            type: "delete",
+                            invisible: childNode.getAttribute("invisible"),
                         });
                     }
                 }
@@ -147,18 +136,11 @@ export class KanbanArchParser {
         }
 
         // Concrete kanban box elements in the template
-        let cardDoc = templateDocs[KANBAN_CARD_ATTRIBUTE];
-        const isLegacyArch = !cardDoc;
-        if (isLegacyArch) {
-            console.warn("'kanban-box' is deprecated, define a 'card' template instead");
-        }
+        const cardDoc = templateDocs[KANBAN_CARD_ATTRIBUTE];
         if (!cardDoc) {
-            cardDoc = templateDocs[LEGACY_KANBAN_BOX_ATTRIBUTE];
-            if (!cardDoc) {
-                throw new Error(`Missing '${KANBAN_CARD_ATTRIBUTE}' template.`);
-            }
+            throw new Error(`Missing '${KANBAN_CARD_ATTRIBUTE}' template.`);
         }
-        const cardClassName = (!isLegacyArch && cardDoc.getAttribute("class")) || "";
+        const cardClassName = cardDoc.getAttribute("class") || "";
 
         if (!defaultOrder.length && handleField) {
             const handleFieldSort = `${handleField}, id`;
@@ -171,7 +153,7 @@ export class KanbanArchParser {
             cardClassName,
             cardColorField: xmlDoc.getAttribute("highlight_color"),
             className,
-            creates,
+            controls,
             defaultGroupBy,
             fieldNodes,
             widgetNodes,
@@ -190,7 +172,6 @@ export class KanbanArchParser {
             tooltipInfo,
             examples: xmlDoc.getAttribute("examples"),
             xmlDoc,
-            isLegacyArch,
         };
     }
 
@@ -202,5 +183,9 @@ export class KanbanArchParser {
             sumField: fields[attrs.sum_field] || false,
             help: attrs.help,
         };
+    }
+
+    processButton(node) {
+        return processButton(node);
     }
 }

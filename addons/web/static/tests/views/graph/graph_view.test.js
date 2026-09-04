@@ -16,6 +16,7 @@ import {
     onRpc,
     patchWithCleanup,
     saveFavorite,
+    serverState,
     switchView,
     toggleMenu,
     toggleMenuItem,
@@ -47,12 +48,10 @@ import {
 
 import { DEFAULT_BG, getBorderWhite, getColors, lightenColor } from "@web/core/colors/colors";
 import { Domain } from "@web/core/domain";
-import { registry } from "@web/core/registry";
 import { SampleServer } from "@web/model/sample_server";
 import { GraphArchParser } from "@web/views/graph/graph_arch_parser";
 import { GraphModel } from "@web/views/graph/graph_model";
 import { GraphRenderer } from "@web/views/graph/graph_renderer";
-import { graphView } from "@web/views/graph/graph_view";
 import { WebClient } from "@web/webclient/webclient";
 
 class Color extends models.Model {
@@ -158,7 +157,6 @@ class Foo extends models.Model {
         },
     ];
     _views = {
-        graph: /* xml */ `<graph />`,
         search: /* xml */ `
             <search>
                 <filter name="false_domain" string="False Domain" domain="[(0, '=', 1)]" />
@@ -174,7 +172,25 @@ class Foo extends models.Model {
     };
 }
 
-defineModels([Foo, Color, Product]);
+class Currency extends models.Model {
+    _name = "res.currency";
+
+    name = fields.Char();
+    symbol = fields.Char();
+    position = fields.Selection({
+        selection: [
+            ["after", "A"],
+            ["before", "B"],
+        ],
+    });
+
+    _records = [
+        { id: 1, name: "USD", symbol: "$", position: "before" },
+        { id: 2, name: "EUR", symbol: "€", position: "after" },
+    ];
+}
+
+defineModels([Foo, Color, Product, Currency]);
 
 setupChartJsForTests();
 
@@ -293,149 +309,6 @@ test("simple bar chart rendering (two groupBy)", async () => {
     checkTooltip(view, { lines: [{ label: "true / xpad", value: "0" }] }, 1, 1);
 });
 
-test("bar chart rendering (no groupBy, several domains)", async () => {
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph>
-                <field name="revenue" type="measure" />
-            </graph>
-        `,
-        groupBy: [],
-        comparison: {
-            domains: [
-                { arrayRepr: [["bar", "=", true]], description: "True group" },
-                { arrayRepr: [["bar", "=", false]], description: "False group" },
-            ],
-        },
-    });
-
-    checkLabels(view, ["Total"]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: "#4EA7F2",
-                borderColor: undefined,
-                data: [6],
-                label: "True group",
-            },
-            {
-                backgroundColor: "#EA6175",
-                borderColor: undefined,
-                data: [17],
-                label: "False group",
-            },
-        ]
-    );
-    checkLegend(view, ["True group", "False group"]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "Total / True group", value: "6" }],
-        },
-        0,
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "Total / False group", value: "17" }],
-        },
-        0,
-        1
-    );
-});
-
-test("bar chart rendering (one groupBy, several domains)", async () => {
-    Foo._records = [
-        { bar: true, foo: 1, revenue: 14 },
-        { bar: true, foo: 2, revenue: 0 },
-        { bar: false, foo: 1, revenue: 12 },
-        { bar: false, foo: 2, revenue: -4 },
-        { bar: false, foo: 3, revenue: 2 },
-        { bar: false, foo: 4, revenue: 0 },
-    ];
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph>
-                <field name="revenue" type="measure" />
-                <field name="foo" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                { arrayRepr: [["bar", "=", true]], description: "True group" },
-                { arrayRepr: [["bar", "=", false]], description: "False group" },
-            ],
-        },
-    });
-
-    checkLabels(view, ["1", "2", "3", "4"]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: "#4EA7F2",
-                borderColor: undefined,
-                data: [14, 0, 0, 0],
-                label: "True group",
-            },
-            {
-                backgroundColor: "#EA6175",
-                borderColor: undefined,
-                data: [12, -4, 2, 0],
-                label: "False group",
-            },
-        ]
-    );
-    checkLegend(view, ["True group", "False group"]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "1 / True group", value: "14" }],
-        },
-        0,
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "1 / False group", value: "12" }],
-        },
-        0,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "2 / False group", value: "-4" }],
-        },
-        1,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "3 / False group", value: "2" }],
-        },
-        2,
-        1
-    );
-});
-
 test("bar chart many2many groupBy", async () => {
     const view = await mountView({
         type: "graph",
@@ -489,220 +362,6 @@ test("differentiate many2many values with same label", async () => {
     checkTooltip(view, { lines: [{ label: "red", value: "13" }], title: "Revenue" }, 1);
     checkTooltip(view, { lines: [{ label: "red (2)", value: "14" }], title: "Revenue" }, 2);
     checkTooltip(view, { lines: [{ label: "None", value: "8" }], title: "Revenue" }, 3);
-});
-
-test("bar chart rendering (one groupBy, several domains with date identification)", async () => {
-    Foo._records = [
-        { date: "2021-01-04", revenue: 12 },
-        { date: "2021-01-12", revenue: 5 },
-        { date: "2021-01-19", revenue: 15 },
-        { date: "2021-01-26", revenue: 2 },
-        { date: "2021-02-04", revenue: 14 },
-        { date: "2021-02-17", revenue: 0 },
-        { date: false, revenue: 0 },
-    ];
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph>
-                <field name="revenue" type="measure" />
-                <field name="date" interval="week" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-02-01"],
-                        ["date", "<=", "2021-02-28"],
-                    ],
-                    description: "February 2021",
-                },
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-01-01"],
-                        ["date", "<=", "2021-01-31"],
-                    ],
-                    description: "January 2021",
-                },
-            ],
-            fieldName: "date",
-        },
-    });
-
-    checkLabels(view, ["W05 2021", "W07 2021", "", ""]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: "#4EA7F2",
-                borderColor: undefined,
-                data: [14, 0],
-                label: "February 2021",
-            },
-            {
-                backgroundColor: "#EA6175",
-                borderColor: undefined,
-                data: [12, 5, 15, 2],
-                label: "January 2021",
-            },
-        ]
-    );
-    checkLegend(view, ["February 2021", "January 2021"]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "W05 2021 / February 2021", value: "14" }],
-        },
-        0,
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "W01 2021 / January 2021", value: "12" }],
-        },
-        0,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "W02 2021 / January 2021", value: "5" }],
-        },
-        1,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "W03 2021 / January 2021", value: "15" }],
-        },
-        2,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "W04 2021 / January 2021", value: "2" }],
-        },
-        3,
-        1
-    );
-});
-
-test("bar chart rendering (two groupBy, several domains with no date identification)", async () => {
-    Foo._records = [
-        { date: "2021-01-04", bar: false, revenue: 12 },
-        { date: "2021-01-12", bar: true, revenue: 5 },
-        { date: "2021-02-04", bar: false, revenue: 14 },
-        { date: "2021-02-17", bar: true, revenue: 0 },
-        { date: false, bar: false, revenue: 0 },
-    ];
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph>
-                <field name="revenue" type="measure" />
-                <field name="bar" />
-                <field name="date" interval="week" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-02-01"],
-                        ["date", "<=", "2021-02-28"],
-                    ],
-                    description: "February 2021",
-                },
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-01-01"],
-                        ["date", "<=", "2021-01-31"],
-                    ],
-                    description: "January 2021",
-                },
-            ],
-            fieldName: "date",
-        },
-    });
-
-    checkLabels(view, ["false", "true"]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: "#4EA7F2",
-                borderColor: undefined,
-                data: [14, 0],
-                label: "February 2021 / W05 2021",
-            },
-            {
-                backgroundColor: "#EA6175",
-                borderColor: undefined,
-                data: [0, 0],
-                label: "February 2021 / W07 2021",
-            },
-            {
-                backgroundColor: "#43C5B1",
-                borderColor: undefined,
-                data: [12, 0],
-                label: "January 2021 / W01 2021",
-            },
-            {
-                backgroundColor: "#F4A261",
-                borderColor: undefined,
-                data: [0, 5],
-                label: "January 2021 / W02 2021",
-            },
-        ]
-    );
-    checkLegend(view, [
-        "February 2021 / W05 2021",
-        "February 2021 / W07 2021",
-        "January 2021 / W01 2021",
-        "January 2021 / W02 2021",
-    ]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "false / February 2021 / W05 2021", value: "14" }],
-        },
-        0,
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "false / January 2021 / W01 2021", value: "12" }],
-        },
-        0,
-        2
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "true / January 2021 / W02 2021", value: "5" }],
-        },
-        1,
-        3
-    );
 });
 
 test("line chart rendering (no groupBy)", async () => {
@@ -988,22 +647,15 @@ test("Stacked line prop click false", async () => {
         {
             backgroundColor: "#a7d3f9",
             borderColor: "#4EA7F2",
-            originIndex: 0,
             pointBackgroundColor: "#4EA7F2",
         },
         {
             backgroundColor: "#f5b0ba",
             borderColor: "#EA6175",
-            originIndex: 0,
             pointBackgroundColor: "#EA6175",
         },
     ];
-    const keysToEvaluate = [
-        "backgroundColor",
-        "borderColor",
-        "originIndex",
-        "pointBackgroundColor",
-    ];
+    const keysToEvaluate = ["backgroundColor", "borderColor", "pointBackgroundColor"];
     checkDatasets(view, keysToEvaluate, expectedDatasets);
 });
 
@@ -1035,12 +687,7 @@ test("Stacked prop and default line chart", async () => {
     });
 
     const expectedDatasets = [];
-    const keysToEvaluate = [
-        "backgroundColor",
-        "borderColor",
-        "originIndex",
-        "pointBackgroundColor",
-    ];
+    const keysToEvaluate = ["backgroundColor", "borderColor", "pointBackgroundColor"];
     const datasets = getChart(view).data.datasets;
     const colors = getColors(undefined, "sm");
     for (let i = 0; i < datasets.length; i++) {
@@ -1048,7 +695,6 @@ test("Stacked prop and default line chart", async () => {
         expectedDatasets.push({
             backgroundColor: lightenColor(expectedColor, 0.5),
             borderColor: expectedColor,
-            originIndex: 0,
             pointBackgroundColor: expectedColor,
         });
     }
@@ -1155,401 +801,6 @@ test("Cumulative prop and cumulated start", async () => {
         },
     ];
     checkDatasets(view, ["data"], expectedDatasets);
-});
-
-test("line chart rendering (no groupBy, several domains)", async () => {
-    const view = await mountView({
-        resModel: "foo",
-        type: "graph",
-        arch: /* xml */ `
-            <graph type="line" stacked="0">
-                <field name="revenue" type="measure" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                { arrayRepr: [["bar", "=", true]], description: "True group" },
-                { arrayRepr: [["bar", "=", false]], description: "False group" },
-            ],
-        },
-    });
-
-    checkLabels(view, ["", "Total", ""]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: "#a7d3f9",
-                borderColor: "#4EA7F2",
-                data: [undefined, 6],
-                label: "True group",
-            },
-            {
-                backgroundColor: "#f5b0ba",
-                borderColor: "#EA6175",
-                data: [undefined, 17],
-                label: "False group",
-            },
-        ]
-    );
-    checkLegend(view, ["True group", "False group"]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [
-                { label: "Total / False group", value: "17" },
-                { label: "Total / True group", value: "6" },
-            ],
-        },
-        1
-    );
-});
-
-test("line chart rendering (one groupBy, several domains)", async () => {
-    Foo._records = [
-        { bar: true, foo: 1, revenue: 14 },
-        { bar: true, foo: 2, revenue: 0 },
-        { bar: false, foo: 1, revenue: 12 },
-        { bar: false, foo: 2, revenue: -4 },
-        { bar: false, foo: 3, revenue: 2 },
-        { bar: false, foo: 4, revenue: 0 },
-    ];
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph type="line" stacked="0">
-                <field name="revenue" type="measure" />
-                <field name="foo" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                { arrayRepr: [["bar", "=", true]], description: "True group" },
-                { arrayRepr: [["bar", "=", false]], description: "False group" },
-            ],
-        },
-    });
-
-    checkLabels(view, ["1", "2", "3", "4"]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: "#a7d3f9",
-                borderColor: "#4EA7F2",
-                data: [14, 0, 0, 0],
-                label: "True group",
-            },
-            {
-                backgroundColor: "#f5b0ba",
-                borderColor: "#EA6175",
-                data: [12, -4, 2, 0],
-                label: "False group",
-            },
-        ]
-    );
-    checkLegend(view, ["True group", "False group"]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [
-                { label: "1 / True group", value: "14" },
-                { label: "1 / False group", value: "12" },
-            ],
-        },
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [
-                { label: "2 / True group", value: "0" },
-                { label: "2 / False group", value: "-4" },
-            ],
-        },
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [
-                { label: "3 / False group", value: "2" },
-                { label: "3 / True group", value: "0" },
-            ],
-        },
-        2
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [
-                { label: "4 / True group", value: "0" },
-                { label: "4 / False group", value: "0" },
-            ],
-        },
-        3
-    );
-});
-
-test("line chart rendering (one groupBy, several domains with date identification)", async () => {
-    Foo._records = [
-        { date: "2021-01-04", revenue: 12 },
-        { date: "2021-01-12", revenue: 5 },
-        { date: "2021-01-19", revenue: 15 },
-        { date: "2021-01-26", revenue: 2 },
-        { date: "2021-02-04", revenue: 14 },
-        { date: "2021-02-17", revenue: 0 },
-        { date: false, revenue: 0 },
-    ];
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph type="line" stacked="0">
-                <field name="revenue" type="measure" />
-                <field name="date" interval="week" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-02-01"],
-                        ["date", "<=", "2021-02-28"],
-                    ],
-                    description: "February 2021",
-                },
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-01-01"],
-                        ["date", "<=", "2021-01-31"],
-                    ],
-                    description: "January 2021",
-                },
-            ],
-            fieldName: "date",
-        },
-    });
-
-    checkLabels(view, ["W05 2021", "W07 2021", "", ""]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: "#a7d3f9",
-                borderColor: "#4EA7F2",
-                data: [14, 0],
-                label: "February 2021",
-            },
-            {
-                backgroundColor: "#f5b0ba",
-                borderColor: "#EA6175",
-                data: [12, 5, 15, 2],
-                label: "January 2021",
-            },
-        ]
-    );
-    checkLegend(view, ["February 2021", "January 2021"]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [
-                { label: "W05 2021 / February 2021", value: "14" },
-                { label: "W01 2021 / January 2021", value: "12" },
-            ],
-        },
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [
-                { label: "W02 2021 / January 2021", value: "5" },
-                { label: "W07 2021 / February 2021", value: "0" },
-            ],
-        },
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "W03 2021 / January 2021", value: "15" }],
-        },
-        2
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "W04 2021 / January 2021", value: "2" }],
-        },
-        3
-    );
-});
-
-test("line chart rendering (one groupBy, several domains with date identification) without stacked attribute", async () => {
-    Foo._records = [
-        { date: "2021-01-04", revenue: 12 },
-        { date: "2021-01-12", revenue: 5 },
-        { date: "2021-01-19", revenue: 15 },
-        { date: "2021-01-26", revenue: 2 },
-        { date: "2021-02-04", revenue: 14 },
-        { date: "2021-02-17", revenue: 0 },
-        { date: false, revenue: 0 },
-    ];
-
-    await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph type="line">
-                <field name="revenue" type="measure" />
-                <field name="date" interval="week" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-02-01"],
-                        ["date", "<=", "2021-02-28"],
-                    ],
-                    description: "February 2021",
-                },
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-01-01"],
-                        ["date", "<=", "2021-01-31"],
-                    ],
-                    description: "January 2021",
-                },
-            ],
-            fieldName: "date",
-        },
-    });
-
-    expect(".o_graph_button[data-tooltip=Stacked]").not.toHaveClass("active", {
-        message: "The stacked mode should be disabled",
-    });
-});
-
-test("line chart rendering (two groupBy, several domains with no date identification)", async () => {
-    Foo._records = [
-        { date: "2021-01-04", bar: false, revenue: 12 },
-        { date: "2021-01-12", bar: true, revenue: 5 },
-        { date: "2021-02-04", bar: false, revenue: 14 },
-        { date: "2021-02-17", bar: true, revenue: 0 },
-        { date: false, bar: false, revenue: 0 },
-    ];
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph type="line" stacked="0">
-                <field name="revenue" type="measure" />
-                <field name="bar" />
-                <field name="date" interval="week" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-02-01"],
-                        ["date", "<=", "2021-02-28"],
-                    ],
-                    description: "February 2021",
-                },
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-01-01"],
-                        ["date", "<=", "2021-01-31"],
-                    ],
-                    description: "January 2021",
-                },
-            ],
-            fieldName: "date",
-        },
-    });
-
-    checkLabels(view, ["false", "true"]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: "#a7d3f9",
-                borderColor: "#4EA7F2",
-                data: [14, 0],
-                label: "February 2021 / W05 2021",
-            },
-            {
-                backgroundColor: "#f5b0ba",
-                borderColor: "#EA6175",
-                data: [0, 0],
-                label: "February 2021 / W07 2021",
-            },
-            {
-                backgroundColor: "#a1e2d8",
-                borderColor: "#43C5B1",
-                data: [12, 0],
-                label: "January 2021 / W01 2021",
-            },
-            {
-                backgroundColor: "#fad1b0",
-                borderColor: "#F4A261",
-                data: [0, 5],
-                label: "January 2021 / W02 2021",
-            },
-        ]
-    );
-    checkLegend(view, [
-        "February 2021 / W05 2021",
-        "February 2021 / W07 2021",
-        "January 2021 / W01 2021",
-        "January 2021 / W02 2021",
-    ]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [
-                { label: "false / February 2021 / W05 2021", value: "14" },
-                { label: "false / January 2021 / W01 2021", value: "12" },
-                { label: "false / February 2021 / W07 2021", value: "0" },
-                { label: "false / January 2021 / W02 2021", value: "0" },
-            ],
-        },
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [
-                { label: "true / January 2021 / W02 2021", value: "5" },
-                { label: "true / February 2021 / W05 2021", value: "0" },
-                { label: "true / February 2021 / W07 2021", value: "0" },
-                { label: "true / January 2021 / W01 2021", value: "0" },
-            ],
-        },
-        1
-    );
 });
 
 test("displaying line chart with only 1 data point", async () => {
@@ -1661,347 +912,6 @@ test("pie chart rendering (two groupBy)", async () => {
     checkTooltip(view, { lines: [{ label: "true / xphone", value: "3 (37.50%)" }] }, 2);
 });
 
-test("pie chart rendering (no groupBy, several domains)", async () => {
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph type="pie">
-                <field name="revenue" type="measure" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                { arrayRepr: [["bar", "=", true]], description: "True group" },
-                { arrayRepr: [["bar", "=", false]], description: "False group" },
-            ],
-        },
-    });
-
-    checkLabels(view, ["Total"]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: ["#4EA7F2"],
-                borderColor: getBorderWhite(),
-                data: [6],
-                label: "True group",
-            },
-            {
-                backgroundColor: ["#4EA7F2"],
-                borderColor: getBorderWhite(),
-                data: [17],
-                label: "False group",
-            },
-        ]
-    );
-    checkLegend(view, ["Total"]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "True group / Total", value: "6 (100.00%)" }],
-        },
-        0,
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "False group / Total", value: "17 (100.00%)" }],
-        },
-        0,
-        1
-    );
-});
-
-test("pie chart rendering (one groupBy, several domains)", async () => {
-    Foo._records = [
-        { bar: true, foo: 1, revenue: 14 },
-        { bar: true, foo: 2, revenue: 0 },
-        { bar: false, foo: 1, revenue: 12 },
-        { bar: false, foo: 2, revenue: 5 },
-        { bar: false, foo: 3, revenue: 0 },
-        { bar: false, foo: 4, revenue: 2 },
-    ];
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph type="pie">
-                <field name="revenue" type="measure" />
-                <field name="foo" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                { arrayRepr: [["bar", "=", true]], description: "True group" },
-                { arrayRepr: [["bar", "=", false]], description: "False group" },
-            ],
-        },
-    });
-
-    checkLabels(view, ["1", "2", "4"]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: ["#4EA7F2", "#EA6175", "#43C5B1"],
-                borderColor: getBorderWhite(),
-                data: [14, 0, 0],
-                label: "True group",
-            },
-            {
-                backgroundColor: ["#4EA7F2", "#EA6175", "#43C5B1"],
-                borderColor: getBorderWhite(),
-                data: [12, 5, 2],
-                label: "False group",
-            },
-        ]
-    );
-    checkLegend(view, ["1", "2", "4"]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "True group / 1", value: "14 (100.00%)" }],
-        },
-        0,
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "False group / 1", value: "12 (63.16%)" }],
-        },
-        0,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "False group / 2", value: "5 (26.32%)" }],
-        },
-        1,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "False group / 4", value: "2 (10.53%)" }],
-        },
-        2,
-        1
-    );
-});
-
-test("pie chart rendering (one groupBy, several domains with date identification)", async () => {
-    Foo._records = [
-        { date: "2021-01-04" },
-        { date: "2021-01-12" },
-        { date: "2021-01-19" },
-        { date: "2021-01-26" },
-        { date: "2021-02-04" },
-        { date: "2021-02-17" },
-        { date: false },
-    ];
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph type="pie">
-                <field name="date" interval="week" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-02-01"],
-                        ["date", "<=", "2021-02-28"],
-                    ],
-                    description: "February 2021",
-                },
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-01-01"],
-                        ["date", "<=", "2021-01-31"],
-                    ],
-                    description: "January 2021",
-                },
-            ],
-            fieldName: "date",
-        },
-    });
-
-    checkLabels(view, ["W05 2021, W01 2021", "W07 2021, W02 2021", "W03 2021", "W04 2021"]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: ["#4EA7F2", "#EA6175", "#43C5B1", "#F4A261"],
-                borderColor: getBorderWhite(),
-                data: [1, 1, 0, 0],
-                label: "February 2021",
-            },
-            {
-                backgroundColor: ["#4EA7F2", "#EA6175", "#43C5B1", "#F4A261"],
-                borderColor: getBorderWhite(),
-                data: [1, 1, 1, 1],
-                label: "January 2021",
-            },
-        ]
-    );
-    checkLegend(view, ["W05 2021, W01 2021", "W07 2021, W02 2021", "W03 2021", "W04 2021"]);
-    checkTooltip(
-        view,
-        {
-            lines: [{ label: "February 2021 / W05 2021", value: "1 (50.00%)" }],
-        },
-        0,
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            lines: [{ label: "January 2021 / W01 2021", value: "1 (25.00%)" }],
-        },
-        0,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            lines: [{ label: "February 2021 / W07 2021", value: "1 (50.00%)" }],
-        },
-        1,
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            lines: [{ label: "January 2021 / W02 2021", value: "1 (25.00%)" }],
-        },
-        1,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            lines: [{ label: "January 2021 / W03 2021", value: "1 (25.00%)" }],
-        },
-        2,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            lines: [{ label: "January 2021 / W04 2021", value: "1 (25.00%)" }],
-        },
-        3,
-        1
-    );
-});
-
-test("pie chart rendering (two groupBy, several domains with no date identification)", async () => {
-    Foo._records = [
-        { date: "2021-01-04", bar: false, revenue: 12 },
-        { date: "2021-01-12", bar: true, revenue: 5 },
-        { date: "2021-02-04", bar: false, revenue: 14 },
-        { date: "2021-02-17", bar: true, revenue: 0 },
-        { date: false, bar: false, revenue: 0 },
-    ];
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph type="pie">
-                <field name="revenue" type="measure" />
-                <field name="bar" />
-                <field name="date" interval="week" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-02-01"],
-                        ["date", "<=", "2021-02-28"],
-                    ],
-                    description: "February 2021",
-                },
-                {
-                    arrayRepr: [
-                        ["date", ">=", "2021-01-01"],
-                        ["date", "<=", "2021-01-31"],
-                    ],
-                    description: "January 2021",
-                },
-            ],
-            fieldName: "date",
-        },
-    });
-
-    checkLabels(view, ["false / W05 2021", "false / W01 2021", "true / W02 2021"]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: ["#4EA7F2", "#EA6175", "#43C5B1"],
-                borderColor: getBorderWhite(),
-                data: [14, 0, 0],
-                label: "February 2021",
-            },
-            {
-                backgroundColor: ["#4EA7F2", "#EA6175", "#43C5B1"],
-                borderColor: getBorderWhite(),
-                data: [0, 12, 5],
-                label: "January 2021",
-            },
-        ]
-    );
-    checkLegend(view, ["false / W05 2021", "false / W01 2021", "true / W02 2021"]);
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "February 2021 / false / W05 2021", value: "14 (100.00%)" }],
-        },
-        0,
-        0
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "January 2021 / false / W01 2021", value: "12 (70.59%)" }],
-        },
-        1,
-        1
-    );
-    checkTooltip(
-        view,
-        {
-            title: "Revenue",
-            lines: [{ label: "January 2021 / true / W02 2021", value: "5 (29.41%)" }],
-        },
-        2,
-        1
-    );
-});
-
 test("pie chart rendering (no data)", async () => {
     Foo._records = [];
 
@@ -2020,55 +930,12 @@ test("pie chart rendering (no data)", async () => {
                 backgroundColor: [DEFAULT_BG],
                 borderColor: getBorderWhite(),
                 data: [1],
-                label: null,
+                label: "",
             },
         ]
     );
     checkLegend(view, ["No data"]);
     checkTooltip(view, { lines: [{ label: "No data", value: "0 (100.00%)" }] }, 0);
-});
-
-test("pie chart rendering (no data, several domains)", async () => {
-    Foo._records = [{ product_id: 100, bar: true }];
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph type="pie">
-                <field name="product_id" />
-            </graph>
-        `,
-        comparison: {
-            domains: [
-                { arrayRepr: [["bar", "=", true]], description: "True group" },
-                { arrayRepr: [["bar", "=", false]], description: "False group" },
-            ],
-        },
-    });
-
-    checkLabels(view, ["xphone", "No data"]);
-    checkDatasets(
-        view,
-        ["backgroundColor", "borderColor", "data", "label"],
-        [
-            {
-                backgroundColor: ["#4EA7F2"],
-                borderColor: getBorderWhite(),
-                data: [1],
-                label: "True group",
-            },
-            {
-                backgroundColor: ["#4EA7F2", DEFAULT_BG],
-                borderColor: getBorderWhite(),
-                data: [undefined, 1],
-                label: "False group",
-            },
-        ]
-    );
-    checkLegend(view, ["xphone", "No data"]);
-    checkTooltip(view, { lines: [{ label: "True group / xphone", value: "1 (100.00%)" }] }, 0, 0);
-    checkTooltip(view, { lines: [{ label: "False group / No data", value: "0 (100.00%)" }] }, 1, 1);
 });
 
 test("pie chart rendering (mix of positive and negative values)", async () => {
@@ -2135,11 +1002,10 @@ test("field id not in groupBy", async () => {
     });
 
     checkLabels(view, ["Total"]);
-    checkDatasets(view, ["backgroundColor", "data", "label", "originIndex", "stack"], {
+    checkDatasets(view, ["backgroundColor", "data", "label", "stack"], {
         backgroundColor: "#4EA7F2",
         data: [8],
         label: "Count",
-        originIndex: 0,
         stack: "",
     });
     checkLegend(view, "Count");
@@ -2390,6 +1256,27 @@ test("no content helper after update", async () => {
     expect(".abc").toHaveCount(0);
 });
 
+test("display the provided no content helper when search has no matching data", async () => {
+    Foo._records = [];
+
+    await mountView({
+        type: "graph",
+        resModel: "foo",
+        noContentHelp: /* xml */ `
+            <p class="abc">This helper should be displayed</p>
+        `,
+    });
+
+    expect(".o_graph_canvas_container canvas").toHaveCount(1);
+    expect(".o_view_nocontent").toHaveCount(0);
+
+    await toggleSearchBarMenu();
+    await toggleMenuItem("color");
+
+    expect(".o_graph_canvas_container canvas").toHaveCount(0);
+    expect(".o_nocontent_help:contains(This helper should be displayed)").toHaveCount(1);
+});
+
 test("can reload with other group by", async () => {
     const view = await mountView({
         type: "graph",
@@ -2455,9 +1342,9 @@ test("save params succeeds", async () => {
     ];
 
     let serverId = 1;
-    onRpc("create_or_replace", ({ args }) => {
+    onRpc("create_filter", ({ args }) => {
         expect(args[0].context).toEqual(expectedContexts.shift());
-        return serverId++;
+        return [serverId++];
     });
 
     await mountView({
@@ -2652,8 +1539,8 @@ test("the active measure description is the arch string attribute in priority", 
 test("reload graph with correct fields", async () => {
     expect.assertions(2);
 
-    onRpc("web_read_group", ({ kwargs }) => {
-        expect(kwargs.fields).toEqual(["__count", "foo:sum"]);
+    onRpc("formatted_read_group", ({ kwargs }) => {
+        expect(kwargs.aggregates).toEqual(["__count", "foo:sum"]);
     });
 
     await mountView({
@@ -2678,7 +1565,7 @@ test("reload graph with correct fields", async () => {
 test("initial groupby is kept when reloading", async () => {
     expect.assertions(7);
 
-    onRpc("web_read_group", ({ kwargs }) => {
+    onRpc("formatted_read_group", ({ kwargs }) => {
         expect(kwargs.groupby).toEqual(["product_id"]);
     });
     const view = await mountView({
@@ -2984,6 +1871,7 @@ test("clicking on bar charts triggers a do_action", async () => {
                 domain: [["bar", "=", false]],
                 name: "Foo Analysis",
                 res_model: "foo",
+                search_view_id: [67, "search"],
                 target: "current",
                 type: "ir.actions.act_window",
                 views: [
@@ -2991,13 +1879,14 @@ test("clicking on bar charts triggers a do_action", async () => {
                     [false, "form"],
                 ],
             });
-            expect(options).toEqual({ viewType: "list" });
+            expect(options).toEqual({ newWindow: false, viewType: "list" });
         },
     });
 
     const view = await mountView({
         type: "graph",
         resModel: "foo",
+        searchViewId: 67,
         arch: /* xml */ `
             <graph string="Foo Analysis">
                 <field name="bar" />
@@ -3013,6 +1902,47 @@ test("clicking on bar charts triggers a do_action", async () => {
     await clickOnDataset(view);
 });
 
+test("middle click on bar charts triggers a do_action", async () => {
+    expect.assertions(6);
+
+    mockService("action", {
+        doAction(actionRequest, options) {
+            expect(actionRequest).toEqual({
+                context: { allowed_company_ids: [1], lang: "en", tz: "taht", uid: 7 },
+                domain: [["bar", "=", false]],
+                name: "Foo Analysis",
+                res_model: "foo",
+                search_view_id: [67, "search"],
+                target: "current",
+                type: "ir.actions.act_window",
+                views: [
+                    [false, "list"],
+                    [false, "form"],
+                ],
+            });
+            expect(options).toEqual({ newWindow: true, viewType: "list" });
+        },
+    });
+
+    const view = await mountView({
+        type: "graph",
+        resModel: "foo",
+        searchViewId: 67,
+        arch: /* xml */ `
+            <graph string="Foo Analysis">
+                <field name="bar" />
+            </graph>
+        `,
+    });
+
+    checkModeIs(view, "bar");
+    checkDatasets(view, ["domains"], {
+        domains: [[["bar", "=", false]], [["bar", "=", true]]],
+    });
+
+    await clickOnDataset(view, { ctrlKey: true });
+});
+
 test("Clicking on bar charts removes group_by and search_default_* context keys", async () => {
     expect.assertions(2);
 
@@ -3023,6 +1953,7 @@ test("Clicking on bar charts removes group_by and search_default_* context keys"
                 domain: [["bar", "=", false]],
                 name: "Foo Analysis",
                 res_model: "foo",
+                search_view_id: [67, "search"],
                 target: "current",
                 type: "ir.actions.act_window",
                 views: [
@@ -3030,13 +1961,14 @@ test("Clicking on bar charts removes group_by and search_default_* context keys"
                     [false, "form"],
                 ],
             });
-            expect(options).toEqual({ viewType: "list" });
+            expect(options).toEqual({ newWindow: false, viewType: "list" });
         },
     });
 
     const view = await mountView({
         type: "graph",
         resModel: "foo",
+        searchViewId: 67,
         arch: /* xml */ `
             <graph string="Foo Analysis">
                 <field name="bar" />
@@ -3064,6 +1996,7 @@ test("clicking on a pie chart trigger a do_action with correct views", async () 
                 domain: [["bar", "=", false]],
                 name: "Foo Analysis",
                 res_model: "foo",
+                search_view_id: [67, "search"],
                 target: "current",
                 type: "ir.actions.act_window",
                 views: [
@@ -3071,13 +2004,14 @@ test("clicking on a pie chart trigger a do_action with correct views", async () 
                     [29, "form"],
                 ],
             });
-            expect(options).toEqual({ viewType: "list" });
+            expect(options).toEqual({ newWindow: false, viewType: "list" });
         },
     });
 
     const view = await mountView({
         type: "graph",
         resModel: "foo",
+        searchViewId: 67,
         arch: /* xml */ `
             <graph string="Foo Analysis" type="pie">
                 <field name="bar" />
@@ -3097,6 +2031,56 @@ test("clicking on a pie chart trigger a do_action with correct views", async () 
     });
 
     await clickOnDataset(view);
+});
+
+test("middle click on a pie chart trigger a do_action with correct views", async () => {
+    expect.assertions(6);
+
+    Foo._views[["list", 364]] = /* xml */ `<list />`;
+    Foo._views[["form", 29]] = /* xml */ `<form />`;
+
+    mockService("action", {
+        doAction(actionRequest, options) {
+            expect(actionRequest).toEqual({
+                context: { allowed_company_ids: [1], lang: "en", tz: "taht", uid: 7 },
+                domain: [["bar", "=", false]],
+                name: "Foo Analysis",
+                res_model: "foo",
+                search_view_id: [67, "search"],
+                target: "current",
+                type: "ir.actions.act_window",
+                views: [
+                    [364, "list"],
+                    [29, "form"],
+                ],
+            });
+            expect(options).toEqual({ newWindow: true, viewType: "list" });
+        },
+    });
+
+    const view = await mountView({
+        type: "graph",
+        resModel: "foo",
+        searchViewId: 67,
+        arch: /* xml */ `
+            <graph string="Foo Analysis" type="pie">
+                <field name="bar" />
+            </graph>
+        `,
+        config: {
+            views: [
+                [364, "list"],
+                [29, "form"],
+            ],
+        },
+    });
+
+    checkModeIs(view, "pie");
+    checkDatasets(view, ["domains"], {
+        domains: [[["bar", "=", false]], [["bar", "=", true]]],
+    });
+
+    await clickOnDataset(view, { ctrlKey: true });
 });
 
 test('graph view with attribute disable_linking="1"', async () => {
@@ -3156,6 +2140,24 @@ test("graph view with invisible attribute on field", async () => {
         message: "there should be only two menu items in the measures dropdown (count and foo)",
     });
     expect(".o_menu_item:contains(Revenue)").toHaveCount(0);
+});
+
+test("graph view reserved word", async () => {
+    // Check that the use of reserved words does not interfere with the view.
+    Product._records.push({ id: 150, name: "constructor" });
+    Foo._records.at(-1).product_id = 150;
+
+    const view = await mountView({
+        type: "graph",
+        resModel: "foo",
+        arch: /* xml */ `
+            <graph order="DESC">
+                <field name="product_id" />
+            </graph>
+        `,
+    });
+    checkLabels(view, ["xphone", "xpad", "constructor"]);
+    checkDatasets(view, ["data", "label"], [{ data: [4, 3, 1], label: "Count" }]);
 });
 
 test("graph view sort by measure", async () => {
@@ -3450,8 +2452,8 @@ test("fallback on initial groupby when the groupby from control panel has 0 leng
 });
 
 test("change mode, stacked, or order via the graph buttons does not reload datapoints, change measure does", async () => {
-    onRpc("web_read_group", ({ kwargs }) => {
-        expect.step(kwargs.fields);
+    onRpc("formatted_read_group", ({ kwargs }) => {
+        expect.step(kwargs.aggregates);
     });
     const view = await mountView({
         type: "graph",
@@ -3490,7 +2492,7 @@ test("change mode, stacked, or order via the graph buttons does not reload datap
 
 test("concurrent reloads: add a filter, and directly toggle a measure", async () => {
     let def;
-    onRpc("web_read_group", () => def);
+    onRpc("formatted_read_group", () => def);
     const view = await mountView({
         type: "graph",
         resModel: "foo",
@@ -3541,7 +2543,7 @@ test("concurrent reloads: add a filter, and directly toggle a measure", async ()
 
 test("change graph mode while loading a filter", async () => {
     let def;
-    onRpc("web_read_group", () => def);
+    onRpc("formatted_read_group", () => def);
     const view = await mountView({
         type: "graph",
         resModel: "foo",
@@ -3636,7 +2638,7 @@ test("only process most recent data for concurrent groupby", async () => {
 test("fill_temporal is true by default", async () => {
     expect.assertions(1);
 
-    onRpc("web_read_group", ({ kwargs }) => {
+    onRpc("formatted_read_group", ({ kwargs }) => {
         expect(kwargs.context.fill_temporal).toBe(true, {
             message: "The observable state of fill_temporal should be true",
         });
@@ -3648,7 +2650,7 @@ test("fill_temporal is true by default", async () => {
 test("fill_temporal can be changed throught the context", async () => {
     expect.assertions(1);
 
-    onRpc("web_read_group", ({ kwargs }) => {
+    onRpc("formatted_read_group", ({ kwargs }) => {
         expect(kwargs.context.fill_temporal).toBe(false, {
             message: "The observable state of fill_temporal should be false",
         });
@@ -3661,66 +2663,6 @@ test("fill_temporal can be changed throught the context", async () => {
             fill_temporal: false,
         },
     });
-});
-
-test("fake data in line chart", async () => {
-    mockDate("2020-05-19 01:00:00");
-
-    Foo._records = [];
-
-    await mountView({
-        type: "graph",
-        resModel: "foo",
-        context: {
-            search_default_date_filter: 1,
-        },
-        arch: /* xml */ `
-            <graph type="line">
-                <field name="date" />
-            </graph>
-        `,
-        searchViewArch: /* xml */ `
-            <search>
-                <filter name="date_filter" domain="[]" date="date" default_period="third_quarter" />
-            </search>
-        `,
-    });
-
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date: Previous period");
-
-    expect(".o_graph_canvas_container").toHaveCount(0);
-});
-
-test("no filling color for period of comparison", async () => {
-    mockDate("2020-05-19 01:00:00");
-
-    for (const record of Foo._records) {
-        record.date = record.date?.replace(/^\d{4}/, "2019");
-    }
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        context: {
-            search_default_date_filter: 1,
-        },
-        arch: /* xml */ `
-            <graph type="line" stacked="0">
-                <field name="product_id" />
-            </graph>
-        `,
-        searchViewArch: /* xml */ `
-            <search>
-                <filter name="date_filter" domain="[]" date="date" default_period="year" />
-            </search>
-        `,
-    });
-
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Date: Previous period");
-
-    checkDatasets(view, "backgroundColor", { backgroundColor: "#a7d3f9" });
 });
 
 test("group by a non stored, sortable field", async () => {
@@ -3746,7 +2688,7 @@ test("graph_groupbys should be also used after first load", async () => {
         groupBy: ["date:quarter"],
         irFilters: [
             {
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
                 name: "Favorite",
                 id: 1,
                 context: JSON.stringify({
@@ -3874,42 +2816,6 @@ test("single chart rendering on search", async () => {
     expect.verifySteps(["rendering"]);
 });
 
-test("apply default filter label", async () => {
-    class CustomGraphModel extends graphView.Model {
-        _getDefaultFilterLabel(fields) {
-            return "None";
-        }
-    }
-    registry.category("views").add("custom_graph", {
-        ...graphView,
-        Model: CustomGraphModel,
-    });
-
-    const view = await mountView({
-        type: "graph",
-        resModel: "foo",
-        arch: /* xml */ `
-            <graph js_class="custom_graph">
-                <field name="product_id" />
-                <field name="color_id" />
-            </graph>
-        `,
-    });
-
-    checkLabels(view, ["xphone", "xpad"]);
-    checkLegend(view, ["red", "None", "Sum"]);
-
-    await selectMode("line");
-
-    checkLabels(view, ["xphone", "xpad"]);
-    checkLegend(view, ["red", "None"]);
-
-    await selectMode("pie");
-
-    checkLabels(view, ["xphone / red", "xphone / None", "xpad / None"]);
-    checkLegend(view, ["xphone / red", "xphone / None", "xpad / None"]);
-});
-
 test("missing property field definition is fetched", async function () {
     Foo._fields.properties_definition = fields.PropertiesDefinition();
     Foo._fields.parent_id = fields.Many2one({ relation: "foo" });
@@ -3918,23 +2824,20 @@ test("missing property field definition is fetched", async function () {
         definition_record_field: "properties_definition",
     });
     onRpc(({ method, kwargs }) => {
-        if (method === "web_read_group" && kwargs.groupby?.includes("properties.my_char")) {
+        if (method === "formatted_read_group" && kwargs.groupby?.includes("properties.my_char")) {
             expect.step(JSON.stringify(kwargs.groupby));
-            return {
-                groups: [
-                    {
-                        "properties.my_char": false,
-                        __domain: [["properties.my_char", "=", false]],
-                        __count: 2,
-                    },
-                    {
-                        "properties.my_char": "aaa",
-                        __domain: [["properties.my_char", "=", "aaa"]],
-                        __count: 1,
-                    },
-                ],
-                length: 2,
-            };
+            return [
+                {
+                    "properties.my_char": false,
+                    __extra_domain: [["properties.my_char", "=", false]],
+                    __count: 2,
+                },
+                {
+                    "properties.my_char": "aaa",
+                    __extra_domain: [["properties.my_char", "=", "aaa"]],
+                    __count: 1,
+                },
+            ];
         } else if (method === "get_property_definition") {
             return {
                 name: "my_char",
@@ -3948,7 +2851,7 @@ test("missing property field definition is fetched", async function () {
         arch: `<graph/>`,
         irFilters: [
             {
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
                 name: "My Filter",
                 id: 5,
                 context: `{"group_by": ['properties.my_char']}`,
@@ -3982,23 +2885,20 @@ test("missing deleted property field definition is created", async function () {
         definition_record_field: "properties_definition",
     });
     onRpc(({ method, kwargs }) => {
-        if (method === "web_read_group" && kwargs.groupby?.includes("properties.my_char")) {
+        if (method === "formatted_read_group" && kwargs.groupby?.includes("properties.my_char")) {
             expect.step(JSON.stringify(kwargs.groupby));
-            return {
-                groups: [
-                    {
-                        "properties.my_char": false,
-                        __domain: [["properties.my_char", "=", false]],
-                        __count: 2,
-                    },
-                    {
-                        "properties.my_char": "aaa",
-                        __domain: [["properties.my_char", "=", "aaa"]],
-                        __count: 1,
-                    },
-                ],
-                length: 2,
-            };
+            return [
+                {
+                    "properties.my_char": false,
+                    __extra_domain: [["properties.my_char", "=", false]],
+                    __count: 2,
+                },
+                {
+                    "properties.my_char": "aaa",
+                    __extra_domain: [["properties.my_char", "=", "aaa"]],
+                    __count: 1,
+                },
+            ];
         } else if (method === "get_property_definition") {
             return {};
         }
@@ -4009,7 +2909,7 @@ test("missing deleted property field definition is created", async function () {
         arch: `<graph/>`,
         irFilters: [
             {
-                user_id: [2, "Mitchell Admin"],
+                user_ids: [2],
                 name: "My Filter",
                 id: 5,
                 context: `{"group_by": ['properties.my_char']}`,
@@ -4033,6 +2933,33 @@ test("missing deleted property field definition is created", async function () {
             },
         ]
     );
+});
+
+test("display '0' for false group, when grouped by int field", async () => {
+    Foo._records[0].foo = false;
+
+    const view = await mountView({
+        type: "graph",
+        resModel: "foo",
+        groupBy: ["foo"],
+        arch: /* xml */ `<graph type="pie" />`,
+    });
+
+    checkLabels(view, ["2", "4", "24", "42", "48", "53", "63", "0"]);
+});
+
+test("display the field's falsy_value_label for false group, if defined", async () => {
+    Foo._fields.product_id.falsy_value_label = "I'm the false group";
+    Foo._records[0].product_id = false;
+
+    const view = await mountView({
+        type: "graph",
+        resModel: "foo",
+        groupBy: ["product_id"],
+        arch: /* xml */ `<graph type="bar" />`,
+    });
+
+    checkLabels(view, ["xphone", "xpad", "I'm the false group"]);
 });
 
 test("limit dataset amount", async () => {
@@ -4095,4 +3022,154 @@ test("limit dataset amount", async () => {
     expect(model.data.exceeds).toBe(false);
     expect(model.data.datasets).toHaveLength(600);
     expect(model.data.labels).toHaveLength(600);
+});
+
+test.tags("desktop");
+test("graph views make their control panel available directly", async () => {
+    const def = new Deferred();
+    onRpc("formatted_read_group", () => def);
+    await mountView({
+        type: "graph",
+        resModel: "foo",
+        arch: `<graph/>`,
+    });
+
+    expect(".o_graph_view").toHaveCount(1);
+    expect(".o_graph_view .o_control_panel .o_searchview").toHaveCount(1);
+    expect(".o_graph_view .o_graph_renderer").toHaveCount(0);
+
+    def.resolve();
+    await animationFrame();
+    expect(".o_graph_view .o_graph_renderer").toHaveCount(1);
+});
+
+test.tags("desktop");
+test("monetary chart rendering with multiple currencies", async () => {
+    // simulate that the company currency is EUR
+    serverState.companies[0].currency_id = 2;
+
+    onRpc("/web/domain/validate", () => true);
+    Foo._fields.amount = fields.Monetary({ currency_field: "currency_id" });
+    Foo._fields.currency_id = fields.Many2one({ relation: "res.currency", default: 1 });
+    Foo._records[0].amount = 500;
+    Foo._records[1].amount = 300;
+    Foo._records[2].amount = 200;
+    Foo._records[3].amount = 400;
+    Foo._records[3].currency_id = 2;
+    Foo._records[4].amount = 700;
+    Foo._records[4].currency_id = 2;
+    Foo._records[5].amount = 100;
+    const view = await mountView({
+        type: "graph",
+        resModel: "foo",
+        arch: /* xml */ `
+            <graph>
+                <field name="bar" />
+                <field name="amount" type="measure" />
+            </graph>
+        `,
+    });
+
+    expect(".o_graph_canvas_container canvas").toHaveCount(1);
+    checkLabels(view, ["false", "true"]);
+    checkDatasets(view, ["backgroundColor", "borderColor", "data", "label"], {
+        backgroundColor: "#4EA7F2",
+        borderColor: undefined,
+        data: [1200, 1000],
+        label: "Amount",
+    });
+    checkLegend(view, "Amount");
+    // should display the sum in the company currency, i.e. EUR
+    checkTooltip(view, { title: "Amount", lines: [{ label: "false", value: "1,200.00 €" }] }, 0);
+    checkTooltip(view, { title: "Amount", lines: [{ label: "true", value: "1,000.00 €" }] }, 1);
+});
+
+test.tags("desktop");
+test("monetary chart rendering with a single foreign currency", async () => {
+    // simulate that the company currency is EUR
+    serverState.companies[0].currency_id = 2;
+
+    onRpc("formatted_read_group", ({ kwargs }) => {
+        // FIXME: context.fill_temporal isn't handled in the MockServer
+        expect(kwargs.context.fill_temporal).toBe(true);
+        return [
+            {
+                "date:day": ["2016-01-01", "2016-01-01"],
+                __extra_domain: [
+                    ["date", ">=", "2016-01-01"],
+                    ["date", "<", "2016-01-02"],
+                ],
+                __count: 1,
+                "currency_id:array_agg_distinct": [1],
+                "amount:sum_currency": 300,
+                "amount:sum": 300,
+            },
+            {
+                "date:day": ["2016-01-02", "2016-01-02"],
+                __extra_domain: [
+                    ["date", ">=", "2016-01-02"],
+                    ["date", "<", "2016-01-03"],
+                ],
+                __count: 0,
+                "currency_id:array_agg_distinct": [],
+                "amount:sum_currency": 0,
+                "amount:sum": 0,
+            },
+            {
+                "date:day": ["2016-01-03", "2016-01-03"],
+                __extra_domain: [
+                    ["date", ">=", "2016-01-03"],
+                    ["date", "<", "2016-01-04"],
+                ],
+                __count: 1,
+                "currency_id:array_agg_distinct": [1],
+                "amount:sum_currency": 400,
+                "amount:sum": 400,
+            },
+        ];
+    });
+
+    onRpc("/web/domain/validate", () => true);
+    Foo._fields.amount = fields.Monetary({ currency_field: "currency_id" });
+    Foo._fields.currency_id = fields.Many2one({ relation: "res.currency", default: 1 });
+    Foo._records = [
+        {
+            id: 1,
+            foo: 3,
+            bar: true,
+            product_id: 100,
+            date: "2016-01-01",
+            revenue: 1,
+            color_ids: [2],
+            amount: 300,
+        },
+        {
+            id: 2,
+            foo: 53,
+            bar: true,
+            product_id: 100,
+            color_id: 2,
+            date: "2016-01-03",
+            revenue: 2,
+            color_ids: [1],
+            amount: 400,
+        },
+    ];
+
+    const view = await mountView({
+        type: "graph",
+        resModel: "foo",
+        groupBy: ["date:day"],
+        arch: `
+            <graph>
+                <field name="bar" />
+                <field name="amount" type="measure" />
+            </graph>
+        `,
+    });
+
+    expect(".o_graph_canvas_container canvas").toHaveCount(1);
+    // should display the sum in the records currency, i.e. USD
+    checkTooltip(view, { title: "Amount", lines: [{ label: "2016-01-01", value: "$ 300.00" }] }, 0);
+    checkTooltip(view, { title: "Amount", lines: [{ label: "2016-01-03", value: "$ 400.00" }] }, 1);
 });

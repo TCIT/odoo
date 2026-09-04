@@ -24,13 +24,7 @@ import {
  * @property {() => void} unlock allows further positioning updates (triggers an update right away)
  */
 
-/** @type {UsePositionOptions} */
-const DEFAULTS = {
-    margin: 0,
-    position: "bottom",
-};
-
-const POSITION_BUS = Symbol("position-bus");
+export const POSITION_BUS = Symbol("position-bus");
 
 /**
  * Makes sure that the `popper` element is always
@@ -59,8 +53,9 @@ export function usePosition(refName, getTarget, options = {}) {
             // No compute needed
             return;
         }
-        const repositionOptions = { ...DEFAULTS, ...omit(options, "onPositioned") };
+        const repositionOptions = omit(options, "onPositioned");
         const solution = reposition(ref.el, targetEl, repositionOptions);
+        options.position = `${solution.direction}-${solution.variant}`; // memorize last position
         options.onPositioned?.(ref.el, solution);
     };
 
@@ -99,13 +94,35 @@ export function usePosition(refName, getTarget, options = {}) {
                 }
                 throttledUpdate();
             };
+            // Get the ownerDocument of the target, and the topmost document
+            // if the target is inside an iframe of same-origin
+            // (c.f. html_builder), to handle scroll events at these 2 levels.
+            const documents = [];
             const targetDocument = getTarget()?.ownerDocument;
-            targetDocument?.addEventListener("scroll", scrollListener, { capture: true });
-            targetDocument?.addEventListener("load", throttledUpdate, { capture: true });
+            if (targetDocument) {
+                documents.push(targetDocument);
+                if (
+                    targetDocument.defaultView &&
+                    targetDocument.defaultView.top !== targetDocument.defaultView
+                ) {
+                    try {
+                        documents.push(targetDocument.defaultView.top.document);
+                    } catch {
+                        // Don't access the top document if it is not allowed.
+                        // (i.e. iframe origin or sandbox restriction)
+                    }
+                }
+            }
+            for (const document of documents) {
+                document.addEventListener("scroll", scrollListener, { capture: true });
+                document.addEventListener("load", throttledUpdate, { capture: true });
+            }
             window.addEventListener("resize", throttledUpdate);
             return () => {
-                targetDocument?.removeEventListener("scroll", scrollListener, { capture: true });
-                targetDocument?.removeEventListener("load", throttledUpdate, { capture: true });
+                for (const document of documents) {
+                    document.removeEventListener("scroll", scrollListener, { capture: true });
+                    document.removeEventListener("load", throttledUpdate, { capture: true });
+                }
                 window.removeEventListener("resize", throttledUpdate);
             };
         }

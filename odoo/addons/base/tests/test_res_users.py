@@ -1,18 +1,53 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from odoo import SUPERUSER_ID
-from odoo.addons.base.models.res_users import is_selection_groups, get_selection_groups, name_selection_groups
-from odoo.exceptions import UserError, ValidationError
+from odoo.api import SUPERUSER_ID
+from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.fields import Command
 from odoo.http import _request_stack
-from odoo.tests import Form, TransactionCase, new_test_user, tagged, HttpCase, users
+from odoo.tests import Form, TransactionCase, new_test_user, tagged, HttpCase, users, warmup
 from odoo.tools import mute_logger
 
 
-class TestUsers(TransactionCase):
+class UsersCommonCase(TransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        users = cls.env['res.users'].create([
+            {
+                'name': 'Internal',
+                'login': 'user_internal',
+                'password': 'password',
+                'group_ids': [cls.env.ref('base.group_user').id],
+                'tz': 'UTC',
+            },
+            {
+                'name': 'Portal 1',
+                'login': 'portal_1',
+                'password': 'portal_1',
+                'group_ids': [cls.env.ref('base.group_portal').id],
+            },
+            {
+                'name': 'Portal 2',
+                'login': 'portal_2',
+                'password': 'portal_2',
+                'group_ids': [cls.env.ref('base.group_portal').id],
+            },
+        ])
+
+        cls.user_internal, cls.user_portal_1, cls.user_portal_2 = users
+
+        # Remove from the cache the values filled with admin rights for the users/partners that have just been created
+        # So unit tests reading/writing these partners/users
+        # as other low-privileged users do not have their cache polluted with values fetched with admin rights
+        users.partner_id.invalidate_recordset()
+        users.invalidate_recordset()
+
+
+class TestUsers(UsersCommonCase):
 
     def test_name_search(self):
         """ Check name_search on user. """
@@ -126,15 +161,8 @@ class TestUsers(TransactionCase):
     @mute_logger('odoo.sql_db')
     def test_deactivate_portal_users_access(self):
         """Test that only a portal users can deactivate his account."""
-        user_internal = self.env['res.users'].create({
-            'name': 'Internal',
-            'login': 'user_internal',
-            'password': 'password',
-            'groups_id': [self.env.ref('base.group_user').id],
-        })
-
         with self.assertRaises(UserError, msg='Internal users should not be able to deactivate their account'):
-            user_internal._deactivate_portal_user()
+            self.user_internal._deactivate_portal_user()
 
     @mute_logger('odoo.sql_db', 'odoo.addons.base.models.res_users_deletion')
     def test_deactivate_portal_users_archive_and_remove(self):
@@ -149,7 +177,7 @@ class TestUsers(TransactionCase):
             'name': 'Portal',
             'login': 'portal_user',
             'password': 'password',
-            'groups_id': [self.env.ref('base.group_portal').id],
+            'group_ids': [self.env.ref('base.group_portal').id],
         })
         portal_partner = portal_user.partner_id
 
@@ -157,7 +185,7 @@ class TestUsers(TransactionCase):
             'name': 'Portal',
             'login': 'portal_user_2',
             'password': 'password',
-            'groups_id': [self.env.ref('base.group_portal').id],
+            'group_ids': [self.env.ref('base.group_portal').id],
         })
         portal_partner_2 = portal_user_2.partner_id
 
@@ -183,7 +211,8 @@ class TestUsers(TransactionCase):
             'model_id': self.env.ref('base.model_res_partner').id,
         })
 
-        self.env['res.users.deletion']._gc_portal_users()
+        with self.enter_registry_test_mode():
+            self.env.ref('base.ir_cron_res_users_deletion').method_direct_trigger()
 
         self.assertFalse(portal_user.exists(), 'Should have removed the user')
         self.assertFalse(portal_partner.exists(), 'Should have removed the partner')
@@ -192,6 +221,19 @@ class TestUsers(TransactionCase):
         self.assertTrue(portal_user_2.exists(), 'Should have kept the user')
         self.assertTrue(portal_partner_2.exists(), 'Should have kept the partner')
         self.assertEqual(asked_deletion_2.state, 'fail', 'Should have marked the deletion as failed')
+
+    def test_delete_public_user(self):
+        """Test that the public user cannot be deleted."""
+        public_user = self.env.ref('base.public_user')
+        public_partner = public_user.partner_id
+
+        # Attempt to delete the public user
+        with self.assertRaises(UserError, msg="Public user should not be deletable"):
+            public_user.unlink()
+
+        # Ensure the public user still exists and is inactive
+        self.assertTrue(public_user.exists() and not public_user.active, "Public user should still exist and be inactive")
+        self.assertTrue(public_partner.exists() and not public_partner.active, "Public partner should still exist and be inactive")
 
     def test_user_home_action_restriction(self):
         test_user = new_test_user(self.env, 'hello world')
@@ -239,14 +281,35 @@ class TestUsers(TransactionCase):
 
         self.assertEqual(user.context_get()['lang'], 'en_US')
 
-@tagged('post_install', '-at_install')
-class TestUsers2(TransactionCase):
+    def test_user_self_update(self):
+        """ Check that the user has access to write his phone. """
+        test_user = self.env['res.users'].create({'name': 'John Smith', 'login': 'jsmith'})
+        self.assertFalse(test_user.phone)
+        test_user.with_user(test_user).write({'phone': '2387478'})
+
+        self.assertEqual(
+            test_user.partner_id.phone,
+            '2387478',
+            "The phone of the partner_id shall be updated."
+        )
+
+    def test_session_non_existing_user(self):
+        """
+        Test to check the invalidation of session bound to non existing (or deleted) users.
+        """
+        User = self.env['res.users']
+        last_user_id = User.with_context(active_test=False).search([], limit=1, order="id desc")
+        non_existing_user = User.browse(last_user_id.id + 1)
+        self.assertFalse(non_existing_user._compute_session_token('session_id'))
+
+@tagged('post_install', '-at_install', 'groups')
+class TestUsers2(UsersCommonCase):
 
     def test_change_user_login(self):
         """ Check that partner email is updated when changing user's login """
 
         User = self.env['res.users']
-        with Form(User, view='base.view_users_form') as UserForm:
+        with Form(User, view='base.view_users_simple_form') as UserForm:
             UserForm.name = "Test User"
             UserForm.login = "test-user1"
             self.assertFalse(UserForm.email)
@@ -257,302 +320,304 @@ class TestUsers2(TransactionCase):
                 "Setting a valid email as login should update the partner's email"
             )
 
-    def test_reified_groups(self):
+    def test_default_groups(self):
         """ The groups handler doesn't use the "real" view with pseudo-fields
         during installation, so it always works (because it uses the normal
-        groups_id field).
+        group_ids field).
         """
+        default_group = self.env.ref('base.default_user_group')
+        test_group = self.env['res.groups'].create({'name': 'test_group'})
+        default_group.implied_ids = test_group
+
         # use the specific views which has the pseudo-fields
         f = Form(self.env['res.users'], view='base.view_users_form')
         f.name = "bob"
         f.login = "bob"
         user = f.save()
 
-        self.assertIn(self.env.ref('base.group_user'), user.groups_id)
+        group_user = self.env.ref('base.group_user')
 
-        # all template user groups are copied
-        default_user = self.env.ref('base.default_user')
-        self.assertEqual(default_user.groups_id, user.groups_id)
+        self.assertIn(group_user, user.group_ids)
+        self.assertEqual(default_group.implied_ids + group_user, user.group_ids)
 
     def test_selection_groups(self):
         # create 3 groups that should be in a selection
-        app = self.env['ir.module.category'].create({'name': 'Foo'})
-        group1, group2, group0 = self.env['res.groups'].create([
-            {'name': name, 'category_id': app.id}
+        app = self.env['res.groups.privilege'].create({'name': 'Foo'})
+        group_user, group_manager, group_visitor = self.env['res.groups'].create([
+            {'name': name, 'privilege_id': app.id}
             for name in ('User', 'Manager', 'Visitor')
         ])
         # THIS PART IS NECESSARY TO REPRODUCE AN ISSUE: group1.id < group2.id < group0.id
-        self.assertLess(group1.id, group2.id)
-        self.assertLess(group2.id, group0.id)
+        self.assertLess(group_user.id, group_manager.id)
+        self.assertLess(group_manager.id, group_visitor.id)
         # implication order is group0 < group1 < group2
-        group2.implied_ids = group1
-        group1.implied_ids = group0
-        groups = group0 + group1 + group2
-
-        # determine the name of the field corresponding to groups
-        fname = next(
-            name
-            for name in self.env['res.users'].fields_get()
-            if is_selection_groups(name) and group0.id in get_selection_groups(name)
-        )
-        self.assertCountEqual(get_selection_groups(fname), groups.ids)
+        group_manager.implied_ids = group_user
+        group_user.implied_ids = group_visitor
+        groups = group_visitor + group_user + group_manager
 
         # create a user
         user = self.env['res.users'].create({'name': 'foo', 'login': 'foo'})
 
-        # put user in group0, and check field value
-        user.write({fname: group0.id})
-        self.assertEqual(user.groups_id & groups, group0)
-        self.assertEqual(user.read([fname])[0][fname], group0.id)
+        # put user in group_visitor, and check field value
+        user.write({'group_ids': [Command.set([group_visitor.id])]})
+        self.assertEqual(user.group_ids & groups, group_visitor)
+        self.assertEqual(user.all_group_ids & groups, group_visitor)
+        self.assertEqual(user.read(['group_ids'])[0]['group_ids'], [group_visitor.id])
+        self.assertEqual(user.read(['all_group_ids'])[0]['all_group_ids'], [group_visitor.id])
 
-        # put user in group1, and check field value
-        user.write({fname: group1.id})
-        self.assertEqual(user.groups_id & groups, group0 + group1)
-        self.assertEqual(user.read([fname])[0][fname], group1.id)
+        # remove group_visitor
+        user.write({'group_ids': [Command.unlink(group_visitor.id)]})
+        self.assertEqual(user.group_ids & groups, self.env['res.groups'])
 
-        # put user in group2, and check field value
-        user.write({fname: group2.id})
-        self.assertEqual(user.groups_id & groups, groups)
-        self.assertEqual(user.read([fname])[0][fname], group2.id)
+        # put user in group_manager, and check field value
+        user.write({'group_ids': [Command.set([group_manager.id])]})
+        self.assertEqual(user.group_ids & groups, group_manager)
+        self.assertEqual(user.all_group_ids & groups, group_visitor + group_manager + group_user)
+        self.assertEqual(user.read(['group_ids'])[0]['group_ids'], [group_manager.id])
+        self.assertEqual(set(user.read(['all_group_ids'])[0]['all_group_ids']), set((group_visitor + group_manager + group_user).ids))
 
-        normalized_values = user._remove_reified_groups({fname: group0.id})
-        self.assertEqual(sorted(normalized_values['groups_id']), [(3, group1.id), (3, group2.id), (4, group0.id)])
+        # add user in group_user, and check field value
+        user.write({'group_ids': [Command.link(group_user.id)]})
+        self.assertEqual(user.group_ids & groups, group_manager + group_user)
+        self.assertEqual(user.all_group_ids & groups, group_visitor + group_manager + group_user)
+        self.assertEqual(set(user.read(['group_ids'])[0]['group_ids']), set((group_manager + group_user).ids))
+        self.assertEqual(set(user.read(['all_group_ids'])[0]['all_group_ids']), set((group_visitor + group_manager + group_user).ids))
 
-        normalized_values = user._remove_reified_groups({fname: group1.id})
-        self.assertEqual(sorted(normalized_values['groups_id']), [(3, group2.id), (4, group1.id)])
+        groups = self.env['res.groups'].search([('all_user_ids', '=', user.id)])
+        self.assertEqual(groups, user.all_group_ids)
 
-        normalized_values = user._remove_reified_groups({fname: group2.id})
-        self.assertEqual(normalized_values['groups_id'], [(4, group2.id)])
-
-    def test_read_list_with_reified_field(self):
-        """ Check that read_group and search_read get rid of reified fields"""
-        User = self.env['res.users']
-        fnames = ['name', 'email', 'login']
-
-        # find some reified field name
-        reified_fname = next(
-            fname
-            for fname in User.fields_get()
-            if fname.startswith(('in_group_', 'sel_groups_'))
-        )
-
-        # check that the reified field name is not aggregable
-        self.assertFalse(User.fields_get([reified_fname], ['aggregator'])[reified_fname].get('aggregator'))
-
-        # check that the reified fields are not considered invalid in search_read
-        # and are ignored
-        res_with_reified = User.search_read([], fnames + [reified_fname])
-        res_without_reified = User.search_read([], fnames)
-        self.assertEqual(res_with_reified, res_without_reified, "Reified fields should be ignored in search_read")
-
-        # Verify that the read_group is raising an error if reified field is used as groupby
-        with self.assertRaises(ValueError):
-            User.read_group([], fnames + [reified_fname], [reified_fname])
-
-    def test_reified_groups_on_change(self):
-        """Test that a change on a reified fields trigger the onchange of groups_id."""
+    def test_implied_groups_on_change(self):
+        """Test that a change on a reified fields trigger the onchange of group_ids."""
         group_public = self.env.ref('base.group_public')
         group_portal = self.env.ref('base.group_portal')
         group_user = self.env.ref('base.group_user')
 
-        # Build the reified group field name
-        user_groups = group_public | group_portal | group_user
-        user_groups_ids = [str(group_id) for group_id in sorted(user_groups.ids)]
-        group_field_name = f"sel_groups_{'_'.join(user_groups_ids)}"
+        app = self.env['res.groups.privilege'].create({'name': 'Foo'})
+        group_contain_user = self.env['res.groups'].create({
+            'name': 'Small user group',
+            'privilege_id': app.id,
+            'implied_ids': [group_user.id],
+        })
 
-        # <group col="4" invisible="sel_groups_1_9_10 != 1" groups="base.group_no_one" class="o_label_nowrap">
-        with self.debug_mode():
-            user_form = Form(self.env['res.users'], view='base.view_users_form')
+        user_form = Form(self.env['res.users'], view='base.view_users_form')
         user_form.name = "Test"
         user_form.login = "Test"
         self.assertFalse(user_form.share)
 
-        user_form[group_field_name] = group_portal.id
-        self.assertTrue(user_form.share, 'The groups_id onchange should have been triggered')
+        user_form['group_ids'] = group_portal
+        self.assertTrue(user_form.share, 'The group_ids onchange should have been triggered')
 
-        user_form[group_field_name] = group_user.id
-        self.assertFalse(user_form.share, 'The groups_id onchange should have been triggered')
+        user = user_form.save()
 
-        user_form[group_field_name] = group_public.id
-        self.assertTrue(user_form.share, 'The groups_id onchange should have been triggered')
+        # in debug mode, show the group widget for external user
 
+        with self.debug_mode():
+            user_form = Form(user, view='base.view_users_form')
 
-@tagged('post_install', '-at_install', 'res_groups')
-class TestUsersGroupWarning(TransactionCase):
+            user_form['group_ids'] = group_user
+            self.assertFalse(user_form.share, 'The group_ids onchange should have been triggered')
 
-    @classmethod
-    def setUpClass(cls):
+            user_form['group_ids'] = group_public
+            self.assertTrue(user_form.share, 'The group_ids onchange should have been triggered')
+
+            user_form['group_ids'] = group_user
+            user_form['group_ids'] = group_user + group_contain_user
+
+            user_form.save()
+
+        # in debug mode, allow extra groups
+
+        with self.debug_mode():
+            user_form = Form(self.env['res.users'], view='base.view_users_form')
+            user_form.name = "Test-2"
+            user_form.login = "Test-2"
+
+            user_form['group_ids'] = group_portal
+            self.assertTrue(user_form.share)
+
+            # for portal user, the view_group_extra_ids is only show in debug mode
+            user_form['group_ids'] = group_portal + group_contain_user
+            self.assertFalse(user_form.share, 'The group_ids onchange should have been triggered')
+
+            with self.assertRaises(ValidationError, msg="The user cannot be at the same time in groups: ['Membre', 'Portal', 'Foo / Small user group']"):
+                user_form.save()
+
+    def test_view_group_hierarchy(self):
+        """Test that the group hierarchy shows up in the correct language of the user."""
+        self.env['res.lang']._activate_lang('fr_FR')
+        group_system = self.env.ref('base.group_system')
+        group_system.with_context(lang='fr_FR').name = 'Administrateur'
+
+        view_group_hierarchy_en = self.env['res.groups']._get_view_group_hierarchy()
+        view_group_hierarchy_fr = self.env['res.groups'].with_context(lang='fr_FR')._get_view_group_hierarchy()
+        self.assertNotEqual(view_group_hierarchy_en['groups'][group_system.id]['name'], 'Administrateur')
+        self.assertEqual(view_group_hierarchy_fr['groups'][group_system.id]['name'], 'Administrateur')
+
+        # Should work the other way around too
+        self.env.registry.clear_cache('groups')
+        view_group_hierarchy_fr = self.env['res.groups'].with_context(lang='fr_FR')._get_view_group_hierarchy()
+        view_group_hierarchy_en = self.env['res.groups']._get_view_group_hierarchy()
+        self.assertNotEqual(view_group_hierarchy_en['groups'][group_system.id]['name'], 'Administrateur')
+        self.assertEqual(view_group_hierarchy_fr['groups'][group_system.id]['name'], 'Administrateur')
+
+        with patch('odoo.addons.base.models.res_groups.ResGroups._get_view_group_hierarchy') as mock:
+            self.user_portal_1.copy_data()
+            self.assertFalse(mock.called)
+
+    @users('portal_1')
+    @mute_logger('odoo.addons.base.models.ir_model')
+    def test_self_writeable_fields(self):
+        """Check that a portal user:
+            - can write on fields in SELF_WRITEABLE_FIELDS on himself,
+            - cannot write on fields not in SELF_WRITEABLE_FIELDS on himself,
+            - and none of the above on another user than himself.
         """
-            These are the Groups and their Hierarchy we have Used to test Group warnings.
+        self.assertIn(
+            "post_install",
+            self.test_tags,
+            "This test **must** be `post_install` to ensure the expected behavior despite other modules",
+        )
+        self.assertIn(
+            "email",
+            self.env['res.users'].SELF_WRITEABLE_FIELDS,
+            "For this test to make sense, 'email' must be in the `SELF_WRITEABLE_FIELDS`",
+        )
+        self.assertNotIn(
+            "login",
+            self.env['res.users'].SELF_WRITEABLE_FIELDS,
+            "For this test to make sense, 'login' must not be in the `SELF_WRITEABLE_FIELDS`",
+        )
 
-            Category groups hierarchy:
-                Sales
-                ├── User: All Documents
-                └── Administrator
-                Timesheets
-                ├── User: own timesheets only
-                ├── User: all timesheets
-                └── Administrator
-                Project
-                ├── User
-                └── Administrator
-                Field Service
-                ├── User
-                └── Administrator
+        me = self.env["res.users"].browse(self.env.user.id)
+        other = self.env["res.users"].browse(self.user_portal_2.id)
 
-            Implied groups hierarchy:
-                Sales / Administrator
-                └── Sales / User: All Documents
+        # Allow to write a field in the SELF_WRITEABLE_FIELDS
+        me.email = "foo@bar.com"
+        self.assertEqual(me.email, "foo@bar.com")
+        # Disallow to write a field not in the SELF_WRITEABLE_FIELDS
+        with self.assertRaises(AccessError):
+            me.login = "foo"
 
-                Timesheets / Administrator
-                └── Timesheets / User: all timesheets
-                    └── Timehseets / User: own timesheets only
+        # Disallow to write a field in the SELF_WRITEABLE_FIELDS on another user
+        with self.assertRaises(AccessError):
+            other.email = "foo@bar.com"
+        # Disallow to write a field not in the SELF_WRITEABLE_FIELDS on another user
+        with self.assertRaises(AccessError):
+            other.login = "foo"
 
-                Project / Administrator
-                ├── Project / User
-                └── Timesheets / User: all timesheets
+    @users('user_internal')
+    def test_self_readable_writeable_fields_preferences_form(self):
+        """Test that a field protected by a `groups='...'` with a group the user doesn't belong to
+        but part of the `SELF_WRITEABLE_FIELDS` is shown in the user profile preferences form and is editable"""
+        my_user = self.env['res.users'].browse(self.env.user.id)
+        self.assertIn(
+            'name',
+            my_user.SELF_WRITEABLE_FIELDS,
+            "This test doesn't make sense if not tested on a field part of the SELF_WRITEABLE_FIELDS"
+        )
+        self.patch(self.env.registry['res.users']._fields['name'], 'groups', 'base.group_system')
+        with Form(my_user, view='base.view_users_form_simple_modif') as UserForm:
+            UserForm.name = "Raoulette Poiluchette"
+        self.assertEqual(my_user.name, "Raoulette Poiluchette")
 
-                Field Service / Administrator
-                ├── Sales / Administrator
-                ├── Project / Administrator
-                └── Field Service / User
-        """
-        super().setUpClass()
-        ResGroups = cls.env['res.groups']
-        IrModuleCategory = cls.env['ir.module.category']
-        categ_sales = IrModuleCategory.create({'name': 'Sales'})
-        categ_project = IrModuleCategory.create({'name': 'Project'})
-        categ_field_service = IrModuleCategory.create({'name': 'Field Service'})
-        categ_timesheets = IrModuleCategory.create({'name': 'Timesheets'})
+    @warmup
+    def test_write_group_ids_performance(self):
+        contact_creation_group = self.env.ref("base.group_partner_manager")
+        self.assertNotIn(contact_creation_group, self.user_internal.group_ids)
 
-        # Sales
-        cls.group_sales_user, cls.group_sales_administrator = ResGroups.create([
-            {'name': 'User: All Documents', 'category_id': categ_sales.id},
-            {'name': 'Administrator', 'category_id': categ_sales.id},
-        ])
-        cls.sales_categ_field = name_selection_groups((cls.group_sales_user | cls.group_sales_administrator).ids)
-        cls.group_sales_administrator.implied_ids = cls.group_sales_user
+        # all modules: 23, base: 10; nightly: +1
+        with self.assertQueryCount(24):
+            self.user_internal.write({
+                "group_ids": [Command.link(contact_creation_group.id)],
+            })
 
-        # Timesheets
-        cls.group_timesheets_user_own_timesheet = ResGroups.create([
-            {'name': 'User: own timesheets only', 'category_id': categ_timesheets.id}
-        ])
-        cls.group_timesheets_user_all_timesheet = ResGroups.create([
-            {'name': 'User: all timesheets', 'category_id': categ_timesheets.id}
-        ])
-        cls.group_timesheets_administrator = ResGroups.create([
-            {'name': 'Administrator', 'category_id': categ_timesheets.id}
-        ])
-        cls.timesheets_categ_field = name_selection_groups((cls.group_timesheets_user_own_timesheet |
-                                                            cls.group_timesheets_user_all_timesheet |
-                                                            cls.group_timesheets_administrator).ids
-                                                           )
-        cls.group_timesheets_administrator.implied_ids += cls.group_timesheets_user_all_timesheet
-        cls.group_timesheets_user_all_timesheet.implied_ids += cls.group_timesheets_user_own_timesheet
-
-        # Project
-        cls.group_project_user, cls.group_project_admnistrator = ResGroups.create([
-            {'name': 'User', 'category_id': categ_project.id},
-            {'name': 'Administrator', 'category_id': categ_project.id},
-        ])
-        cls.project_categ_field = name_selection_groups((cls.group_project_user | cls.group_project_admnistrator).ids)
-        cls.group_project_admnistrator.implied_ids = (cls.group_project_user | cls.group_timesheets_user_all_timesheet)
-
-        # Field Service
-        cls.group_field_service_user, cls.group_field_service_administrator = ResGroups.create([
-            {'name': 'User', 'category_id': categ_field_service.id},
-            {'name': 'Administrator', 'category_id': categ_field_service.id},
-        ])
-        cls.field_service_categ_field = name_selection_groups((cls.group_field_service_user | cls.group_field_service_administrator).ids)
-        cls.group_field_service_administrator.implied_ids = (cls.group_sales_administrator |
-                                                             cls.group_project_admnistrator |
-                                                             cls.group_field_service_user).ids
-
-        # User
-        cls.test_group_user = cls.env['res.users'].create({
-            'name': 'Test Group User',
-            'login': 'TestGroupUser',
-            'groups_id': (
-                cls.env.ref('base.group_user') |
-                cls.group_timesheets_administrator |
-                cls.group_field_service_administrator).ids,
+    def test_portal_user_manager_access(self):
+        # groups
+        group_portal = self.env.ref('base.group_portal')
+        group_user = self.env.ref('base.group_user')
+        group_partner_manager = self.env.ref('base.group_partner_manager')
+        group_portal_user_manager = self.env['res.groups'].create({
+            'name': 'Portal User Manager',
+            'user_ids': [],
         })
 
+        # ACL
+        self.env['ir.model.access'].create({
+            'name': 'Allow user profile update',
+            'model_id': self.env['ir.model']._get('res.users').id,
+            'group_id': group_portal_user_manager.id,
+            'perm_write': True,
+        })
 
-    def test_user_group_empty_group_warning(self):
-        """ User changes Empty Sales access from 'Sales: Administrator'. The
-        warning should be there since 'Sales: Administrator' is required when
-        user is having 'Field Service: Administrator'. When user reverts the
-        changes, warning should disappear. """
-        with Form(self.test_group_user.with_context(show_user_group_warning=True), view='base.view_users_form') as UserForm:
-            UserForm[self.sales_categ_field] = False
-            self.assertEqual(
-                UserForm.user_group_warning,
-                'Since Test Group User is a/an "Field Service: Administrator", they will at least obtain the right "Sales: Administrator"'
-            )
+        # Rules
+        self.env['ir.rule'].create({
+            'name': 'Allow updates by Portal Managers on PORTAL users (only)',
+            'model_id': self.env['ir.model']._get('res.users').id,
+            'groups': [group_portal_user_manager.id],
+            'domain_force': [('share', '=', True)],
+            'perm_write': True,
+        })
 
-            UserForm[self.sales_categ_field] = self.group_sales_administrator.id
-            self.assertFalse(UserForm.user_group_warning)
+        # Users
+        portal_user_manager = self.env['res.users'].create({
+            'name': 'Portal User Manager',
+            'login': 'maintainer',
+            'password': 'password',
+            'group_ids': [group_user.id, group_partner_manager.id, group_portal_user_manager.id],
+        })
+        user = self.env['res.users'].create({
+            'name': 'User',
+            'login': 'user_',
+            'password': 'password',
+            'group_ids': [group_user.id, group_partner_manager.id],
+        })
+        portal = self.env['res.users'].create({
+            'name': 'Portal',
+            'login': 'portal_',
+            'password': 'password',
+            'group_ids': [group_portal.id],
+        })
 
-    def test_user_group_inheritance_warning(self):
-        """ User changes 'Sales: User' from 'Sales: Administrator'. The warning
-        should be there since 'Sales: Administrator' is required when user is
-        having 'Field Service: Administrator'. When user reverts the changes,
-        warning should disappear. """
-        with Form(self.test_group_user.with_context(show_user_group_warning=True), view='base.view_users_form') as UserForm:
-            UserForm[self.sales_categ_field] = self.group_sales_user.id
-            self.assertEqual(
-                UserForm.user_group_warning,
-                'Since Test Group User is a/an "Field Service: Administrator", they will at least obtain the right "Sales: Administrator"'
-            )
+        # A UPM cannot update the user profile of another USER
+        with self.assertRaises(AccessError):
+            user.with_user(portal_user_manager).write({
+                'name': 'New name for you'
+            })
+        # A UPM can update the user profile of a PORTAL user
+        portal.with_user(portal_user_manager).write({
+            'name': 'New name for you'
+        })
 
-            UserForm[self.sales_categ_field] = self.group_sales_administrator.id
-            self.assertFalse(UserForm.user_group_warning)
+        # A UPM cannot update the partner profile of another USER
+        with self.assertRaises(AccessError):
+            user.partner_id.with_user(portal_user_manager).write({
+                'name': 'New name for you'
+            })
+        # A UPM can update the partner profile of a PORTAL user
+        portal.partner_id.with_user(portal_user_manager).write({
+            'name': 'New name for you'
+        })
 
-    def test_user_group_inheritance_warning_multi(self):
-        """ User changes 'Sales: User' from 'Sales: Administrator' and
-        'Project: User' from 'Project: Administrator'. The warning should
-        be there since 'Sales: Administrator' and 'Project: Administrator'
-        are required when user is havning 'Field Service: Administrator'.
-        When user reverts the changes For 'Sales: Administrator', warning
-        should disappear for Sales Access."""
-        with Form(self.test_group_user.with_context(show_user_group_warning=True), view='base.view_users_form') as UserForm:
-            UserForm[self.sales_categ_field] = self.group_sales_user.id
-            UserForm[self.project_categ_field] = self.group_project_user.id
-            self.assertTrue(
-                UserForm.user_group_warning,
-                'Since Test Group User is a/an "Field Service: Administrator", they will at least obtain the right "Sales: Administrator", Project: Administrator"',
-            )
+        # A USER cannot update the user profile of another USER
+        with self.assertRaises(AccessError):
+            self.user_internal.with_user(user).write({
+                'name': 'New name for you'
+            })
+        # A USER cannot update the user profile of a PORTAL user
+        with self.assertRaises(AccessError):
+            portal.with_user(user).write({
+                'name': 'New name for you'
+            })
 
-            UserForm[self.sales_categ_field] = self.group_sales_administrator.id
-            self.assertEqual(
-                UserForm.user_group_warning,
-                'Since Test Group User is a/an "Field Service: Administrator", they will at least obtain the right "Project: Administrator"'
-            )
-
-    def test_user_group_least_possible_inheritance_warning(self):
-        """ User changes 'Timesheets: User: own timesheets only ' from
-        'Timesheets: Administrator'. The warning should be there since
-        'Timesheets: User: all timesheets' is at least required when user is
-        having 'Project: Administrator'. When user reverts the changes For
-        'Timesheets: User: all timesheets', warning should disappear."""
-        with Form(self.test_group_user.with_context(show_user_group_warning=True), view='base.view_users_form') as UserForm:
-            UserForm[self.timesheets_categ_field] = self.group_timesheets_user_own_timesheet.id
-            self.assertEqual(
-                UserForm.user_group_warning,
-                'Since Test Group User is a/an "Project: Administrator", they will at least obtain the right "Timesheets: User: all timesheets"'
-            )
-
-            UserForm[self.timesheets_categ_field] = self.group_timesheets_user_all_timesheet.id
-            self.assertFalse(UserForm.user_group_warning)
-
-    def test_user_group_parent_inheritance_no_warning(self):
-        """ User changes 'Field Service: User' from 'Field Service: Administrator'.
-        The warning should not be there since 'Field Service: User' is not affected
-        by any other groups."""
-        with Form(self.test_group_user.with_context(show_user_group_warning=True), view='base.view_users_form') as UserForm:
-            UserForm[self.field_service_categ_field] = self.group_field_service_user.id
-            self.assertFalse(UserForm.user_group_warning)
+        # A USER cannot update the partner profile of another USER
+        with self.assertRaises(AccessError):
+            self.user_internal.partner_id.with_user(user).write({
+                'name': 'New name for you'
+            })
+        # A USER can update the partner profile of a PORTAL user
+        portal.partner_id.with_user(user).write({
+            'name': 'New name for you'
+        })
 
 
 class TestUsersTweaks(TransactionCase):
@@ -576,10 +641,10 @@ class TestUsersIdentitycheck(HttpCase):
         self.env.user.password = "admin@odoo"
 
         # Create a first session that will be used to revoke other sessions
-        session = self.authenticate('admin', 'admin@odoo')
+        session = self.authenticate('admin', 'admin@odoo', session_extra={'_trace_disable': False})
 
         # Create a second session that will be used to check it has been revoked
-        self.authenticate('admin', 'admin@odoo')
+        self.authenticate('admin', 'admin@odoo', session_extra={'_trace_disable': False})
         # Test the session is valid
         # Valid session -> not redirected from /web to /web/login
         self.assertTrue(self.url_open('/web').url.endswith('/web'))
@@ -596,7 +661,7 @@ class TestUsersIdentitycheck(HttpCase):
         form.password = 'admin@odoo'
         # The user clicks the button "Log out from all devices", which triggers a save then a call to the button method
         user_identity_check = form.save()
-        action = user_identity_check.run_check()
+        action = user_identity_check.with_context(password=form.password).run_check()
 
         # Test the session is no longer valid
         # Invalid session -> redirected from /web to /web/login
@@ -604,3 +669,77 @@ class TestUsersIdentitycheck(HttpCase):
 
         # In addition, the password must have been emptied from the wizard
         self.assertFalse(user_identity_check.password)
+
+
+@tagged('post_install', '-at_install')
+class TestApiKeys(UsersCommonCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.env['ir.config_parameter'].set_param('base.enable_programmatic_api_keys', 1)
+        UsersApiKeys = cls.env['res.users.apikeys'].with_user(cls.user_internal)
+        cls.tomorrow = datetime.now() + timedelta(days=1)
+        cls.unscoped_key = UsersApiKeys._generate(None, 'Key without a scope', cls.tomorrow)
+        cls.scoped_key = UsersApiKeys._generate('scope', 'Key with a scope', cls.tomorrow)
+
+    def test_programmatic_apikey_management_is_deactivated_by_default(self):
+        self.env['ir.config_parameter'].set_param('base.enable_programmatic_api_keys', None)
+
+        # Attempting to create a key raises an error
+        with self.assertRaisesRegex(UserError, 'Programmatic API keys are not enabled'):
+            self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+                self.unscoped_key, None, 'Another key without a scope', self.tomorrow)
+
+        # Attempting to revoke a key raises an error
+        with self.assertRaisesRegex(UserError, 'Programmatic API keys are not enabled'):
+            self.env['res.users.apikeys'].with_user(self.user_internal).revoke(self.unscoped_key)
+
+    def test_generate_apikey_is_limited(self):
+        # create 8 new keys, which makes 10 keys in total for user_internal
+        for i in range(8):
+            self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+                self.unscoped_key, None, 'Another key without a scope', self.tomorrow)
+
+        with self.assertRaisesRegex(UserError, 'Limit of 10 API keys is reached'):
+            self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+                self.unscoped_key, None, 'Another key without a scope', self.tomorrow)
+
+        # This ICP can change the limit
+        self.env['ir.config_parameter'].set_param('base.programmatic_api_keys_limit', 11)
+        self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+            self.unscoped_key, None, 'Another key without a scope', self.tomorrow)
+
+    def test_generate_apikey_raises_when_creating_unscoped_key_from_scoped_key(self):
+        # Creating an unscoped key from a scoped key raises an error
+        with self.assertRaisesRegex(UserError, 'The provided API key is invalid or does not belong to the current user'):
+            self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+                self.scoped_key, None, 'Another key without a scope', self.tomorrow)
+
+    def test_generate_apikey_raises_when_creating_key_from_differently_scoped_key(self):
+        # Creating a key with a different scope raises an error
+        with self.assertRaisesRegex(UserError, 'The provided API key is invalid or does not belong to the current user'):
+            self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+                self.scoped_key, 'other', 'Another key with another scope', self.tomorrow)
+
+    def test_generate_apikey_accepts_creating_key_from_identically_scoped_key(self):
+        # Creating a key with the same scope doesn't raise
+        self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+            self.scoped_key, 'scope', 'Another key with a scope', self.tomorrow)
+
+    def test_generate_apikey_accepts_creating_scoped_key_from_unscoped_key(self):
+        # Creating a key with a scope from an unscoped key doesn't raise
+        self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+            self.unscoped_key, 'scope', 'Another key with a scope', self.tomorrow)
+
+    def test_generate_apikey_accepts_creating_unscoped_key_from_unscoped_key(self):
+        # Creating an unscoped key from another unscoped key doesn't raise
+        self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+            self.unscoped_key, None, 'Another key without a scope', self.tomorrow)
+
+    def test_generate_apikey_checks_ownership(self):
+        # Check that an API key cannot be generated from another user's API key
+        with self.assertRaisesRegex(UserError, 'The provided API key is invalid or does not belong to the current user'):
+            self.env['res.users.apikeys'].with_user(SUPERUSER_ID).generate(
+                self.unscoped_key, None, 'Another key without a scope', self.tomorrow)

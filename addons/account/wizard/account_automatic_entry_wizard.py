@@ -10,7 +10,8 @@ from markupsafe import Markup, escape
 from odoo.tools import frozendict
 import json
 
-class AutomaticEntryWizard(models.TransientModel):
+
+class AccountAutomaticEntryWizard(models.TransientModel):
     _name = 'account.automatic.entry.wizard'
     _description = 'Create Automatic Entries'
     _check_company_auto = True
@@ -144,9 +145,9 @@ class AutomaticEntryWizard(models.TransientModel):
         res['move_line_ids'] = [(6, 0, move_line_ids.ids)]
 
         if any(move.state != 'posted' for move in move_line_ids.mapped('move_id')):
-            raise UserError(_('You can only change the period/account for posted journal items.'))
+            raise UserError(_("Oops! You can only change the period or account for posted entries! Other ones aren't up for an adventure like that!"))
         if any(move_line.reconciled for move_line in move_line_ids):
-            raise UserError(_('You can only change the period/account for items that are not yet reconciled.'))
+            raise UserError(_("Oops! You can only change the period or account for items that are not yet reconciled! Other ones aren't up for an adventure like that!"))
         if any(line.company_id.root_id != move_line_ids[0].company_id.root_id for line in move_line_ids):
             raise UserError(_('You cannot use this wizard on journal entries belonging to different companies.'))
         res['company_id'] = move_line_ids[0].company_id.root_id.id
@@ -313,12 +314,15 @@ class AutomaticEntryWizard(models.TransientModel):
             }),
         ]
 
+    def _get_lock_safe_date(self, date):
+        # Use a reference move in the correct journal because _get_accounting_date depends on the journal sequence.
+        reference_move = self.env['account.move'].new({'journal_id': self.journal_id.id, 'move_type': 'entry', 'invoice_date': date})
+        return reference_move._get_accounting_date(date, False)
+
     def _get_move_dict_vals_change_period(self):
-        reference_move = self.env['account.move'].new({'journal_id': self.journal_id.id, 'move_type': 'entry'})
 
         def get_lock_safe_date(aml):
-            # Use a reference move in the correct journal because _get_accounting_date depends on the journal sequence.
-            return reference_move._get_accounting_date(aml.date, False)
+            return self._get_lock_safe_date(aml.date)
 
         # set the change_period account on the selected journal items
 
@@ -330,6 +334,7 @@ class AutomaticEntryWizard(models.TransientModel):
             'ref': self._format_strings(ref_format, self.move_line_ids[0].move_id),
             'date': fields.Date.to_string(self.date),
             'journal_id': self.journal_id.id,
+            'adjusting_entry_origin_move_ids': self.move_line_ids.move_id.ids,
         }}
         # complete the account.move data
         for date, grouped_lines in groupby(self.move_line_ids, get_lock_safe_date):
@@ -342,6 +347,7 @@ class AutomaticEntryWizard(models.TransientModel):
                 'ref': self._format_strings(ref_format, grouped_lines[0].move_id, amount),
                 'date': fields.Date.to_string(date),
                 'journal_id': self.journal_id.id,
+                'adjusting_entry_origin_move_ids': self.move_line_ids.move_id.ids,
             }
 
         # compute the account.move.lines and the total amount per move
@@ -410,7 +416,7 @@ class AutomaticEntryWizard(models.TransientModel):
         accrual_move_offsets = defaultdict(int)
         for move in self.move_line_ids.move_id:
             amount = sum((self.move_line_ids._origin & move.line_ids).mapped('balance'))
-            accrual_move = created_moves[1:].filtered(lambda m: m.date == m._get_accounting_date(move.date, False))
+            accrual_move = created_moves[1:].filtered(lambda m: m.date == self._get_lock_safe_date(move.date))
 
             if accrual_account.reconcile and accrual_move.state == 'posted' and destination_move.state == 'posted':
                 destination_move_lines = destination_move.mapped('line_ids').filtered(lambda line: line.account_id == accrual_account)[destination_move_offset:destination_move_offset+2]

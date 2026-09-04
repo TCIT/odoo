@@ -7,6 +7,7 @@ from . import test_barcode
 from . import test_base
 from . import test_basecase
 from . import test_cache
+from . import test_intervals
 from . import test_date_utils
 from . import test_deprecation
 from . import test_db_cursor
@@ -19,8 +20,11 @@ from . import test_groups
 from . import test_http_case
 from . import test_i18n
 from . import test_image
+from . import test_install
 from . import test_avatar_mixin
+from . import test_init
 from . import test_ir_actions
+from . import test_ir_asset
 from . import test_ir_attachment
 from . import test_ir_cron
 from . import test_ir_filters
@@ -33,15 +37,17 @@ from . import test_ir_sequence
 from . import test_ir_sequence_date_range
 from . import test_ir_embedded_actions
 from . import test_ir_default
+from . import test_logging
 from . import test_mail
 from . import test_menu
 from . import test_mimetypes
 from . import test_misc
 from . import test_module
+from . import test_module_graph
 from . import test_orm
 from . import test_ormcache
-from . import test_osv
 from . import test_overrides
+from . import test_query
 from . import test_qweb_field
 from . import test_qweb
 from . import test_res_config
@@ -52,10 +58,8 @@ from . import test_sql
 from . import test_translate
 from . import test_tz
 # from . import test_uninstall  # loop
-from . import test_upgrade_code
 from . import test_user_has_group
 from . import test_views
-from . import test_xmlrpc
 from . import test_res_company
 from . import test_res_currency
 from . import test_res_country
@@ -77,3 +81,7 @@ from . import test_config_parameter
 from . import test_ir_module_category
 from . import test_configmanager
 from . import test_num2words_ar
+from . import test_cli
+from . import test_signature
+from . import test_import_files
+from . import test_registry

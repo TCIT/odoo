@@ -16,14 +16,12 @@ class TestAccruedTimeSheetSaleOrders(TestCommonSaleTimesheet):
             'partner_id': cls.partner_a.id,
             'partner_invoice_id': cls.partner_a.id,
             'partner_shipping_id': cls.partner_a.id,
-            'pricelist_id': cls.company_data['default_pricelist'].id,
             'date_order': '2020-01-01',
         })
         so_line_deliver_global_project = cls.env['sale.order.line'].create({
             'name': cls.product_delivery_timesheet2.name,
             'product_id': cls.product_delivery_timesheet2.id,
             'product_uom_qty': 50,
-            'product_uom': cls.product_delivery_timesheet2.uom_id.id,
             'price_unit': cls.product_delivery_timesheet2.list_price,
             'order_id': cls.sale_order.id,
         })

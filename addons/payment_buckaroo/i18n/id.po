@@ -1,23 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_buckaroo
-# 
+# * payment_buckaroo
+#
 # Translators:
-# Wil Odoo, 2024
-# 
+# Wahyu Setiawan <wahyusetiaaa@gmail.com>, 2017
+# Bonny Useful <bonny.useful@gmail.com>, 2017
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Abe Manyo (abem)" <abem@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 10.saas~18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-06 02:55+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/"
+"payment_buckaroo/id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment_buckaroo
 #. odoo-python
@@ -44,10 +48,16 @@ msgid "Code"
 msgstr "Kode"
 
 #. module: payment_buckaroo
-#. odoo-python
-#: code:addons/payment_buckaroo/models/payment_transaction.py:0
-msgid "No transaction found matching reference %s."
-msgstr "Tidak ada transaksi dengan referensi %s yang cocok."
+#: model:ir.model.fields,field_description:payment_buckaroo.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_buckaroo.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "Nama Tampilan"
+
+#. module: payment_buckaroo
+#: model:ir.model.fields,field_description:payment_buckaroo.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_buckaroo.field_payment_transaction__id
+msgid "ID"
+msgstr "ID"
 
 #. module: payment_buckaroo
 #: model:ir.model,name:payment_buckaroo.model_payment_provider
@@ -63,7 +73,7 @@ msgstr "Transaksi pembayaran"
 #. odoo-python
 #: code:addons/payment_buckaroo/models/payment_transaction.py:0
 msgid "Received data with missing transaction keys"
-msgstr "Menerima data tanpa transaction key "
+msgstr "Menerima data tanpa transaction key"
 
 #. module: payment_buckaroo
 #: model_terms:ir.ui.view,arch_db:payment_buckaroo.payment_provider_form
@@ -83,8 +93,8 @@ msgstr "Kode teknis penyedia pembayaran ini."
 #. module: payment_buckaroo
 #. odoo-python
 #: code:addons/payment_buckaroo/models/payment_transaction.py:0
-msgid "Unknown status code: %s"
-msgstr "Kode status tidak diketahui: %s"
+msgid "Unknown status code: %s."
+msgstr "Kode status tidak diketahui: %s."
 
 #. module: payment_buckaroo
 #: model:ir.model.fields,field_description:payment_buckaroo.field_payment_provider__buckaroo_website_key
@@ -96,3 +106,6 @@ msgstr "Website Key"
 #: code:addons/payment_buckaroo/models/payment_transaction.py:0
 msgid "Your payment was refused (code %s). Please try again."
 msgstr "Pembayaran Anda ditolak (kode %s). Silakan coba lagi."
+
+#~ msgid "Payment Acquirer"
+#~ msgstr "Acquirer pembayaran"

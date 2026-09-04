@@ -1,24 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* iap
-# 
+# * iap
+#
 # Translators:
-# Wil Odoo, 2024
-# Abe Manyo, 2025
-# 
+# Martin Trigaux, 2022
+# Abe Manyo, 2022
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Abe Manyo (abem)" <abem@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~15.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Abe Manyo, 2025\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-07 00:38+0000\n"
+"Last-Translator: \"Abe Manyo (abem)\" <abem@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/iap/"
+"id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: iap
 #: model_terms:ir.ui.view,arch_db:iap.iap_account_view_form
@@ -53,8 +57,8 @@ msgid ""
 "An error occurred while reaching %s. Please contact Odoo support if this "
 "error persists."
 msgstr ""
-"Terjadi error saat mencari %s. Silakan hubungi bantuan Odoo bila masalah ini"
-" terjadi."
+"Terjadi error saat mencari %s. Silakan hubungi bantuan Odoo bila masalah ini "
+"terjadi."
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__balance
@@ -65,18 +69,6 @@ msgstr "Saldo"
 #: model:ir.model.fields.selection,name:iap.selection__iap_account__state__banned
 msgid "Banned"
 msgstr "Di-ban"
-
-#. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/js/insufficient_credit_error_handler.js:0
-msgid "Buy credits"
-msgstr "Beli kredit"
-
-#. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/xml/iap_templates.xml:0
-msgid "Cancel"
-msgstr "Batal"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__company_ids
@@ -104,10 +96,11 @@ msgstr "Kredit"
 #: model:ir.model.fields,field_description:iap.field_iap_account__description
 #: model:ir.model.fields,field_description:iap.field_iap_service__description
 msgid "Description"
-msgstr "Keterangan"
+msgstr "Deskripsi"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__display_name
+#: model:ir.model.fields,field_description:iap.field_iap_enrich_api__display_name
 #: model:ir.model.fields,field_description:iap.field_iap_service__display_name
 msgid "Display Name"
 msgstr "Nama Tampilan"
@@ -126,8 +119,8 @@ msgstr "Threshold Peringatan Email"
 #: model:iap.service,description:iap.iap_service_reveal
 msgid ""
 "Get quality leads and opportunities: convert your website visitors into "
-"leads, generate leads based on a set of criteria and enrich the company data"
-" of your opportunities."
+"leads, generate leads based on a set of criteria and enrich the company data "
+"of your opportunities."
 msgstr ""
 "Dapatkan lead dan opportunity berkualitas: konversikan pengunjung website "
 "Anda menjadi lead, buat lead berdasarkan pada kelompok kriteria dan perkaya "
@@ -163,15 +156,10 @@ msgstr "Layanan IAP"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__id
+#: model:ir.model.fields,field_description:iap.field_iap_enrich_api__id
 #: model:ir.model.fields,field_description:iap.field_iap_service__id
 msgid "ID"
 msgstr "ID"
-
-#. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/xml/iap_templates.xml:0
-msgid "Insufficient credit to perform this service."
-msgstr "Kredit tidak cukup untuk melakukan layanan ini."
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_service__integer_balance
@@ -201,6 +189,12 @@ msgstr "Kelola Layanan & Beli Kredit"
 #: model:ir.model.fields,field_description:iap.field_iap_service__name
 msgid "Name"
 msgstr "Nama"
+
+#. module: iap
+#. odoo-python
+#: code:addons/iap/models/iap_account.py:0
+msgid "No service exists with the provided technical name"
+msgstr "Tidak ada layanan yang tersedia dengan nama teknis yang disediakan"
 
 #. module: iap
 #: model_terms:ir.ui.view,arch_db:iap.res_config_settings_view_form
@@ -243,12 +237,6 @@ msgid "Service Locked"
 msgstr "Layanan Dikunci"
 
 #. module: iap
-#. odoo-javascript
-#: code:addons/iap/static/src/js/insufficient_credit_error_handler.js:0
-msgid "Start a Trial at Odoo"
-msgstr "Mulai Trial di Odoo"
-
-#. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_account__state
 msgid "State"
 msgstr "Status"
@@ -261,13 +249,19 @@ msgstr "Nama Teknis"
 
 #. module: iap
 #. odoo-python
+#: code:addons/iap/models/iap_account.py:0
+msgid "The IAP token provided is invalid or empty."
+msgstr "Token IAP disediakan tidak valid atau kosong."
+
+#. module: iap
+#. odoo-python
 #: code:addons/iap/tools/iap_tools.py:0
 msgid ""
 "The request to the service timed out. Please contact the author of the app. "
 "The URL it tried to contact was %s"
 msgstr ""
-"Waktu permintaan layanan habis. Silakan hubungi pembuat app. URL yang dicoba"
-" untuk dihubungi adalah %s"
+"Waktu permintaan layanan habis. Silakan hubungi pembuat app. URL yang dicoba "
+"untuk dihubungi adalah %s"
 
 #. module: iap
 #: model:ir.model.fields,field_description:iap.field_iap_service__unit_name
@@ -290,3 +284,16 @@ msgstr "Lihat Layanan Saya"
 #: model_terms:ir.ui.view,arch_db:iap.res_config_settings_view_form
 msgid "View your IAP Services and recharge your credits"
 msgstr "Lihat Layanan IAP Anda dan isi ulang kredit Anda"
+
+#~ msgid "Cancel"
+#~ msgstr "Batal"
+
+#~ msgid "Config Settings"
+#~ msgstr "Pengaturan Konfigurasi"
+
+#~ msgid ""
+#~ "The url that this service requested returned an error. Please contact the "
+#~ "author of the app. The url it tried to contact was %s"
+#~ msgstr ""
+#~ "Url yang layanan ini minta membalas dengan error. Mohon hubungi pembuat "
+#~ "aplikasi ini. Url yang layanan ini coba hubungi adalah %s"

@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.fields import Command
 from odoo.tests import Form, tagged
 
 from odoo.addons.product.tests.common import ProductVariantsCommon
@@ -9,9 +10,19 @@ from odoo.addons.product.tests.common import ProductVariantsCommon
 class TestUpdateProductAttributeValueWizard(ProductVariantsCommon):
 
     def test_add_to_products(self):
+        product_template_shirt = self.env['product.template'].create({
+            'name': 'Shirt',
+            'categ_id': self.product_category.id,
+            'attribute_line_ids': [
+                Command.create({
+                    'attribute_id': self.size_attribute.id,
+                    'value_ids': [Command.set([self.size_attribute_l.id])],
+                }),
+            ],
+        })
         self.assertNotIn(
             self.size_attribute_m,
-            self.product_template_shirt.attribute_line_ids.value_ids,
+            product_template_shirt.attribute_line_ids.value_ids,
         )
 
         action = self.size_attribute_m.action_add_to_products()
@@ -23,7 +34,7 @@ class TestUpdateProductAttributeValueWizard(ProductVariantsCommon):
 
         self.assertIn(
             self.size_attribute_m,
-            self.product_template_shirt.attribute_line_ids.value_ids,
+            product_template_shirt.attribute_line_ids.value_ids,
         )
 
     def test_update_extra_prices(self):
@@ -37,16 +48,14 @@ class TestUpdateProductAttributeValueWizard(ProductVariantsCommon):
         )
 
         self.color_attribute_red.default_extra_price = 20.0
-        action = self.color_attribute_red.action_update_prices()
+        self.assertTrue(self.color_attribute_red.default_extra_price_changed)
 
-        with Form(self.env[action['res_model']].with_context(action['context'])) as wizard:
-            wizard_record = wizard.save()
-
-        wizard_record.action_confirm()
-
+        wizard = Form.from_action(self.env, self.color_attribute_red.action_update_prices()).save()
+        wizard.action_confirm()
         self.assertEqual(
             self.product_template_sofa.attribute_line_ids.product_template_value_ids.filtered(
                 lambda ptav: ptav.product_attribute_value_id == self.color_attribute_red,
             ).price_extra,
             20.0,
         )
+        self.assertFalse(any(self.color_attribute.value_ids.mapped('default_extra_price_changed')))

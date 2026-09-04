@@ -7,7 +7,7 @@ from odoo import _, api, fields, models
 from odoo.tools import date_utils
 
 
-class KarmaTracking(models.Model):
+class GamificationKarmaTracking(models.Model):
     _name = 'gamification.karma.tracking'
     _description = 'Track Karma Changes'
     _rec_name = 'user_id'
@@ -48,16 +48,16 @@ class KarmaTracking(models.Model):
             karma.origin_ref_model_name = karma.origin_ref._name
 
     @api.model_create_multi
-    def create(self, values_list):
+    def create(self, vals_list):
         # fill missing old value with current user karma
         users = self.env['res.users'].browse([
             values['user_id']
-            for values in values_list
+            for values in vals_list
             if 'old_value' not in values and values.get('user_id')
         ])
         karma_per_users = {user.id: user.karma for user in users}
 
-        for values in values_list:
+        for values in vals_list:
             if 'old_value' not in values and values.get('user_id'):
                 values['old_value'] = karma_per_users[values['user_id']]
 
@@ -65,7 +65,7 @@ class KarmaTracking(models.Model):
                 values['new_value'] = values['old_value'] + values['gain']
                 del values['gain']
 
-        return super().create(values_list)
+        return super().create(vals_list)
 
     @api.model
     def _consolidate_cron(self):

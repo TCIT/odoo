@@ -2,13 +2,13 @@
 from odoo import fields, models, api
 
 
-class L10nPeResCityDistrict(models.Model):
-    _name = "l10n_pe.res.city.district"
+class L10n_PeResCityDistrict(models.Model):
+    _name = 'l10n_pe.res.city.district'
     _inherit = ["l10n_pe.res.city.district", "pos.load.mixin"]
 
     country_id = fields.Many2one(related="city_id.country_id")
     state_id = fields.Many2one(related="city_id.state_id")
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
+    def _load_pos_data_fields(self, config):
         return ["name", "city_id", "country_id", "state_id"]

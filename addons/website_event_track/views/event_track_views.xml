@@ -19,7 +19,7 @@
         <field name="arch" type="xml">
             <form>
                 <group>
-                    <field name="event_id" invisible="context.get('default_event_id', False)"/>
+                    <field name="event_id" invisible="context.get('default_event_id', False)" placeholder="All Events"/>
                     <field name="name" placeholder="e.g. Inspiring Business Talk"/>
                     <field name="date"/>
                 </group>
@@ -71,7 +71,7 @@
         <field name="model">event.track</field>
         <field eval="2" name="priority"/>
         <field name="arch" type="xml">
-            <calendar date_start="date" date_delay="duration" string="Event Tracks" color="location_id" event_limit="5">
+            <calendar date_start="date" date_stop="date_end" string="Event Tracks" color="location_id" event_limit="5">
                 <field name="location_id" filters="1"/>
                 <field name="event_id"/>
                 <field name="partner_id" avatar_field="avatar_128"/>
@@ -106,14 +106,17 @@
                 <separator/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
                 <separator/>
+                <filter invisible="1" string="My Activities" name="filter_activities_my"
+                    domain="[('activity_user_id', '=', uid)]"/>
+                <separator invisible="1"/>
                 <filter invisible="1" string="Late Activities" name="activities_overdue"
-                    domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
-                    help="Show all records which has next action date is before today"/>
+                    domain="[('my_activity_date_deadline', '&lt;', 'today')]"
+                    help="Show all records whose next activity date is past"/>
                 <filter invisible="1" string="Today Activities" name="activities_today"
-                    domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                    domain="[('my_activity_date_deadline', '=', 'today')]"/>
                 <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
-                    domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
-                <group expand="0" string="Group By">
+                    domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
+                <group>
                     <filter string="Responsible" name="responsible" context="{'group_by': 'user_id'}"/>
                     <filter string="Stage" name="stage" context="{'group_by': 'stage_id'}"/>
                     <filter string="Date" name="date" context="{'group_by': 'date'}"/>
@@ -168,7 +171,7 @@
                         <group>
                             <field name="company_id" invisible="1"/>
                             <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
-                            <field name="event_id"/>
+                            <field name="event_id" placeholder="All Events"/>
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                             <field name="color" widget="color_picker"/>
                         </group>
@@ -234,16 +237,17 @@
             <list string="Event Track" multi_edit="1">
                 <field name="name"/>
                 <field name="active" column_invisible="True"/>
-                <field name="partner_name"/>
+                <field name="partner_name" string="Speaker Name"/>
                 <field name="partner_id" optional="hide"/>
-                <field name="partner_email"/>
-                <field name="partner_phone"/>
+                <field name="partner_email" optional="hide"/>
+                <field name="partner_phone" optional="hide"/>
                 <field name="event_id" column_invisible="context.get('default_event_id')"/>
                 <field name="wishlisted_by_default" optional="hide"/>
                 <field name="wishlist_visitor_count" optional="hide"/>
                 <field name="stage_id"/>
-                <field name="color" widget="color_picker" optional="hide"/>
+                <field name="color" string="Color" widget="color_picker"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>
+                <field name="location_id"/>
             </list>
         </field>
     </record>

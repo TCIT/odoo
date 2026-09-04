@@ -9,7 +9,7 @@ from odoo import fields
 from odoo.addons.base.tests.test_format_address_mixin import FormatAddressCase
 from odoo.addons.crm.models.crm_lead import PARTNER_FIELDS_TO_SYNC, PARTNER_ADDRESS_FIELDS_TO_SYNC
 from odoo.addons.crm.tests.common import TestCrmCommon, INCOMING_EMAIL
-from odoo.addons.mail.tests.mail_tracking_duration_mixin_case import MailTrackingDurationMixinCase
+from odoo.addons.mail.tests.common_tracking import MailTrackingDurationMixinCase
 from odoo.addons.phone_validation.tools.phone_validation import phone_format
 from odoo.exceptions import UserError
 from odoo.tests import Form, tagged, users
@@ -77,6 +77,37 @@ class TestCRMLead(TestCrmCommon):
             self.assertEqual(lead[fname], self.contact_company_1[fname])
             self.assertEqual(self.contact_company_1.lang, self.lang_en.code)
             self.assertEqual(lead.lang_id, self.lang_en)
+
+    @users('user_sales_leads')
+    def test_crm_lead_compute_commercial_partner(self):
+        company_partner, child_partner, orphan_partner = self.env['res.partner'].create([
+            {
+                'name': 'test_crm_lead_compute_commercial_partner',
+                'is_company': True,
+                'email': 'test_crm_lead_compute_commercial_partner@test.lan',
+            },
+            {'name': 'Test Child'},
+            {'name': 'Test Orphan'},
+        ])
+        child_partner.parent_id = company_partner
+        lead = self.env['crm.lead'].create({
+            'name': 'Test Lead',
+            'partner_name': 'test_crm_lead_compute_commercial_partner',
+        })
+        self.assertEqual(lead.commercial_partner_id, company_partner)
+        lead.partner_id = orphan_partner
+        self.assertFalse(lead.commercial_partner_id)
+        lead.partner_id = child_partner
+        self.assertEqual(lead.commercial_partner_id, company_partner)
+        lead.write({
+            'partner_id': False,
+            'partner_name': False,
+        })
+        self.assertFalse(lead.commercial_partner_id)
+        lead.partner_id = company_partner
+        # this is mostly because we use it to set "parent_id" in most flows
+        # and it doesn't really make sense to have it be its own parent
+        self.assertFalse(lead.commercial_partner_id, "If a partner is its own commercial_partner_id, the lead is considered to have none.")
 
     @users('user_sales_leads')
     def test_crm_lead_creation_no_partner(self):
@@ -186,8 +217,7 @@ class TestCRMLead(TestCrmCommon):
             'name': 'Empty partner',
             'is_company': True,
             'lang': 'en_US',
-            'mobile': '123456789',
-            'title': self.env.ref('base.res_partner_title_mister').id,
+            'phone': '0485112233',
             'function': 'My function',
         })
         lead_data = {
@@ -197,7 +227,6 @@ class TestCRMLead(TestCrmCommon):
             'country_id': self.country_ref.id,
             'email_from': self.test_email,
             'phone': self.test_phone,
-            'mobile': '987654321',
             'website': 'http://mywebsite.org',
         }
         lead = self.env['crm.lead'].create(lead_data)
@@ -216,8 +245,6 @@ class TestCRMLead(TestCrmCommon):
         # PARTNER_FIELDS_TO_SYNC
         self.assertEqual(lead.lang_id, self.lang_en)
         self.assertEqual(lead.phone, lead_data['phone'], "Phone should keep its initial value")
-        self.assertEqual(lead.mobile, empty_partner.mobile, "Mobile from partner should be set on the lead")
-        self.assertEqual(lead.title, empty_partner.title, "Title from partner should be set on the lead")
         self.assertEqual(lead.function, empty_partner.function, "Function from partner should be set on the lead")
         self.assertEqual(lead.website, lead_data['website'], "Website should keep its initial value")
 
@@ -265,13 +292,27 @@ class TestCRMLead(TestCrmCommon):
 
     @users('user_sales_manager')
     def test_crm_lead_date_closed(self):
+        # ensure a lead created directly in a won stage gets a date_closed
+        lead_in_won = self.env['crm.lead'].create({
+            'name': 'Created in Won',
+            'type': 'opportunity',
+            'stage_id': self.stage_team1_won.id,
+            'expected_revenue': 123.45,
+        })
+        # date_closed must be set at creation when stage is won
+        self.assertTrue(lead_in_won.date_closed, "Lead created in a won stage must have date_closed set")
+        self.assertIsInstance(lead_in_won.date_closed, datetime)
         # Test for one won lead
         stage_team1_won2 = self.env['crm.stage'].create({
             'name': 'Won2',
             'sequence': 75,
-            'team_id': self.sales_team_1.id,
+            'team_ids': [self.sales_team_1.id],
             'is_won': True,
         })
+        old_date_closed = lead_in_won.date_closed
+        with freeze_time('2020-02-02 18:00'):
+            lead_in_won.stage_id = stage_team1_won2
+        self.assertEqual(lead_in_won.date_closed, old_date_closed, 'Moving between won stages should not change existing date_closed')
         won_lead = self.lead_team_1_won.with_env(self.env)
         other_lead = self.lead_1.with_env(self.env)
         old_date_closed = won_lead.date_closed
@@ -336,6 +377,20 @@ class TestCRMLead(TestCrmCommon):
             self.assertEqual(lead.meeting_display_label, 'No Meeting')
 
     @users('user_sales_manager')
+    def test_crm_lead_meeting_display_fields_with_timezone(self):
+        self.env.user.tz = "America/Grand_Turk"
+        lead = self.env['crm.lead'].create({'name': 'Lead With Meetings'})
+        self.env['calendar.event'].create([{
+            'name': 'Meeting 1 of Lead',
+            'opportunity_id': lead.id,
+            'start': '2022-07-12 01:00:00',
+            'stop': '2022-07-12 01:30:00',
+        }])
+
+        with freeze_time('2022-07-13 11:00:00'):
+            self.assertEqual(lead.meeting_display_date, fields.Date.from_string("2022-07-11"))
+
+    @users('user_sales_manager')
     def test_crm_lead_partner_sync(self):
         lead, partner = self.lead_1.with_user(self.env.user), self.contact_2
         partner_email, partner_phone = self.contact_2.email, self.contact_2.phone
@@ -381,19 +436,14 @@ class TestCRMLead(TestCrmCommon):
             lead_form = Form(lead)
 
             # reset partner phone to a local number and prepare formatted / sanitized values
-            partner_phone, partner_mobile = self.test_phone_data[2], self.test_phone_data[1]
+            partner_phone = self.test_phone_data[2]
             partner_phone_formatted = phone_format(partner_phone, 'US', '1', force_format='INTERNATIONAL')
             partner_phone_sanitized = phone_format(partner_phone, 'US', '1', force_format='E164')
-            partner_mobile_formatted = phone_format(partner_mobile, 'US', '1', force_format='INTERNATIONAL')
-            partner_mobile_sanitized = phone_format(partner_mobile, 'US', '1', force_format='E164')
             partner_email, partner_email_normalized = self.test_email_data[2], self.test_email_data_normalized[2]
             self.assertEqual(partner_phone_formatted, '+1 202-555-0888')
             self.assertEqual(partner_phone_sanitized, self.test_phone_data_sanitized[2])
-            self.assertEqual(partner_mobile_formatted, '+1 202-555-0999')
-            self.assertEqual(partner_mobile_sanitized, self.test_phone_data_sanitized[1])
             # ensure initial data
             self.assertEqual(partner.phone, partner_phone)
-            self.assertEqual(partner.mobile, partner_mobile)
             self.assertEqual(partner.email, partner_email)
 
             # LEAD/PARTNER SYNC: email and phone are propagated to lead
@@ -401,8 +451,6 @@ class TestCRMLead(TestCrmCommon):
             lead_form.partner_id = partner
             self.assertEqual(lead_form.email_from, partner_email)
             self.assertEqual(lead_form.phone, partner_phone_formatted,
-                            'Lead: form automatically formats numbers')
-            self.assertEqual(lead_form.mobile, partner_mobile_formatted,
                             'Lead: form automatically formats numbers')
             self.assertFalse(lead_form.partner_email_update)
             self.assertFalse(lead_form.partner_phone_update)
@@ -416,9 +464,7 @@ class TestCRMLead(TestCrmCommon):
                             'Lead / Partner: equal emails should lead to equal normalized emails')
             self.assertEqual(lead.phone, partner_phone_formatted,
                             'Lead / Partner: partner values (formatted) sent to lead')
-            self.assertEqual(lead.mobile, partner_mobile_formatted,
-                            'Lead / Partner: partner values (formatted) sent to lead')
-            self.assertEqual(lead.phone_sanitized, partner_mobile_sanitized,
+            self.assertEqual(lead.phone_sanitized, partner_phone_sanitized,
                             'Lead: phone_sanitized computed field on mobile')
 
             # for email_from, if only formatting differs, warning should not appear and
@@ -442,6 +488,7 @@ class TestCRMLead(TestCrmCommon):
             self.assertTrue(lead_form.partner_email_update)
             new_phone = '+1 202 555 7799'
             new_phone_formatted = phone_format(new_phone, 'US', '1', force_format="INTERNATIONAL")
+            new_phone_sanitized = phone_format(new_phone, 'US', '1', force_format="E164")
             lead_form.phone = new_phone
             self.assertEqual(lead_form.phone, new_phone_formatted)
             self.assertTrue(lead_form.partner_email_update)
@@ -452,18 +499,10 @@ class TestCRMLead(TestCrmCommon):
             self.assertEqual(partner.email_normalized, new_email_normalized)
             self.assertEqual(partner.phone, new_phone_formatted)
 
-            # LEAD/PARTNER SYNC: mobile does not update partner
-            new_mobile = '+1 202 555 6543'
-            new_mobile_formatted = phone_format(new_mobile, 'US', '1', force_format="INTERNATIONAL")
-            lead_form.mobile = new_mobile
-            lead_form.save()
-            self.assertEqual(lead.mobile, new_mobile_formatted)
-            self.assertEqual(partner.mobile, partner_mobile)
-
             # LEAD/PARTNER SYNC: resetting lead values should not reset partner
             # # voiding lead info (because of some reasons) should not prevent
             # # from using the contact in other records
-            lead_form.email_from, lead_form.phone, lead.mobile = False, False, False
+            lead_form.email_from, lead_form.phone = False, False
             self.assertFalse(lead_form.partner_email_update)
             self.assertFalse(lead_form.partner_phone_update)
             lead_form.save()
@@ -471,12 +510,10 @@ class TestCRMLead(TestCrmCommon):
             self.assertEqual(partner.email_normalized, new_email_normalized)
             self.assertEqual(partner.phone, new_phone_formatted)
             self.assertFalse(lead.phone)
-            self.assertFalse(lead.mobile)
             self.assertFalse(lead.phone_sanitized)
-            self.assertEqual(partner.mobile, partner_mobile)
             # if SMS is uninstalled, phone_sanitized is not available on partner
             if 'phone_sanitized' in partner:
-                self.assertEqual(partner.phone_sanitized, partner_mobile_sanitized,
+                self.assertEqual(partner.phone_sanitized, new_phone_sanitized,
                                 'Partner sanitized should be computed on mobile')
 
     @users('user_sales_manager')
@@ -490,7 +527,6 @@ class TestCRMLead(TestCrmCommon):
             'name': 'NoContact Partner',
             'phone': '',
             'email': '',
-            'mobile': '',
         })
 
         # This is a type == 'lead', not a type == 'opportunity'
@@ -586,6 +622,41 @@ class TestCRMLead(TestCrmCommon):
         lead.action_set_won()
         self.assertEqual(lead.probability, 100.0)
         self.assertEqual(lead.stage_id, self.stage_gen_won)  # generic won stage has lower sequence than team won stage
+
+    def test_crm_lead_stages_with_multiple_possible_teams(self):
+        """ Test lead stage is properly set when switching between multiple teams. """
+        self.sales_team_2 = self.env['crm.team'].create({
+            'name': 'Test Sales Team 2',
+            'company_id': False,
+            'user_id': self.user_sales_manager.id,
+        })
+        self.sales_team_2_m1 = self.env['crm.team.member'].create({
+            'user_id': self.user_sales_leads.id,
+            'crm_team_id': self.sales_team_2.id,
+        })
+
+        user_teams = self.env['crm.team'].search([
+            ('crm_team_member_all_ids.user_id', '=', self.user_sales_leads.id),
+        ])
+        self.assertIn(self.sales_team_1, user_teams)
+        self.assertIn(self.sales_team_2, user_teams)
+
+        self.stage_team2_1 = self.env['crm.stage'].create({
+            'name': 'New (T2)',
+            'team_ids': [self.sales_team_2.id],
+        })
+
+        lead = self.env['crm.lead'].with_user(self.user_sales_leads).create({
+            'name': 'Test',
+            'contact_name': 'Test Contact',
+            'team_id': self.sales_team_1.id,
+        })
+        self.assertEqual(lead.team_id, self.sales_team_1)
+        self.assertEqual(lead.stage_id, self.stage_team1_1)
+
+        lead.team_id = self.sales_team_2
+        self.assertEqual(lead.team_id, self.sales_team_2)
+        self.assertEqual(lead.stage_id, self.stage_team2_1)
 
     @users('user_sales_manager')
     def test_crm_lead_unlink_calendar_event(self):
@@ -765,6 +836,7 @@ class TestCRMLead(TestCrmCommon):
         """Test that the help message is the right one if we are on multiple team with different settings."""
         # archive other teams
         self.env['crm.team'].search([]).active = False
+        self.env['ir.config_parameter'].sudo().set_param("sales_team.membership_multi", True)
 
         self._activate_multi_company()
         team_other_comp = self.team_company2
@@ -790,6 +862,10 @@ class TestCRMLead(TestCrmCommon):
             'use_leads': False,
             'member_ids': [],
         }])
+
+        # Additional check to ensure proper team creation
+        user_team_leads.invalidate_recordset(fnames=['member_ids'])
+        self.assertEqual(user_team_leads.member_ids.ids, [self.env.user.id])
 
         self.env['crm.lead'].create([{
             'name': 'LeadOurTeam',
@@ -823,9 +899,9 @@ class TestCRMLead(TestCrmCommon):
         for team in teams:
             with self.subTest(team=team):
                 if team != team_other_comp:
-                    self.assertIn(f"<a href='mailto:{team.display_name}'>{team.display_name}</a>", self.env['crm.lead'].sudo().get_empty_list_help(""))
+                    self.assertIn(f"<a href='mailto:{team.alias_email}'>{team.alias_email}</a>", self.env['crm.lead'].sudo().get_empty_list_help(""))
                 else:
-                    self.assertNotIn(f"<a href='mailto:{team.display_name}'>{team.display_name}</a>", self.env['crm.lead'].sudo().get_empty_list_help(""))
+                    self.assertNotIn(f"<a href='mailto:{team.alias_email}'>{team.alias_email}</a>", self.env['crm.lead'].sudo().get_empty_list_help(""))
                 team.active = False
 
     @mute_logger('odoo.addons.mail.models.mail_thread')
@@ -873,10 +949,9 @@ class TestCRMLead(TestCrmCommon):
         })
 
         # search term containing less than 3 characters should throw an error (some currently not working)
+        self.env['crm.lead'].search([('phone_mobile_search', 'like', '')])  # no restriction, returns all
         with self.assertRaises(UserError):
-            self.env['crm.lead'].search([('phone_mobile_search', 'like', '')])
-        # with self.assertRaises(UserError):
-        #     self.env['crm.lead'].search([('phone_mobile_search', 'like', '7   ')])
+            self.env['crm.lead'].search([('phone_mobile_search', 'like', '7   ')])
         with self.assertRaises(UserError):
             self.env['crm.lead'].search([('phone_mobile_search', 'like', 'c')])
         with self.assertRaises(UserError):
@@ -963,24 +1038,171 @@ class TestCRMLead(TestCrmCommon):
             'phone': self.test_phone_data[0],
         })
         self.assertEqual(lead.phone, self.test_phone_data[0])
-        self.assertFalse(lead.mobile)
         self.assertEqual(lead.phone_sanitized, self.test_phone_data_sanitized[0])
 
-        lead.write({'phone': False, 'mobile': self.test_phone_data[1]})
+        lead.write({'phone': False})
         self.assertFalse(lead.phone)
-        self.assertEqual(lead.mobile, self.test_phone_data[1])
-        self.assertEqual(lead.phone_sanitized, self.test_phone_data_sanitized[1])
+        self.assertEqual(lead.phone_sanitized, False)
 
-        lead.write({'phone': self.test_phone_data[1], 'mobile': self.test_phone_data[2]})
+        lead.write({'phone': self.test_phone_data[1]})
         self.assertEqual(lead.phone, self.test_phone_data[1])
-        self.assertEqual(lead.mobile, self.test_phone_data[2])
-        self.assertEqual(lead.phone_sanitized, self.test_phone_data_sanitized[2])
+        self.assertEqual(lead.phone_sanitized, self.test_phone_data_sanitized[1])
 
         # updating country should trigger sanitize computation
         lead.write({'country_id': self.env.ref('base.be').id})
         self.assertEqual(lead.phone, self.test_phone_data[1])
-        self.assertEqual(lead.mobile, self.test_phone_data[2])
         self.assertFalse(lead.phone_sanitized)
+
+
+class TestCRMLeadRotting(TestCrmCommon):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.stage_team1_1.rotting_threshold_days = 5
+        cls.stage_team1_2.rotting_threshold_days = 3
+
+    @users('user_sales_manager')
+    def test_leads_rotting(self):
+        rotten_leads = self.env['crm.lead']
+        clean_leads = self.env['crm.lead']
+
+        close_future = datetime(2025, 1, 24, 12, 0, 0)
+        now = datetime(2025, 1, 20, 12, 0, 0)
+        close_past = datetime(2025, 1, 18, 12, 0, 0)
+        past = datetime(2025, 1, 10, 12, 0, 0)
+        last_year = datetime(2024, 1, 20, 12, 0, 0)
+
+        with self.mock_datetime_and_now(past):
+            rotten_leads += self.env['crm.lead'].create([
+                {
+                    'name': 'Opportunity',
+                    'type': 'opportunity',
+                    'stage_id': self.stage_team1_1.id,
+                } for x in range(3)
+            ])
+            rotten_leads.flush_recordset(['date_last_stage_update'])  # precalculate stage update
+
+        with self.mock_datetime_and_now(close_past):
+            clean_leads += self.env['crm.lead'].create({
+                'name': "Lead that won't have time to rot",
+                'type': 'opportunity',
+                'stage_id': self.stage_team1_1.id,
+            })
+            clean_leads.flush_recordset(['date_last_stage_update'])  # precalculate stage update
+        with self.mock_datetime_and_now(last_year):
+            clean_leads += self.env['crm.lead'].create({
+                'name': 'Opportuniy in Won Stage',
+                'type': 'opportunity',
+                'stage_id': self.stage_gen_won.id,
+            })
+            clean_leads.flush_recordset(['date_last_stage_update'])  # precalculate stage update
+
+        with self.mock_datetime_and_now(now):
+            for lead in rotten_leads:
+                self.assertTrue(lead.is_rotting)
+                self.assertEqual(lead.rotting_days, 10)
+            for lead in clean_leads:
+                self.assertFalse(lead.is_rotting)
+                self.assertEqual(lead.rotting_days, 0)
+
+            rotten_leads_iterator = iter(rotten_leads)
+
+            lead_edited = next(rotten_leads_iterator)
+            lead_edited.name = 'Edited Opportunity'
+            self.assertTrue(
+                lead_edited.is_rotting,
+                'Editing the lead has no effect on rotting status',
+            )
+
+            lead_changed_stage = next(rotten_leads_iterator)
+            lead_changed_stage.stage_id = self.stage_team1_2.id
+            self.assertFalse(
+                lead_changed_stage.is_rotting,
+                'Changing the stage disables rotting status',
+            )
+
+            lead_changed_rotting_threshold = next(rotten_leads_iterator)
+            old_rotting_threshold = self.stage_team1_1.rotting_threshold_days
+            self.stage_team1_1.rotting_threshold_days = 50
+            self.assertFalse(
+                lead_changed_rotting_threshold.is_rotting,
+                'Changing the rotting threshold to a higher value does affect rotten leads\' status',
+            )
+            self.stage_team1_1.rotting_threshold_days = old_rotting_threshold  # Revert rotting threshold
+            self.assertTrue(
+                lead_changed_rotting_threshold.is_rotting,
+                'Changing the threshold back should affect the status again',
+            )
+
+            self.stage_team1_1.rotting_threshold_days = 0
+            self.assertFalse(
+                lead_changed_rotting_threshold.is_rotting,
+                'A 0-day rotting threshold disables rotting',
+            )
+            self.stage_team1_1.rotting_threshold_days = old_rotting_threshold
+
+            # create a new lead in the New stage
+            jan20_lead = self.env['crm.lead'].create({
+                'name': 'Fresh Opportuniy',
+                'type': 'opportunity',
+                'stage_id': self.stage_team1_1.id,
+            })
+
+        # 4 days later:
+        with self.mock_datetime_and_now(close_future):
+            rotten_leads.invalidate_recordset(['is_rotting', 'rotting_days'])
+            self.assertEqual(
+                lead_changed_rotting_threshold.rotting_days,
+                14,
+                'Since this lead has not seen a stage change, it has been rotting for 14 days total',
+            )
+            self.assertFalse(
+                jan20_lead.is_rotting,
+                'Since this lead remained in a stage with a higher threshold, it\'s not rotting yet',
+            )
+            self.assertTrue(
+                lead_changed_stage.is_rotting,
+                'As its new stage has a lower rotting threshold, this lead should be rotting 3 days after its last stage change',
+            )
+            self.assertEqual(lead_changed_stage.rotting_days, 4)
+
+    def test_search_leads_rotting(self):
+        """
+            This test checks that the result of search_leads_rotting accurately matches is_rotting computation results
+        """
+        past = datetime(2025, 1, 1)
+        now = datetime(2025, 1, 10)
+        with self.mock_datetime_and_now(past):
+            all_leads = self.env['crm.lead'].create([{
+                'name': 'TestLead Rotting opportunity',
+                'type': 'opportunity',
+                'stage_id': self.stage_team1_1.id,
+            }] * 5 + [{
+                'name': 'TestLead Lead',
+                'type': 'lead',
+                'stage_id': self.stage_team1_1.id,
+            }] * 3 + [{
+                'name': 'TestLead Won Opportunity',
+                'type': 'opportunity',
+                'stage_id': self.stage_gen_won.id,
+            }] * 4)
+
+            all_leads.flush_recordset(['date_last_stage_update'])
+            rotten_leads = all_leads.filtered(lambda lead: 'Rotting' in lead.name)
+            clean_leads = all_leads - rotten_leads
+
+        with self.mock_datetime_and_now(now):
+            rot = self.env['crm.lead'].search([
+                ('name', 'ilike', 'TestLead'),
+                ('is_rotting', '=', True),
+            ], order='id ASC')
+            norot = self.env['crm.lead'].search([
+                ('name', 'ilike', 'TestLead'),
+                ('is_rotting', '=', False),
+            ], order='id ASC')
+
+            self.assertEqual(rot, rotten_leads)
+            self.assertEqual(norot, clean_leads)
 
 
 @tagged('lead_internals')
@@ -991,7 +1213,7 @@ class TestLeadFormTools(FormatAddressCase):
         self.assertAddressView('crm.lead')
 
 
-@tagged('lead_internals')
+@tagged('lead_internals', 'is_query_count')
 class TestCrmLeadMailTrackingDuration(MailTrackingDurationMixinCase):
 
     @classmethod

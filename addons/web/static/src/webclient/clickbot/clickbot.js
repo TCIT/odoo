@@ -16,9 +16,9 @@ const BLACKLISTED_MENUS = [
     "base.menu_third_party", // Open a new tab
     "event.menu_event_registration_desk", // there's no way to come back from this menu (tablet mode)
     "hr_attendance.menu_action_open_form", // same here (tablet mode)
+    "hr_attendance.menu_hr_attendance_onboarding", // same here (tablet mode)
     "mrp_workorder.menu_mrp_workorder_root", // same here (tablet mode)
-    "account.menu_action_account_bank_journal_form", // Modal in an iFrame
-    "pos_preparation_display.menu_point_kitchen_display_root", // conditional menu that may leads to frontend
+    "pos_enterprise.menu_point_kitchen_display_root", // conditional menu that may leads to frontend
 ];
 // If you change this selector, adapt Studio test "Studio icon matches the clickbot selector"
 const STUDIO_SYSTRAY_ICON_SELECTOR = ".o_web_studio_navbar_item:not(.o_disabled) i";
@@ -494,6 +494,7 @@ async function _clickEverywhere(xmlId, light, currentState) {
     const startTime = performance.now();
     try {
         if (xmlId) {
+            state.xmlId = xmlId;
             state.app = xmlId;
             await testApp();
         } else {

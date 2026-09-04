@@ -17,14 +17,11 @@
             <xpath expr="//form/sheet/group/group/field[@name='split_transactions']" position="attributes">
                 <attribute name="invisible">is_online_payment</attribute>
             </xpath>
-            <xpath expr="//form/sheet/group/group/field[@name='payment_method_type']" position="attributes">
+            <xpath expr="//form/sheet/group/div/group/field[@name='payment_method_type']" position="attributes">
                 <attribute name="invisible">is_online_payment</attribute>
             </xpath>
-            <xpath expr="//form/sheet/group/group/field[@name='qr_code_method']" position="attributes">
+            <xpath expr="//form/sheet/group/div/group/field[@name='qr_code_method']" position="attributes">
                 <attribute name="invisible">is_online_payment or hide_qr_code_method</attribute>
-            </xpath>
-            <xpath expr="//form/sheet/group/group/div[@name='tips']" position="attributes">
-                <attribute name="invisible">is_online_payment or not hide_use_payment_terminal or payment_method_type != 'terminal'</attribute>
             </xpath>
             <xpath expr="//form/sheet/group/group/field[@name='journal_id']" position="attributes">
                 <attribute name="invisible">is_online_payment</attribute>
@@ -34,7 +31,7 @@
                 <attribute name="invisible">is_online_payment or split_transactions</attribute>
             </xpath>
             <xpath expr="//form/sheet/group[@name='Payment methods']/group" position="after">
-                <group invisible="not is_online_payment">
+                <group invisible="not is_online_payment" groups="point_of_sale.group_pos_manager,base.group_system">
                     <div colspan="2">
                         <label for="online_payment_provider_ids"/>
                         <field name="online_payment_provider_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="All available providers" />

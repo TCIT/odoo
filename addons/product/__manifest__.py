@@ -41,7 +41,6 @@ Print product labels with barcode.
         'views/product_category_views.xml',
         'views/product_combo_views.xml',
         'views/product_document_views.xml',
-        'views/product_packaging_views.xml',
         'views/product_pricelist_item_views.xml',
         'views/product_pricelist_views.xml',
         'views/product_supplierinfo_views.xml',
@@ -49,6 +48,7 @@ Print product labels with barcode.
         'views/product_template_views.xml',
         'views/res_country_group_views.xml',
         'views/res_partner_views.xml',
+        'views/uom_views.xml',
 
         'report/product_reports.xml',
         'report/product_product_templates.xml',
@@ -70,14 +70,16 @@ Print product labels with barcode.
             'product/static/src/product_catalog/**/*.js',
             'product/static/src/product_catalog/**/*.xml',
             'product/static/src/product_catalog/**/*.scss',
+            'product/static/src/product_name_and_description/**/*.js',
             'product/static/src/scss/product_form.scss',
         ],
         'web.report_assets_common': [
             'product/static/src/scss/report_label_sheet.scss',
         ],
-        'web.qunit_suite_tests': [
+        'web.assets_unit_tests': [
             'product/static/tests/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

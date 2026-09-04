@@ -1,6 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { ODOO_VERSION } from "@spreadsheet/o_spreadsheet/migration";
-import { Model, load } from "@odoo/o-spreadsheet";
+import { load } from "@odoo/o-spreadsheet";
 import { defineSpreadsheetActions, defineSpreadsheetModels } from "../helpers/data";
 
 defineSpreadsheetModels();
@@ -26,13 +25,13 @@ test("Odoo formulas are migrated", () => {
         ],
     };
     const migratedData = load(data);
-    expect(migratedData.sheets[0].cells.A1.content).toBe(`=PIVOT.VALUE("1")`);
-    expect(migratedData.sheets[0].cells.A2.content).toBe(`=PIVOT.HEADER("1")`);
-    expect(migratedData.sheets[0].cells.A3.content).toBe(`=ODOO.FILTER.VALUE("1")`);
-    expect(migratedData.sheets[0].cells.A4.content).toBe(`=ODOO.LIST("1")`);
-    expect(migratedData.sheets[0].cells.A5.content).toBe(`=ODOO.LIST.HEADER("1")`);
-    expect(migratedData.sheets[0].cells.A6.content).toBe(`=ODOO.PIVOT.POSITION("1")`);
-    expect(migratedData.sheets[0].cells.A7.content).toBe(`=PIVOT.VALUE("1")`);
+    expect(migratedData.sheets[0].cells.A1).toBe(`=PIVOT.VALUE("1")`);
+    expect(migratedData.sheets[0].cells.A2).toBe(`=PIVOT.HEADER("1")`);
+    expect(migratedData.sheets[0].cells.A3).toBe(`=ODOO.FILTER.LABEL("1")`);
+    expect(migratedData.sheets[0].cells.A4).toBe(`=ODOO.LIST("1")`);
+    expect(migratedData.sheets[0].cells.A5).toBe(`=ODOO.LIST.HEADER("1")`);
+    expect(migratedData.sheets[0].cells.A6).toBe(`=ODOO.PIVOT.POSITION("1")`);
+    expect(migratedData.sheets[0].cells.A7).toBe(`=PIVOT.VALUE("1")`);
 });
 
 test("Pivot 'day' arguments are migrated", () => {
@@ -53,14 +52,12 @@ test("Pivot 'day' arguments are migrated", () => {
         ],
     };
     const migratedData = load(data);
-    expect(migratedData.sheets[0].cells.A1.content).toBe(`=PIVOT.VALUE("1","07/21/2022")`);
-    expect(migratedData.sheets[0].cells.A2.content).toBe(`=PIVOT.HEADER("1","12/11/2022")`);
-    expect(migratedData.sheets[0].cells.A3.content).toBe(`=PIVOT.VALUE("1","07/21/2021")`);
-    expect(migratedData.sheets[0].cells.A4.content).toBe(`=PIVOT.VALUE("1","test")`);
-    expect(migratedData.sheets[0].cells.A5.content).toBe(
-        `=PIVOT.VALUE("1","07/21/2021")+"21/07/2021"`
-    );
-    expect(migratedData.sheets[0].cells.A6.content).toBe(`=BAD_FORMULA(`);
+    expect(migratedData.sheets[0].cells.A1).toBe(`=PIVOT.VALUE("1","07/21/2022")`);
+    expect(migratedData.sheets[0].cells.A2).toBe(`=PIVOT.HEADER("1","12/11/2022")`);
+    expect(migratedData.sheets[0].cells.A3).toBe(`=PIVOT.VALUE("1","07/21/2021")`);
+    expect(migratedData.sheets[0].cells.A4).toBe(`=PIVOT.VALUE("1","test")`);
+    expect(migratedData.sheets[0].cells.A5).toBe(`=PIVOT.VALUE("1","07/21/2021")+"21/07/2021"`);
+    expect(migratedData.sheets[0].cells.A6).toBe(`=BAD_FORMULA(`);
 });
 
 test("Global filters: pivot fields is correctly added", () => {
@@ -126,9 +123,9 @@ test("Global filters: date is correctly migrated", () => {
     };
     const migratedData = load(data);
     const [f1, f2, f3] = migratedData.globalFilters;
-    expect(f1.defaultValue).toEqual({ yearOffset: -1 });
-    expect(f2.defaultValue).toEqual({ yearOffset: -2 });
-    expect(f3.defaultValue).toEqual({ yearOffset: 0 });
+    expect(f1.defaultValue).toBe(undefined);
+    expect(f2.defaultValue).toBe(undefined);
+    expect(f3.defaultValue).toBe(undefined);
 });
 
 test("List name default is model name", () => {
@@ -224,6 +221,7 @@ test("fieldMatchings are moved from filters to their respective datasources", ()
                         tag: "chart",
                         data: {
                             type: "odoo_bar",
+                            metaData: {},
                         },
                     },
                 ],
@@ -294,6 +292,7 @@ test("fieldMatchings offsets are correctly preserved after migration", () => {
                         tag: "chart",
                         data: {
                             type: "odoo_bar",
+                            metaData: {},
                         },
                     },
                 ],
@@ -363,7 +362,7 @@ test("group year/quarter/month filters to a single filter type", () => {
             id: "1",
             type: "relation",
             label: "a relational filter",
-            defaultValue: [2],
+            defaultValue: { operator: "in", ids: [2] },
             defaultValueDisplayNames: ["Mitchell Admin"],
             modelName: "res.users",
         },
@@ -371,29 +370,25 @@ test("group year/quarter/month filters to a single filter type", () => {
             id: "2",
             type: "date",
             label: "a year relational filter",
-            rangeType: "fixedPeriod",
             defaultValue: "this_year",
         },
         {
             id: "3",
             type: "date",
             label: "a quarter relational filter",
-            rangeType: "fixedPeriod",
             defaultValue: "this_quarter",
         },
         {
             id: "4",
             type: "date",
             label: "a month relational filter",
-            rangeType: "fixedPeriod",
             defaultValue: "this_month",
         },
         {
             id: "5",
             type: "date",
             label: "a relative date filter",
-            rangeType: "relative",
-            defaultValue: "last_week",
+            defaultValue: "last_7_days",
         },
     ]);
 });
@@ -472,11 +467,11 @@ test("Pivot formulas are migrated from 9 to 10", () => {
         ],
     };
     const migratedData = load(data);
-    expect(migratedData.sheets[0].cells.A1.content).toBe(`=PIVOT.VALUE("1")`);
-    expect(migratedData.sheets[0].cells.A2.content).toBe(`=PIVOT.HEADER("1")`);
-    expect(migratedData.sheets[0].cells.A3.content).toBe(`=ODOO.PIVOT.POSITION("1")`);
-    expect(migratedData.sheets[0].cells.A4.content).toBe(`=PIVOT("1")`);
-    expect(migratedData.sheets[0].cells.A5.content).toBe(`=PIVOT.VALUE("1")`);
+    expect(migratedData.sheets[0].cells.A1).toBe(`=PIVOT.VALUE("1")`);
+    expect(migratedData.sheets[0].cells.A2).toBe(`=PIVOT.HEADER("1")`);
+    expect(migratedData.sheets[0].cells.A3).toBe(`=ODOO.PIVOT.POSITION("1")`);
+    expect(migratedData.sheets[0].cells.A4).toBe(`=PIVOT("1")`);
+    expect(migratedData.sheets[0].cells.A5).toBe(`=PIVOT.VALUE("1")`);
 });
 
 test("Pivot formulas using pivot positions are migrated (11 to 12)", () => {
@@ -499,17 +494,341 @@ test("Pivot formulas using pivot positions are migrated (11 to 12)", () => {
         ],
     };
     const migratedData = load(data);
-    expect(migratedData.sheets[0].cells.A1.content).toBe(
-        `=-PIVOT.VALUE("1","balance","#account_id",12,"date:quarter","4/"&ODOO.FILTER.VALUE("Year"))`
+    expect(migratedData.sheets[0].cells.A1).toBe(
+        `=-PIVOT.VALUE("1","balance","#account_id",12,"date:quarter","4/"&ODOO.FILTER.LABEL("Year"))`
     );
-    expect(migratedData.sheets[0].cells.A2.content).toBe(`=PIVOT.HEADER("1","#account_id",14)`);
-    expect(migratedData.sheets[0].cells.A3.content).toBe(
-        `=ODOO.PIVOT.POSITION("1","account_id",14)`
-    );
-    expect(migratedData.sheets[0].cells.A4.content).toBe(`=ODOO.PIVOT.POSITION("1",14)`);
+    expect(migratedData.sheets[0].cells.A2).toBe(`=PIVOT.HEADER("1","#account_id",14)`);
+    expect(migratedData.sheets[0].cells.A3).toBe(`=ODOO.PIVOT.POSITION("1","account_id",14)`);
+    expect(migratedData.sheets[0].cells.A4).toBe(`=ODOO.PIVOT.POSITION("1",14)`);
 });
 
-test("Odoo version is exported", () => {
-    const model = new Model();
-    expect(model.exportData().odooVersion).toBe(ODOO_VERSION);
+test("Pivot sorted columns are migrated (12 to 13)", () => {
+    const data = {
+        version: 23,
+        odooVersion: 12,
+        sheets: [],
+        pivots: {
+            1: {
+                name: "test",
+                sortedColumn: { groupId: [[], []], measure: "testMeasure", order: "desc" },
+                columns: [],
+                rows: [],
+                measures: [{ id: "testMeasure:sum", fieldName: "testMeasure", aggregator: "sum" }],
+            },
+            2: {
+                name: "test2",
+                sortedColumn: { groupId: [[], [1]], measure: "testMeasure", order: "desc" },
+                columns: [{ fieldName: "product_id" }],
+                rows: [],
+                measures: [{ id: "testMeasure:sum", fieldName: "testMeasure", aggregator: "sum" }],
+            },
+            3: {
+                name: "test",
+                // sortedColumn is not in the measures
+                sortedColumn: { groupId: [[], []], measure: "testMeasure", order: "desc" },
+                columns: [],
+                rows: [],
+                measures: [],
+            },
+        },
+    };
+    const migratedData = load(data);
+    expect(migratedData.pivots["1"].sortedColumn).toEqual({
+        domain: [],
+        measure: "testMeasure:sum",
+        order: "desc",
+    });
+    expect(migratedData.pivots["2"].sortedColumn).toBe(undefined);
+    expect(migratedData.pivots["3"].sortedColumn).toBe(undefined);
+});
+
+test("Chart cumulatedStart is set to true if cumulative at migration", () => {
+    const data = {
+        version: 18.0,
+        odooVersion: 9,
+        sheets: [
+            {
+                figures: [
+                    {
+                        id: "fig1",
+                        tag: "chart",
+                        data: {
+                            type: "odoo_bar",
+                            metaData: {
+                                cumulatedStart: undefined,
+                                cumulative: true,
+                            },
+                            cumulative: true,
+                        },
+                    },
+                    {
+                        id: "fig2",
+                        tag: "chart",
+                        data: {
+                            type: "odoo_bar",
+                            metaData: {
+                                cumulative: false,
+                            },
+                            cumulative: false,
+                        },
+                    },
+                    {
+                        id: "fig3",
+                        tag: "chart",
+                        data: {
+                            type: "odoo_bar",
+                            metaData: {
+                                cumulative: true,
+                                cumulatedStart: false,
+                            },
+                            cumulative: true,
+                            cumulatedStart: false,
+                        },
+                    },
+                ],
+            },
+        ],
+    };
+    const migratedData = load(data);
+    const sheet = migratedData.sheets[0];
+    expect(sheet.figures[0].data.metaData.cumulatedStart).toBe(true);
+    expect(sheet.figures[0].data.cumulatedStart).toBe(true);
+    expect(sheet.figures[1].data.metaData.cumulatedStart).toBe(false);
+    expect(sheet.figures[1].data.cumulatedStart).toBe(false);
+    expect(sheet.figures[2].data.metaData.cumulatedStart).toBe(false);
+    expect(sheet.figures[2].data.cumulatedStart).toBe(false);
+});
+
+test("text global filter default value is now an array of strings", () => {
+    const data = {
+        version: "18.3.0",
+        globalFilters: [
+            {
+                id: "1",
+                type: "text",
+                defaultValue: "foo",
+                rangeOfAllowedValues: "Sheet1!A1:A2",
+            },
+            {
+                id: "2",
+                type: "text",
+            },
+            {
+                id: "3",
+                type: "text",
+                defaultValue: "",
+            },
+        ],
+    };
+    const migratedData = load(data);
+    expect(migratedData.globalFilters[0].defaultValue).toEqual({
+        operator: "ilike",
+        strings: ["foo"],
+    });
+    expect(migratedData.globalFilters[0].rangeOfAllowedValues).toBe(undefined);
+    expect(migratedData.globalFilters[0].rangesOfAllowedValues).toEqual(["Sheet1!A1:A2"]);
+    expect(migratedData.globalFilters[1].defaultValue).toBe(undefined);
+    expect(migratedData.globalFilters[1].rangeOfAllowedValues).toBe(undefined);
+    expect(migratedData.globalFilters[1].rangesOfAllowedValues).toBe(undefined);
+    expect(migratedData.globalFilters[2].defaultValue).toBe(undefined);
+});
+
+test("global filter default value have operators", () => {
+    const data = {
+        version: "18.4.14",
+        globalFilters: [
+            {
+                id: "1",
+                type: "text",
+                defaultValue: ["foo"],
+            },
+            {
+                id: "2",
+                type: "relation",
+                modelName: "res.partner",
+                defaultValue: [1],
+            },
+            {
+                id: "3",
+                type: "relation",
+                modelName: "res.company",
+                defaultValue: [2],
+                includeChildren: true,
+            },
+            {
+                id: "4",
+                type: "boolean",
+                defaultValue: [true],
+            },
+            {
+                id: "5",
+                type: "boolean",
+                defaultValue: [false],
+            },
+            {
+                id: "6",
+                type: "boolean",
+                defaultValue: [true, false],
+            },
+        ],
+    };
+    const migratedData = load(data);
+    expect(migratedData.globalFilters[0].defaultValue).toEqual({
+        operator: "ilike",
+        strings: ["foo"],
+    });
+    expect(migratedData.globalFilters[1].defaultValue).toEqual({
+        operator: "in",
+        ids: [1],
+    });
+    expect(migratedData.globalFilters[2].defaultValue).toEqual({
+        operator: "child_of",
+        ids: [2],
+    });
+    expect(migratedData.globalFilters[3].defaultValue).toEqual({ operator: "set" });
+    expect(migratedData.globalFilters[4].defaultValue).toEqual({ operator: "not set" });
+    expect(migratedData.globalFilters[5].defaultValue).toBe(undefined);
+});
+
+test("Date with antepenultimate_year is not supported anymore", () => {
+    const data = {
+        version: "1",
+        globalFilters: [
+            {
+                id: "1",
+                type: "date",
+                defaultValue: { year: "antepenultimate_year" },
+                rangeType: "fixedPeriod",
+            },
+        ],
+    };
+    const migratedData = load(data);
+    expect(migratedData.globalFilters[0].defaultValue).toBe(undefined);
+});
+
+test("Default value is now undefined", () => {
+    const data = {
+        version: "1",
+        globalFilters: [
+            {
+                id: "1",
+                type: "relation",
+                label: "a relation filter",
+                defaultValue: [],
+            },
+        ],
+    };
+    const migratedData = load(data);
+    expect(migratedData.globalFilters[0].defaultValue).toBe(undefined);
+});
+
+test("period values are correctly renamed/removed", () => {
+    const data = {
+        version: 14,
+        odooVersion: 5,
+        globalFilters: [
+            {
+                id: "1",
+                type: "date",
+                label: "My label",
+                rangeType: "relative",
+                defaultValue: "last_six_month",
+            },
+            {
+                id: "2",
+                type: "date",
+                label: "My label",
+                rangeType: "relative",
+                defaultValue: "last_three_years",
+            },
+            {
+                id: "3",
+                type: "date",
+                label: "My label",
+                rangeType: "relative",
+                defaultValue: "last_month",
+            },
+            {
+                id: "4",
+                type: "date",
+                label: "My label",
+                rangeType: "relative",
+                defaultValue: "last_week",
+            },
+            {
+                id: "5",
+                type: "date",
+                label: "My label",
+                rangeType: "relative",
+                defaultValue: "last_three_months",
+            },
+            {
+                id: "6",
+                type: "date",
+                label: "My label",
+                rangeType: "relative",
+                defaultValue: "last_year",
+            },
+        ],
+    };
+    const migratedData = load(data);
+    const filters = migratedData.globalFilters;
+    expect(filters[0].defaultValue).toBe(undefined);
+    expect(filters[1].defaultValue).toBe(undefined);
+    expect(filters[2].defaultValue).toBe("last_30_days");
+    expect(filters[3].defaultValue).toBe("last_7_days");
+    expect(filters[4].defaultValue).toBe("last_90_days");
+    expect(filters[5].defaultValue).toBe("last_12_months");
+});
+
+test("Date filters are migrated", () => {
+    const data = {
+        version: 14,
+        odooVersion: 5,
+        globalFilters: [
+            {
+                id: "1",
+                type: "date",
+                label: "Fixed Period",
+                rangeType: "fixedPeriod",
+                disabledPeriods: ["quarter"],
+            },
+            {
+                id: "2",
+                type: "date",
+                label: "Relative",
+                rangeType: "relative",
+            },
+            {
+                id: "3",
+                type: "date",
+                label: "From/to",
+                rangeType: "fromTo",
+            },
+        ],
+    };
+    const migratedData = load(data);
+    const filters = migratedData.globalFilters;
+    expect(filters[0].rangeType).toBe(undefined);
+    expect(filters[1].rangeType).toBe(undefined);
+    expect(filters[2].rangeType).toBe(undefined);
+
+    expect(filters[0].disabledPeriods).toBe(undefined);
+});
+
+test("18.5.10: ODOO.FILTER.VALUE to ODOO.FILTER.LABEL in cells", () => {
+    const data = {
+        version: "18.4.14",
+        sheets: [
+            {
+                cells: {
+                    A1: '=ODOO.FILTER.VALUE("MyFilter")+odoo.filter.value("AnotherFilter")',
+                },
+            },
+        ],
+    };
+    const migratedData = load(data);
+    expect(migratedData.sheets[0].cells.A1).toBe(
+        `=ODOO.FILTER.LABEL("MyFilter")+ODOO.FILTER.LABEL("AnotherFilter")`
+    );
 });

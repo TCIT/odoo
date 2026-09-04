@@ -1,21 +1,19 @@
-/** @odoo-module **/
-
-import { Component, onWillStart, useChildSubEnv, useState } from "@odoo/owl";
+import { Component, onWillStart, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { download } from "@web/core/network/download";
 
 import { useSpreadsheetNotificationStore } from "@spreadsheet/hooks";
 
 import * as spreadsheet from "@odoo/o-spreadsheet";
-import { Spreadsheet, Model, registries } from "@odoo/o-spreadsheet";
-import { _t } from "@web/core/l10n/translation";
+import { Spreadsheet, Model } from "@odoo/o-spreadsheet";
 import { useSpreadsheetPrint } from "../hooks";
+import { _t } from "@web/core/l10n/translation";
 
-registries.topbarMenuRegistry.addChild("download_public_excel", ["file"], {
+spreadsheet.registries.topbarMenuRegistry.addChild("download_public_excel", ["file"], {
     name: _t("Download"),
     execute: (env) => env.downloadExcel(),
     isReadonlyAllowed: true,
     icon: "o-spreadsheet-Icon.DOWNLOAD",
+    isVisible: (env) => env.canDownloadExcel?.(),
 });
 
 export class PublicReadonlySpreadsheet extends Component {
@@ -23,7 +21,7 @@ export class PublicReadonlySpreadsheet extends Component {
     static components = { Spreadsheet };
     static props = {
         dataUrl: String,
-        downloadExcelUrl: String,
+        downloadExcelUrl: { type: [String, Boolean], optional: true },
         mode: { type: String, optional: true },
     };
 
@@ -32,13 +30,6 @@ export class PublicReadonlySpreadsheet extends Component {
         this.http = useService("http");
         this.state = useState({
             isFilterShown: false,
-        });
-        useChildSubEnv({
-            downloadExcel: () =>
-                download({
-                    url: this.props.downloadExcelUrl,
-                    data: {},
-                }),
         });
         useSpreadsheetPrint(() => this.model);
         onWillStart(this.createModel.bind(this));
@@ -63,7 +54,12 @@ export class PublicReadonlySpreadsheet extends Component {
         this.data = await this.http.get(this.props.dataUrl);
         this.model = new Model(
             this.data,
-            { mode: this.props.mode === "dashboard" ? "dashboard" : "readonly" },
+            {
+                mode: this.props.mode === "dashboard" ? "dashboard" : "readonly",
+                custom: {
+                    isFrozenSpreadsheet: true,
+                },
+            },
             this.data.revisions || []
         );
         if (this.env.debug) {

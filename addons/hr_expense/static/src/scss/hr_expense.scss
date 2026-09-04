@@ -1,6 +1,6 @@
 .hr_expense {
     @include media-breakpoint-up(md) {
-        &.o_list_view, &.o_kanban_view .o_kanban_renderer {
+        &.o_list_renderer, &.o_kanban_renderer {
             min-height: 100% !important;
         }
     }
@@ -130,4 +130,18 @@
 .o_overflow {
     white-space: normal !important;
     overflow-wrap: break-word;
+}
+
+/**************
+    MAILS
+***************/
+
+.o_expense_button_mail {
+    background-color: #9E588B;
+    margin-top: 10px;
+    padding: 10px;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 5px;
+    font-size: 16px;
 }

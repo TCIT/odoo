@@ -1,21 +1,22 @@
 import { Component, useState, validate } from "@odoo/owl";
+import { omit, pick } from "@web/core/utils/objects";
 
 export class Toolbar extends Component {
     static template = "html_editor.Toolbar";
     static props = {
         class: { type: String, optional: true },
-        toolbar: {
+        getSelection: Function,
+        focusEditable: Function,
+        state: {
             type: Object,
             shape: {
-                getSelection: Function,
-                focusEditable: Function,
+                namespace: { type: String, optional: true },
                 buttonGroups: {
                     type: Array,
                     element: {
                         type: Object,
                         shape: {
                             id: String,
-                            namespace: { type: String, optional: true },
                             buttons: {
                                 type: Array,
                                 element: {
@@ -23,9 +24,8 @@ export class Toolbar extends Component {
                                     validate: (button) => {
                                         const base = {
                                             id: String,
-                                            groupId: String,
-                                            title: String,
-                                            isAvailable: { type: Function, optional: true },
+                                            description: String,
+                                            isDisabled: Boolean,
                                         };
                                         if (button.Component) {
                                             validate(button, {
@@ -39,8 +39,7 @@ export class Toolbar extends Component {
                                                 run: Function,
                                                 icon: { type: String, optional: true },
                                                 text: { type: String, optional: true },
-                                                isActive: { type: Function, optional: true },
-                                                isDisabled: { type: Function, optional: true },
+                                                isActive: Boolean,
                                             });
                                         }
                                         return true;
@@ -50,45 +49,45 @@ export class Toolbar extends Component {
                         },
                     },
                 },
-                state: {
-                    type: Object,
-                    shape: {
-                        buttonsActiveState: Object,
-                        buttonsDisabledState: Object,
-                        buttonsAvailableState: Object,
-                        namespace: {
-                            type: String,
-                            optional: true,
-                        },
-                    },
-                },
             },
         },
     };
 
     setup() {
-        this.state = useState(this.props.toolbar.state);
-    }
-
-    getFilteredButtonGroups() {
-        if (this.state.namespace) {
-            const filteredGroups = this.props.toolbar.buttonGroups.filter(
-                (group) => group.namespace === this.state.namespace
-            );
-            if (filteredGroups.length > 0) {
-                return filteredGroups;
-            }
-        }
-        return this.props.toolbar.buttonGroups.filter((group) => group.namespace === undefined);
+        this.state = useState(this.props.state);
     }
 
     onButtonClick(button) {
         button.run();
-        this.props.toolbar.focusEditable();
+        this.props.focusEditable();
     }
 }
 
 export const toolbarButtonProps = {
-    title: String,
+    title: [String, Function],
     getSelection: Function,
+    isDisabled: Boolean,
 };
+
+/** @typedef {import("@html_editor/core/user_command_plugin").UserCommand} UserCommand */
+/** @typedef {import("./toolbar_plugin").ToolbarCommandItem} ToolbarCommandItem */
+/** @typedef {import("./toolbar_plugin").ToolbarCommandButton} ToolbarCommandButton */
+
+/**
+ * @param {UserCommand} userCommand
+ * @param {ToolbarCommandItem} toolbarItem
+ * @returns {ToolbarCommandButton}
+ */
+export function composeToolbarButton(userCommand, toolbarItem) {
+    const description = toolbarItem.description || userCommand.description;
+    return {
+        ...pick(userCommand, "icon"),
+        ...omit(toolbarItem, "commandId", "commandParams"),
+        run: () => userCommand.run(toolbarItem.commandParams),
+        isAvailable: (selection) =>
+            [userCommand.isAvailable, toolbarItem.isAvailable]
+                .filter(Boolean)
+                .every((predicate) => predicate(selection)),
+        description: description instanceof Function ? description : () => description,
+    };
+}

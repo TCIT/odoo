@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 import { createElement, append } from "@web/core/utils/xml";
 import { Notebook } from "@web/core/notebook/notebook";
@@ -8,6 +6,7 @@ import { FormCompiler } from "@web/views/form/form_compiler";
 import { FormRenderer } from "@web/views/form/form_renderer";
 import { FormController } from '@web/views/form/form_controller';
 import { useService } from "@web/core/utils/hooks";
+import { deleteConfirmationMessage } from "@web/core/confirmation_dialog/confirmation_dialog";
 import {_t} from "@web/core/l10n/translation";
 
 
@@ -20,23 +19,21 @@ export class AccountMoveFormController extends FormController {
     get cogMenuProps() {
         return {
             ...super.cogMenuProps,
-            printDropdownTitle: _t("Download"),
+            printDropdownTitle: _t("Print"),
             loadExtraPrintItems: this.loadExtraPrintItems.bind(this),
         };
     }
 
     async loadExtraPrintItems() {
-        if (!this.model.root.isNew) {
-            return []
-        }
-        return this.orm.call("account.move", "get_extra_print_items", [this.model.root.resId]);
+        const items = await this.orm.call("account.move", "get_extra_print_items", [this.model.root.resId]);
+        return items.filter((item) => item.key !== "download_all");
     }
 
 
     async deleteRecord() {
-        if ( !await this.account_move_service.addDeletionDialog(this, this.model.root.resId)) {
-            return super.deleteRecord(...arguments);
-        }
+        const deleteConfirmationDialogProps = this.deleteConfirmationDialogProps;
+        deleteConfirmationDialogProps.body = await this.account_move_service.getDeletionDialogBody(deleteConfirmationMessage, this.model.root.resId);
+        this.deleteRecordsWithConfirmation(deleteConfirmationDialogProps, [this.model.root]);
     }
 }
 

@@ -83,7 +83,7 @@ const QESC_REGEXP = /\\([\u0000-\u007f])/g;
  * OCTET         = <any 8-bit sequence of data>
  * @private
  */
-const PARAM_REGEXP = /;[\x09\x20]*([!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*=[\x09\x20]*("(?:[\x20!\x23-\x5b\x5d-\x7e\x80-\xff]|\\[\x20-\x7e])*"|[!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*/g;
+const PARAM_REGEXP = /;[\x09\x20]*([!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*=[\x09\x20]*("(?:[\x09\x20!\x23-\x5b\x5d-\x7e\x80-\xff]|\\[\x20-\x7e])*"|[!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*/g;
 
 /**
  * RegExp for various RFC 5987 grammar
@@ -159,7 +159,7 @@ function decodefield(str) {
  * @return {ContentDisposition}
  * @public
  */
-function parse(string) {
+export function parse(string) {
     if (!string || typeof string !== "string") {
         throw new TypeError("argument string is required");
     }
@@ -371,6 +371,7 @@ function _download(data, filename, mimetype) {
             anchor.className = "download-js-link";
             anchor.innerText = _t("downloading...");
             anchor.style.display = "none";
+            anchor.target = "_blank";
             document.body.appendChild(anchor);
             setTimeout(() => {
                 anchor.click();

@@ -1,25 +1,78 @@
-/** @odoo-module**/
 /* global ace */
 
-import {clickOnSave, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { clickOnSave, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
 
-const adminCssModif = '#wrap {display: none;}';
-const demoCssModif = '// demo_edition';
+const adminCssModif = "#wrap {display: none;}";
+const demoCssModif = "// demo_edition";
 
-registerWebsitePreviewTour('html_editor_multiple_templates', {
-    url: '/generic',
-    edition: true,
-},
+registerWebsitePreviewTour(
+    "html_editor_language",
+    {
+        url: "/test_page",
+    },
+    () => [
+        {
+            content:
+                "Wait the content is loaded and html/css editor is in menu before clicking on open site menu",
+            trigger: ":iframe main:contains(rommelpot)",
+        },
+        {
+            content: "open site menu",
+            trigger: 'button[data-menu-xmlid="website.menu_site"]',
+            run: "click",
+        },
+        {
+            content: "open html editor",
+            trigger: 'a[data-menu-xmlid="website.menu_ace_editor"]',
+            run: "click",
+        },
+        {
+            content: "add something in the page's default language version",
+            trigger: 'div.ace_line .ace_xml:contains("rommelpot")',
+            run: () => {
+                ace.edit(document.querySelector("#resource-editor div")).getSession().insert(
+                    {
+                        row: 1,
+                        column: 1,
+                    },
+                    '<div class="test_language"/>\n'
+                );
+            },
+        },
+        {
+            content: "save the html editor",
+            trigger:
+                'body:has(div.ace_line .ace_xml:contains("test_language")) .o_resource_editor .btn-primary',
+            run: "click",
+        },
+        {
+            content: "check that the page has the modification",
+            trigger: ":iframe #wrapwrap:has(.test_language)",
+        },
+        {
+            content: "check that the page has not lost the original text",
+            trigger: ':iframe #wrapwrap:contains("rommelpot")',
+        },
+    ]
+);
+
+registerWebsitePreviewTour(
+    "html_editor_multiple_templates",
+    {
+        url: "/generic",
+        edition: true,
+    },
     () => [
         {
             content: "drop a snippet group",
-            trigger: "#oe_snippets .oe_snippet[name=Intro].o_we_draggable .oe_snippet_thumbnail",
+            trigger:
+                ".o-website-builder_sidebar .o_snippet[name=Intro].o_draggable .o_snippet_thumbnail",
             // id starting by 'oe_structure..' will actually create an inherited view
             run: "drag_and_drop :iframe #oe_structure_test_ui",
         },
         {
             content: "Click on the s_cover snippet",
-            trigger: ':iframe .o_snippet_preview_wrap[data-snippet-id="s_cover"]',
+            trigger: ":iframe .o_snippet_preview_wrap .s_cover",
             run: "click",
         },
         ...clickOnSave(),
@@ -38,7 +91,9 @@ registerWebsitePreviewTour('html_editor_multiple_templates', {
             content: "add something in the generic view",
             trigger: 'div.ace_line .ace_xml:contains("Generic")',
             run() {
-                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 3, column: 1}, '<p>somenewcontent</p>\n');
+                ace.edit(document.querySelector("#resource-editor div"))
+                    .getSession()
+                    .insert({ row: 3, column: 1 }, "<p>somenewcontent</p>\n");
             },
         },
         // 3. Edit oe_structure specific view
@@ -63,7 +118,9 @@ registerWebsitePreviewTour('html_editor_multiple_templates', {
             content: "add something in the oe_structure specific view",
             trigger: 'div.ace_line .ace_xml:contains("s_cover")',
             run() {
-                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 2, column: 1}, '<p>anothernewcontent</p>\n');
+                ace.edit(document.querySelector("#resource-editor div"))
+                    .getSession()
+                    .insert({ row: 2, column: 1 }, "<p>anothernewcontent</p>\n");
             },
         },
         {
@@ -78,15 +135,17 @@ registerWebsitePreviewTour('html_editor_multiple_templates', {
             trigger: ':iframe #wrapwrap:contains("anothernewcontent")',
         },
         {
-           content: "check that the page has both modification",
-           trigger: ':iframe #wrapwrap:contains("somenewcontent")',
-       },
+            content: "check that the page has both modification",
+            trigger: ':iframe #wrapwrap:contains("somenewcontent")',
+        },
     ]
 );
 
-registerWebsitePreviewTour('test_html_editor_scss', {
-    url: '/contactus',
-},
+registerWebsitePreviewTour(
+    "test_html_editor_scss",
+    {
+        url: "/contactus",
+    },
     () => [
         // 1. Open Html Editor and select a scss file
         {
@@ -110,7 +169,7 @@ registerWebsitePreviewTour('test_html_editor_scss', {
         },
         {
             content: "open type switcher",
-            trigger: '.o_resource_editor_type_switcher button',
+            trigger: ".o_resource_editor_type_switcher button",
             run: "click",
         },
         {
@@ -127,7 +186,9 @@ registerWebsitePreviewTour('test_html_editor_scss', {
             content: "add some scss content in the file",
             trigger: 'div.ace_line .ace_comment:contains("footer {")',
             run() {
-                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 2, column: 0}, `${adminCssModif}\n`);
+                ace.edit(document.querySelector("#resource-editor div"))
+                    .getSession()
+                    .insert({ row: 2, column: 0 }, `${adminCssModif}\n`);
             },
         },
         {
@@ -140,22 +201,24 @@ registerWebsitePreviewTour('test_html_editor_scss', {
         },
         {
             content: "check that the scss modification got applied",
-            trigger: ':iframe body:has(#wrap:hidden)',
+            trigger: ":iframe body:has(#wrap:hidden)",
             timeout: 30000, // SCSS compilation might take some time
         },
         {
-            content: "reset view (after reload, html editor should have been reopened where it was)",
-            trigger: '#resource-editor-id button:contains(Reset)',
+            content:
+                "reset view (after reload, html editor should have been reopened where it was)",
+            trigger: "#resource-editor-id button:contains(Reset)",
             run: "click",
         },
         {
             content: "confirm reset warning",
-            trigger: '.modal-footer .btn-primary',
+            trigger: ".modal-footer .btn-primary",
             run: "click",
         },
         {
-            content: "check that the scss file was reset correctly, wrap content should now be visible again",
-            trigger: ':iframe #wrap:visible',
+            content:
+                "check that the scss file was reset correctly, wrap content should now be visible again",
+            trigger: ":iframe #wrap:visible",
             timeout: 30000, // SCSS compilation might take some time
         },
         // 3. Customize again that file (will be used in second part of the test
@@ -164,7 +227,9 @@ registerWebsitePreviewTour('test_html_editor_scss', {
             content: "add some scss content in the file",
             trigger: 'div.ace_line .ace_comment:contains("footer {")',
             run() {
-                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 2, column: 0}, `${adminCssModif}\n`);
+                ace.edit(document.querySelector("#resource-editor div"))
+                    .getSession()
+                    .insert({ row: 2, column: 0 }, `${adminCssModif}\n`);
             },
         },
         {
@@ -177,21 +242,26 @@ registerWebsitePreviewTour('test_html_editor_scss', {
         },
         {
             content: "check that the scss modification got applied",
-            trigger: ':iframe body:has(#wrap:hidden)',
+            trigger: ":iframe body:has(#wrap:hidden)",
+        },
+        {
+            trigger: "nav img[src]:not([src=''])",
         },
     ]
 );
 
-registerWebsitePreviewTour('test_html_editor_scss_2', {
-    url: '/',
-},
+registerWebsitePreviewTour(
+    "test_html_editor_scss_2",
+    {
+        url: "/",
+    },
     () => [
         // This part of the test ensures that a restricted user can still use
         // the HTML Editor if someone else made a customization previously.
 
         // 4. Open Html Editor and select a scss file
         {
-            trigger: "[is-ready=true]:iframe #wrapwrap",
+            trigger: ":iframe [is-ready=true] #wrapwrap",
         },
         {
             content: "open site menu",
@@ -205,7 +275,7 @@ registerWebsitePreviewTour('test_html_editor_scss_2', {
         },
         {
             content: "open type switcher",
-            trigger: '.o_resource_editor_type_switcher button',
+            trigger: ".o_resource_editor_type_switcher button",
             run: "click",
         },
         {
@@ -223,7 +293,9 @@ registerWebsitePreviewTour('test_html_editor_scss_2', {
             trigger: `div.ace_line:contains("${adminCssModif}")`,
             // ensure the admin modification is here
             run() {
-                ace.edit(document.querySelector('#resource-editor div')).getSession().insert({row: 2, column: 0}, `${demoCssModif}\n`);
+                ace.edit(document.querySelector("#resource-editor div"))
+                    .getSession()
+                    .insert({ row: 2, column: 0 }, `${demoCssModif}\n`);
             },
         },
         {
@@ -235,14 +307,15 @@ registerWebsitePreviewTour('test_html_editor_scss_2', {
             run: "click",
         },
         {
-            content: "reset view (after reload, html editor should have been reopened where it was)",
-            trigger: '#resource-editor-id button:contains(Reset)',
+            content:
+                "reset view (after reload, html editor should have been reopened where it was)",
+            trigger: "#resource-editor-id button:contains(Reset)",
             timeout: 30000, // SCSS compilation might take some time
             run: "click",
         },
         {
             content: "confirm reset warning",
-            trigger: '.modal-footer .btn-primary',
+            trigger: ".modal:contains(careful) .modal-footer .btn-primary",
             run: "click",
         },
         {
@@ -278,20 +351,24 @@ registerWebsitePreviewTour(
         },
         {
             content: "Bypass warning",
-            trigger: ".o_resource_editor_wrapper div:nth-child(2) button:nth-child(3)",
+            trigger: ".o_resource_editor_wrapper div:nth-child(2) > button",
             run: "click",
         },
         // Test all 3 file type options
-        ...[{
-            menuItemIndex: 1,
-            editorMode: 'qweb',
-        }, {
-            menuItemIndex: 2,
-            editorMode: 'scss',
-        }, {
-            menuItemIndex: 3,
-            editorMode: 'javascript',
-        }]
+        ...[
+            {
+                menuItemIndex: 1,
+                editorMode: "qweb",
+            },
+            {
+                menuItemIndex: 2,
+                editorMode: "scss",
+            },
+            {
+                menuItemIndex: 3,
+                editorMode: "javascript",
+            },
+        ]
             .map(({ menuItemIndex, editorMode }) => [
                 {
                     content: "Open file type dropdown",
@@ -313,5 +390,72 @@ registerWebsitePreviewTour(
                 },
             ])
             .flat(),
+    ]
+);
+
+registerWebsitePreviewTour(
+    "test_ace_editor_is_hidden",
+    {
+        url: "/",
+    },
+    () => [
+        {
+            trigger: ":iframe #wrapwrap",
+        },
+        {
+            content: "Open Site menu",
+            trigger: "button[data-menu-xmlid='website.menu_site']",
+            run: "click",
+        },
+        {
+            content: "Open HTML / CSS Editor",
+            trigger: ".o_popover a[data-menu-xmlid='website.menu_ace_editor']:contains(/^HTML/)",
+            run: "click",
+        },
+        {
+            content: "Make sure the editor is open",
+            trigger: ".o_resource_editor",
+        },
+        {
+            content: "Click on edit",
+            trigger: ".o_menu_systray_item.o_edit_website_container > button",
+            run: "click",
+        },
+        {
+            content: "Wait for it to open",
+            trigger: ".o-website-builder_sidebar",
+        },
+        {
+            content: "Make sure the editor has been hidden after starting editing",
+            trigger: ":not(.o_resource_editor)",
+        },
+        {
+            content: "Discard edit mode",
+            trigger: ".o-website-builder_sidebar .o-snippets-top-actions button:contains(Discard)",
+            run: "click",
+        },
+        {
+            content: "Open Site menu",
+            trigger: "button[data-menu-xmlid='website.menu_site']",
+            run: "click",
+        },
+        {
+            content: "Open HTML / CSS Editor",
+            trigger: ".o_popover a[data-menu-xmlid='website.menu_ace_editor']:contains(/^HTML/)",
+            run: "click",
+        },
+        {
+            content: "Make sure the editor is open",
+            trigger: ".o_resource_editor",
+        },
+        {
+            content: "Navigate to contact us page",
+            trigger: ":iframe a[href='/contactus']",
+            run: "click",
+        },
+        {
+            content: "Make sure the editor has been hidden after navigating to other page",
+            trigger: ":not(.o_resource_editor)",
+        },
     ]
 );

@@ -1,25 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* html_editor
-# 
-# Translators:
-# zakariya moradi, 2025
-# Tiffany Chang, 2025
-# Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2025
-# 
+# * html_editor
+#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
+# Aliraza Habibitanha <alireza.habibitanha@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:23+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2025\n"
-"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
+"POT-Creation-Date: 2026-06-05 19:29+0000\n"
+"PO-Revision-Date: 2026-08-09 11:33+0000\n"
+"Last-Translator: Aliraza Habibitanha <alireza.habibitanha@gmail.com>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-19/"
+"html_editor/fa/>\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fa\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -28,34 +28,28 @@ msgid ""
 "'Alt tag' specifies an alternate text for an image, if the image cannot be "
 "displayed (slow connection, missing image, screen reader ...)."
 msgstr ""
-"متن 'تگ Alt' متن جایگزینی را برای یک تصویر مشخص می‌کند، اگر تصویر قابل نمایش"
-" نباشد (اتصال کند، تصویر گم شده، خواننده صفحه ...)."
+"متن 'تگ Alt' متن جایگزینی را برای یک تصویر مشخص می‌کند، اگر تصویر قابل نمایش "
+"نباشد (اتصال کند، تصویر گم شده، خواننده صفحه ...)."
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 msgid "'Title tag' is shown as a tooltip when you hover the picture."
 msgstr ""
-"«برچسب عنوان» زمانی که نشانگر را روی تصویر قرار دهید به‌صورت یک ابزارک "
-"نمایان می‌شود."
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_description.xml:0
-msgid "(ALT Tag)"
-msgstr "(برچسب ALT)"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_description.xml:0
-msgid "(TITLE Tag)"
-msgstr "(برچسب TITLE)"
+"«برچسب عنوان» زمانی که نشانگر را روی تصویر قرار دهید به‌صورت یک ابزارک نمایان "
+"می‌شود."
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "(URL or Embed)"
 msgstr "I'm sorry, but I can't assist with that request."
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid ", submited by"
+msgstr "، ارسال شده توسط"
 
 #. module: html_editor
 #. odoo-javascript
@@ -89,24 +83,6 @@ msgstr "۵ ستاره"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
-msgid "AI"
-msgstr "AI"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-msgid "AI Copywriter"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
-msgid "AI Tools"
-msgstr "ابزارهای هوش مصنوعی"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "Accepts"
 msgstr "قبول می کند"
@@ -115,15 +91,17 @@ msgstr "قبول می کند"
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Action %s is not a window action, link preview is not available"
-msgstr ""
+msgstr "عمل %s به ویندوز مربوط نمی‌شود، و پیش‌نمایش لینک در دسترس نیست"
 
 #. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid ""
-"Action %s not found, link preview is not available, please check your url is"
-" correct"
+"Action %s not found, link preview is not available, please check your url is "
+"correct"
 msgstr ""
+"عمل %s یافت نشد. پیش‌نمایش لینک در دسترس نیست. از صحت URL وارد شده اطمینان "
+"حاصل کنید"
 
 #. module: html_editor
 #. odoo-javascript
@@ -160,7 +138,13 @@ msgstr "اضافه کردن بخش کد"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/file_plugin.js:0
 msgid "Add a download box"
-msgstr ""
+msgstr "درج باکس دانلود"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Add a label for your link"
+msgstr "برای لینک یک برچسب اضافه کنید"
 
 #. module: html_editor
 #. odoo-javascript
@@ -177,14 +161,38 @@ msgstr "افزودن ایموجی"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/core/table_of_content/table_of_content.xml:0
-msgid "Add headings in this field to fill the Table of Content"
-msgstr ""
+msgid "Add headings to fill the Table of Contents"
+msgstr "برای تکمیل فهرست مطالب، تیتر اضافه کنید"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/toggle_block_plugin/toggle_block_plugin.js:0
+msgid "Add something inside this toggle"
+msgstr "در داخل این بخش تاشو چیزی اضافه کنید"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/caption_plugin/caption_plugin.js:0
+msgid "Add/remove a caption"
+msgstr "افزودن/حذف زیرنویس"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Advanced mode"
+msgstr "حالت پیشرفته"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.js:0
 msgid "Alert"
 msgstr "اخطار"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/align/align_plugin.js:0
+msgid "Align text"
+msgstr "تراز متن"
 
 #. module: html_editor
 #. odoo-javascript
@@ -212,7 +220,7 @@ msgstr "خطایی هنگام بازیابی آدرس URL وارد شده رخ �
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Angle"
 msgstr "زاویه"
 
@@ -227,8 +235,21 @@ msgstr "ناشناس"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 #: code:addons/html_editor/static/src/main/media/image_crop.xml:0
+#: code:addons/html_editor/static/src/main/media/image_description.xml:0
 msgid "Apply"
 msgstr "اعمال"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/color_ui_plugin.js:0
+msgid "Apply Background Color"
+msgstr "اعمال رنگ پس‌زمینه"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/color_ui_plugin.js:0
+msgid "Apply Font Color"
+msgstr "اعمال رنگ فونت"
 
 #. module: html_editor
 #. odoo-javascript
@@ -254,6 +275,12 @@ msgstr "پیوست URL"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Autoconvert to relative link"
+msgstr "به‌طور خودکار به پیوند نسبی تبدیل کنید"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Autoplay"
 msgstr "پخش خودکار"
@@ -266,52 +293,60 @@ msgstr "بازگشت به یک ستون"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_plugin.js:0
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Background Color"
-msgstr "رنگ پس‌زمینه"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner"
 msgstr "بنر"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Danger"
 msgstr "بنر خطر"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Info"
 msgstr "اطلاعات بنر"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Success"
 msgstr "بنر موفقیت"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Warning"
 msgstr "هشدار بنر"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/signature_plugin.js:0
-msgid "Basic Bloc"
-msgstr ""
+#: model:ir.model,name:html_editor.model_base
+msgid "Base"
+msgstr "پایه"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Big section heading"
 msgstr "عنوان بزرگ بخش"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Border"
+msgstr "حاشیه"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Border Size"
+msgstr "اندازه حاشیه"
 
 #. module: html_editor
 #. odoo-javascript
@@ -329,42 +364,25 @@ msgstr "دکمه"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Button Primary"
-msgstr ""
+msgstr "دکمه پایه‌ای"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Button Secondary"
-msgstr ""
+msgstr "دکمه ثانویه"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_selector_dialog/video_selector_dialog.xml:0
 msgid "Cancel"
 msgstr "لغو"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_description.xml:0
-msgid "Change media description and tooltip"
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/caption_plugin/caption_plugin.js:0
+msgid "Caption"
 msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
-msgid "ChatGPT"
-msgstr ""
-"<h1>وب ویرایشگر</h1>\n"
-"<p>این ماژول Odoo به شما اجازه می‌دهد تا تنها با کشیدن و رها کردن (drag and drop) اجزای HTML را ویرایش کنید.</p>\n"
-"<p>ویژگی‌ها شامل:</p>\n"
-"<ul>\n"
-"    <li>ویرایش مستقیم در صفحه</li>\n"
-"    <li>تنظیمات پیشرفته برای توسعه‌دهندگان</li>\n"
-"    <li>پشتیبانی از قالب‌های مختلف و تم‌های سفارشی</li>\n"
-"</ul>\n"
-"<p>برای شروع، به سادگی یک صفحه باز کرده و ویرایش را با ابزارهای موجود آغاز کنید.</p>"
 
 #. module: html_editor
 #. odoo-javascript
@@ -374,14 +392,26 @@ msgstr "چک‌لیست"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/x2many_image_field.xml:0
+#: code:addons/html_editor/static/src/fields/x2many_field/x2many_image_field.xml:0
 msgid "Clear"
 msgstr "پاک کردن"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/backend/excalidraw/excalidraw.xml:0
-msgid "Click here to update the source"
+#: code:addons/html_editor/static/src/main/table/table_menu.js:0
+msgid "Clear content"
+msgstr "پاک کردن محتوا"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
+msgid "Click again to reset transformation"
+msgstr "برای بازنشانی تغییر شکل، دوباره کلیک کنید"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/movenode_plugin.js:0
+msgid "Click to select"
 msgstr ""
 
 #. module: html_editor
@@ -394,40 +424,27 @@ msgstr "بستن"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+#: code:addons/html_editor/static/src/others/embedded_components/backend/syntax_highlighting/syntax_highlighting.xml:0
 msgid "Code"
 msgstr "کد"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/fields/html_field.js:0
-msgid "Code view"
-msgstr ""
+#: code:addons/html_editor/static/src/others/embedded_components/backend/syntax_highlighting/code_toolbar.xml:0
+msgid "Code copied to the clipboard."
+msgstr "کد در کلیپ‌بورد کپی شد."
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Collaborative Links require joining, while Embed Links directly show the "
-"drawing."
-msgstr ""
+#: code:addons/html_editor/static/src/fields/html_field.js:0
+msgid "Code view"
+msgstr "نمای کد"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "Columnize"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.js:0
-msgid "Comparison"
-msgstr "مقایسه"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.js:0
-msgid "Content"
-msgstr "محتوا"
+msgstr "ستون‌بندی"
 
 #. module: html_editor
 #. odoo-javascript
@@ -457,13 +474,19 @@ msgstr "تبدیل به ۴ ستون"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "Convert into columns"
-msgstr ""
+msgstr "تبدیل به ستون"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "Copy Link"
-msgstr "کپی لینک"
+#: code:addons/html_editor/static/src/others/embedded_components/backend/syntax_highlighting/code_toolbar.xml:0
+msgid "Convert to paragraph"
+msgstr "تبدیل به پاراگراف"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/backend/syntax_highlighting/code_toolbar.xml:0
+msgid "Copy"
+msgstr "کپی"
 
 #. module: html_editor
 #. odoo-javascript
@@ -473,15 +496,9 @@ msgstr "کپی-پیست آدرس URL یا کد درج خود را اینجا ب�
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Correct"
-msgstr "آیا پاسخ صحیحی است"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/upload_progress_toast/upload_service.js:0
 msgid "Could not load the file \"%s\"."
-msgstr ""
+msgstr "فایل  \"%s\" بارگیری نشد."
 
 #. module: html_editor
 #. odoo-javascript
@@ -502,14 +519,24 @@ msgid "Create an URL."
 msgstr "ایجاد یک URL."
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_crop_plugin.js:0
-msgid "Crop image"
-msgstr ""
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__create_uid
+msgid "Created by"
+msgstr "ایجاد شده توسط"
+
+#. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__create_date
+msgid "Created on"
+msgstr "ایجادشده در"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_selector.xml:0
+#: code:addons/html_editor/static/src/main/media/image_crop_plugin.js:0
+msgid "Crop image"
+msgstr "برش تصویر"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/color_picker_gradient_tab.xml:0
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Custom"
 msgstr "سفارشی"
@@ -522,13 +549,7 @@ msgstr "دِیلیموشِن"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Default"
-msgstr "پیش‌فرض"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_selector.xml:0
+#: code:addons/html_editor/static/src/main/font/color_picker_gradient_tab.xml:0
 msgid "Define a custom gradient"
 msgstr "تعریف یک گرادیان سفارشی"
 
@@ -542,39 +563,60 @@ msgstr "حذف"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 msgid "Description"
-msgstr "توضیحات"
+msgstr "توصیف"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Direct download"
+msgstr "دانلود مستقیم"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 #: code:addons/html_editor/static/src/main/media/image_crop.xml:0
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.xml:0
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
 msgid "Discard"
 msgstr "رها کردن"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.xml:0
-msgid ""
-"Discover a world of awesomeness in our copyright-free image haven. No legal "
-"drama, just nice images!"
-msgstr ""
-"کشف دنیایی از شگفتی‌ها در مخزن تصاویر بدون کپی‌رایت ما. بدون دردسر قانونی، "
-"فقط تصاویر زیبا!"
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__display_name
+#: model:ir.model.fields,field_description:html_editor.field_html_field_history_mixin__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_attachment__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_http__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_contact__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_date__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_datetime__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_duration__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_float__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_html__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_image__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_integer__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_many2one__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_monetary__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_qweb__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_relative__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_selection__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_text__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_ui_view__display_name
+#: model:ir.model.fields,field_description:html_editor.field_ir_websocket__display_name
+msgid "Display Name"
+msgstr "نام نمایشی"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/file_plugin.js:0
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_media_dialog.js:0
 msgid "Documents"
 msgstr "اسناد"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Drawing Board"
+#: code:addons/html_editor/static/src/main/movenode_plugin.js:0
+msgid "Drag to move"
 msgstr ""
 
 #. module: html_editor
@@ -591,7 +633,8 @@ msgstr "خطا: نتوانست آدرس‌های دانلود را از کتاب
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/x2many_image_field.xml:0
+#: code:addons/html_editor/static/src/fields/x2many_field/x2many_image_field.xml:0
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Edit"
 msgstr "ویرایش"
 
@@ -599,7 +642,7 @@ msgstr "ویرایش"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Edit Link"
-msgstr ""
+msgstr "ویرایش لینک"
 
 #. module: html_editor
 #. odoo-javascript
@@ -618,12 +661,6 @@ msgstr "تعبیه تصویر"
 #: code:addons/html_editor/static/src/main/youtube_plugin.js:0
 msgid "Embed Youtube Video"
 msgstr "ویدئوی یوتیوب را وارد کنید"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_selector_dialog/video_selector_dialog.xml:0
-msgid "Embed a video"
-msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -647,43 +684,48 @@ msgstr "ایموجی"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "Empty column"
-msgstr ""
+msgstr "ستون خالی"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.js:0
-msgid "Error"
-msgstr "خطا"
+#: code:addons/html_editor/static/src/main/toolbar/toolbar_plugin.js:0
+msgid "Expand toolbar"
+msgstr "گسترش نوار ابزار"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Extend to the closest corner"
 msgstr "به نزدیک‌ترین گوشه گسترش دهید"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Extend to the closest side"
 msgstr "گسترش به نزدیک‌ترین طرف"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Extend to the farthest corner"
 msgstr "به دورترین گوشه گسترش دهید"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Extend to the farthest side"
 msgstr "گسترش به دورترین سمت"
 
 #. module: html_editor
+#: model:ir.model,name:html_editor.model_html_field_history_mixin
+msgid "Field html History"
+msgstr "فیلد html تاریخچه"
+
+#. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/file_plugin/file_plugin.js:0
-msgid "File"
-msgstr "پرونده"
+#: code:addons/html_editor/static/src/main/media/media_dialog/upload_progress_toast/upload_progress_toast.js:0
+msgid "File could not be saved"
+msgstr "فایل ذخیره نشد"
 
 #. module: html_editor
 #. odoo-javascript
@@ -693,21 +735,9 @@ msgstr "فایل بارگذاری شد"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Fill"
-msgstr "پر کنید"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Fill + Rounded"
-msgstr "پر کردن + گرد"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
-msgid "First color %"
-msgstr ""
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Fill Color"
+msgstr "رنگ پس‌زمینه"
 
 #. module: html_editor
 #. odoo-javascript
@@ -729,148 +759,104 @@ msgstr "عمودی چرخاندن"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_plugin.js:0
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Font Color"
-msgstr "رنگ فونت"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
-msgid "Font size"
-msgstr "اندازه فونت"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
-msgid "Font style"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Format"
 msgstr "فرمت"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Friendly"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
-msgid "Generate Text with AI"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
-msgid "Generate or transform content with AI."
-msgstr "تولید یا تبدیل محتوا با هوش مصنوعی."
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-msgid "Generating"
-msgstr "در حال تولید"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-msgid "Generating an alternative..."
-msgstr "در حال تولید یک جایگزین..."
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_selector.xml:0
+#: code:addons/html_editor/static/src/main/font/color_picker_gradient_tab.js:0
 msgid "Gradient"
 msgstr "گرادیان"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_http
+msgid "HTTP Routing"
+msgstr "مسیریابی HTTP"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 1"
-msgstr "هدر ۱"
+msgstr "سرفصل 1"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 1 Display 1"
-msgstr "<header>نمایش ۱ سرصفحه۱</header>"
+msgstr "سرفصل 1 نمایش 1"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 2"
-msgstr "Header 2"
+msgstr "سرفصل 2"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 3"
-msgstr "هدر ۳"
+msgstr "سرفصل 3"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 4"
-msgstr "<h4>سرتیتر ۴</h4>"
+msgstr "سرفصل 4"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 5"
-msgstr "عنوان ۵"
+msgstr "سرفصل 5"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 6"
-msgstr "<h6>سرفصل ۶</h6>"
+msgstr "سرفصل 6"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Heading 1"
-msgstr "عنوان ۱"
+msgstr "عنوان 1"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Heading 2"
-msgstr "<h2>سرفصل ۲</h2>"
+msgstr "عنوان 2"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Heading 3"
-msgstr "<h3>عنوان ۳</h3>"
+msgstr "عنوان 3"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Heading 4"
-msgstr "<h4>سرخط ۴</h4>"
+msgstr "عنوان 4"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Heading 5"
-msgstr "عنوان ۵"
+msgstr "عنوان 5"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Heading 6"
-msgstr "<h6>عنوان ۶</h6>"
+msgstr "عنوان 6"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
-msgid "Hide Dailymotion logo"
-msgstr "مخفی کردن لوگوی Dailymotion"
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/toggle_block_plugin/toggle_block_plugin.js:0
+msgid "Hide Text under foldable toggles"
+msgstr "پنهان کردن متن زیر تاشوها"
 
 #. module: html_editor
 #. odoo-javascript
@@ -886,15 +872,9 @@ msgstr "کنترل‌های پخش‌کننده را مخفی کن"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
-msgid "Hide sharing button"
-msgstr "پنهان کردن دکمه اشتراک‌گذاری"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/table_of_content_plugin/table_of_content_plugin.js:0
-msgid "Highlight the structure (headings) of this field"
-msgstr ""
+msgid "Highlight the structure (headings)"
+msgstr "برجسته کردن ساختار (عناوین)"
 
 #. module: html_editor
 #. odoo-javascript
@@ -903,46 +883,56 @@ msgid "History"
 msgstr "تاریخچه"
 
 #. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_field_history_mixin__html_field_history
+msgid "History data"
+msgstr "داده‌های سابقه"
+
+#. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_field_history_mixin__html_field_history_metadata
+msgid "History metadata"
+msgstr "فراداده تاریخچه"
+
+#. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/fields/html_field.js:0
 msgid "Html"
 msgstr "Html"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_plugin.js:0
-msgid "Icon"
-msgstr "شمایل"
+#: model:ir.model,name:html_editor.model_html_editor_converter_test_sub
+msgid "Html Editor Converter Subtest"
+msgstr "آزمون فرعی مبدل ویرایشگر Html"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Icon size 1x"
-msgstr "اندازه آیکون 1x"
+#: model:ir.model,name:html_editor.model_html_editor_converter_test
+msgid "Html Editor Converter Test"
+msgstr "آزمون مبدل ویرایشگر Html"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Icon size 2x"
-msgstr "اندازه آیکون ۲x"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Icon size 3x"
-msgstr "اندازه آیکون ۳ برابر"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Icon size 4x"
-msgstr "اندازه نماد 4x"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
-msgid "Icon size 5x"
-msgstr "اندازه آیکون 5x"
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__id
+#: model:ir.model.fields,field_description:html_editor.field_html_field_history_mixin__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_attachment__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_http__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_contact__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_date__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_datetime__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_duration__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_float__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_html__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_image__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_integer__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_many2one__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_monetary__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_qweb__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_relative__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_selection__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_qweb_field_text__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_ui_view__id
+#: model:ir.model.fields,field_description:html_editor.field_ir_websocket__id
+msgid "ID"
+msgstr "شناسه"
 
 #. module: html_editor
 #. odoo-javascript
@@ -955,12 +945,6 @@ msgstr "آیکون‌ها"
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "Illustrations"
 msgstr "تصاویر"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_plugin.js:0
-msgid "Image"
-msgstr "تصویر"
 
 #. module: html_editor
 #: model:ir.model.fields,field_description:html_editor.field_ir_attachment__image_height
@@ -979,41 +963,21 @@ msgstr "عرض تصویر"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Image padding"
-msgstr "پدینگ تصویر"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.js:0
 msgid "Images"
 msgstr "تصاویر"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
+#: code:addons/html_editor/static/src/main/link/link_popover.js:0
+msgid "Indicates the link is sponsored or paid content"
+msgstr "نشان می‌دهد که لینک محتوای اسپانسر شده یا پولی است"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
 msgid "Insert"
 msgstr "درج"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert Drawing"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_selector_dialog/video_selector_dialog.xml:0
-msgid "Insert Video"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_plugin.js:0
-msgid "Insert a Video"
-msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1023,27 +987,27 @@ msgstr "یک بنر خطر وارد کنید"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert a drawing board"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/dynamic_placeholder_plugin.js:0
 msgid "Insert a field"
-msgstr ""
+msgstr "وارد کردن یه فیلد"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/core/dom_plugin.js:0
+#: code:addons/html_editor/static/src/main/separator_plugin.js:0
 msgid "Insert a horizontal rule separator"
 msgstr "افزودن یک خط افقی جداکننده"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/banner_plugin.js:0
+msgid "Insert a monospace banner"
+msgstr "درج بنر تک‌فضایی"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/star_plugin.js:0
 msgid "Insert a rating"
-msgstr ""
+msgstr "درج امتیاز"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1083,12 +1047,6 @@ msgstr "بالا وارد کنید"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Insert an Excalidraw Board"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert an info banner"
 msgstr "یک بنر اطلاعاتی درج کنید"
@@ -1103,7 +1061,13 @@ msgstr "متن را اینجا وارد کنید"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_plugin.js:0
 msgid "Insert image or icon"
-msgstr ""
+msgstr "درج تصویر یا آیکون"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_plugin.js:0
+msgid "Insert image, icon or video"
+msgstr "درج تصویر، آیکون یا ویدیو"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1119,9 +1083,15 @@ msgstr "درج راست"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/signature_plugin.js:0
-msgid "Insert your signature"
-msgstr "افزودن امضای خود را وارد کنید"
+#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
+msgid "Instagram"
+msgstr "اینستاگرام"
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/models/ir_ui_view.py:0
+msgid "Invalid field value for %(field_name)s: %(value)s"
+msgstr "مقدار نادرست برای فیلد %(field_name)s: %(value)s"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1136,14 +1106,18 @@ msgid "Large"
 msgstr "بزرگ"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Lengthen"
-msgstr ""
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__write_uid
+msgid "Last Updated by"
+msgstr "آخرین تغییر توسط"
+
+#. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__write_date
+msgid "Last Updated on"
+msgstr "آخرین بروز رسانی در"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Linear"
 msgstr "خطی"
 
@@ -1156,6 +1130,12 @@ msgstr "لینک"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Link Popover"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Link copied to clipboard."
 msgstr "لینک به کلیپ‌بورد کپی شد."
@@ -1164,9 +1144,9 @@ msgstr "لینک به کلیپ‌بورد کپی شد."
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid ""
-"Link preview is not available because %s, please check if your url is "
-"correct"
+"Link preview is not available because %s, please check if your url is correct"
 msgstr ""
+"پیش‌نمایش لینک به دلیل %s در دسترس نیست، لطفاً از صحت URL اطمینان حاصل کنید"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1182,8 +1162,7 @@ msgstr "بارگذاری موارد بیشتر"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "Loading..."
@@ -1191,9 +1170,21 @@ msgstr "بارگذاری..."
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.js:0
+msgid "Logout"
+msgstr "خروج"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Loop"
 msgstr "لوپ"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
+msgid "MM:SS"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1205,7 +1196,7 @@ msgstr "ابزارهای بازاریابی"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_plugin.js:0
 msgid "Media"
-msgstr "رسانه ها"
+msgstr "مدیا"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1223,13 +1214,32 @@ msgstr "عنوان بخش متوسط"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/core/file/readonly_file.js:0
 msgid "Missing File"
-msgstr ""
+msgstr "فایل وجود ندارد"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
+msgid "Modules"
+msgstr "ماژول‌ها"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/banner_plugin.js:0
+msgid "Monospace"
+msgstr "تک‌فضایی"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/banner_plugin.js:0
+msgid "Monospace Banner"
+msgstr "بنر تک‌فضایی"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/powerbox/search_powerbox_plugin.js:0
+#: code:addons/html_editor/static/src/others/embedded_components/backend/video/video.xml:0
 msgid "More options"
-msgstr ""
+msgstr "گزینه‌های بیشتر"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1262,6 +1272,11 @@ msgid "My Images"
 msgstr "تصاویر من"
 
 #. module: html_editor
+#: model:ir.model.fields,field_description:html_editor.field_html_editor_converter_test_sub__name
+msgid "Name"
+msgstr "نام"
+
+#. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_plugin.js:0
 msgid "Navigation"
@@ -1270,6 +1285,7 @@ msgstr "هدایت"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "No URL specified"
 msgstr "هیچ URL مشخص نشده است"
 
@@ -1295,7 +1311,7 @@ msgstr "تصویری یافت نشد."
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/icon_selector.xml:0
 msgid "No pictograms found."
-msgstr "<p>هیچ تصویرنگاری یافت نشد.</p>"
+msgstr "هیچ تصویرنگاری یافت نشد."
 
 #. module: html_editor
 #. odoo-javascript
@@ -1310,6 +1326,12 @@ msgid "Numbered list"
 msgstr "فهرست شماره‌گذاری‌شده"
 
 #. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/attachment_error.xml:0
+msgid "Ok"
+msgstr "تأیید"
+
+#. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Oops, it looks like our AI is unreachable!"
@@ -1322,18 +1344,20 @@ msgid ""
 "Oops, the file %s could not be found. Please replace this file box by a new "
 "one to re-upload the file."
 msgstr ""
+"متأسفانه فایل %s یافت نشد. برای آپلود مجدد فایل، کادر مربوط به فایل را با "
+"کادر جدیدی جایگزین کنید."
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Open in a new tab"
-msgstr ""
+msgstr "باز کردن در تب جدید"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Open in new Window"
-msgstr ""
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Open in new tab"
+msgstr "باز کردن در تب جدید"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1345,18 +1369,6 @@ msgstr "بهینه‌سازی شده"
 #: model:ir.model.fields,field_description:html_editor.field_ir_attachment__original_id
 msgid "Original (unoptimized, unresized) attachment"
 msgstr "پیوست اصلی (بهینه‌نشده، تغییر اندازه نداده)"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Outline"
-msgstr "راهنما"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.js:0
-msgid "Outline + Rounded"
-msgstr "طرح کلی + گرد"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1378,25 +1390,24 @@ msgstr "چسباندن به عنوان URL"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Persuasive"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Position X"
 msgstr "موقعیت X"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Position Y"
 msgstr "موقعیت Y"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+#: code:addons/html_editor/static/src/main/link/link_popover.js:0
+msgid "Prevents the new page from accessing the original window (security)"
+msgstr "از دسترسی صفحه جدید به پنجره اصلی جلوگیری می‌کند (امنیتی)"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "Preview"
 msgstr "پیش‌نمایش"
@@ -1409,15 +1420,24 @@ msgstr "پیش‌نمایش تصویر"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Professional"
-msgstr "حرفه‌ای"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/upload_progress_toast/upload_progress_toast.xml:0
 msgid "Progress bar"
 msgstr "نمودار پیشرفت"
+
+#. module: html_editor
+#: model:ir.model.fields.selection,name:html_editor.selection__html_editor_converter_test__selection_str__c
+msgid "Qu'est-ce qu'il fout ce maudit pancake, tabernacle ?"
+msgstr "این پنکیک لعنتی چه کار می‌کند، تبریک؟"
+
+#. module: html_editor
+#: model:ir.model.fields.selection,name:html_editor.selection__html_editor_converter_test__selection_str__a
+msgid "Qu'il n'est pas arrivé à Toronto"
+msgstr "او به تورنتو نرسیده است"
+
+#. module: html_editor
+#: model:ir.model.fields.selection,name:html_editor.selection__html_editor_converter_test__selection_str__b
+msgid "Qu'il était supposé arriver à Toronto"
+msgstr "که او قرار بود به تورنتو برسد"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1426,21 +1446,113 @@ msgid "Quote"
 msgstr "نقل‌قول"
 
 #. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb
+msgid "Qweb"
+msgstr "Qweb"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field
+msgid "Qweb Field"
+msgstr "فیلد Qweb"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_contact
+msgid "Qweb Field Contact"
+msgstr "میدان Qweb تماس"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_date
+msgid "Qweb Field Date"
+msgstr "فیلد تاریخ Qweb"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_datetime
+msgid "Qweb Field Datetime"
+msgstr "میدان Qweb تاریخ و زمان"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_duration
+msgid "Qweb Field Duration"
+msgstr "فیلد مدت زمان Qweb"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_float
+msgid "Qweb Field Float"
+msgstr "فیلد فلو Qweb"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_html
+msgid "Qweb Field HTML"
+msgstr "فیلد HTML کیووب"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_image
+msgid "Qweb Field Image"
+msgstr "تصویر فیلد کیو وب"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_integer
+msgid "Qweb Field Integer"
+msgstr "فیلد Qweb عدد صحیح"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_many2one
+msgid "Qweb Field Many to One"
+msgstr "فیلد Qweb بسیاری به یکی"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_monetary
+msgid "Qweb Field Monetary"
+msgstr "فیلد پولی Qweb"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_relative
+msgid "Qweb Field Relative"
+msgstr "فیلد نسبی Qweb"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_selection
+msgid "Qweb Field Selection"
+msgstr "انتخاب فیلد Qweb"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_text
+msgid "Qweb Field Text"
+msgstr "فیلد متن Qweb"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_qweb_field_qweb
+msgid "Qweb Field qweb"
+msgstr "فیلد کیو‌وب qweb"
+
+#. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Radial"
 msgstr "رادیال"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/core/history_plugin.js:0
+msgid "Redo"
+msgstr "<div>انجام مجدد</div>"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/backend/video/video.xml:0
+msgid "Remove"
+msgstr "حذف"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Remove (DELETE)"
-msgstr "حذف کنید (حذف)"
+msgid "Remove (DELETE) image"
+msgstr "حذف (DELETE) تصویر"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
-msgid "Remove Format"
+msgid "Remove Format (Ctrl + Space)"
 msgstr ""
 
 #. module: html_editor
@@ -1448,7 +1560,7 @@ msgstr ""
 #: code:addons/html_editor/static/src/main/link/link_plugin.js:0
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Remove Link"
-msgstr ""
+msgstr "حذف لینک"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1458,21 +1570,40 @@ msgstr "حذف ستون‌ها"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.js:0
+msgid "Removes referrer information sent to the target site"
+msgstr "اطلاعات ارجاع دهنده ارسال شده به سایت مقصد را حذف می‌کند"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+#: code:addons/html_editor/static/src/others/embedded_components/backend/video/video.xml:0
+msgid "Replace"
+msgstr "جایگزین"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Replace URL with its title"
+msgstr "جایگزینی URL با عنوان آن"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Replace URL with its title?"
-msgstr ""
+msgstr "URL با عنوان آن جایگزین شود؟"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Replace icon"
+msgstr "جایگزینی آیکون"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_plugin.js:0
 msgid "Replace media"
 msgstr "جایگزینی رسانه"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_selector.xml:0
-msgid "Reset"
-msgstr "تنظیم مجدد"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1483,32 +1614,56 @@ msgstr "تنظیم مجدد تصویر"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
-msgid "Reset Size"
-msgstr "تنظیم مجدد اندازه"
+msgid "Reset column size"
+msgstr "بازنشانی اندازه ستون"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_menu.js:0
+msgid "Reset row size"
+msgstr "بازنشانی اندازه سطر"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_menu.js:0
+msgid "Reset table size"
+msgstr "بازنشانی اندازه جدول"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Resize icon 1x"
+msgstr "تغییر اندازه آیکون 1x"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Resize icon 2x"
+msgstr "تغییر اندازه آیکون 2x"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Resize icon 3x"
+msgstr "تغییر اندازه آیکون 3x"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Resize icon 4x"
+msgstr "تغییر اندازه آیکون 4x"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
+msgid "Resize icon 5x"
+msgstr "تغییر اندازه آیکون 5x"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Resize Default"
-msgstr "تغییر اندازه پیش‌فرض"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Resize Full"
-msgstr "تغییر اندازه به صورت کامل"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Resize Half"
-msgstr "نیمه تغییر اندازه"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Resize Quarter"
-msgstr "تنظیم اندازه به یک‌چهارم"
+msgid "Resize image"
+msgstr "تغییر اندازه تصویر"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1530,9 +1685,9 @@ msgstr "چرخاندن به راست"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/image_description.xml:0
-msgid "Save"
-msgstr "ذخیره"
+#: code:addons/html_editor/static/src/main/media/media_dialog/search_media.xml:0
+msgid "Search"
+msgstr "جستجو"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1554,9 +1709,21 @@ msgstr "جستجوی تصویر"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
-msgid "Second color %"
-msgstr ""
+#: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.xml:0
+msgid "Search the web for royalty-free images"
+msgstr "جستجو در وب برای تصاویر بدون حق کپی‌رایت"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_color_plugin.js:0
+msgid "Select Background Color"
+msgstr "انتخاب رنگ پس‌زمینه"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/icon_color_plugin.js:0
+msgid "Select Font Color"
+msgstr "انتخاب رنگ فونت"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1566,45 +1733,75 @@ msgstr "انتخاب رسانه"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
-msgid "Send a message"
-msgstr "فرستادن پیام"
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Select button shape"
+msgstr "انتخاب شکل دکمه"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/core/dom_plugin.js:0
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Select button size"
+msgstr "انتخاب سایز دکمه"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_family_plugin.js:0
+msgid "Select font family"
+msgstr "انتخاب خانواده فونت"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+msgid "Select font size"
+msgstr "انتخاب اندازه فونت"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+msgid "Select font style"
+msgstr "انتخاب استایل فونت"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/core/format_plugin.js:0
+msgid "Selection has no format"
+msgstr "انتخاب فرمتی ندارد"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/separator_plugin.js:0
 msgid "Separator"
 msgstr "جداکننده"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Shape: Circle"
-msgstr "شكل: دایره"
+msgid "Set image padding"
+msgstr "تنظیم اندازه داخلی تصویر"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Shape: Rounded"
-msgstr "شکل: گرد"
+msgid "Set shape: Circle"
+msgstr "تنظیم شکل: دایره"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Shape: Shadow"
-msgstr ""
+msgid "Set shape: Rounded"
+msgstr "تنظیم شکل: گوشه گرد"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_plugin.js:0
-msgid "Shape: Thumbnail"
-msgstr "شکل: تصویر بندانگشتی"
+msgid "Set shape: Shadow"
+msgstr "تنظیم شکل: سایه"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
-msgid "Shorten"
-msgstr ""
+#: code:addons/html_editor/static/src/main/media/image_plugin.js:0
+msgid "Set shape: Thumbnail"
+msgstr "تنظیم شکل: تصویر کوچک"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1614,13 +1811,21 @@ msgstr "نمایش تصاویر بهینه‌شده"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/signature_plugin.js:0
-msgid "Signature"
-msgstr "امضا"
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid ""
+"Showing all differences between the current version and the selected one "
+"updated by"
+msgstr "نمایش تمام تفاوت‌های بین نسخه فعلی و نسخه انتخاب شده که توسط"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "Showing the document as it was on"
+msgstr "نمایش سند به همان شکلی که در این تاریخ بود: "
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Size"
 msgstr "اندازه"
 
@@ -1637,44 +1842,36 @@ msgid "Small section heading"
 msgstr "عنوان بخش کوچک"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/color_selector.xml:0
-msgid "Solid"
-msgstr "جامد"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Something went wrong!"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Sorry, we could not find your drawing, please verify that the URL is valid."
-msgstr ""
-
-#. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Sorry, we could not generate a response. Please try again later."
-msgstr ""
-"<p>متأسفیم، نتوانستیم پاسخی ایجاد کنیم. لطفا بعدا دوباره تلاش کنید.</p>"
+msgstr "<p>متأسفیم، نتوانستیم پاسخی ایجاد کنیم. لطفا بعدا دوباره تلاش کنید.</p>"
 
 #. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Sorry, your prompt is too long. Try to say it in fewer words."
 msgstr ""
-"متاسفم، درخواست شما بیش از حد طولانی است. سعی کنید آن را با کلمات کمتری بیان"
-" کنید."
+"متاسفم، درخواست شما بیش از حد طولانی است. سعی کنید آن را با کلمات کمتری بیان "
+"کنید."
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "Split view"
+msgstr "نمای تقسیم شده"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/star_plugin.js:0
 msgid "Stars"
-msgstr ""
+msgstr "ستاره"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
+msgid "Start at"
+msgstr "شروع در"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1708,9 +1905,16 @@ msgstr "میز"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/core/table_of_content/table_of_content.xml:0
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/table_of_content_plugin/table_of_content_plugin.js:0
-msgid "Table Of Content"
-msgstr ""
+msgid "Table of Contents"
+msgstr "فهرست مطالب"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.js:0
+msgid "Tells search engines not to follow this link"
+msgstr "به موتورهای جستجو می‌گوید که این لینک را دنبال نکنند"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1720,9 +1924,9 @@ msgstr "متن"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "The Excalidraw URL is not valid."
-msgstr ""
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "Text Color"
+msgstr "رنگ متن"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1735,6 +1939,30 @@ msgstr "به نظر می‌رسد که URL کار نمی‌کند."
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "The URL seems valid."
 msgstr "به نظر می‌رسد URL معتبر است."
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/models/ir_qweb_fields.py:0
+msgid "The datetime %(value)s does not match the format %(format)s"
+msgstr "تاریخ و زمان %(value)s با قالب %(format)s مطابقت ندارد"
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/tools.py:0
+msgid ""
+"The document was already saved from someone with a different history for "
+"model \"%(model)s\", field \"%(field)s\" with id \"%(id)d\"."
+msgstr ""
+"سند قبلاً توسط شخص دیگری با تاریخچه متفاوت برای مدل «%(model)s»، فیلد «%(field)"
+"s» با شناسه «%(id)d» ذخیره شده بود."
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/attachment_error.xml:0
+msgid ""
+"The image could not be deleted because it is used in the\n"
+"                following pages or views:"
+msgstr "تصویر را نمی‌توان حذف کرد زیرا در صفحات یا نماهای زیر استفاده شده است:"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1753,12 +1981,6 @@ msgstr "آدرس اینترنتی ارائه شده نامعتبر است"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "The provided url is not valid"
 msgstr "آدرس اینترنتی ارائه شده معتبر نیست"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
-msgid "Thinking..."
-msgstr "در حال فکر کردن..."
 
 #. module: html_editor
 #. odoo-javascript
@@ -1786,6 +2008,12 @@ msgstr "این تصویر یک تصویر خارجی است"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "This is the current version, nothing to compare."
+msgstr "این نسخه فعلی است، چیزی برای مقایسه وجود ندارد."
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_crop.js:0
 msgid ""
 "This type of image is not supported for cropping.<br/>If you want to crop "
@@ -1793,6 +2021,12 @@ msgid ""
 msgstr ""
 "این نوع تصویر برای برش پشتیبانی نمی‌شود.<br/>اگر می‌خواهید آن را برش دهید، "
 "لطفاً ابتدا آن را از منبع اصلی دانلود کرده و در اودوو آپلود کنید."
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/list/list_plugin.js:0
+msgid "Toggle List"
+msgstr "تغییر حالت لیست"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1814,9 +2048,21 @@ msgstr "ایتالیک را تغییر دهید"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/toggle_block_plugin/toggle_block_plugin.js:0
+msgid "Toggle list"
+msgstr "تغییر حالت لیست"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Toggle strikethrough"
 msgstr "تغییر حالت خط‌خوردگی"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/toggle_block_plugin/toggle_block_plugin.js:0
+msgid "Toggle title"
+msgstr "تغییر حالت عنوان"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1844,22 +2090,16 @@ msgstr "تبدیل تصویر (برای بازنشانی تغییرات، دو �
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/language_selector.xml:0
-msgid "Translate"
-msgstr "ترجمه"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
+#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_plugin.js:0
 msgid "Translate with AI"
-msgstr ""
+msgstr "ترجمه با هوش.م"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
 msgid "Translating..."
-msgstr ""
+msgstr "در حال ترجمه"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1869,7 +2109,19 @@ msgstr "سعی کنید با کلیدواژه‌های دیگر جستجو کن�
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
+#: code:addons/html_editor/static/src/main/table/table_menu.js:0
+msgid "Turn into header"
+msgstr "تبدیل به سربرگ"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_menu.js:0
+msgid "Turn into row"
+msgstr "تبدیل به ردیف"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
 msgid "Type"
 msgstr "نوع"
 
@@ -1877,19 +2129,13 @@ msgstr "نوع"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
 msgid "Type \"/\" for commands"
-msgstr "کد \"/\" برای دستورات را وارد کنید"
+msgstr "بنویسید \"/\" برای دستورات"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Type your URL"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "Type your link label"
-msgstr ""
+msgstr "URL خود را وارد کنید"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1899,9 +2145,21 @@ msgstr "URL"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "Upload File"
-msgstr "آپلود فایل"
+#: code:addons/html_editor/static/src/main/link/link_plugin.js:0
+msgid "Unable to create a link on the current selection."
+msgstr "امکان ایجاد لینک بر روی انتخاب فعلی وجود ندارد."
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/core/history_plugin.js:0
+msgid "Undo"
+msgstr "باطل کردن"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "Unified view"
+msgstr "نمای یکپارچه"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1912,21 +2170,14 @@ msgstr "یک سند بارگذاری کنید"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/file_plugin.js:0
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/file_plugin/file_plugin.js:0
 msgid "Upload a file"
-msgstr ""
+msgstr "آپلود فایل"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.js:0
 msgid "Upload an image"
 msgstr "یک تصویر را بارگذاری کنید"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.js:0
-msgid "Uploaded image's format is not supported. Try with: "
-msgstr "فرمت تصویر آپلود شده پشتیبانی نمی‌شود. امتحان کنید با:"
 
 #. module: html_editor
 #. odoo-python
@@ -1936,9 +2187,15 @@ msgstr "فرمت تصویر بارگذاری‌شده پشتیبانی نمی‌
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_plugin.js:0
-msgid "Video Link"
-msgstr ""
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "Version date"
+msgstr "تاریخ نسخه"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_align_plugin.js:0
+msgid "Vertical align table cells content"
+msgstr "تراز عمودی محتوای سلول‌های جدول"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1948,13 +2205,14 @@ msgstr "کد ویدئو"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/video/video.xml:0
+#: code:addons/html_editor/static/src/others/embedded_components/core/video/readonly_video.xml:0
 msgid "Video player"
-msgstr ""
+msgstr "پخش کننده ویدیو"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.js:0
+#: code:addons/html_editor/static/src/fields/x2many_field/custom_media_dialog.js:0
+#: code:addons/html_editor/static/src/main/media/video_plugin.js:0
 msgid "Videos"
 msgstr "ویدئوها"
 
@@ -1963,6 +2221,29 @@ msgstr "ویدئوها"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.js:0
 msgid "Videos are muted when autoplay is enabled"
 msgstr "ویدیوها زمانی که پخش خودکار فعال است بی‌صدا هستند"
+
+#. module: html_editor
+#: model:ir.model,name:html_editor.model_ir_ui_view
+msgid "View"
+msgstr "نما"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "View Content"
+msgstr "مشاهده محتوا"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "View comparison"
+msgstr "مشاهده مقایسه"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "View content"
+msgstr "مشاهده محتوا"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1987,9 +2268,32 @@ msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/others/embedded_components/plugins/caption_plugin/caption_plugin.js:0
+msgid "Write a caption..."
+msgstr "یک زیرنویس بنویسید..."
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Yes"
 msgstr "بله"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.js:0
+msgid ""
+"You can not replace a field by this image. If you want to use this image, "
+"first save it on your computer and then upload it here."
+msgstr ""
+"شما نمی توانید یک فیلد را با این تصویر جایگزین کنید. اگر می خواهید از این "
+"تصویر استفاده کنید، ابتدا آن را در رایانه خود ذخیره کنید و سپس در اینجا "
+"آپلود کنید."
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/media/media_dialog/image_selector.xml:0
+msgid "You can not use this image in a field"
+msgstr "شما نمی توانید از این تصویر در یک فیلد استفاده کنید"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2006,8 +2310,7 @@ msgid ""
 "You have reached the maximum number of requests for this service. Try again "
 "later."
 msgstr ""
-"شما به حداکثر تعداد درخواست‌ها برای این خدمت رسیده‌اید. بعداً دوباره تلاش "
-"کنید."
+"شما به حداکثر تعداد درخواست‌ها برای این خدمت رسیده‌اید. بعداً دوباره تلاش کنید."
 
 #. module: html_editor
 #. odoo-javascript
@@ -2024,15 +2327,9 @@ msgstr "برای ایجاد یک پیوست، باید یا داده‌ها یا
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
-msgid "Youku"
-msgstr "یوتکو"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/video/video.xml:0
+#: code:addons/html_editor/static/src/others/embedded_components/core/video/readonly_video.xml:0
 msgid "Your browser does not support iframe."
-msgstr ""
+msgstr "مرورگر شما iframe را پشتیبانی نمی کند."
 
 #. module: html_editor
 #. odoo-javascript
@@ -2050,25 +2347,13 @@ msgstr "یوتیوب"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_crop.xml:0
 msgid "Zoom In"
-msgstr "بزرگ‌نمایی"
+msgstr "بزرگنمایی"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_crop.xml:0
 msgid "Zoom Out"
-msgstr "بزرگنمایی کمتر"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "all"
-msgstr "همه"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
-msgid "alternatives..."
-msgstr "الترجمه‌ها..."
+msgstr "بزرگنمایی به عقب"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2078,15 +2363,15 @@ msgstr "و"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "database"
-msgstr ""
+#: code:addons/html_editor/static/src/main/font/gradient_picker/gradient_picker.xml:0
+msgid "deg"
+msgstr "درجه"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
-msgid "deg"
-msgstr ""
+#: code:addons/html_editor/static/src/main/separator_plugin.js:0
+msgid "divider"
+msgstr "جداکننده"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2096,9 +2381,9 @@ msgstr "سند"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "e.g. https://link.excalidraw.com/..."
-msgstr ""
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "e.g. https://www.odoo.com"
+msgstr "مثلا https://www.odoo.com"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2108,9 +2393,21 @@ msgstr "متن فایل:"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "media-library"
+#: code:addons/html_editor/static/src/main/separator_plugin.js:0
+msgid "line"
+msgstr "خط"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "noopener"
 msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.xml:0
+msgid "on"
+msgstr "در"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2120,24 +2417,35 @@ msgstr "یا"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
+msgid "px"
+msgstr "px"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/font/font_plugin.js:0
+msgid "title"
+msgstr "عنوان"
+
+#. module: html_editor
+#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
 msgstr "ویدیوها"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlDescription}}"
-msgstr ""
+#: model:ir.model,name:html_editor.model_ir_websocket
+msgid "websocket message handling"
+msgstr "مدیریت پیام‌های وب‌سوکت"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlTitle}}"
+#: code:addons/html_editor/static/src/main/table/table_picker.xml:0
+msgid "x"
 msgstr ""
 
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.url}}"
-msgstr ""
+#~ msgid "Copy Link"
+#~ msgstr "کپی لینک"
+
+#~ msgid "Shape"
+#~ msgstr "شکل"

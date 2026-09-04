@@ -21,14 +21,13 @@ Forwarding leads can be done for one or several leads at a time. The action is a
 The automatic assignment is figured from the weight of partner levels and the geolocalization. Partners get leads that are located around them.
 
     """,
-    'depends': ['base_geolocalize', 'crm', 'account',
+    'depends': ['base_geolocalize', 'crm', 'account', 'partnership',
                 'website_partner', 'website_google_map', 'portal'],
     'data': [
         'data/crm_lead_merge_template.xml',
         'data/crm_tag_data.xml',
         'data/mail_template_data.xml',
         'data/res_partner_activation_data.xml',
-        'data/res_partner_grade_data.xml',
         'security/ir.model.access.csv',
         'security/ir_rule.xml',
         'wizard/crm_forward_to_partner_view.xml',
@@ -39,7 +38,6 @@ The automatic assignment is figured from the weight of partner levels and the ge
         'views/website_crm_partner_assign_templates.xml',
         'views/partner_assign_menus.xml',
         'report/crm_partner_report_view.xml',
-        'views/snippets.xml',
     ],
     'demo': [
         'data/res_partner_demo.xml',
@@ -49,8 +47,18 @@ The automatic assignment is figured from the weight of partner levels and the ge
     'installable': True,
     'assets': {
         'web.assets_frontend': [
-            'website_crm_partner_assign/static/src/**/*',
+            'website_crm_partner_assign/static/src/interactions/**/*',
+        ],
+        'website.website_builder_assets': [
+            'website_crm_partner_assign/static/src/website_builder/**/*',
+        ],
+        'html_builder.assets_inside_builder_iframe': [
+            'website_crm_partner_assign/static/src/scss/crm_partner_assign.scss',
+        ],
+        'web.assets_tests': [
+            'website_crm_partner_assign/static/tests/tours/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

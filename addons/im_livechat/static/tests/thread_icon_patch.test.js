@@ -13,17 +13,16 @@ test("Public website visitor is typing", async () => {
     const pyEnv = await startServer();
     const guestId = pyEnv["mail.guest"].create({ name: "Visitor 20" });
     const channelId = pyEnv["discuss.channel"].create({
-        anonymous_name: "Visitor 20",
         channel_member_ids: [
-            Command.create({ partner_id: serverState.partnerId }),
-            Command.create({ guest_id: guestId }),
+            Command.create({ partner_id: serverState.partnerId, livechat_member_type: "agent" }),
+            Command.create({ guest_id: guestId, livechat_member_type: "visitor" }),
         ],
         channel_type: "livechat",
         livechat_operator_id: serverState.partnerId,
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-Discuss-header .o-mail-ThreadIcon .fa.fa-comments");
+    await contains(".o-mail-DiscussContent-header .o-mail-ThreadIcon .fa.fa-circle-o");
     const channel = pyEnv["discuss.channel"].search_read([["id", "=", channelId]])[0];
     // simulate receive typing notification from livechat visitor "is typing"
     withGuest(guestId, () =>
@@ -32,8 +31,8 @@ test("Public website visitor is typing", async () => {
             channel_id: channel.id,
         })
     );
-    await contains(".o-mail-Discuss-header .o-discuss-Typing-icon");
+    await contains(".o-mail-DiscussContent-header .o-discuss-Typing-icon");
     await contains(
-        ".o-mail-Discuss-header .o-discuss-Typing-icon[title='Visitor 20 is typing...']"
+        ".o-mail-DiscussContent-header .o-discuss-Typing-icon[title='Visitor 20 is typing...']"
     );
 });

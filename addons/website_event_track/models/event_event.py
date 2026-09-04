@@ -4,7 +4,7 @@
 from odoo import api, fields, models, _
 
 
-class Event(models.Model):
+class EventEvent(models.Model):
     _inherit = "event.event"
 
     track_ids = fields.One2many('event.track', 'event_id', 'Tracks')
@@ -56,6 +56,14 @@ class Event(models.Model):
             event.tracks_tag_ids = event.track_ids.mapped('tag_ids').filtered(lambda tag: tag.color != 0).ids
 
     # ------------------------------------------------------------
+    # BUSINESS METHODS
+    # ------------------------------------------------------------
+
+    def _has_published_track(self):
+        self.ensure_one()
+        return bool(self.track_ids.filtered('is_published'))
+
+    # ------------------------------------------------------------
     # WEBSITE MENU MANAGEMENT
     # ------------------------------------------------------------
 
@@ -65,11 +73,16 @@ class Event(models.Model):
     def toggle_website_track_proposal(self, val):
         self.website_track_proposal = val
 
+    def copy_event_menus(self, old_events):
+        super().copy_event_menus(old_events)
+        for new_event in self:
+            (new_event.track_menu_ids + new_event.track_proposal_menu_ids).menu_id.parent_id = new_event.menu_id
+
     def _get_menu_update_fields(self):
-        return super(Event, self)._get_menu_update_fields() + ['website_track', 'website_track_proposal']
+        return super()._get_menu_update_fields() + ['website_track', 'website_track_proposal']
 
     def _update_website_menus(self, menus_update_by_field=None):
-        super(Event, self)._update_website_menus(menus_update_by_field=menus_update_by_field)
+        super()._update_website_menus(menus_update_by_field=menus_update_by_field)
         for event in self:
             if event.menu_id and (not menus_update_by_field or event in menus_update_by_field.get('website_track')):
                 event._update_website_menu_entry('website_track', 'track_menu_ids', 'track')
@@ -77,14 +90,15 @@ class Event(models.Model):
                 event._update_website_menu_entry('website_track_proposal', 'track_proposal_menu_ids', 'track_proposal')
 
     def _get_menu_type_field_matching(self):
-        res = super(Event, self)._get_menu_type_field_matching()
+        res = super()._get_menu_type_field_matching()
         res['track_proposal'] = 'website_track_proposal'
         return res
 
     def _get_website_menu_entries(self):
         self.ensure_one()
-        return super(Event, self)._get_website_menu_entries() + [
-            (_('Talks'), '/event/%s/track' % self.env['ir.http']._slug(self), False, 10, 'track'),
-            (_('Agenda'), '/event/%s/agenda' % self.env['ir.http']._slug(self), False, 70, 'track'),
-            (_('Talk Proposals'), '/event/%s/track_proposal' % self.env['ir.http']._slug(self), False, 15, 'track_proposal')
+        return super()._get_website_menu_entries() + [
+            (_('Talks'), '#', False, 10, 'track', False),
+            (_('Talks'), '/event/%s/track' % self.env['ir.http']._slug(self), False, 10, 'track', 'track'),
+            (_('Agenda'), '/event/%s/agenda' % self.env['ir.http']._slug(self), False, 15, 'track', 'track'),
+            (_('Propose a talk'), '/event/%s/track_proposal' % self.env['ir.http']._slug(self), False, 20, 'track_proposal', 'track')
         ]

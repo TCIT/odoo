@@ -1,31 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* certificate
-# 
-# Translators:
-# Konsta Aavaranta, 2024
-# Jussi Lehto <jussi@gulfeo.com>, 2024
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
-# Martin Trigaux, 2024
-# Simo Suurla <simo@suurla.fi>, 2024
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
-# 
+# * certificate
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:39+0000\n"
-"PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
+"PO-Revision-Date: 2026-08-06 16:08+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"certificate/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: certificate
 #. odoo-python
@@ -96,7 +90,7 @@ msgstr "Varmenteen soveltamisala"
 #: model:ir.actions.act_window,name:certificate.certificate_certificate_action_view_list
 #: model_terms:ir.ui.view,arch_db:certificate.res_config_settings_view_form
 msgid "Certificates"
-msgstr "Todistukset"
+msgstr "Sertifikaatit"
 
 #. module: certificate
 #: model_terms:ir.ui.view,arch_db:certificate.res_config_settings_view_form
@@ -181,6 +175,11 @@ msgid "Invalid"
 msgstr "Virheellinen"
 
 #. module: certificate
+#: model:ir.model.fields,field_description:certificate.field_certificate_certificate__issuer_cert_id
+msgid "Issuer Certificate"
+msgstr "Myöntäjän varmenne"
+
+#. module: certificate
 #: model_terms:ir.ui.view,arch_db:certificate.certificate_key_view_list
 msgid "Key"
 msgstr "Avain"
@@ -227,6 +226,14 @@ msgstr ""
 "Varmista, että käytät asiakirjojen allekirjoittamiseen yksityistä avainta."
 
 #. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/key.py:0
+msgid "Make sure to use a public key to verify the signature of documents."
+msgstr ""
+"Varmista, että käytät julkista avainta asiakirjojen allekirjoituksen "
+"vahvistamiseen."
+
+#. module: certificate
 #: model_terms:ir.ui.view,arch_db:certificate.res_config_settings_view_form
 msgid "Manage your certificates"
 msgstr "Hallitse varmenteita"
@@ -248,7 +255,7 @@ msgstr "Nimi"
 msgid ""
 "No private key linked to the certificate, it is required to sign documents."
 msgstr ""
-"Varmenteeseen ei liity yksityistä avainta, sitä tarvitaan asiakirjojen "
+"Todistukseen ei liity yksityistä avainta, se vaaditaan asiakirjojen "
 "allekirjoittamiseen."
 
 #. module: certificate
@@ -350,19 +357,33 @@ msgstr "Varmenne ja julkinen avain eivät ole yhteensopivia."
 
 #. module: certificate
 #: model:ir.model.fields,help:certificate.field_certificate_certificate__date_end
-msgid "The date on which the certificate expires (UTC)"
-msgstr "Varmenteen voimassaolon päättymispäivä (UTC)"
+msgid "The date on which the certificate expires"
+msgstr "Päivämäärä, jolloin todistus vanhenee"
 
 #. module: certificate
 #: model:ir.model.fields,help:certificate.field_certificate_certificate__date_start
-msgid "The date on which the certificate starts to be valid (UTC)"
-msgstr "Päivämäärä, jolloin varmenne alkaa olla voimassa (UTC)"
+msgid "The date on which the certificate starts to be valid"
+msgstr "Päivämäärä, jona sertifikaatti astuu voimaan"
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/key.py:0
+msgid "The key size should be at least 512 bytes."
+msgstr "Avaimen koon tulee olla vähintään 512 tavua."
 
 #. module: certificate
 #. odoo-python
 #: code:addons/certificate/models/key.py:0
 msgid "The private key could not be loaded."
 msgstr "Yksityistä avainta ei voitu ladata."
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/key.py:0
+msgid "The public exponent should be 65537 (or 3 for legacy purposes)."
+msgstr ""
+"Julkisen eksponentin tulisi olla 65537 (tai 3 käytöstä poistuneiden "
+"järjestelmien kohdalla)."
 
 #. module: certificate
 #. odoo-python
@@ -389,6 +410,14 @@ msgid ""
 "erroneous."
 msgstr ""
 "Tätä varmentetta ei voitu ladata. Joko sisältö tai salasana on virheellinen."
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/certificate.py:0
+msgid ""
+"This certificate could not be loaded. Please provide the certificate "
+"password."
+msgstr "Tätä varmentetta ei voitu ladata. Anna varmenteen salasana."
 
 #. module: certificate
 #. odoo-python
@@ -429,8 +458,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/certificate/models/key.py:0
 msgid ""
-"Unsupported asymmetric cryptography algorithm '%s'. Currently supported: EC,"
-" RSA."
+"Unsupported asymmetric cryptography algorithm '%s'. Currently supported for "
+"signature: ED25519, EC and RSA."
+msgstr ""
+"Ei-tuettu epäsymmetrinen salausalgoritmi '%s'. Tällä hetkellä tuettu "
+"allekirjoituksille: ED25519, EC ja RSA."
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/key.py:0
+msgid ""
+"Unsupported asymmetric cryptography algorithm '%s'. Currently supported: EC, "
+"RSA."
 msgstr ""
 "Ei tuettu epäsymmetrinen salausalgoritmi \"%s\". Tällä hetkellä tuettu: EC, "
 "RSA."
@@ -438,12 +477,16 @@ msgstr ""
 #. module: certificate
 #: model:ir.model.fields,help:certificate.field_certificate_certificate__public_key_id
 msgid ""
-"Used to set a public key in case the one self-contained in the certificate is erroneus.\n"
-"                When a public key is set this way, it will be used instead of the one in the certificate.\n"
+"Used to set a public key in case the one self-contained in the certificate "
+"is erroneus.\n"
+"                When a public key is set this way, it will be used instead "
+"of the one in the certificate.\n"
 "             "
 msgstr ""
-"Käytetään julkisen avaimen asettamiseen siltä varalta, että varmenteen sisältämä avain on virheellinen.\n"
-"                Kun julkinen avain asetetaan tällä tavalla, sitä käytetään varmenteessa olevan avaimen sijasta.\n"
+"Käytetään julkisen avaimen asettamiseen siltä varalta, että varmenteen "
+"sisältämä avain on virheellinen.\n"
+"                Kun julkinen avain asetetaan tällä tavalla, sitä käytetään "
+"varmenteessa olevan avaimen sijasta.\n"
 "             "
 
 #. module: certificate

@@ -4,9 +4,7 @@ from collections import defaultdict
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.tools import float_round, format_list
-
-from odoo.addons.base.models.res_partner import WARNING_HELP, WARNING_MESSAGE
+from odoo.tools import float_round
 
 
 class ProductTemplate(models.Model):
@@ -20,10 +18,7 @@ class ProductTemplate(models.Model):
         help="Manually set quantities on order: Invoice based on the manually entered quantity, without creating an analytic account.\n"
              "Timesheets on contract: Invoice based on the tracked hours on the related timesheet.\n"
              "Create a task and track hours: Create a task on the sales order validation and track the work hours.")
-    sale_line_warn = fields.Selection(
-        WARNING_MESSAGE, string="Sales Order Line",
-        help=WARNING_HELP, required=True, default="no-message")
-    sale_line_warn_msg = fields.Text(string="Message for Sales Order Line")
+    sale_line_warn_msg = fields.Text(string="Sales Order Line Warning")
     expense_policy = fields.Selection(
         selection=[
             ('no', "No"),
@@ -36,7 +31,7 @@ class ProductTemplate(models.Model):
     visible_expense_policy = fields.Boolean(
         string="Re-Invoice Policy visible", compute='_compute_visible_expense_policy')
     sales_count = fields.Float(
-        string="Sold", compute='_compute_sales_count', digits='Product Unit of Measure')
+        string="Sold", compute='_compute_sales_count', digits='Product Unit')
     invoice_policy = fields.Selection(
         selection=[
             ('order', "Ordered quantities"),
@@ -81,13 +76,10 @@ class ProductTemplate(models.Model):
         return tooltip
 
     def _prepare_invoicing_tooltip(self):
-        if self.invoice_policy == 'delivery':
+        if self.invoice_policy == 'delivery' and self.type != 'consu':
             return _("Invoice after delivery, based on quantities delivered, not ordered.")
-        elif self.invoice_policy == 'order':
-            if self.type == 'consu':
-                return _("You can invoice goods before they are delivered.")
-            elif self.type == 'service':
-                return _("Invoice ordered quantities as soon as this service is sold.")
+        elif self.invoice_policy == 'order' and self.type == 'service':
+            return _("Invoice ordered quantities as soon as this service is sold.")
         return ""
 
     def _prepare_service_tracking_tooltip(self):
@@ -111,7 +103,7 @@ class ProductTemplate(models.Model):
     @api.depends('product_variant_ids.sales_count')
     def _compute_sales_count(self):
         for product in self:
-            product.sales_count = float_round(sum([p.sales_count for p in product.with_context(active_test=False).product_variant_ids]), precision_rounding=product.uom_id.rounding)
+            product.sales_count = product.uom_id.round(sum(p.sales_count for p in product.with_context(active_test=False).product_variant_ids))
 
     @api.constrains('company_id')
     def _check_sale_product_company(self):
@@ -139,12 +131,13 @@ class ProductTemplate(models.Model):
                                         'with your company restriction instead, or leave them as '
                                         'shared product.', company=target_company.name, used_products=', '.join(used_products)))
 
+    @api.readonly
     def action_view_sales(self):
         action = self.env['ir.actions.actions']._for_xml_id('sale.report_all_channels_sales_action')
         action['domain'] = [('product_tmpl_id', 'in', self.ids)]
         action['context'] = {
             'pivot_measures': ['product_uom_qty'],
-            'active_id': self._context.get('active_id'),
+            'active_id': self.env.context.get('active_id'),
             'active_model': 'sale.report',
             'search_default_Sales': 1,
             'search_default_filter_order_date': 1,
@@ -205,7 +198,7 @@ class ProductTemplate(models.Model):
                 raise ValidationError(_(
                     "The product (%(product)s) has incompatible values: %(value_list)s",
                     product=val['name'],
-                    value_list=format_list(self.env, [field_descriptions[v] for v in incompatible_fields]),
+                    value_list=[field_descriptions[v] for v in incompatible_fields],
                 ))
 
     def get_single_product_variant(self):
@@ -227,12 +220,6 @@ class ProductTemplate(models.Model):
                 'has_optional_products': has_optional_products,
                 'is_combo': self.type == 'combo',
             })
-        if self.sale_line_warn != 'no-message':
-            res['sale_warning'] = {
-                'type': self.sale_line_warn,
-                'title': _("Warning for %s", self.name),
-                'message': self.sale_line_warn_msg,
-            }
         return res
 
     @api.model
@@ -242,11 +229,6 @@ class ProductTemplate(models.Model):
         :rtype: list
         """
         return ['no']
-
-    def _get_product_accounts(self):
-        product_accounts = super()._get_product_accounts()
-        product_accounts['downpayment'] = self.categ_id.property_account_downpayment_categ_id
-        return product_accounts
 
     ####################################
     # Product/combo configurator hooks #
@@ -310,10 +292,9 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _get_additional_configurator_data(
-        self, product_or_template, date, currency, pricelist, **kwargs
+        self, product_or_template, date, currency, pricelist, *, uom=None, **kwargs
     ):
-        """ Return additional data about the specified product, to be used by the product and combo
-        configurators.
+        """Return additional data about the specified product.
 
         This is a hook meant to append module-specific data in overriding modules.
 
@@ -322,6 +303,7 @@ class ProductTemplate(models.Model):
         :param datetime date: The date to use to compute prices.
         :param res.currency currency: The currency to use to compute prices.
         :param product.pricelist pricelist: The pricelist to use to compute prices.
+        :param uom.uom uom: The uom to use to compute prices.
         :param dict kwargs: Locally unused data passed to overrides.
         :rtype: dict
         :return: A dict containing additional data about the specified product.

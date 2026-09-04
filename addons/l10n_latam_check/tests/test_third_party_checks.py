@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from freezegun import freeze_time
+from unittest.mock import patch
+from datetime import datetime, timedelta
+
 from odoo.addons.l10n_latam_check.tests.common import L10nLatamCheckTest
 from odoo.exceptions import ValidationError, UserError
 from odoo.tests.common import tagged
@@ -54,7 +58,7 @@ class TestThirdChecks(L10nLatamCheckTest):
         delivery.action_post()
         self.assertFalse(check.current_journal_id, 'Current journal was not computed properly on delivery')
         # check dont delivery twice
-        with self.assertRaisesRegex(ValidationError, "it seems it has been moved by another payment"), self.cr.savepoint():
+        with self.assertRaisesRegex(ValidationError, "it seems it has been moved by another payment"):
             self.env['account.payment'].create(vals).action_post()
 
         # Check Return / Rejection
@@ -70,7 +74,7 @@ class TestThirdChecks(L10nLatamCheckTest):
         supplier_return.action_post()
         self.assertEqual(check.current_journal_id, self.rejected_check_journal, 'Current journal was not computed properly on return')
         # check dont return twice
-        with self.assertRaisesRegex(ValidationError, "Some checks are already in hand and can't be received again"), self.cr.savepoint():
+        with self.assertRaisesRegex(ValidationError, "Some checks are already in hand and can't be received again"):
             self.env['account.payment'].create(vals).action_post()
 
         # Check Claim/Return to customer
@@ -85,7 +89,7 @@ class TestThirdChecks(L10nLatamCheckTest):
         customer_return.action_post()
         self.assertFalse(check.current_journal_id, 'Current journal was not computed properly on customer return')
         # check dont claim twice
-        with self.assertRaisesRegex(ValidationError, "Some checks are not anymore in journal,"), self.cr.savepoint():
+        with self.assertRaisesRegex(ValidationError, "Some checks are not anymore in journal,"):
             self.env['account.payment'].create(vals).action_post()
 
         operations = self.env['account.payment'].search([('l10n_latam_move_check_ids', '=', check.id), ('state', '!=', 'draft')], order="date desc, id desc")
@@ -139,3 +143,69 @@ class TestThirdChecks(L10nLatamCheckTest):
         check2 = payment2.l10n_latam_new_check_ids[0]
         self.env['l10n_latam.payment.mass.transfer'].with_context(
             active_model='l10n_latam.check', active_ids=[check.id, check2.id]).create({'destination_journal_id': self.third_party_check_journal.id})._create_payments()
+
+    def test_05_check_current_journal_with_both_operations(self):
+        # -------------------------------
+        # Case 1: inbound first, then outbound
+        # -------------------------------
+        inbound_payment = self.create_third_party_check()
+        check = inbound_payment.l10n_latam_new_check_ids[0]
+
+        # Check should be on hand after receiving
+        self.assertEqual(
+            check.current_journal_id,
+            self.third_party_check_journal,
+            "Check should be available after inbound operation"
+        )
+
+        # Create outbound payment and consume check
+        outbound_payment = self.env['account.payment'].create({
+            'l10n_latam_move_check_ids': [Command.set([check.id])],
+            'partner_id': self.partner_a.id,
+            'payment_type': 'outbound',
+            'journal_id': self.third_party_check_journal.id,
+            'payment_method_line_id': self.third_party_check_journal
+                ._get_available_payment_method_lines('outbound')
+                .filtered(lambda x: x.code == 'out_third_party_checks').id,
+        })
+        outbound_payment.action_post()
+
+        # Check should not be on hand after both operations
+        self.assertFalse(
+            check.current_journal_id,
+            "Check with both inbound and outbound operations should not have current_journal_id set"
+        )
+
+        # -------------------------------
+        # Case 2: outbound first, then inbound
+        # -------------------------------
+        first_now = datetime(2023, 11, 6, 8, 0, 0)
+        second_now = first_now + timedelta(seconds=1)
+
+        # Outbound creation with fixed now
+        with patch.object(self.env.cr, 'now', lambda: first_now), freeze_time(first_now):
+            outbound_payment_2 = self.env['account.payment'].create({
+                'partner_id': self.partner_a.id,
+                'payment_type': 'outbound',
+                'journal_id': self.third_party_check_journal.id,
+                'payment_method_line_id': self.third_party_check_journal
+                    ._get_available_payment_method_lines('outbound')
+                    .filtered(lambda x: x.code == 'out_third_party_checks').id,
+            })
+
+        # Inbound creation with slightly later now
+        with patch.object(self.env.cr, 'now', lambda: second_now), freeze_time(second_now):
+            inbound_payment_2 = self.create_third_party_check()
+            check_2 = inbound_payment_2.l10n_latam_new_check_ids[0]
+
+        # Link check to outbound
+        outbound_payment_2.write({'l10n_latam_move_check_ids': [Command.set([check_2.id])]})
+        outbound_payment_2.action_post()
+
+        inbound_payment_2.action_post()
+
+        # Check should also not be on hand in this order
+        self.assertFalse(
+            check_2.current_journal_id,
+            "Check should not be on hand even if outbound was created before inbound",
+        )

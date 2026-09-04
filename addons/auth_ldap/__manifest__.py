@@ -11,7 +11,11 @@
         'views/res_config_settings_views.xml',
     ],
     'external_dependencies': {
-        'python': ['ldap'],
+        'python': ['python-ldap'],
+        'apt': {
+            'python-ldap': 'python3-ldap',
+        },
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

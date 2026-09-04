@@ -1,7 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { Dialog } from "@web/core/dialog/dialog";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
-import { is24HourFormat } from "@web/core/l10n/dates";
+import { is24HourFormat } from "@web/core/l10n/time";
 import { registry } from "@web/core/registry";
 import { Field } from "@web/views/fields/field";
 import { Record } from "@web/model/record";
@@ -36,7 +36,14 @@ export class CalendarCommonPopover extends Component {
         this.date = null;
         this.dateDuration = null;
 
-        useExternalListener(window, "pointerdown", (e) => e.preventDefault(), { capture: true });
+        useExternalListener(window, "pointerdown", (e) => {
+            // Prevent the default behavior so the pointer down event only triggers the click-away callback (closing the popover).
+            // If the clicked element is the popover target, allow the default click and drag-&-drop events,
+            // which will also close the popover.
+            if (!e.target.closest(`.fc-event[data-event-id="${this.props.record.id}"]`)) {
+                e.preventDefault();
+            }
+        }, { capture: true });
 
         this.computeDateTimeAndDuration();
     }
@@ -45,13 +52,16 @@ export class CalendarCommonPopover extends Component {
         return this.props.model.activeFields;
     }
     get isEventEditable() {
-        return true;
+        return this.props.model.canEdit;
     }
     get isEventDeletable() {
         return this.props.model.canDelete;
     }
+    get isEventViewable() {
+        return true;
+    }
     get hasFooter() {
-        return this.isEventEditable || this.isEventDeletable;
+        return this.isEventEditable || this.isEventDeletable || this.isEventViewable;
     }
 
     isInvisible(fieldNode, record) {

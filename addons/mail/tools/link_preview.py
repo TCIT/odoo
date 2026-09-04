@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+import re
 from lxml import html
 import chardet
 import requests
@@ -22,12 +22,15 @@ def get_link_preview_from_url(url, request_session=None):
     (e.g. a lot of url could have the same domain).
     """
     # Some websites are blocking non browser user agent.
-    user_agent = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0'}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0',
+        'Odoo-Link-Preview': 'True',  # Used to identify coming from the link previewer
+    }
     try:
         if request_session:
-            response = request_session.get(url, timeout=3, headers=user_agent, allow_redirects=True, stream=True)
+            response = request_session.get(url, timeout=3, headers=headers, allow_redirects=True, stream=True)
         else:
-            response = requests.get(url, timeout=3, headers=user_agent, allow_redirects=True, stream=True)
+            response = requests.get(url, timeout=3, headers=headers, allow_redirects=True, stream=True)
     except requests.exceptions.RequestException:
         return False
     except LocationParseError:
@@ -73,7 +76,14 @@ def get_link_preview_from_html(url, response):
     except (UnicodeDecodeError, TypeError) as e:
         decoded_content = content.decode("utf-8", errors="ignore")
 
-    tree = html.fromstring(decoded_content)
+    try:
+        tree = html.fromstring(decoded_content)
+    except ValueError:
+        decoded_content = re.sub(
+            r"^<\?xml[^>]+\?>\s*", "", decoded_content, flags=re.IGNORECASE
+        )
+        tree = html.fromstring(decoded_content)
+
     og_title = tree.xpath('//meta[@property="og:title"]/@content')
     if og_title:
         og_title = og_title[0]

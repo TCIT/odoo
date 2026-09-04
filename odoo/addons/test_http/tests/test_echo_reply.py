@@ -1,10 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+import time
+from http import HTTPStatus
 
-from odoo.http import Request
-from odoo.tests import tagged
-from odoo.tests.common import new_test_user
+from odoo.http import Request, root, SESSION_ROTATION_INTERVAL
+from odoo.tests import Like, new_test_user, tagged
 from odoo.tools import mute_logger
 from odoo.addons.test_http.controllers import CT_JSON
 
@@ -74,7 +75,12 @@ class TestHttpEchoReplyJsonNoDB(TestHttpBase):
     @mute_logger('odoo.http')
     def test_echojson2_http_post_nodb(self):
         res = self.nodb_url_open('/test_http/echo-json', data={'race': 'Asgard'})  # POST
-        self.assertIn("Bad Request", res.text)
+        self.assertEqual(res.text, Like("""
+            ...Request inferred type is compatible with...http...but...
+            /test_http/echo-json...is type=...json...
+        """))
+        self.assertEqual(res.status_code, HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+        self.assertEqual(res.headers.get('Accept'), "application/json, application/json-rpc")
 
     def test_echojson3_bad_json(self):
         payload = 'some non json garbage'
@@ -143,6 +149,30 @@ class TestHttpEchoReplyHttpWithDB(TestHttpBase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.text, "{'race': 'Asgard', 'commander': 'Thor'}")
 
+    @mute_logger('odoo.http')
+    def test_echohttp8_post_good_csrf_with_session_rotation(self):
+        # Compute a csrf token in advance,
+        # to mimic a form opened in another browser tab with the CSRF token already computed
+        csrf_token = Request.csrf_token(self)
+        sid_before_rotation = self.opener.cookies['session_id']
+
+        # Force a rotation by changing the create date of the session
+        self.session['create_time'] = time.time() - SESSION_ROTATION_INTERVAL
+        root.session_store.save(self.session)
+
+        # Trigger session rotation by calling another endpoint
+        res = self.db_url_open('/test_http/echo-http-get')
+        self.assertNotEqual(
+            sid_before_rotation,
+            self.opener.cookies['session_id'],
+            "The session must rotate for this test to make sense",
+        )
+
+        # Do the post with the CSRF token computed in advance
+        res = self.db_url_open('/test_http/echo-http-csrf?race=Asgard', data={'commander': 'Thor', 'csrf_token': csrf_token})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.text, "{'race': 'Asgard', 'commander': 'Thor'}")
+
 
 @tagged('post_install', '-at_install')
 class TestHttpEchoReplyJsonWithDB(TestHttpBase):
@@ -174,7 +204,12 @@ class TestHttpEchoReplyJsonWithDB(TestHttpBase):
     @mute_logger('odoo.http')
     def test_echojson2_http_post_db(self):
         res = self.db_url_open('/test_http/echo-json', data={'race': 'Asgard'})  # POST
-        self.assertIn("Bad Request", res.text)
+        self.assertEqual(res.text, Like("""
+            ...Request inferred type is compatible with...http...but...
+            /test_http/echo-json...is type=...json...
+        """))
+        self.assertEqual(res.status_code, HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+        self.assertEqual(res.headers.get('Accept'), "application/json, application/json-rpc")
 
     def test_echojson3_context_db(self):
         payload = json.dumps({

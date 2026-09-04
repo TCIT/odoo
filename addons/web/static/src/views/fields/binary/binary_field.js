@@ -18,6 +18,8 @@ export class BinaryField extends Component {
     static props = {
         ...standardFieldProps,
         acceptedFileExtensions: { type: String, optional: true },
+        // See https://www.iana.org/assignments/media-types/media-types.xhtml
+        allowedMIMETypes: { type: String, optional: true },
         fileNameField: { type: String, optional: true },
     };
     static defaultProps = {
@@ -29,11 +31,12 @@ export class BinaryField extends Component {
     }
 
     get fileName() {
-        return (
-            this.props.record.data[this.props.fileNameField] ||
-            this.props.record.data[this.props.name] ||
-            ""
-        ).slice(0, toBase64Length(MAX_FILENAME_SIZE_BYTES));
+        let value = this.props.record.data[this.props.name];
+        value = value && typeof value === "string" ? value : false;
+        return (this.props.record.data[this.props.fileNameField] || value || "").slice(
+            0,
+            toBase64Length(MAX_FILENAME_SIZE_BYTES)
+        );
     }
 
     update({ data, name }) {
@@ -80,10 +83,16 @@ export const binaryField = {
             name: "accepted_file_extensions",
             type: "string",
         },
+        {
+            label: _t("Allowed file mimetype"),
+            name: "allowed_mime_type",
+            type: "string",
+        },
     ],
     supportedTypes: ["binary"],
     extractProps: ({ attrs, options }) => ({
         acceptedFileExtensions: options.accepted_file_extensions,
+        allowedMIMETypes: options.allowed_mime_type,
         fileNameField: attrs.filename,
     }),
 };

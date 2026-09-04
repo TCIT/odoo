@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, useState } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
@@ -38,6 +36,7 @@ export class SpreadsheetShareButton extends Component {
         if (!this.isChanged(data)) {
             return;
         }
+        model.dispatch("LOG_DATASOURCE_EXPORT", { action: "freeze" });
         const url = await this.props.onSpreadsheetShared(data, model.exportXLSX());
         this.state.url = url;
         setTimeout(async () => {
@@ -59,7 +58,7 @@ export class SpreadsheetShareButton extends Component {
         const newCells = data.sheets[data.sheets.length - 1].cells;
         if (this.lastGlobalFilters !== undefined) {
             for (const key of Object.keys(newCells)) {
-                if (this.lastGlobalFilters[key]?.content !== newCells[key].content) {
+                if (this.lastGlobalFilters[key] !== newCells[key]) {
                     globalFilterChanged = true;
                     break;
                 }

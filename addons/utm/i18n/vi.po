@@ -1,24 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* utm
-# 
+# * utm
+#
 # Translators:
-# Wil Odoo, 2024
-# Thi Huong Nguyen, 2024
-# 
+# Martin Trigaux, 2022
+# Duy BQ <duybq86@gmail.com>, 2022
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2024\n"
-"Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-03 02:56+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-19/utm/"
+"vi/>\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: vi\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: utm
 #. odoo-python
@@ -220,9 +222,12 @@ msgid "Design"
 msgstr "Thiết kế"
 
 #. module: utm
+#: model:ir.model.fields,field_description:utm.field_ir_http__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_medium__display_name
+#: model:ir.model.fields,field_description:utm.field_utm_mixin__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_source__display_name
+#: model:ir.model.fields,field_description:utm.field_utm_source_mixin__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_stage__display_name
 #: model:ir.model.fields,field_description:utm.field_utm_tag__display_name
 msgid "Display Name"
@@ -272,19 +277,17 @@ msgstr ""
 "mục tiêu Marketing của bạn."
 
 #. module: utm
-#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
-msgid "Group By"
-msgstr "Nhóm theo"
-
-#. module: utm
 #: model:ir.model,name:utm.model_ir_http
 msgid "HTTP Routing"
 msgstr "Định tuyến HTTP"
 
 #. module: utm
+#: model:ir.model.fields,field_description:utm.field_ir_http__id
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__id
 #: model:ir.model.fields,field_description:utm.field_utm_medium__id
+#: model:ir.model.fields,field_description:utm.field_utm_mixin__id
 #: model:ir.model.fields,field_description:utm.field_utm_source__id
+#: model:ir.model.fields,field_description:utm.field_utm_source_mixin__id
 #: model:ir.model.fields,field_description:utm.field_utm_stage__id
 #: model:ir.model.fields,field_description:utm.field_utm_tag__id
 msgid "ID"
@@ -385,7 +388,8 @@ msgid ""
 "Doing so would be like tearing down a load-bearing wall — not the best idea."
 msgstr ""
 "Rất tiếc, bạn không thể xóa Phương tiện '%s'.\n"
-"Hành động này không khác nào phá đi bức tường chịu lực và không phải là một ý tưởng tốt đẹp."
+"Hành động này không khác nào phá đi bức tường chịu lực và không phải là một "
+"ý tưởng tốt đẹp."
 
 #. module: utm
 #. odoo-javascript
@@ -442,7 +446,7 @@ msgstr "Đang chạy"
 #. module: utm
 #: model:utm.campaign,title:utm.utm_campaign_fall_drive
 msgid "Sale"
-msgstr "Bán"
+msgstr "Bán hàng"
 
 #. module: utm
 #: model:utm.stage,name:utm.campaign_stage_1
@@ -519,8 +523,8 @@ msgstr "Giai đoạn"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_stage
 msgid ""
-"Stages allow you to organize your workflow  (e.g. plan, design, in progress,"
-" done, …)."
+"Stages allow you to organize your workflow  (e.g. plan, design, in progress, "
+"done, …)."
 msgstr ""
 "Các giai đoạn cho phép bạn sắp xếp quy trình làm việc của mình (VD: kế "
 "hoạch, thiết kế, đang thực hiện, đã hoàn thành,…)."
@@ -567,8 +571,8 @@ msgstr "Tuần này"
 #. module: utm
 #: model:ir.model.fields,help:utm.field_utm_mixin__campaign_id
 msgid ""
-"This is a name that helps you keep track of your different campaign efforts,"
-" e.g. Fall_Drive, Christmas_Special"
+"This is a name that helps you keep track of your different campaign efforts, "
+"e.g. Fall_Drive, Christmas_Special"
 msgstr ""
 "Đây là tên giúp bạn theo dõi các chiến dịch marketing khác nhau: ví dụ "
 "Fall_Drive, Christmas_Special"
@@ -599,11 +603,11 @@ msgstr "Cần phê duyệt"
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 msgid ""
-"Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely"
-" content."
+"Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely "
+"content."
 msgstr ""
-"Theo dõi các sự kiện sắp diễn ra (VD: Giáng sinh, Black Friday, ...) và đăng"
-" nội dung kịp thời."
+"Theo dõi các sự kiện sắp diễn ra (VD: Giáng sinh, Black Friday, ...) và đăng "
+"nội dung kịp thời."
 
 #. module: utm
 #: model:ir.model,name:utm.model_utm_campaign
@@ -649,8 +653,8 @@ msgstr "Mixin nguồn UTM"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.utm_source_action
 msgid ""
-"UTM Sources track where traffic comes from  (e.g. \"May Newsletter\", \"\", "
-"...)."
+"UTM Sources track where traffic comes from  (e.g. \"May Newsletter\", "
+"\"\", ...)."
 msgstr ""
 "Nguồn UTM theo dõi xem lưu lượng truy cập đến từ đâu (VD: \"Bản tin email "
 "tháng 5\", \"\", ...)."
@@ -679,11 +683,16 @@ msgstr "Sử dụng cho chiến dịch của tôi"
 #. module: utm
 #. odoo-python
 #: code:addons/utm/models/utm_source.py:0
+msgid "You cannot delete the 'Referral' UTM source record."
+msgstr ""
+
+#. module: utm
+#. odoo-python
+#: code:addons/utm/models/utm_source.py:0
 msgid ""
 "You cannot update multiple records with the same name. The name should be "
 "unique!"
-msgstr ""
-"Bạn không thể cập nhật nhiều bản ghi có cùng tên. Tên phải là duy nhất!"
+msgstr "Bạn không thể cập nhật nhiều bản ghi có cùng tên. Tên phải là duy nhất!"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_form
@@ -705,3 +714,6 @@ msgstr "VD: \"Email\""
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form_quick_create
 msgid "e.g. Black Friday"
 msgstr "VD: Black Friday"
+
+#~ msgid "Group By"
+#~ msgstr "Nhóm theo"

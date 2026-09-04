@@ -9,6 +9,7 @@ $-mini-nav-size: 40px;
     @include o-position-absolute(0, auto, auto, 0);
     z-index: $zindex-modal;
     @include font-size($o-font-size-base);
+    font-family: $o-we-font-family;
 
     &::before {
         content: "";
@@ -109,6 +110,10 @@ body {
 }
 [data-publish='off'] > *:not(.css_options) {
     opacity: 0.5;
+}
+
+.js_publish_management > .js_publish_btn.btn-success {
+    border-radius: var(--btn-border-radius);
 }
 
 // Do not show path behind the links in browser printing

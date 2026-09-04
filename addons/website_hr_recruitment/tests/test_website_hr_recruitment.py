@@ -4,26 +4,31 @@
 from odoo.api import Environment
 import odoo.tests
 from odoo.tools import html2plaintext
+import unittest
+from odoo.tests.common import new_test_user
 
-from odoo.addons.website.tools import MockRequest
+from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.addons.website_hr_recruitment.controllers.main import WebsiteHrRecruitment
 
 @odoo.tests.tagged('post_install', '-at_install')
 class TestWebsiteHrRecruitmentForm(odoo.tests.HttpCase):
     def test_tour(self):
+        department = self.env['hr.department'].create({'name': 'guru team'})
         job_guru = self.env['hr.job'].create({
             'name': 'Guru',
             'is_published': True,
+            'department_id': department.id,
         })
         job_intern = self.env['hr.job'].create({
             'name': 'Internship',
             'is_published': True,
+            'department_id': department.id,
         })
         self.start_tour(self.env['website'].get_client_action_url('/jobs'), 'model_required_field_should_have_action_name', login='admin')
 
         self.start_tour(self.env['website'].get_client_action_url('/jobs'), 'website_hr_recruitment_tour_edit_form', login='admin')
 
-        with odoo.tests.RecordCapturer(self.env['hr.applicant'], []) as capt:
+        with odoo.tests.RecordCapturer(self.env['hr.applicant']) as capt:
             self.start_tour("/", 'website_hr_recruitment_tour')
 
         # check result
@@ -33,14 +38,20 @@ class TestWebsiteHrRecruitmentForm(odoo.tests.HttpCase):
         self.assertEqual(guru_applicant.partner_name, 'John Smith')
         self.assertEqual(guru_applicant.email_from, 'john@smith.com')
         self.assertEqual(guru_applicant.partner_phone, '118.218')
-        self.assertEqual(html2plaintext(guru_applicant.applicant_notes), '### [GURU] HR RECRUITMENT TEST DATA ###')
+        self.assertTrue(
+            "Other Information:\n___________\n\nShort introduction from applicant : ### [GURU] HR RECRUITMENT TEST DATA ###"
+            in guru_applicant.message_ids.mapped(lambda m: html2plaintext(m.body))
+        )
         self.assertEqual(guru_applicant.job_id, job_guru)
 
         internship_applicant = capt.records[1]
         self.assertEqual(internship_applicant.partner_name, 'Jack Doe')
         self.assertEqual(internship_applicant.email_from, 'jack@doe.com')
         self.assertEqual(internship_applicant.partner_phone, '118.712')
-        self.assertEqual(html2plaintext(internship_applicant.applicant_notes), '### HR [INTERN] RECRUITMENT TEST DATA ###')
+        self.assertTrue(
+            "Other Information:\n___________\n\nShort introduction from applicant : ### HR [INTERN] RECRUITMENT TEST DATA ###"
+            in internship_applicant.message_ids.mapped(lambda m: html2plaintext(m.body))
+        )
         self.assertEqual(internship_applicant.job_id, job_intern)
 
     def test_jobs_listing_city_unspecified(self):
@@ -108,3 +119,27 @@ class TestWebsiteHrRecruitmentForm(odoo.tests.HttpCase):
             ),
             "One message in the chatter should contain the extra information filled in by the applicant"
         )
+
+    def test_apply_job_does_not_update_existing_user(self):
+        internal_user = new_test_user(
+            self.env,
+            login='internal.user@example.com',
+            name='Internal User',
+        )
+        job = self.env['hr.job'].create({
+            'name': 'Developer',
+            'is_published': True,
+        })
+
+        self.authenticate(None, None)
+        response = self.url_open('/website/form/hr.applicant', data={
+            'partner_name': 'Impersonated User',
+            'email_from': internal_user.email,
+            'partner_phone': '12345678',
+            'job_id': job.id,
+        })
+
+        applicant = self.env['hr.applicant'].browse(response.json().get('id'))
+        self.assertEqual(applicant.partner_id, internal_user.partner_id)
+        self.assertEqual(applicant.partner_name, 'Impersonated User')
+        self.assertEqual(internal_user.name, 'Internal User')

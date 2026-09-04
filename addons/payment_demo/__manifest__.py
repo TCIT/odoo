@@ -3,7 +3,7 @@
 {
     'name': 'Payment Provider: Demo',
     'version': '2.0',
-    'category': 'Hidden',
+    'category': 'Accounting/Accounting',
     'sequence': 350,
     'summary': "A payment provider for running fake payment flows for demo purposes.",
     'description': " ",  # Non-empty string to avoid loading the README file.
@@ -21,8 +21,9 @@
     'uninstall_hook': 'uninstall_hook',
     'assets': {
         'web.assets_frontend': [
-            'payment_demo/static/src/js/**/*',
+            'payment_demo/static/src/interactions/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

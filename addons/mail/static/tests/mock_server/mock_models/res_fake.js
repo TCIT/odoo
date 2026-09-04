@@ -1,16 +1,17 @@
 import { parseEmail } from "@mail/utils/common/format";
 import { fields, makeKwArgs, models } from "@web/../tests/web_test_helpers";
-import { DEFAULT_MAIL_SEARCH_ID, DEFAULT_MAIL_VIEW_ID } from "./constants";
 
 export class ResFake extends models.Model {
     _name = "res.fake";
+    _primary_email = "email_cc";
 
     _views = {
-        [`search,${DEFAULT_MAIL_SEARCH_ID}`]: /* xml */ `<search/>`,
-        [`form,${DEFAULT_MAIL_VIEW_ID}`]: /* xml */ `
+        form: /* xml */ `
             <form>
                 <sheet>
                     <field name="name"/>
+                    <field name="partner_id" />
+                    <field name="email_cc" />
                 </sheet>
                 <chatter/>
             </form>`,
@@ -18,11 +19,17 @@ export class ResFake extends models.Model {
 
     name = fields.Char({ string: "Name" });
     activity_ids = fields.One2many({ relation: "mail.activity", string: "Activities" });
+    email_from = fields.Char({ string: "Email" });
     email_cc = fields.Char();
     message_ids = fields.One2many({ relation: "mail.message" });
     message_follower_ids = fields.Many2many({ relation: "mail.followers", string: "Followers" });
     partner_ids = fields.One2many({ relation: "res.partner", string: "Related partners" });
     phone = fields.Char({ string: "Phone number" });
+    partner_id = fields.Many2one({ relation: "res.partner", string: "contact partner" });
+
+    _mail_get_partner_fields() {
+        return ["partner_id"];
+    }
 
     /**
      * @param {integer[]} ids
@@ -30,6 +37,9 @@ export class ResFake extends models.Model {
      */
     _get_customer_information(ids) {
         const record = this.browse(ids)[0];
+        if (!record.email_cc) {
+            return;
+        }
         const [name, email] = parseEmail(record.email_cc);
         return {
             name,
@@ -39,7 +49,7 @@ export class ResFake extends models.Model {
     }
 
     /** @param {number[]} ids */
-    _message_get_suggested_recipients(ids) {
+    _message_get_suggested_recipients(ids, additional_partners = [], primary_email = false) {
         /** @type {import("mock_models").MailThread} */
         const MailThread = this.env["mail.thread"];
         /** @type {import("mock_models").ResPartner} */
@@ -62,6 +72,19 @@ export class ResFake extends models.Model {
                     })
                 );
             }
+            if (primary_email) {
+                MailThread._message_add_suggested_recipient.call(
+                    this,
+                    id,
+                    result,
+                    makeKwArgs({
+                        name: primary_email,
+                        email: primary_email,
+                        partner: undefined,
+                        reason: "CC email",
+                    })
+                );
+            }
             const partners = ResPartner.browse(record.partner_ids);
             if (partners.length) {
                 for (const partner of partners) {
@@ -76,6 +99,20 @@ export class ResFake extends models.Model {
                         })
                     );
                 }
+            }
+            const partner_id = additional_partners.length ? additional_partners : record.partner_id;
+            const [partner] = ResPartner.browse(partner_id);
+            if (partner) {
+                MailThread._message_add_suggested_recipient.call(
+                    this,
+                    id,
+                    result,
+                    makeKwArgs({
+                        email: partner.email,
+                        partner,
+                        reason: "contact partner",
+                    })
+                );
             }
         }
         return result;

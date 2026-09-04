@@ -1,12 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
+import json
 from datetime import datetime, timedelta
 from freezegun import freeze_time
 from unittest.mock import patch
+from markupsafe import Markup
 
 from odoo import Command, fields
-from odoo.tools.misc import limited_field_access_token
+from odoo.addons.bus.models.bus import json_dump
 from odoo.addons.mail.models.discuss.discuss_channel import channel_avatar, group_avatar
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.mail.tests.common import MailCommon
@@ -23,11 +25,13 @@ class TestChannelInternals(MailCommon, HttpCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.maxDiff = None
-        cls.test_channel = cls.env['discuss.channel'].with_context(cls._test_context).channel_create(name='Channel', group_id=None)
-        cls.test_partner = cls.env['res.partner'].with_context(cls._test_context).create({
-            'name': 'Test Partner',
-            'email': 'test_customer@example.com',
-        })
+        cls.test_channel = cls.env['discuss.channel'].with_context(cls._test_context)._create_channel(name='Channel', group_id=None)
+        cls.test_user = (
+            cls.env["res.users"]
+            .with_context(cls._test_context)
+            .create({"name": "Test Partner", "email": "test_customer@example.com", "login": "fndz"})
+        )
+        cls.test_partner = cls.test_user.partner_id
         cls.user_employee_nomail = mail_new_test_user(
             cls.env, login='employee_nomail',
             email=False,
@@ -42,16 +46,16 @@ class TestChannelInternals(MailCommon, HttpCase):
     def test_channel_member_cannot_be_public_user(self):
         """Public users can only join channels as guest."""
         user_public = mail_new_test_user(self.env, login='user_public', groups='base.group_public', name='Bert Tartignole')
-        public_channel = self.env['discuss.channel'].channel_create(name='Public Channel', group_id=None)
+        public_channel = self.env['discuss.channel']._create_channel(name='Public Channel', group_id=None)
         with self.assertRaises(ValidationError):
-            public_channel.add_members(user_public.partner_id.id)
+            public_channel._add_members(users=user_public)
 
     @users('employee')
     @freeze_time("2020-03-22 10:42:06")
     def test_channel_members(self):
-        channel = self.env['discuss.channel'].browse(self.test_channel.ids)
-        self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
-        self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
+        test_group = self.env["discuss.channel"].create({"name": "Group", "channel_type": "group"})
+        self.assertEqual(test_group.message_partner_ids, self.env["res.partner"])
+        self.assertEqual(test_group.channel_partner_ids, self.partner_employee)
 
         emp_partner_write_date = fields.Datetime.to_string(self.env.user.partner_id.write_date)
         test_partner_write_date = fields.Datetime.to_string(self.env.user.partner_id.write_date)
@@ -61,25 +65,13 @@ class TestChannelInternals(MailCommon, HttpCase):
             member = self.env["discuss.channel.member"].search([], order="id desc", limit=1)
             return (
                 [
+                    (self.cr.dbname, "discuss.channel", test_group.id),
                     (self.cr.dbname, "res.partner", self.test_partner.id),
-                    (self.cr.dbname, "discuss.channel", channel.id),
-                    (self.cr.dbname, "discuss.channel", channel.id, "members"),
-                    (self.cr.dbname, "discuss.channel", channel.id),
-                    (self.cr.dbname, "discuss.channel", channel.id),
+                    (self.cr.dbname, "res.partner", self.partner_employee.id),
+                    (self.cr.dbname, "discuss.channel", test_group.id),
+                    (self.cr.dbname, "discuss.channel", test_group.id),
                 ],
                 [
-                    {
-                        "type": "mail.record/insert",
-                        "payload": {
-                            "discuss.channel": [
-                                {"id": channel.id, "last_interest_dt": "2020-03-22 10:42:06"},
-                            ],
-                        },
-                    },
-                    {
-                        "type": "mail.record/insert",
-                        "payload": {"discuss.channel": [{"id": channel.id, "is_pinned": True}]},
-                    },
                     {
                         "type": "discuss.channel/new_message",
                         "payload": {
@@ -87,41 +79,45 @@ class TestChannelInternals(MailCommon, HttpCase):
                                 "mail.message": self._filter_messages_fields(
                                     {
                                         "attachment_ids": [],
-                                        "author": {
-                                            "id": self.env.user.partner_id.id,
-                                            "type": "partner",
-                                        },
-                                        "body": f'<div class="o_mail_notification">invited <a href="#" data-oe-model="res.partner" data-oe-id="{self.test_partner.id}">@Test Partner</a> to the channel</div>',
+                                        "author_id": self.env.user.partner_id.id,
+                                        "author_guest_id": False,
+                                        "body": [
+                                            "markup",
+                                            f'<div class="o_mail_notification" data-oe-type="channel-joined">invited <a href="#" data-oe-model="res.partner" data-oe-id="{self.test_partner.id}">@Test Partner</a> to the channel</div>',
+                                        ],
                                         "create_date": fields.Datetime.to_string(
-                                            message.create_date
+                                            message.create_date,
                                         ),
                                         "date": "2020-03-22 10:42:06",
-                                        "default_subject": "Channel",
-                                        "email_from": '"Ernest Employee" <e.e@example.com>',
+                                        "default_subject": "Group",
                                         "id": message.id,
-                                        "is_discussion": True,
-                                        "is_note": False,
-                                        "linkPreviews": [],
+                                        "incoming_email_cc": False,
+                                        "incoming_email_to": False,
+                                        "message_link_preview_ids": [],
                                         "message_type": "notification",
                                         "model": "discuss.channel",
-                                        "notifications": [],
-                                        "parentMessage": False,
+                                        "parent_id": False,
+                                        "partner_ids": [],
                                         "pinned_at": False,
                                         "rating_id": False,
                                         "reactions": [],
-                                        "recipients": [],
-                                        "record_name": "Channel",
-                                        "res_id": channel.id,
+                                        "record_name": "Group",
+                                        "res_id": test_group.id,
                                         "scheduledDatetime": False,
                                         "subject": False,
-                                        "subtype_description": False,
-                                        "thread": {"id": channel.id, "model": "discuss.channel"},
+                                        "subtype_id": self.env.ref("mail.mt_comment").id,
+                                        "thread": {"id": test_group.id, "model": "discuss.channel"},
                                         "write_date": fields.Datetime.to_string(message.write_date),
                                     },
                                 ),
+                                "mail.message.subtype": [
+                                    {"description": False, "id": self.env.ref("mail.mt_comment").id},
+                                ],
                                 "mail.thread": self._filter_threads_fields(
                                     {
-                                        "id": channel.id,
+                                        "display_name": "Group",
+                                        "has_mail_thread": True,
+                                        "id": test_group.id,
                                         "model": "discuss.channel",
                                         "module_icon": "/mail/static/description/icon.png",
                                         "rating_avg": 0.0,
@@ -130,60 +126,68 @@ class TestChannelInternals(MailCommon, HttpCase):
                                 ),
                                 "res.partner": self._filter_partners_fields(
                                     {
-                                        "avatar_128_access_token": limited_field_access_token(
-                                            self.env.user.partner_id, "avatar_128"
-                                        ),
+                                        "avatar_128_access_token": self.env.user.partner_id._get_avatar_128_access_token(),
                                         "id": self.env.user.partner_id.id,
-                                        "isInternalUser": True,
                                         "is_company": False,
+                                        "main_user_id": self.env.user.id,
                                         "name": "Ernest Employee",
-                                        "userId": self.env.user.id,
                                         "write_date": emp_partner_write_date,
                                     },
                                 ),
+                                "res.users": self._filter_users_fields(
+                                    {
+                                        "id": self.env.user.id,
+                                        "partner_id": self.env.user.partner_id.id,
+                                        "share": False,
+                                    },
+                                ),
                             },
-                            "id": channel.id,
+                            "id": test_group.id,
                         },
                     },
                     {
                         "type": "mail.record/insert",
                         "payload": {
-                            "discuss.channel": [{"id": channel.id, "memberCount": 2}],
+                            "discuss.channel": [{"id": test_group.id, "member_count": 2}],
                             "discuss.channel.member": [
                                 {
+                                    "channel_id": {"id": test_group.id, "model": "discuss.channel"},
                                     "create_date": fields.Datetime.to_string(member.create_date),
                                     "fetched_message_id": False,
                                     "id": member.id,
                                     "last_seen_dt": False,
-                                    "persona": {"id": self.test_partner.id, "type": "partner"},
+                                    "partner_id": self.test_partner.id,
                                     "seen_message_id": False,
-                                    "thread": {"id": channel.id, "model": "discuss.channel"},
                                 },
                             ],
                             "res.partner": self._filter_partners_fields(
                                 {
                                     "active": True,
-                                    "avatar_128_access_token": limited_field_access_token(
-                                        self.test_partner, "avatar_128"
-                                    ),
-                                    "email": "test_customer@example.com",
+                                    "avatar_128_access_token": self.test_partner._get_avatar_128_access_token(),
                                     "id": self.test_partner.id,
-                                    "im_status": "im_partner",
-                                    "isInternalUser": False,
+                                    "im_status": "offline",
+                                    "im_status_access_token": self.test_partner._get_im_status_access_token(),
                                     "is_company": False,
+                                    "main_user_id": self.test_user.id,
+                                    "mention_token": self.test_partner._get_mention_token(),
                                     "name": "Test Partner",
-                                    "out_of_office_date_end": False,
-                                    "userId": False,
                                     "write_date": test_partner_write_date,
+                                },
+                            ),
+                            "res.users": self._filter_users_fields(
+                                {
+                                    "id": self.test_user.id,
+                                    "partner_id": self.test_partner.id,
+                                    "share": False,
                                 },
                             ),
                         },
                     },
                 ],
             )
-        self._reset_bus()
+
         with self.assertBus(get_params=get_add_member_bus):
-            channel.add_members(self.test_partner.ids)
+            test_group._add_members(partners=self.test_partner)
 
         def get_add_member_again_bus():
             member = self.env["discuss.channel.member"].search([], order="id desc", limit=1)
@@ -195,60 +199,63 @@ class TestChannelInternals(MailCommon, HttpCase):
                     {
                         "type": "mail.record/insert",
                         "payload": {
-                            "discuss.channel": [{"id": channel.id, "memberCount": 2}],
+                            "discuss.channel": [{"id": test_group.id, "member_count": 2}],
                             "discuss.channel.member": [
                                 {
                                     "create_date": fields.Datetime.to_string(member.create_date),
                                     "fetched_message_id": False,
                                     "id": member.id,
                                     "last_seen_dt": False,
-                                    "persona": {"id": self.test_partner.id, "type": "partner"},
+                                    "partner_id": self.test_partner.id,
                                     "seen_message_id": False,
-                                    "thread": {"id": channel.id, "model": "discuss.channel"},
+                                    "channel_id": {"id": test_group.id, "model": "discuss.channel"},
                                 }
                             ],
                             "res.partner": self._filter_partners_fields(
                                 {
                                     "active": True,
-                                    "avatar_128_access_token": limited_field_access_token(
-                                        self.test_partner, "avatar_128"
-                                    ),
+                                    "avatar_128_access_token": self.test_partner._get_avatar_128_access_token(),
                                     "email": "test_customer@example.com",
+                                    "employee_ids": [],
                                     "id": self.test_partner.id,
-                                    "im_status": "im_partner",
-                                    "isInternalUser": False,
+                                    "im_status": "offline",
+                                    "im_status_access_token": self.test_partner._get_im_status_access_token(),
                                     "is_company": False,
+                                    "main_user_id": self.test_user.id,
+                                    "mention_token": self.test_partner._get_mention_token(),
                                     "name": "Test Partner",
-                                    "out_of_office_date_end": False,
-                                    "userId": False,
                                     "write_date": test_partner_write_date,
-                                }
+                                },
+                            ),
+                            "res.users": self._filter_users_fields(
+                                {
+                                    "id": self.test_user.id,
+                                    "employee_ids": [],
+                                    "partner_id": self.test_partner.id,
+                                    "share": False,
+                                },
                             ),
                         },
                     },
                 ],
             )
-        self._reset_bus()
         with self.assertBus(get_params=get_add_member_again_bus):
-            channel.add_members(self.test_partner.ids)
-        self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
-        self.assertEqual(channel.channel_partner_ids, self.test_partner)
+            test_group._add_members(partners=self.test_partner)
+        self.assertEqual(test_group.message_partner_ids, self.env["res.partner"])
+        self.assertEqual(test_group.channel_partner_ids, self.test_partner + self.partner_employee)
 
-        self.env['discuss.channel.member'].sudo().search([
-            ('partner_id', 'in', self.test_partner.ids),
-            ('channel_id', 'in', channel.ids)
-        ]).unlink()
-        self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
-        self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
+        self.env["discuss.channel.member"].sudo().search([("partner_id", "in", self.test_partner.ids), ("channel_id", "in", test_group.ids)]).unlink()
+        self.assertEqual(test_group.message_partner_ids, self.env["res.partner"])
+        self.assertEqual(test_group.channel_partner_ids, self.partner_employee)
 
-        channel.message_post(body='Test', message_type='comment', subtype_xmlid='mail.mt_comment')
-        self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
-        self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
+        test_group.message_post(body="Test", message_type="comment", subtype_xmlid="mail.mt_comment")
+        self.assertEqual(test_group.message_partner_ids, self.env["res.partner"])
+        self.assertEqual(test_group.channel_partner_ids, self.partner_employee)
 
     @users('employee')
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_channel_chat_message_post_should_update_last_interest_dt(self):
-        chat = self.env['discuss.channel'].with_user(self.user_admin).channel_get((self.partner_employee | self.user_admin.partner_id).ids)
+        chat = self.env['discuss.channel'].with_user(self.user_admin)._get_or_create_chat((self.partner_employee | self.user_admin.partner_id).ids)
         post_time = fields.Datetime.now()
         # Mocks the return value of field.Datetime.now(),
         # so we can see if the `last_interest_dt` is updated correctly
@@ -262,7 +269,7 @@ class TestChannelInternals(MailCommon, HttpCase):
         """ Posting a message on a channel should not send emails """
         channel = self.env['discuss.channel'].browse(self.test_channel.ids)
         # sudo: discuss.channel.member - adding members in non-accessible channel in a test file
-        channel.sudo().add_members((self.partner_employee | self.partner_admin | self.test_partner).ids)
+        channel.sudo()._add_members(users=self.user_employee | self.user_admin, partners=self.test_partner)
         with self.mock_mail_gateway():
             new_msg = channel.message_post(body="Test", message_type='comment', subtype_xmlid='mail.mt_comment')
         self.assertNotSentEmail()
@@ -275,7 +282,7 @@ class TestChannelInternals(MailCommon, HttpCase):
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_channel_recipients_chat(self):
         """ Posting a message on a chat should not send emails """
-        chat = self.env['discuss.channel'].with_user(self.user_admin).channel_get((self.partner_employee | self.user_admin.partner_id).ids)
+        chat = self.env['discuss.channel'].with_user(self.user_admin)._get_or_create_chat((self.partner_employee | self.user_admin.partner_id).ids)
         with self.mock_mail_gateway():
             with self.with_user('employee'):
                 new_msg = chat.message_post(body="Test", message_type='comment', subtype_xmlid='mail.mt_comment')
@@ -294,13 +301,52 @@ class TestChannelInternals(MailCommon, HttpCase):
                 message_type='comment', subtype_xmlid='mail.mt_comment')
         self.assertSentEmail(self.test_channel.env.user.partner_id, [self.test_partner])
 
+    @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
+    def test_channel_recipients_user_of_partner_with_archived_user(self):
+        """The user picked for a recipient partner is one of its active users."""
+        archived_only, two_logins = self.env["res.partner"].with_context(self._test_context).create([
+            {"email": "archived.only@example.com", "name": "Archived Only"},
+            {"email": "two.logins@example.com", "name": "Two Logins"},
+        ])
+        group_ids = [Command.set([self.env.ref("base.group_user").id])]
+        old_alone, old_login, new_login = (
+            self.env["res.users"].with_context(self._test_context).create([
+                {"group_ids": group_ids, "login": "old_alone", "partner_id": archived_only.id},
+                {"group_ids": group_ids, "login": "old_login", "partner_id": two_logins.id},
+                {"group_ids": group_ids, "login": "new_login", "partner_id": two_logins.id},
+            ])
+        )
+        (old_alone | old_login).active = False
+        recipients = self.test_channel._notify_get_recipients(
+            self.env["mail.message"],
+            {
+                "author_id": self.partner_employee.id,
+                "message_type": "comment",
+                "partner_ids": (archived_only | two_logins).ids,
+            },
+        )
+        self.assertEqual(
+            {r["id"]: r["uid"] for r in recipients if r["notif"] != "web_push"},
+            {archived_only.id: None, two_logins.id: new_login.id},
+        )
+
+    @mute_logger("odoo.models.unlink")
+    def test_channel_special_mention(self):
+        """ Posting a message on a channel should support special mention """
+        self.test_channel._add_members(users=self.user_employee | self.user_employee_nomail)
+        with self.mock_mail_gateway():
+            new_msg = self.test_channel.message_post(
+                body="Test", special_mentions=["everyone"],
+                message_type="comment", subtype_xmlid="mail.mt_comment")
+        self.assertEqual(new_msg.partner_ids, self.test_channel.channel_member_ids.partner_id)
+
     @mute_logger('odoo.models.unlink')
     def test_channel_user_synchronize(self):
         """Archiving / deleting a user should automatically unsubscribe related partner from group restricted channels"""
-        group_restricted_channel = self.env['discuss.channel'].channel_create(name='Sic Mundus', group_id=self.env.ref('base.group_user').id)
+        group_restricted_channel = self.env['discuss.channel']._create_channel(name='Sic Mundus', group_id=self.env.ref('base.group_user').id)
 
-        self.test_channel.add_members((self.partner_employee | self.partner_employee_nomail).ids)
-        group_restricted_channel.add_members((self.partner_employee | self.partner_employee_nomail).ids)
+        self.test_channel._add_members(users=self.user_employee | self.user_employee_nomail)
+        group_restricted_channel._add_members(users=self.user_employee | self.user_employee_nomail)
 
         # Unsubscribe archived user from the private channels, but not from public channels
         self.user_employee.active = False
@@ -312,11 +358,36 @@ class TestChannelInternals(MailCommon, HttpCase):
         self.assertEqual(group_restricted_channel.channel_partner_ids, self.env['res.partner'])
         self.assertEqual(self.test_channel.channel_partner_ids, self.user_employee.partner_id | self.partner_employee_nomail)
 
+    @mute_logger("odoo.models.unlink")
+    def test_channel_user_synchronize_partner_with_several_users(self):
+        """A partner stays in a group restricted channel as long as one of its users has access"""
+        group_restricted_channel = self.env["discuss.channel"]._create_channel(
+            name="Sic Mundus",
+            group_id=self.env.ref("base.group_user").id,
+        )
+        second_user = (
+            self.env["res.users"]
+            .with_context(self._test_context)
+            .create(
+                {
+                    "group_ids": [Command.set([self.env.ref("base.group_user").id])],
+                    "login": "employee_second_login",
+                    "partner_id": self.partner_employee.id,
+                },
+            )
+        )
+        group_restricted_channel.add_members(self.partner_employee.ids)
+        self.assertIn(self.partner_employee, group_restricted_channel.channel_partner_ids)
+        self.user_employee.active = False
+        self.assertIn(self.partner_employee, group_restricted_channel.channel_partner_ids)
+        second_user.active = False
+        self.assertNotIn(self.partner_employee, group_restricted_channel.channel_partner_ids)
+
     @users('employee_nomail')
     def test_channel_info_get(self):
         # `channel_get` should return a new channel the first time a partner is given
-        channel = self.env["discuss.channel"].channel_get(partners_to=self.test_partner.ids)
-        init_data = Store(channel).get_result()
+        channel = self.env["discuss.channel"]._get_or_create_chat(partners_to=self.test_partner.ids)
+        init_data = Store().add(channel).get_result()
         initial_channel_info = init_data["discuss.channel"][0]
         self.assertEqual(
             {persona["id"] for persona in init_data["res.partner"]},
@@ -324,21 +395,21 @@ class TestChannelInternals(MailCommon, HttpCase):
         )
 
         # `channel_get` should return the existing channel every time the same partner is given
-        same_channel = self.env['discuss.channel'].channel_get(partners_to=self.test_partner.ids)
-        same_channel_info = Store(same_channel).get_result()["discuss.channel"][0]
+        same_channel = self.env['discuss.channel']._get_or_create_chat(partners_to=self.test_partner.ids)
+        same_channel_info = Store().add(same_channel).get_result()["discuss.channel"][0]
         self.assertEqual(same_channel_info['id'], initial_channel_info['id'])
 
         # `channel_get` should return the existing channel when the current partner is given together with the other partner
         together_pids = (self.partner_employee_nomail + self.test_partner).ids
-        together_channel = self.env['discuss.channel'].channel_get(partners_to=together_pids)
-        together_channel_info = Store(together_channel).get_result()["discuss.channel"][0]
+        together_channel = self.env['discuss.channel']._get_or_create_chat(partners_to=together_pids)
+        together_channel_info = Store().add(together_channel).get_result()["discuss.channel"][0]
         self.assertEqual(together_channel_info['id'], initial_channel_info['id'])
 
         # `channel_get` should return a new channel the first time just the current partner is given,
         # even if a channel containing the current partner together with other partners already exists
         solo_pids = self.partner_employee_nomail.ids
-        solo_channel = self.env['discuss.channel'].channel_get(partners_to=solo_pids)
-        solo_channel_data = Store(solo_channel).get_result()
+        solo_channel = self.env['discuss.channel']._get_or_create_chat(partners_to=solo_pids)
+        solo_channel_data = Store().add(solo_channel).get_result()
         solo_channel_info = solo_channel_data["discuss.channel"][0]
         self.assertNotEqual(solo_channel_info['id'], initial_channel_info['id'])
         self.assertEqual(
@@ -348,41 +419,40 @@ class TestChannelInternals(MailCommon, HttpCase):
 
         # `channel_get` should return the existing channel every time the current partner is given
         same_solo_pids = self.partner_employee_nomail.ids
-        same_solo_channel = self.env['discuss.channel'].channel_get(partners_to=same_solo_pids)
-        same_solo_channel_info = Store(same_solo_channel).get_result()["discuss.channel"][0]
+        same_solo_channel = self.env['discuss.channel']._get_or_create_chat(partners_to=same_solo_pids)
+        same_solo_channel_info = Store().add(same_solo_channel).get_result()["discuss.channel"][0]
         self.assertEqual(same_solo_channel_info['id'], solo_channel_info['id'])
 
     # `channel_get` will pin the channel by default and thus last interest will be updated.
     @users('employee')
-    def test_channel_info_get_should_update_last_interest_dt(self):
-        self.env['discuss.channel'].channel_get(partners_to=self.partner_admin.ids)
-
-        retrieve_time = datetime(2021, 1, 1, 0, 0)
-        with patch.object(fields.Datetime, 'now', lambda: retrieve_time):
-            # `last_interest_dt` should be updated again when `channel_get` is called
-            # because `channel_pin` is called.
-            channel = self.env["discuss.channel"].channel_get(
-                partners_to=self.partner_admin.ids
-            )
+    def test_get_or_create_chat_should_update_last_interest_dt(self):
+        """Ensure last_interest_dt of the current user is updated when calling _get_or_create_chat.
+        The last_interest_dt of the channel is only updated when creating the chat initially."""
+        with freeze_time("2025-06-18 10:40:22"):
+            channel = self.env["discuss.channel"]._get_or_create_chat(self.partner_admin.ids)
+        self.assertEqual(fields.Datetime.to_string(channel.last_interest_dt), "2025-06-18 10:40:21")
         self.assertEqual(
-            fields.Datetime.to_string(
-                channel.channel_member_ids.filtered(
-                    lambda member: member.partner_id == self.env.user.partner_id
-                ).last_interest_dt
-            ),
-            fields.Datetime.to_string(retrieve_time),
+            fields.Datetime.to_string(channel.self_member_id.last_interest_dt),
+            "2025-06-18 10:40:21",
+        )
+        with freeze_time("2025-06-18 10:40:58"):
+            self.env["discuss.channel"]._get_or_create_chat(self.partner_admin.ids)
+        self.assertEqual(fields.Datetime.to_string(channel.last_interest_dt), "2025-06-18 10:40:21")
+        self.assertEqual(
+            fields.Datetime.to_string(channel.self_member_id.last_interest_dt),
+            "2025-06-18 10:40:57",
         )
 
     @users('employee')
     def test_channel_info_mark_as_read(self):
         """ In case of concurrent channel_seen RPC, ensure the oldest call has no effect. """
         pids = (self.partner_employee | self.user_admin.partner_id).ids
-        chat = self.env['discuss.channel'].with_user(self.user_admin).channel_get(pids)
+        chat = self.env['discuss.channel'].with_user(self.user_admin)._get_or_create_chat(pids)
         msg_1 = self._add_messages(chat, 'Body1', author=self.user_employee.partner_id)
         msg_2 = self._add_messages(chat, 'Body2', author=self.user_employee.partner_id)
         self_member = chat.channel_member_ids.filtered(lambda m: m.partner_id == self.user_admin.partner_id)
         self_member._mark_as_read(msg_2.id)
-        init_data = Store(chat).get_result()
+        init_data = Store().add(chat).get_result()
         self_member_info = next(
             filter(lambda d: d["id"] == self_member.id, init_data["discuss.channel.member"])
         )
@@ -392,7 +462,7 @@ class TestChannelInternals(MailCommon, HttpCase):
             "Last message id should have been updated",
         )
         self_member._mark_as_read(msg_1.id)
-        final_data = Store(chat).get_result()
+        final_data = Store().add(chat).get_result()
         self_member_info = next(
             filter(lambda d: d["id"] == self_member.id, final_data["discuss.channel.member"])
         )
@@ -403,68 +473,78 @@ class TestChannelInternals(MailCommon, HttpCase):
         )
 
     @users('employee')
-    def test_set_last_seen_message_should_send_notification_only_once(self):
-        chat = self.env['discuss.channel'].with_user(self.user_admin).channel_get((self.partner_employee | self.user_admin.partner_id).ids)
+    def test_set_last_seen_message_should_always_send_notification(self):
+        chat = self.env['discuss.channel'].with_user(self.user_admin)._get_or_create_chat((self.partner_employee | self.user_admin.partner_id).ids)
+        # avoid testing behavior when member has no seen_message_id
+        read_message = self._add_messages(chat, "Read message", author=self.user_employee.partner_id)
         msg_1 = self._add_messages(chat, 'Body1', author=self.user_employee.partner_id)
         member = chat.channel_member_ids.filtered(lambda m: m.partner_id == self.user_admin.partner_id)
+        member.seen_message_id = read_message
         self._reset_bus()
+
+        mark_as_read_notifs = [
+            {
+                "type": "mail.record/insert",
+                "payload": {
+                    "discuss.channel.member": [
+                        {
+                            "id": member.id,
+                            "message_unread_counter": 0,
+                            "message_unread_counter_bus_id": 0,
+                            "new_message_separator": msg_1.id + 1,
+                            "partner_id": self.user_admin.partner_id.id,
+                            "channel_id": {
+                                "id": chat.id,
+                                "model": "discuss.channel",
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                "type": "mail.record/insert",
+                "payload": {
+                    "discuss.channel.member": [
+                        {
+                            "id": member.id,
+                            "partner_id": self.user_admin.partner_id.id,
+                            "seen_message_id": msg_1.id,
+                            "channel_id": {"id": chat.id, "model": "discuss.channel"},
+                        },
+                    ],
+                    "res.partner": self._filter_partners_fields(
+                        {
+                            "avatar_128_access_token": self.user_admin.partner_id._get_avatar_128_access_token(),
+                            "id": self.user_admin.partner_id.id,
+                            "im_status": self.user_admin.im_status,
+                            "im_status_access_token": self.user_admin.partner_id._get_im_status_access_token(),
+                            "mention_token": self.user_admin.partner_id._get_mention_token(),
+                            "name": self.user_admin.partner_id.name,
+                            "write_date": fields.Datetime.to_string(
+                                self.user_admin.partner_id.write_date
+                            ),
+                        },
+                    ),
+                },
+            },
+        ]
+
         with self.assertBus(
             [
                 (self.env.cr.dbname, "discuss.channel", chat.id),
                 (self.env.cr.dbname, "res.partner", self.user_admin.partner_id.id),
             ],
-            [
-                {
-                    "type": "mail.record/insert",
-                    "payload": {
-                        "discuss.channel.member": [
-                            {
-                                "id": member.id,
-                                "message_unread_counter": 0,
-                                "message_unread_counter_bus_id": 0,
-                                "new_message_separator": msg_1.id + 1,
-                                "persona": {"id": self.user_admin.partner_id.id, "type": "partner"},
-                                "syncUnread": False,
-                                "thread": {
-                                    "id": chat.id,
-                                    "model": "discuss.channel",
-                                },
-                            },
-                        ],
-                        "res.partner": self._filter_partners_fields(
-                            {
-                                "id": self.user_admin.partner_id.id,
-                                "name": self.user_admin.partner_id.name,
-                            },
-                        ),
-                    },
-                },
-                {
-                    "type": "mail.record/insert",
-                    "payload": {
-                        "discuss.channel.member": [
-                            {
-                                "id": member.id,
-                                "persona": {"id": self.user_admin.partner_id.id, "type": "partner"},
-                                "seen_message_id": msg_1.id,
-                                "thread": {"id": chat.id, "model": "discuss.channel"},
-                            },
-                        ],
-                        "res.partner": self._filter_partners_fields(
-                            {
-                                "id": self.user_admin.partner_id.id,
-                                "name": self.user_admin.partner_id.name,
-                            },
-                        ),
-                    },
-                },
-            ],
+            mark_as_read_notifs,
         ):
             member._mark_as_read(msg_1.id)
-        # There should be no channel member to be set as seen in the second time
-        # So no notification should be sent
         self._reset_bus()
-        with self.assertBus([], []):
+        with self.assertBus(
+            [
+                (self.env.cr.dbname, "res.partner", self.user_admin.partner_id.id),
+                (self.env.cr.dbname, "res.partner", self.user_admin.partner_id.id),
+            ],
+            mark_as_read_notifs
+        ):
             member._mark_as_read(msg_1.id)
 
     def test_channel_message_post_should_not_allow_adding_wrong_parent(self):
@@ -521,10 +601,10 @@ class TestChannelInternals(MailCommon, HttpCase):
     @mute_logger('odoo.models.unlink')
     def test_channel_private_unfollow(self):
         """ Test that a partner can leave (unfollow) a channel/group/chat. """
-        group_restricted_channel = self.env['discuss.channel'].channel_create(name='Channel for Groups', group_id=self.env.ref('base.group_user').id)
-        public_channel = self.env['discuss.channel'].channel_create(name='Channel for Everyone', group_id=None)
-        private_group = self.env['discuss.channel'].create_group(partners_to=self.user_employee.partner_id.ids, name="Group")
-        chat_user_current = self.env['discuss.channel'].channel_get(self.env.user.partner_id.ids)
+        group_restricted_channel = self.env['discuss.channel']._create_channel(name='Channel for Groups', group_id=self.env.ref('base.group_user').id)
+        public_channel = self.env['discuss.channel']._create_channel(name='Channel for Everyone', group_id=None)
+        private_group = self.env['discuss.channel']._create_group(partners_to=self.user_employee.partner_id.ids, name="Group")
+        chat_user_current = self.env['discuss.channel']._get_or_create_chat(self.env.user.partner_id.ids)
         self.assertEqual(len(group_restricted_channel.channel_member_ids), 1)
         self.assertEqual(len(public_channel.channel_member_ids), 1)
         self.assertEqual(len(private_group.sudo().channel_member_ids), 1)
@@ -540,49 +620,65 @@ class TestChannelInternals(MailCommon, HttpCase):
         # sudo: discuss.channel - reading members of non-accessible channel for testing purposes
         self.assertEqual(len(chat_user_current.sudo().channel_member_ids), 0)
 
-    def test_channel_unfollow_should_not_post_message_if_the_partner_has_been_removed(self):
+    def test_group_unfollow_should_not_post_message_if_the_partner_has_been_removed(self):
         '''
-        When a partner leaves a channel, the system will help post a message under
-        that partner's name in the channel to notify others if `email_sent` is set `False`.
-        The message should only be posted when the partner is still a member of the channel
+        When a partner leaves a group, the system will help post a message under
+        that partner's name in the group to notify others if `email_sent` is set `False`.
+        The message should only be posted when the partner is still a member of the group
         before method `_action_unfollow()` is called.
         If the partner has been removed earlier, no more messages will be posted
         even if `_action_unfollow()` is called again.
         '''
-        channel = self.env['discuss.channel'].browse(self.test_channel.id)
-        channel.add_members(self.test_partner.ids)
+        test_group = self.env['discuss.channel'].create({
+            'name': 'Private Channel',
+            'channel_type': 'group',
+        })
+        test_group._add_members(partners=self.test_partner)
 
         # no message should be posted under test_partner's name
         messages_0 = self.env['mail.message'].search([
             ('model', '=', 'discuss.channel'),
-            ('res_id', '=', channel.id),
+            ('res_id', '=', test_group.id),
             ('author_id', '=', self.test_partner.id)
         ])
-        self.assertEqual(len(messages_0), 0)
+        self.assertFalse(messages_0)
 
         # a message should be posted to notify others when a partner is about to leave
-        channel._action_unfollow(self.test_partner)
+        test_group._action_unfollow(self.test_partner)
         messages_1 = self.env['mail.message'].search([
             ('model', '=', 'discuss.channel'),
-            ('res_id', '=', channel.id),
+            ('res_id', '=', test_group.id),
             ('author_id', '=', self.test_partner.id)
         ])
         self.assertEqual(len(messages_1), 1)
 
         # no more messages should be posted if the partner has been removed before.
-        channel._action_unfollow(self.test_partner)
+        test_group._action_unfollow(self.test_partner)
         messages_2 = self.env['mail.message'].search([
             ('model', '=', 'discuss.channel'),
-            ('res_id', '=', channel.id),
+            ('res_id', '=', test_group.id),
             ('author_id', '=', self.test_partner.id)
         ])
         self.assertEqual(len(messages_2), 1)
         self.assertEqual(messages_1, messages_2)
 
+    def test_channel_join_unfollow_should_not_post_message(self):
+        channel = self.env['discuss.channel'].browse(self.test_channel.id)
+        channel.with_user(self.test_user)._add_members(partners=self.test_partner)
+
+        # no message should be posted to notify others when a partner is joined and left
+        channel._action_unfollow(self.test_partner)
+        messages = self.env['mail.message'].search([
+            ('model', '=', 'discuss.channel'),
+            ('res_id', '=', channel.id),
+            ('author_id', '=', self.test_partner.id)
+        ])
+        self.assertFalse(messages)
+
     def test_channel_should_generate_correct_default_avatar(self):
-        test_channel = self.env['discuss.channel'].channel_create(name='Channel', group_id=self.env.ref('base.group_user').id)
+        test_channel = self.env['discuss.channel']._create_channel(name='Channel', group_id=self.env.ref('base.group_user').id)
         test_channel.uuid = 'channel-uuid'
-        private_group = self.env['discuss.channel'].create_group(partners_to=self.user_employee.partner_id.ids)
+        private_group = self.env['discuss.channel']._create_group(partners_to=self.user_employee.partner_id.ids)
         private_group.uuid = 'group-uuid'
         bgcolor_channel = html_escape('hsl(316, 61%, 45%)')  # depends on uuid
         bgcolor_group = html_escape('hsl(17, 60%, 45%)')  # depends on uuid
@@ -597,7 +693,6 @@ class TestChannelInternals(MailCommon, HttpCase):
 
     def test_channel_write_should_send_notification(self):
         channel = self.env['discuss.channel'].create({"name": "test", "description": "test"})
-        self._reset_bus()
         with self.assertBus(
             [(self.cr.dbname, "discuss.channel", channel.id)],
             [
@@ -615,14 +710,13 @@ class TestChannelInternals(MailCommon, HttpCase):
         channel.image_128 = base64.b64encode(("<svg/>").encode())
         avatar_cache_key = channel.avatar_cache_key
         channel.image_128 = False
-        self._reset_bus()
         with self.assertBus(
             [(self.cr.dbname, "discuss.channel", channel.id)],
             [
                 {
                     "type": "mail.record/insert",
                     "payload": {
-                        "discuss.channel": [{"avatarCacheKey": avatar_cache_key, "id": channel.id}],
+                        "discuss.channel": [{"avatar_cache_key": avatar_cache_key, "id": channel.id}],
                     },
                 }
             ],
@@ -657,8 +751,8 @@ class TestChannelInternals(MailCommon, HttpCase):
         all_test_user.res_users_settings_id.write({"channel_notifications": "all"})
         nothing_test_user.res_users_settings_id.write({"channel_notifications": "no_notif"})
 
-        channel = self.env["discuss.channel"].channel_create(name="Channel", group_id=None)
-        channel.add_members((self.partner_employee | all_test_user.partner_id | mentions_test_user.partner_id | nothing_test_user.partner_id).ids)
+        channel = self.env["discuss.channel"]._create_channel(name="Channel", group_id=None)
+        channel._add_members(users=self.user_employee | all_test_user | mentions_test_user | nothing_test_user)
 
         # sending normal message
         with self.with_user("employee"):
@@ -766,7 +860,8 @@ class TestChannelInternals(MailCommon, HttpCase):
             - OR we have access to the channel
         """
         self.authenticate(self.user_employee.login, self.user_employee.login)
-        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['starred']['counter'], 0)
+        data = self.make_jsonrpc_request("/mail/data", {"fetch_params": ["init_messaging"]})
+        self.assertEqual(data["Store"]["starred"]["counter"], 0)
         test_group = self.env['discuss.channel'].create({
             'name': 'Private Channel',
             'channel_type': 'group',
@@ -775,14 +870,17 @@ class TestChannelInternals(MailCommon, HttpCase):
 
         test_group_own_message = test_group.with_user(self.user_employee.id).message_post(body='TestingMessage')
         test_group_own_message.write({'starred_partner_ids': [(6, 0, self.partner_employee.ids)]})
-        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['starred']['counter'], 1)
+        data = self.make_jsonrpc_request("/mail/data", {"fetch_params": ["init_messaging"]})
+        self.assertEqual(data["Store"]["starred"]["counter"], 1)
 
         test_group_message = test_group.message_post(body='TestingMessage')
         test_group_message.write({'starred_partner_ids': [(6, 0, self.partner_employee.ids)]})
-        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['starred']['counter'], 2)
+        data = self.make_jsonrpc_request("/mail/data", {"fetch_params": ["init_messaging"]})
+        self.assertEqual(data["Store"]["starred"]["counter"], 2)
 
         test_group.write({'channel_partner_ids': False})
-        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['starred']['counter'], 1)
+        data = self.make_jsonrpc_request("/mail/data", {"fetch_params": ["init_messaging"]})
+        self.assertEqual(data["Store"]["starred"]["counter"], 1)
 
     def test_multi_company_chat(self):
         self.assertEqual(self.env.user.company_id, self.company_admin)
@@ -790,15 +888,14 @@ class TestChannelInternals(MailCommon, HttpCase):
         with self.with_user('employee'):
             chat = self.env['discuss.channel'].with_context(
                 allowed_company_ids=self.company_admin.ids
-            ).channel_get(self.partner_employee_c2.ids)
+            )._get_or_create_chat(self.partner_employee_c2.ids)
             self.assertTrue(chat, 'should be able to chat with multi company user')
 
     @users('employee')
     def test_create_chat_channel_should_only_pin_the_channel_for_the_current_user(self):
-        chat = self.env['discuss.channel'].channel_get(partners_to=self.test_partner.ids)
-        member_of_current_user = self.env['discuss.channel.member'].search([('channel_id', '=', chat.id), ('partner_id', '=', self.env.user.partner_id.id)])
-        member_of_correspondent = self.env['discuss.channel.member'].search([('channel_id', '=', chat.id), ('partner_id', '=', self.test_partner.id)])
-        self.assertTrue(member_of_current_user.is_pinned)
+        chat = self.env["discuss.channel"]._get_or_create_chat(self.test_partner.ids)
+        member_of_correspondent = chat.channel_member_ids - chat.self_member_id
+        self.assertTrue(chat.self_member_id.is_pinned)
         self.assertFalse(member_of_correspondent.is_pinned)
 
     @users("employee")
@@ -806,7 +903,6 @@ class TestChannelInternals(MailCommon, HttpCase):
         """Ensures the command '/help' works in a channel"""
         channel = self.env["discuss.channel"].browse(self.test_channel.ids)
         channel.name = "<strong>R&D</strong>"
-        self._reset_bus()
         with self.assertBus(
             [(self.env.cr.dbname, "res.partner", self.env.user.partner_id.id)],
             [
@@ -819,12 +915,10 @@ class TestChannelInternals(MailCommon, HttpCase):
                             "<br><br>Type <b>@username</b> to mention someone, and grab their attention."
                             "<br>Type <b>#channel</b> to mention a channel."
                             "<br>Type <b>/command</b> to execute a command."
-                            "<br>Type <b>:shortcut</b> to insert a canned response in your message."
+                            "<br>Type <b>::shortcut</b> to insert a canned response in your message."
+                            "<br>Type <b>:emoji:</b> to insert an emoji in your message."
                             "</span>",
-                        "thread": {
-                            "id": channel.id,
-                            "model": "discuss.channel",
-                        },
+                        "channel_id": channel.id,
                     },
                 },
             ],
@@ -844,8 +938,7 @@ class TestChannelInternals(MailCommon, HttpCase):
             'channel_type': 'group',
             'channel_partner_ids': [(6, 0, test_user.partner_id.id)]
         })
-        test_group.add_members(self.partner_employee_nomail.ids)
-        self._reset_bus()
+        test_group._add_members(users=self.user_employee_nomail)
         with self.assertBus(
             [(self.env.cr.dbname, "res.partner", self.env.user.partner_id.id)],
             [
@@ -860,14 +953,148 @@ class TestChannelInternals(MailCommon, HttpCase):
                             "<br><br>Type <b>@username</b> to mention someone, and grab their attention."
                             "<br>Type <b>#channel</b> to mention a channel."
                             "<br>Type <b>/command</b> to execute a command."
-                            "<br>Type <b>:shortcut</b> to insert a canned response in your message."
+                            "<br>Type <b>::shortcut</b> to insert a canned response in your message."
+                            "<br>Type <b>:emoji:</b> to insert an emoji in your message."
                             "</span>",
-                        "thread": {
-                            "id": test_group.id,
-                            "model": "discuss.channel",
-                        },
+                        "channel_id": test_group.id,
                     },
                 },
             ],
         ):
             test_group.execute_command_help()
+
+    @users('employee')
+    def test_message_update_content_bus(self):
+        self.maxDiff = None
+        channel = self.env["discuss.channel"].create({"name": "MyTestChannel"})
+        message = self.env['mail.message'].create({
+            "body": "Test",
+            "model": "discuss.channel",
+            "res_id": channel.id,
+        })
+        with self.assertBus(
+            [(self.cr.dbname, "discuss.channel", channel.id)],
+            [
+                {
+                    "type": "mail.record/insert",
+                    "payload": {
+                        "mail.message": [
+                            {
+                                "attachment_ids": [],
+                                "body": ['markup', '<p>Test update <span class="o-mail-Message-edited"></span></p>'],
+                                "id": message.id,
+                                "parent_id": False,
+                                "partner_ids": message.partner_ids.ids,
+                                "pinned_at": message.pinned_at,
+                                "translationValue": False,
+                                "write_date": fields.Datetime.to_string(message.write_date),
+                            },
+                        ],
+                    },
+                },
+            ],
+        ):
+            channel._message_update_content(
+                message,
+                body=Markup("<p>Test update</p>"),
+                attachment_ids=[],
+            )
+
+    def test_member_based_channel_naming(self):
+        john = mail_new_test_user(self.env, groups="base.group_user", login="john")
+        bob = mail_new_test_user(self.env, groups="base.group_user", login="bob")
+        alice = mail_new_test_user(self.env, groups="base.group_user", login="alice")
+        eve = mail_new_test_user(self.env, groups="base.group_user", login="eve")
+        group = self.env["discuss.channel"].create({"name": "", "channel_type": "group"})
+        channel = self.env["discuss.channel"].create({"name": "General"})
+
+        # Each test case represents a flow of member changes on a given channel.
+        # The format is: (channel, flow) where `flow` is a list of tuples
+        # (user, operation, expected_users).
+        #
+        # Those cases ensure that we only send `channel_name_member_ids` updates
+        # for channels listed in `_member_based_naming_channel_types`, and only
+        # when relevant members (those contributing to the computed name) are affected.
+        cases = [
+            # Channel does not use member-based naming (not in `_member_based_naming_channel_types`).
+            (
+                channel,
+                [(john, "add", False), (john, "remove", False)],
+            ),
+            # Group uses member-based naming (in `_member_based_naming_channel_types`).
+            # Name is computed from the first 3 members. Updates are only sent when those change.
+            (
+                group,
+                [
+                    (john, "add", [self.env.user, john]),
+                    (bob, "add", [self.env.user, john, bob]),
+                    # Alice is added: we already have 3 members to compute the name, no update.
+                    (alice, "add", False),
+                    (eve, "add", False),
+                    # Eve is removed: not taken into account for name computation, no update.
+                    (eve, "remove", False),
+                    # John is removed: was used in naming, update.
+                    (john, "remove", [self.env.user, bob, alice]),
+                ],
+            ),
+        ]
+
+        for channel, flow in cases:
+            with self.subTest(
+                f"Test member-based channel name: channel_type={channel.channel_type}, channel_name={channel.name}"
+            ):
+                for user, operation, expected_users in flow:
+                    self._reset_bus()
+                    if operation == "add":
+                        channel._add_members(users=user, post_joined_message=False)
+                    else:
+                        channel.with_user(user).action_unfollow()
+                    self.cr.precommit.run()
+                    matching_data = None
+                    for notification in self.env["bus.bus"].search(
+                        [("channel", "=", json_dump((self.cr.dbname, "discuss.channel", channel.id)))]
+                    ):
+                        message = json.loads(notification.message)
+                        if message["type"] != "mail.record/insert":
+                            continue
+                        if "discuss.channel" not in message["payload"]:
+                            continue
+                        matching_data = next(
+                            (
+                                data
+                                for data in message["payload"]["discuss.channel"]
+                                if data["id"] == channel.id and "channel_name_member_ids" in data
+                            ),
+                            None,
+                        )
+                        if matching_data:
+                            break
+
+                    if expected_users is False:
+                        self.assertIsNone(
+                            matching_data, "Unexpected channel_name_member_ids update"
+                        )
+                    else:
+                        self.assertIsNotNone(
+                            matching_data, "Missing channel_name_member_ids update"
+                        )
+                        expected_member_ids = [
+                            member.id
+                            for member in channel.channel_member_ids
+                            if member.partner_id.main_user_id in expected_users
+                        ]
+                        self.assertEqual(
+                            matching_data["channel_name_member_ids"], expected_member_ids
+                        )
+
+    def test_create_channel_with_partners_and_guests(self):
+        channel = self.env['discuss.channel'].create({
+            'name': 'test channel',
+            'channel_member_ids': [
+                (0, 0, {'guest_id': self.guest.id}),
+                (0, 0, {'partner_id': self.partner_employee.id})
+            ]
+        })
+        actual_member_ids = [m.partner_id.id if m.partner_id else m.guest_id.id for m in channel.channel_member_ids]
+        expected_member_ids = [self.partner_employee.id, self.guest.id, self.env.user.partner_id.id]
+        self.assertCountEqual(actual_member_ids, expected_member_ids)

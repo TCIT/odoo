@@ -1,30 +1,34 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* base_sparse_field
-# 
+# * base_sparse_field
+#
 # Translators:
-# Monika Raciunaite <monika.raciunaite@gmail.com>, 2024
-# Arunas V. <arunas@devoro.com>, 2024
-# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2024
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2024
-# Silvija Butko <silvija.butko@gmail.com>, 2024
-# Anatolij, 2024
-# Martin Trigaux, 2024
-# Linas Versada <linaskrisiukenas@gmail.com>, 2024
-# 
+# Arunas V. <arunas@devoro.com>, 2022
+# digitouch UAB <digitouchagencyeur@gmail.com>, 2022
+# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2022
+# Linas Versada <linaskrisiukenas@gmail.com>, 2022
+# Anatolij, 2022
+# Martin Trigaux, 2022
+# Silvija Butko <silvija.butko@gmail.com>, 2022
+# Monika Raciunaite <monika.raciunaite@gmail.com>, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~14.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:55+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Linas Versada <linaskrisiukenas@gmail.com>, 2024\n"
-"Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 13:10+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-19/"
+"base_sparse_field/lt/>\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lt\n"
-"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_sparse_field
 #: model:ir.model,name:base_sparse_field.model_base
@@ -63,6 +67,7 @@ msgid "Data"
 msgstr "Duomenys"
 
 #. module: base_sparse_field
+#: model:ir.model.fields,field_description:base_sparse_field.field_ir_model_fields__display_name
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__display_name
 msgid "Display Name"
 msgstr "Rodomas pavadinimas"
@@ -83,6 +88,7 @@ msgid "Float"
 msgstr "Pozicija"
 
 #. module: base_sparse_field
+#: model:ir.model.fields,field_description:base_sparse_field.field_ir_model_fields__id
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__id
 msgid "ID"
 msgstr "ID"
@@ -95,7 +101,7 @@ msgid ""
 "be changed after creation."
 msgstr ""
 "Jei nustatyta, šis laukas bus laikomas retoje serijavimo lauko struktūroje, "
-"vietoje to, kad turėtų savo duomenų bazės stulpelį. "
+"vietoje to, kad turėtų savo duomenų bazės stulpelį."
 
 #. module: base_sparse_field
 #: model:ir.model.fields,field_description:base_sparse_field.field_sparse_fields_test__integer
@@ -142,8 +148,8 @@ msgstr "Serijavimo laukas"
 #. odoo-python
 #: code:addons/base_sparse_field/models/models.py:0
 msgid ""
-"Serialization field \"%(serialization_field)s\" not found for sparse field "
-"%(sparse_field)s!"
+"Serialization field \"%(serialization_field)s\" not found for sparse field %"
+"(sparse_field)s!"
 msgstr ""
 
 #. module: base_sparse_field
@@ -160,3 +166,6 @@ msgstr "Du"
 #: model:ir.model.fields.selection,name:base_sparse_field.selection__ir_model_fields__ttype__serialized
 msgid "serialized"
 msgstr "serijuotas"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Paskutinį kartą keista"

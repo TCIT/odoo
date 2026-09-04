@@ -14,7 +14,19 @@ import { omit } from "@web/core/utils/objects";
 import { effect } from "@web/core/utils/reactive";
 import { batched } from "@web/core/utils/timing";
 import { orderByToString } from "@web/search/utils/order_by";
-import { rpc } from "@web/core/network/rpc";
+import { _t } from "@web/core/l10n/translation";
+import { user } from "@web/core/user";
+import { uniqueId } from "@web/core/utils/functions";
+import { unique } from "@web/core/utils/arrays";
+
+const granularityToInterval = {
+    hour: { hours: 1 },
+    day: { days: 1 },
+    week: { days: 7 },
+    month: { month: 1 },
+    quarter: { month: 4 },
+    year: { year: 1 },
+};
 
 /**
  * @param {boolean || string} value boolean or string encoding a python expression
@@ -47,7 +59,7 @@ export function makeActiveField({
     };
 }
 
-const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that can be aggregated in grouped views
+export const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that can be aggregated in grouped views
 
 export function addFieldDependencies(activeFields, fields, fieldDependencies = []) {
     for (const field of fieldDependencies) {
@@ -58,6 +70,9 @@ export function addFieldDependencies(activeFields, fields, fieldDependencies = [
             patchActiveFields(activeFields[field.name], makeActiveField(field));
         } else {
             activeFields[field.name] = makeActiveField(field);
+            if (["one2many", "many2many"].includes(field.type)) {
+                activeFields[field.name].related = { activeFields: {}, fields: {} };
+            }
         }
         if (!fields[field.name]) {
             const newField = omit(field, [
@@ -254,7 +269,10 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                 activeField.required = "False";
             }
         }
-        if (fields[fieldName].type === "many2one_reference" && fieldNode.views) {
+        if (
+            ["many2one", "many2one_reference"].includes(fields[fieldName].type) &&
+            fieldNode.views
+        ) {
             const viewDescr = fieldNode.views.default;
             activeField.related = extractFieldsFromArchInfo(viewDescr, viewDescr.fields);
         }
@@ -328,7 +346,7 @@ export function getBasicEvalContext(config) {
         context: config.context,
         uid,
         allowed_company_ids,
-        current_company_id: config.currentCompanyId,
+        current_company_id: user.activeCompany?.id,
     };
 }
 
@@ -344,7 +362,7 @@ function getFieldContextForSpec(activeFields, fields, fieldName, evalContext) {
     }
 }
 
-export function getFieldsSpec(activeFields, fields, evalContext, { withInvisible } = {}) {
+export function getFieldsSpec(activeFields, fields, evalContext, { orderBys, withInvisible } = {}) {
     const fieldsSpec = {};
     const properties = [];
     for (const fieldName in activeFields) {
@@ -371,8 +389,9 @@ export function getFieldsSpec(activeFields, fields, evalContext, { withInvisible
                         evalContext
                     );
                     fieldsSpec[fieldName].limit = limit;
-                    if (defaultOrderBy) {
-                        fieldsSpec[fieldName].order = orderByToString(defaultOrderBy);
+                    const orderBy = orderBys?.[fieldName] || defaultOrderBy || [];
+                    if (orderBy.length) {
+                        fieldsSpec[fieldName].order = orderByToString(orderBy);
                     }
                 }
                 break;
@@ -381,6 +400,13 @@ export function getFieldsSpec(activeFields, fields, evalContext, { withInvisible
             case "reference": {
                 fieldsSpec[fieldName].fields = {};
                 if (!isAlwaysInvisible) {
+                    if (related) {
+                        fieldsSpec[fieldName].fields = getFieldsSpec(
+                            related.activeFields,
+                            related.fields,
+                            evalContext
+                        );
+                    }
                     fieldsSpec[fieldName].fields.display_name = {};
                     fieldsSpec[fieldName].context = getFieldContextForSpec(
                         activeFields,
@@ -491,20 +517,41 @@ export function parseServerValue(field, value) {
         case "many2one": {
             if (Array.isArray(value)) {
                 // Used for web_read_group, where the value is an array of [id, display_name]
-                return value;
+                value = { id: value[0], display_name: value[1] };
             }
-            return value ? [value.id, value.display_name] : false;
+            return value;
         }
         case "properties": {
             return value
-                ? value.map((property) => ({
-                      ...property,
-                      value: parseServerValue(property, property.value ?? false),
-                  }))
+                ? value.map((property) => {
+                      if (property.value !== undefined) {
+                          property.value = parseServerValue(property, property.value ?? false);
+                      }
+                      if (property.default !== undefined) {
+                          property.default = parseServerValue(property, property.default ?? false);
+                      }
+                      return property;
+                  })
                 : [];
         }
     }
     return value;
+}
+
+export function getAggregateSpecifications(fields) {
+    const aggregatableFields = Object.values(fields)
+        .filter((field) => field.aggregator && AGGREGATABLE_FIELD_TYPES.includes(field.type))
+        .map((field) => `${field.name}:${field.aggregator}`);
+    const currencyFields = unique(
+        Object.values(fields)
+            .filter((field) => field.aggregator && field.currency_field)
+            .map((field) => [
+                `${field.currency_field}:array_agg_distinct`,
+                `${field.name}:sum_currency`,
+            ])
+            .flat()
+    );
+    return aggregatableFields.concat(currencyFields);
 }
 
 /**
@@ -515,20 +562,25 @@ export function parseServerValue(field, value) {
  * @param {Object} fields
  * @returns {Object}
  */
-export function extractInfoFromGroupData(groupData, groupBy, fields) {
+export function extractInfoFromGroupData(groupData, groupBy, fields, domain) {
     const info = {};
     const groupByField = fields[groupBy[0].split(":")[0]];
-    // sometimes the key FIELD_ID_count doesn't exist and we have to get the count from `__count` instead
-    // see read_group in models.py
-    info.count = groupData.__count || groupData[`${groupByField.name}_count`];
-    info.length = info.count; // TODO: remove
-    info.range = groupData.__range ? groupData.__range[groupBy[0]] : null;
-    info.domain = groupData.__domain;
+    info.count = groupData.__count;
+    info.length = info.count; // TODO: remove but still used in DynamicRecordList._updateCount
+    info.domain = Domain.and([domain, groupData.__extra_domain]).toList();
     info.rawValue = groupData[groupBy[0]];
-    info.value = getValueFromGroupData(groupByField, info.rawValue, info.range);
+    info.value = getValueFromGroupData(groupByField, info.rawValue);
+    if (["date", "datetime"].includes(groupByField.type) && info.value) {
+        const granularity = groupBy[0].split(":")[1];
+        info.range = {
+            from: info.value,
+            to: info.value.plus(granularityToInterval[granularity]),
+        };
+    }
     info.displayName = getDisplayNameFromGroupData(groupByField, info.rawValue);
     info.serverValue = getGroupServerValue(groupByField, info.value);
     info.aggregates = getAggregatesFromGroupData(groupData, fields);
+    info.values = groupData.__values; // Extra data of the relational groupby field record
     return info;
 }
 
@@ -538,9 +590,17 @@ export function extractInfoFromGroupData(groupData, groupBy, fields) {
  */
 function getAggregatesFromGroupData(groupData, fields) {
     const aggregates = {};
-    for (const [key, value] of Object.entries(groupData)) {
-        if (key in fields && AGGREGATABLE_FIELD_TYPES.includes(fields[key].type)) {
-            aggregates[key] = value;
+    for (const keyAggregate of getAggregateSpecifications(fields)) {
+        if (keyAggregate in groupData) {
+            const [fieldName, aggregate] = keyAggregate.split(":");
+            if (aggregate === "sum_currency") {
+                const currencies =
+                    groupData[fields[fieldName].currency_field + ":array_agg_distinct"];
+                if (currencies.length === 1) {
+                    continue;
+                }
+            }
+            aggregates[fieldName] = groupData[keyAggregate];
         }
     }
     return aggregates;
@@ -549,16 +609,28 @@ function getAggregatesFromGroupData(groupData, fields) {
 /**
  * @param {import("./datapoint").Field} field
  * @param {any} rawValue
- * @returns {string | false}
+ * @returns {string}
  */
 function getDisplayNameFromGroupData(field, rawValue) {
-    if (field.type === "selection") {
-        return Object.fromEntries(field.selection)[rawValue];
+    switch (field.type) {
+        case "selection": {
+            return Object.fromEntries(field.selection)[rawValue];
+        }
+        case "boolean": {
+            return rawValue ? _t("Yes") : _t("No");
+        }
+        case "integer": {
+            return rawValue ? String(rawValue) : "0";
+        }
+        case "many2one":
+        case "many2many":
+        case "date":
+        case "datetime":
+        case "tags": {
+            return (rawValue && rawValue[1]) || field.falsy_value_label || _t("None");
+        }
     }
-    if (["many2one", "many2many", "tags"].includes(field.type)) {
-        return rawValue ? rawValue[1] : false;
-    }
-    return rawValue;
+    return rawValue ? String(rawValue) : field.falsy_value_label || _t("None");
 }
 
 /**
@@ -589,18 +661,21 @@ export function getGroupServerValue(field, value) {
  * @param {object} [range]
  * @returns {any}
  */
-function getValueFromGroupData(field, rawValue, range) {
+function getValueFromGroupData(field, rawValue) {
     if (["date", "datetime"].includes(field.type)) {
-        if (!range) {
+        if (!rawValue) {
             return false;
         }
-        const dateValue = parseServerValue(field, range.to);
-        return dateValue.minus({
-            [field.type === "date" ? "day" : "second"]: 1,
-        });
+        return parseServerValue(field, rawValue[0]);
     }
     const value = parseServerValue(field, rawValue);
-    if (["many2one", "many2many"].includes(field.type)) {
+    if (field.type === "many2one") {
+        return value && value.id;
+    }
+    if (field.type === "many2many") {
+        return value ? value[0] : false;
+    }
+    if (field.type === "tags") {
         return value ? value[0] : false;
     }
     return value;
@@ -686,10 +761,14 @@ export function isRelational(field) {
  */
 export function useRecordObserver(callback) {
     const component = useComponent();
-    let alive = true;
-    let props = component.props;
-    const fct = () => {
+    let currentId;
+    const observeRecord = (props) => {
+        currentId = uniqueId();
+        if (!props.record) {
+            return;
+        }
         const def = new Deferred();
+        const effectId = currentId;
         let firstCall = true;
         effect(
             (record) => {
@@ -701,7 +780,7 @@ export function useRecordObserver(callback) {
                 } else {
                     return batched(
                         (record) => {
-                            if (!alive) {
+                            if (effectId !== currentId) {
                                 // effect doesn't clean up when the component is unmounted.
                                 // We must do it manually.
                                 return;
@@ -719,14 +798,12 @@ export function useRecordObserver(callback) {
         return def;
     };
     onWillDestroy(() => {
-        alive = false;
+        currentId = uniqueId();
     });
-    onWillStart(() => fct());
+    onWillStart(() => observeRecord(component.props));
     onWillUpdateProps((nextProps) => {
-        const currentRecordId = props.record.id;
-        props = nextProps;
-        if (props.record.id !== currentRecordId) {
-            return fct();
+        if (nextProps.record !== component.props.record) {
+            return observeRecord(nextProps);
         }
     });
 }
@@ -810,30 +887,19 @@ export async function resequence({
 
     const resIds = toReorder.map((d) => getResId(d)).filter((id) => id && !isNaN(id));
     const sequences = toReorder.map(getSequence);
-    const offset = sequences.length && Math.min(...sequences);
+    const offset = Math.min(...sequences) || 0;
 
     // Try to write new sequences on the affected records/groups
-    const params = {
-        model: resModel,
-        ids: resIds,
-        context: context,
-        field: fieldName,
-    };
-    if (offset) {
-        params.offset = offset;
-    }
     try {
-        const wasResequenced = await rpc("/web/dataset/resequence", params);
-        if (!wasResequenced) {
-            return;
-        }
+        return await orm.webResequence(resModel, resIds, {
+            field_name: fieldName,
+            offset,
+            context,
+            specification: { [fieldName]: {} },
+        });
     } catch (error) {
         // If the server fails to resequence, rollback the original list
         records.splice(0, records.length, ...originalOrder);
         throw error;
     }
-
-    // Read the actual values set by the server and update the records/groups
-    const kwargs = { context };
-    return orm.read(resModel, resIds, [fieldName], kwargs);
 }

@@ -12,8 +12,20 @@ from odoo.addons.payment.tests.common import PaymentCommon
 @tagged('-at_install', 'post_install')
 class TestPaymentTransaction(PaymentCommon):
 
+    def test_is_live_when_created_by_enabled_provider(self):
+        self.provider.state = 'enabled'
+        tx = self._create_transaction('redirect')
+        self.assertTrue(tx.is_live)
+
+    def test_is_not_live_when_created_by_test_provider(self):
+        self.provider.state = 'test'  # Will work with anything other than 'enabled'
+        tx = self._create_transaction('redirect')
+        self.assertFalse(tx.is_live)
+
     def test_capture_allowed_for_authorized_users(self):
         """ Test that users who have access to a transaction can capture it. """
+        if not self.env.ref('account.group_account_invoice', raise_if_not_found=False):
+            self.skipTest("account needed for test")
         self.provider.support_manual_capture = 'full_only'
         tx = self._create_transaction('redirect', state='authorized')
         user = self._prepare_user(self.internal_user, 'account.group_account_invoice')
@@ -21,6 +33,8 @@ class TestPaymentTransaction(PaymentCommon):
 
     def test_void_allowed_for_authorized_users(self):
         """ Test that users who have access to a transaction can void it. """
+        if not self.env.ref('account.group_account_invoice', raise_if_not_found=False):
+            self.skipTest("account needed for test")
         self.provider.support_manual_capture = 'full_only'
         tx = self._create_transaction('redirect', state='authorized')
         user = self._prepare_user(self.internal_user, 'account.group_account_invoice')
@@ -28,6 +42,8 @@ class TestPaymentTransaction(PaymentCommon):
 
     def test_refund_allowed_for_authorized_users(self):
         """ Test that users who have access to a transaction can refund it. """
+        if not self.env.ref('account.group_account_invoice', raise_if_not_found=False):
+            self.skipTest("account needed for test")
         self.provider.support_refund = 'full_only'
         tx = self._create_transaction('redirect', state='done')
         user = self._prepare_user(self.internal_user, 'account.group_account_invoice')
@@ -70,6 +86,24 @@ class TestPaymentTransaction(PaymentCommon):
             1,
             msg="The refunds count should only consider transactions with operation 'refund'."
         )
+
+    def test_capturing_tx_creates_child_tx(self):
+        """Test that capturing a transaction creates a child capture transaction."""
+        self.provider.capture_manually = True
+        self.provider.support_manual_capture = 'partial'
+        source_tx = self._create_transaction('direct', state='authorized')
+        child_tx = source_tx._capture()
+        self.assertTrue(child_tx)
+        self.assertNotEqual(child_tx, source_tx)
+
+    def test_voiding_tx_creates_child_tx(self):
+        """Test that voiding a transaction creates a child void transaction."""
+        self.provider.capture_manually = True
+        self.provider.support_manual_capture = 'partial'
+        source_tx = self._create_transaction('direct', state='authorized')
+        child_tx = source_tx._void()
+        self.assertTrue(child_tx)
+        self.assertNotEqual(child_tx, source_tx)
 
     def test_refund_transaction_values(self):
         self.provider.support_refund = 'partial'
@@ -217,6 +251,72 @@ class TestPaymentTransaction(PaymentCommon):
                 "'done'."
         )
 
+    def test_validate_amount_skips_validation_transactions(self):
+        """Test that the amount validation is skipped for validation transactions."""
+        tx = self._create_transaction('redirect', operation='validation')
+        with patch(
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
+            '._extract_amount_data', return_value={'amount': None, 'currency_code': None},
+        ):
+            tx._validate_amount({})
+        self.assertNotEqual(tx.state, 'error')
+
+    def test_processing_applies_updates_to_error_txs_with_valid_amount_data(self):
+        tx = self._create_transaction('redirect', state='error')
+        with patch(
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
+            '._validate_amount'
+        ), patch(
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
+            '._apply_updates'
+        ) as apply_updates_mock:
+            tx._process('test', {})
+        self.assertEqual(apply_updates_mock.call_count, 1)
+
+    def test_processing_does_not_apply_updates_when_amount_data_is_invalid(self):
+        tx = self._create_transaction('redirect', state='draft', amount=100)
+        with patch(
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
+            '._extract_amount_data', return_value={'amount': 10, 'currency_code': 'USD'}
+        ), patch(
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
+            '._apply_updates'
+        ) as apply_updates_mock:
+            tx._process('test', {})
+        self.assertEqual(tx.state, 'error')
+        self.assertEqual(apply_updates_mock.call_count, 0)
+
+    def test_processing_tokenizes_validated_transaction(self):
+        """Test that `_process` tokenizes 'authorized' and 'done' transactions when possible."""
+        self.provider.support_manual_capture = 'partial'
+        self.provider.capture_manually = True
+        for state in ['authorized', 'done']:
+            tx = self._create_transaction(
+                'redirect', reference=f'Test {state}', state=state, tokenize=True
+            )
+            with patch(
+                'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
+                '._validate_amount', return_value=None
+            ), patch(
+                'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
+                '._extract_token_values', return_value={'provider_ref': 'test'}
+            ):
+                tx._process('test', {})
+            self.assertTrue(tx.token_id)
+
+    def test_processing_only_tokenizes_when_requested(self):
+        """Test that `_process` only triggers tokenization if the user requested it."""
+        tx = self._create_transaction('redirect', state='done', tokenize=False)
+        with patch(
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
+            '._validate_amount', return_value=None
+        ), patch(
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
+            '._tokenize'
+        ) as tokenize_mock:
+            tx._process('test', {})
+        self.assertEqual(tokenize_mock.call_count, 0)
+
     @mute_logger('odoo.addons.payment.models.payment_transaction')
     def test_update_state_to_illegal_target_state(self):
         tx = self._create_transaction('redirect', state='done')
@@ -242,3 +342,14 @@ class TestPaymentTransaction(PaymentCommon):
 
         tx._set_done()
         self.assertFalse(tx.is_post_processed)
+
+    def test_validate_amount_uses_payment_minor_unit(self):
+        self.currency_euro.rounding = 0.001
+        tx = self._create_transaction('direct', amount=123.452, currency_id=self.currency_euro.id)
+        with patch(
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
+            '._extract_amount_data',
+            return_value={'amount': 123.45, 'currency_code': self.currency_euro.name},
+        ):
+            tx._validate_amount({})
+        self.assertNotEqual(tx.state, 'error')

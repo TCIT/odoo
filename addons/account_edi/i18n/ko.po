@@ -1,24 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_edi
-# 
-# Translators:
-# Wil Odoo, 2024
-# Sarah Park, 2024
-# 
+# * account_edi
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Sarah Park, 2024\n"
-"Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-06 03:05+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Korean <https://translate.odoo.com/projects/odoo-19/"
+"account_edi/ko/>\n"
+"Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ko\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_edi
 #. odoo-python
@@ -76,14 +75,19 @@ msgstr "차단 수준"
 #. module: account_edi
 #: model:ir.model.fields,help:account_edi.field_account_edi_document__blocking_level
 msgid ""
-"Blocks the current operation of the document depending on the error severity:\n"
-"  * Info: the document is not blocked and everything is working as it should.\n"
-"  * Warning: there is an error that doesn't prevent the current Electronic Invoicing operation to succeed.\n"
-"  * Error: there is an error that blocks the current Electronic Invoicing operation."
+"Blocks the current operation of the document depending on the error "
+"severity:\n"
+"  * Info: the document is not blocked and everything is working as it "
+"should.\n"
+"  * Warning: there is an error that doesn't prevent the current Electronic "
+"Invoicing operation to succeed.\n"
+"  * Error: there is an error that blocks the current Electronic Invoicing "
+"operation."
 msgstr ""
 "오류의 심각성 정도에 따라서 현재 진행 중인 문서 작업을 차단합니다:\n"
 "  * 안내: 문서를 차단하지 않고 정상적으로 전체를 작동시킵니다.\n"
-"  * 경고: 현재 오류가 발생하였으나 전자 청구서 작업 진행에는 문제가 없습니다.\n"
+"  * 경고: 현재 오류가 발생하였으나 전자 청구서 작업 진행에는 문제가 "
+"없습니다.\n"
 "  * 오류: 현재 오류가 발생하여 전자 청구서 작업을 차단합니다."
 
 #. module: account_edi
@@ -103,7 +107,7 @@ msgstr "취소됨"
 msgid ""
 "Cannot deactivate (%s) on this journal because not all documents are "
 "synchronized"
-msgstr "동기화되지 않은 문서가 있습니다. 이 전표에서 (%s) 비활성화를 할 수 없습니다. "
+msgstr "동기화되지 않은 문서가 있습니다. 이 전표에서 (%s) 비활성화를 할 수 없습니다."
 
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_format__code
@@ -130,6 +134,12 @@ msgstr "작성일자"
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__display_name
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_format__display_name
+#: model:ir.model.fields,field_description:account_edi.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_edi.field_account_move__display_name
+#: model:ir.model.fields,field_description:account_edi.field_account_move_send__display_name
+#: model:ir.model.fields,field_description:account_edi.field_account_resequence_wizard__display_name
+#: model:ir.model.fields,field_description:account_edi.field_ir_actions_report__display_name
+#: model:ir.model.fields,field_description:account_edi.field_ir_attachment__display_name
 msgid "Display Name"
 msgstr "표시명"
 
@@ -265,6 +275,12 @@ msgstr "해당 작업에서 몇 개의 EDI에 오류가 발생했나요?"
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__id
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_format__id
+#: model:ir.model.fields,field_description:account_edi.field_account_journal__id
+#: model:ir.model.fields,field_description:account_edi.field_account_move__id
+#: model:ir.model.fields,field_description:account_edi.field_account_move_send__id
+#: model:ir.model.fields,field_description:account_edi.field_account_resequence_wizard__id
+#: model:ir.model.fields,field_description:account_edi.field_ir_actions_report__id
+#: model:ir.model.fields,field_description:account_edi.field_ir_attachment__id
 msgid "ID"
 msgstr "ID"
 
@@ -393,8 +409,7 @@ msgstr "다음 주소로 청구서가 곧 발송됩니다."
 #. module: account_edi
 #: model:ir.model.fields,help:account_edi.field_account_edi_document__error
 msgid ""
-"The text of the last error that happened during Electronic Invoice "
-"operation."
+"The text of the last error that happened during Electronic Invoice operation."
 msgstr "전자 청구서 작업 중에 최근 발생한 오류 문구입니다."
 
 #. module: account_edi
@@ -406,14 +421,14 @@ msgstr "이미 존재하는 코드입니다."
 #. odoo-python
 #: code:addons/account_edi/models/account_edi_document.py:0
 msgid "This document is being sent by another process already. "
-msgstr "다른 프로세스에서 이미 전송이 완료된 문서입니다."
+msgstr "다른 프로세스에서 이미 전송이 완료된 문서입니다. "
 
 #. module: account_edi
 #. odoo-python
 #: code:addons/account_edi/models/account_move.py:0
 msgid ""
-"This invoice was canceled while the EDIs %s still had a pending cancellation"
-" request."
+"This invoice was canceled while the EDIs %s still had a pending cancellation "
+"request."
 msgstr "이 청구서는 EDI %s에 아직 취소 요청이 보류 중인 상태에서 취소되었습니다."
 
 #. module: account_edi
@@ -438,18 +453,21 @@ msgstr "주의 사항"
 #. odoo-python
 #: code:addons/account_edi/models/account_move.py:0
 msgid ""
-"You can't edit the following journal entry %s because an electronic document"
-" has already been sent. Please use the 'Request EDI Cancellation' button "
+"You can't edit the following journal entry %s because an electronic document "
+"has already been sent. Please use the 'Request EDI Cancellation' button "
 "instead."
 msgstr ""
-"이미 전자 문서 전송이 완료되었기 때문에 다음의 %s 전표를 수정할 수 없습니다. 대신 'EDI 취소 요청' 버튼을 사용하세요."
+"이미 전자 문서 전송이 완료되었기 때문에 다음의 %s 전표를 수정할 수 없습니다. "
+"대신 'EDI 취소 요청' 버튼을 사용하세요."
 
 #. module: account_edi
 #. odoo-python
 #: code:addons/account_edi/models/ir_attachment.py:0
 msgid ""
 "You can't unlink an attachment being an EDI document sent to the government."
-msgstr "EDI 문서가 정부 기관에 전송된 경우에는 첨부된 파일의 연결을 해제할 수 없습니다."
+msgstr ""
+"EDI 문서가 정부 기관에 전송된 경우에는 첨부된 파일의 연결을 해제할 수 "
+"없습니다."
 
 #. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit

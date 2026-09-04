@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo import Command
 from odoo.tests import Form, tagged
 from odoo.tests.common import new_test_user
 
@@ -58,9 +59,103 @@ class TestProduct(AccountTestInvoicingCommon):
             'supplier_taxes_id': self.company_data['company'].account_purchase_tax_id.ids,
         }])
 
-    def test_account_manager_user_can_create_product(self):
-        """Test that a user with group_account_manager can create a product."""
-        product = self.env['product.product'].with_user(self.account_manager_user).create({
-            'name': 'Test Accountant', 'type': 'consu', 'list_price': 50.0,
+    def test_product_tax_with_company_and_branch(self):
+        """Ensure that setting a tax on a product overrides the default tax of branch companies.
+            as branches share taxes with their parent company."""
+        parent_company = self.env.company
+        # Create a branch company and set a default sales tax.
+        self.env['res.company'].create({
+            'name': 'Branch Company',
+            'parent_id': parent_company.id,
+            'account_sale_tax_id': parent_company.account_sale_tax_id.id,
         })
-        self.assertTrue(product)
+
+        tax_new = self.env['account.tax'].create({
+            'name': "tax_new",
+            'amount_type': 'percent',
+            'amount': 21.0,
+            'type_tax_use': 'sale',
+        })
+
+        # Create a product in the parent company and set its sales tax to the new tax
+        product = self.env['product.template'].with_context(allowed_company_ids=[parent_company.id]).create({
+            'name': 'Product with new Tax',
+            'taxes_id': tax_new.ids,
+        })
+
+        self.assertEqual(product.taxes_id, tax_new, "The branch company default tax shouldn't be set if we set a different tax on the product from the parent company.")
+
+    def test_product_category_parent_account_fallback(self):
+        """When no account is set on a product category, accounts should be inherited from parent categories.
+        Also covers the case where income and expense are defined at different hierarchy levels.
+        """
+        grandparent_income = self.copy_account(self.company_data['default_account_revenue'])
+        child_expense = self.copy_account(self.company_data['default_account_expense'])
+
+        grandparent_categ = self.env['product.category'].create({
+            'name': 'Grandparent Category',
+            'property_account_income_categ_id': grandparent_income.id,
+        })
+        parent_categ = self.env['product.category'].create({
+            'name': 'Parent Category',
+            'parent_id': grandparent_categ.id,
+            'property_account_income_categ_id': False,
+            'property_account_expense_categ_id': False,
+        })
+        child_categ = self.env['product.category'].create({
+            'name': 'Child Category',
+            'parent_id': parent_categ.id,
+            'property_account_income_categ_id': False,
+            'property_account_expense_categ_id': child_expense.id,
+        })
+        product = self.env['product.product'].create({
+            'name': 'Test Product',
+            'categ_id': child_categ.id,
+        })
+
+        invoice, bill = self.env['account.move'].create([
+            {
+                'move_type': 'out_invoice',
+                'partner_id': self.partner_a.id,
+                'invoice_line_ids': [Command.create({'product_id': product.id})],
+            },
+            {
+                'move_type': 'in_invoice',
+                'partner_id': self.partner_a.id,
+                'invoice_line_ids': [Command.create({'product_id': product.id})],
+            },
+        ])
+        self.assertEqual(invoice.invoice_line_ids.account_id, grandparent_income,
+            "Customer invoice line should use grandparent category's income account")
+        self.assertEqual(bill.invoice_line_ids.account_id, child_expense,
+            "Vendor bill line should use child category's expense account")
+
+    def test_product_category_defaults_after_company_account_change(self):
+        """Ensure new product categories pick up the updated expense and income accounts from settings."""
+        old_expense = self.env.company.expense_account_id
+        old_income = self.env.company.income_account_id
+        new_expense = self.copy_account(old_expense)
+        new_income = self.copy_account(old_income)
+
+        self.env.company.write({
+            'expense_account_id': new_expense.id,
+            'income_account_id': new_income.id,
+        })
+
+        fresh_categ = self.env['product.category'].create({'name': 'Category After Account Change'})
+        self.assertEqual(fresh_categ.with_company(self.env.company).property_account_expense_categ_id, new_expense)
+        self.assertEqual(fresh_categ.with_company(self.env.company).property_account_income_categ_id, new_income)
+
+    def test_retrieve_product_by_name(self):
+        company = self.company_data['company']
+        if 'predict_bill_product' in company._fields:
+            company.predict_bill_product = True
+
+        Product = self.env['product.product']
+        Product.create({'name': 'Wireless bluetooth speaker battery'})
+        product_A = Product.create({'name': 'Network Cables'})
+
+        # Similar but not similar enough to be considered the same product
+        self.assertFalse(Product._retrieve_product(name='Wireless bluetooth speaker'))
+        self.assertEqual(product_A, Product._retrieve_product(name='Network Cable'))
+        self.assertEqual(product_A, Product._retrieve_product(name='network cables'))  # case insensitive exact match

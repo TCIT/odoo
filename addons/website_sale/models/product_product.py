@@ -1,12 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from werkzeug.urls import url_join
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.http import request
+from odoo.tools import float_round
 
 
-class Product(models.Model):
+class ProductProduct(models.Model):
     _inherit = 'product.product'
     _mail_post_access = 'read'
 
@@ -23,6 +24,9 @@ class Product(models.Model):
         string="Base Unit Count",
         help="Display base unit price on your eCommerce pages. Set to 0 to hide it for this"
              " product.",
+        # Force NUMERIC with unlimited precision, as for `uom.uom.relative_factor`,
+        # to support very small ratios, e.g. one unit in a box of 10000.
+        digits=0,
         required=True,
         default=1,
     )
@@ -73,7 +77,7 @@ class Product(models.Model):
             url = product.product_tmpl_id.website_url
             if pavs := product.product_template_attribute_value_ids.product_attribute_value_id:
                 pav_ids = [str(pav.id) for pav in pavs]
-                url = f'{url}#attribute_values={",".join(pav_ids)}'
+                url = f'{url}?attribute_values={",".join(pav_ids)}'
             product.website_url = url
 
     #=== CONSTRAINT METHODS ===#
@@ -130,16 +134,21 @@ class Product(models.Model):
 
     def _website_show_quick_add(self):
         self.ensure_one()
-        # TODO VFE pass website as param and avoid existence check
-        website = self.env['website'].get_current_website()
-        return self.sale_ok and (not website.prevent_zero_price_sale or self._get_contextual_price())
+        if not self.filtered_domain(self.env['website']._product_domain()):
+            return False
+        return not request.website.prevent_zero_price_sale or self._get_contextual_price()
 
     def _is_add_to_cart_allowed(self):
         self.ensure_one()
-        is_product_salable = self.active and self.sale_ok and self.website_published
-        website = self.env['website'].get_current_website()
-        return (is_product_salable and website.has_ecommerce_access()) \
-               or self.env.user.has_group('base.group_system')
+        if self.env.user.has_group('base.group_system'):
+            return True
+        if not self.active or not self.website_published:
+            return False
+        if not self.filtered_domain(self.env['website']._product_domain()):
+            return False
+        if request.website.prevent_zero_price_sale and not self._get_contextual_price():
+            return False
+        return request.website.has_ecommerce_access()
 
     @api.onchange('public_categ_ids')
     def _onchange_public_categ_ids(self):
@@ -147,3 +156,94 @@ class Product(models.Model):
             self.website_published = True
         else:
             self.website_published = False
+
+    def _to_markup_data(self, website):
+        """ Generate JSON-LD markup data for the current product.
+
+        :param website website: The current website.
+        :return: The JSON-LD markup data.
+        :rtype: dict
+        """
+        self.ensure_one()
+
+        product_price = request.pricelist._get_product_price(
+            self, quantity=1, currency=website.currency_id
+        )
+        # Use sudo to access cross-company taxes.
+        product_taxes_sudo = self.sudo().taxes_id._filter_taxes_by_company(self.env.company)
+        taxes = request.fiscal_position.map_tax(product_taxes_sudo)
+        price = self.product_tmpl_id._apply_taxes_to_price(
+            product_price, website.currency_id, product_taxes_sudo, taxes, self, website=website
+        )
+
+        base_url = website.get_base_url()
+        markup_data = {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            'name': self.with_context(display_default_code=False).display_name,
+            'url': f'{base_url}{self.website_url}',
+            'image': f'{base_url}{website.image_url(self, "image_1920")}',
+            'offers': {
+                '@type': 'Offer',
+                'price': price,
+                'priceCurrency': website.currency_id.name,
+            },
+        }
+        if self.website_meta_description or self.description_sale:
+            markup_data['description'] = self.website_meta_description or self.description_sale
+        if website.is_view_active('website_sale.product_comment') and self.rating_count:
+            markup_data['aggregateRating'] = {
+                '@type': 'AggregateRating',
+                # sudo: product.product - visitor can access product average rating
+                'ratingValue': self.sudo().rating_avg,
+                'reviewCount': self.rating_count,
+            }
+        if self.default_code:
+            markup_data['sku'] = self.default_code
+        if self.barcode:
+            markup_data['gtin'] = self.barcode
+        return markup_data
+
+    def _get_image_1920_url(self):
+        """ Returns the local url of the product main image.
+
+        Note: self.ensure_one()
+
+        :rtype: str
+        """
+        self.ensure_one()
+        return self.env['website'].image_url(self, 'image_1920')
+
+    def _get_extra_image_1920_urls(self):
+        """ Returns the local url of the product additional images, no videos. This includes the
+        variant specific images first and then the template images.
+
+        Note: self.ensure_one()
+
+        :rtype: list[str]
+        """
+        self.ensure_one()
+        return [
+            self.env['website'].image_url(extra_image, 'image_1920')
+            for extra_image in self.product_variant_image_ids + self.product_template_image_ids
+            if extra_image.image_128  # only images, no video urls
+        ]
+
+    def write(self, vals):
+        if 'active' in vals and not vals['active']:
+            # unlink draft lines containing the archived product
+            self.env['sale.order.line'].sudo().search([
+                ('state', '=', 'draft'),
+                ('product_id', 'in', self.ids),
+                ('order_id', 'any', [('website_id', '!=', False)]),
+            ]).unlink()
+        return super().write(vals)
+
+    def _mail_get_operation_for_mail_message_operation(self, message_operation):
+        if (
+            message_operation == 'create'
+            and not self.env.user._is_internal()
+            and not self.env['website'].is_view_active('website_sale.product_comment')
+        ):
+            return dict.fromkeys(self, 'write')
+        return super()._mail_get_operation_for_mail_message_operation(message_operation)

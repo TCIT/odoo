@@ -4,7 +4,7 @@
 {
     'name': 'Sales and Warehouse Management',
     'version': '1.0',
-    'category': 'Hidden',
+    'category': 'Sales/Sales',
     'summary': 'Quotation, Sales Orders, Delivery & Invoicing Control',
     'description': """
 Manage sales quotations and orders
@@ -25,12 +25,14 @@ Preferences
         'security/ir.model.access.csv',
 
         'views/sale_order_views.xml',
+        'views/sale_order_line_views.xml',
         'views/stock_route_views.xml',
         'views/res_config_settings_views.xml',
         'views/sale_stock_portal_template.xml',
         'views/stock_lot_views.xml',
         'views/res_users_views.xml',
         'views/stock_picking_views.xml',
+        'views/stock_reference_views.xml',
 
         'report/sale_order_report_templates.xml',
         'report/stock_report_deliveryslip.xml',
@@ -39,7 +41,6 @@ Preferences
         'data/sale_stock_data.xml',
 
         'wizard/stock_rules_report_views.xml',
-        'wizard/sale_order_cancel_views.xml',
     ],
     'demo': ['data/sale_order_demo.xml'],
     'installable': True,
@@ -48,6 +49,10 @@ Preferences
         'web.assets_backend': [
             'sale_stock/static/src/**/*',
         ],
+        'web.assets_tests': [
+            'sale_stock/static/tests/tours/*.js',
+        ]
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

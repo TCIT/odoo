@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models, api, _
@@ -15,13 +14,12 @@ class MailGroupModeration(models.Model):
     status = fields.Selection(
         [('allow', 'Always Allow'), ('ban', 'Permanent Ban')],
         string='Status', required=True, default='ban')
-    mail_group_id = fields.Many2one('mail.group', string='Group', required=True, ondelete='cascade')
+    mail_group_id = fields.Many2one('mail.group', string='Group', required=True, index=True, ondelete='cascade')
 
-    _sql_constraints = [(
-        'mail_group_email_uniq',
+    _mail_group_email_uniq = models.Constraint(
         'UNIQUE(mail_group_id, email)',
         'You can create only one rule for a given email address in a group.',
-    )]
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -30,12 +28,12 @@ class MailGroupModeration(models.Model):
             if not email_normalized:
                 raise UserError(_('Invalid email address “%s”', values.get('email')))
             values['email'] = email_normalized
-        return super(MailGroupModeration, self).create(vals_list)
+        return super().create(vals_list)
 
-    def write(self, values):
-        if 'email' in values:
-            email_normalized = email_normalize(values['email'])
+    def write(self, vals):
+        if 'email' in vals:
+            email_normalized = email_normalize(vals['email'])
             if not email_normalized:
-                raise UserError(_('Invalid email address “%s”', values.get('email')))
-            values['email'] = email_normalized
-        return super(MailGroupModeration, self).write(values)
+                raise UserError(_('Invalid email address “%s”', vals.get('email')))
+            vals['email'] = email_normalized
+        return super().write(vals)

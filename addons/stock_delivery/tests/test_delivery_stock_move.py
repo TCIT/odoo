@@ -1,11 +1,16 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.tests import Form, tagged
+import datetime
+
+from odoo import fields
+from odoo.fields import Command
+from odoo.tests import Form, freeze_time, tagged
+
+from odoo.addons.sale.tests.common import TestSaleCommon
 
 
 @tagged('post_install', '-at_install')
-class StockMoveInvoice(AccountTestInvoicingCommon):
+class TestStockMoveInvoice(TestSaleCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -47,7 +52,6 @@ class StockMoveInvoice(AccountTestInvoicingCommon):
                 'name': 'Cable Management Box',
                 'product_id': self.product_cable_management_box.id,
                 'product_uom_qty': 2,
-                'product_uom': self.product_uom_unit.id,
                 'price_unit': 750.00,
             })],
         })
@@ -114,7 +118,6 @@ class StockMoveInvoice(AccountTestInvoicingCommon):
                 'name': 'Cable Management Box',
                 'product_id': self.product_cable_management_box.id,
                 'product_uom_qty': 2,
-                'product_uom': self.product_uom_unit.id,
                 'price_unit': 750.00,
             })],
         })
@@ -193,7 +196,6 @@ class StockMoveInvoice(AccountTestInvoicingCommon):
                 "name": "Cable Management Box",
                 "product_id": self.product_cable_management_box.id,
                 "product_uom_qty": 2,
-                "product_uom": self.product_uom_unit.id,
                 "price_unit": 750.00,
             })],
         })
@@ -215,7 +217,6 @@ class StockMoveInvoice(AccountTestInvoicingCommon):
                 "name": "Another product to deliver",
                 "product_id": self.product_11.id,
                 "product_uom_qty": 2,
-                "product_uom": self.product_uom_unit.id,
                 "price_unit": 750.00,
             })],
         })
@@ -246,7 +247,6 @@ class StockMoveInvoice(AccountTestInvoicingCommon):
                 "name": "Cable Management Box",
                 "product_id": self.product_cable_management_box.id,
                 "product_uom_qty": 1,
-                "product_uom": self.product_uom_unit.id,
                 "price_unit": 750.00,
             })],
         })
@@ -257,3 +257,81 @@ class StockMoveInvoice(AccountTestInvoicingCommon):
         self.assertEqual(picking.weight, 1.0, "The weight of the picking should not change")
         picking.move_ids.product_id = self.product_a
         self.assertEqual(picking.weight, 2.0, "The weight of the picking should be 2.0")
+
+    @freeze_time("2024-06-06 11:00")
+    def test_picking_change_scheduled_date(self):
+        """
+        Check that changing the scheduled date of a move can affect the scheduled date
+        of the picking but not its sibling moves.
+        """
+        wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        receipt = self.env['stock.picking'].create({
+            'picking_type_id': wh.in_type_id.id,
+            'location_id': self.ref('stock.stock_location_customers'),
+            'location_dest_id': wh.lot_stock_id.id,
+            'move_ids': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'product_uom_qty': 1,
+                    'location_id': self.ref('stock.stock_location_customers'),
+                    'location_dest_id': wh.lot_stock_id.id,
+                }),
+                Command.create({
+                    'product_id': self.product_b.id,
+                    'product_uom_qty': 1,
+                    'location_id': self.ref('stock.stock_location_customers'),
+                    'location_dest_id': wh.lot_stock_id.id,
+                }),
+            ],
+        })
+        receipt.action_confirm()
+        today, yesterday = fields.Datetime.now(), fields.Datetime.now() - datetime.timedelta(days=1)
+        self.assertEqual(receipt.scheduled_date, today)
+        with Form(receipt) as picking_form:
+            with picking_form.move_ids.edit(0) as move:
+                move.date = yesterday
+        self.assertEqual(receipt.scheduled_date, yesterday)
+        self.assertRecordValues(receipt.move_ids, [
+            {'date': yesterday},
+            {'date': today},
+        ])
+
+    @freeze_time("2024-06-06 11:00")
+    def test_delivery_slip_product_value(self):
+        """Test that product value reported on the delivery slip is correct.
+        """
+        product = self.product_cable_management_box
+        tax = self.company_data['default_tax_sale']
+        other_currency = self.setup_other_currency('EUR', rates=[
+            ('2024-06-06', 0.1),
+        ])
+        pricelist_in_other_curr = self.env['product.pricelist'].create({
+            'name': 'Test Pricelist (EUR)',
+            'currency_id': other_currency.id,
+        })
+
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'partner_invoice_id': self.partner_a.id,
+            'partner_shipping_id': self.partner_a.id,
+            'pricelist_id': pricelist_in_other_curr.id,
+            'order_line': [
+                Command.create({
+                    'name': product.name,
+                    'product_id': product.id,
+                    'product_uom_qty': 180,
+                    'product_uom_id': product.uom_id.id,
+                    'price_unit': 1.49,
+                    'tax_ids': [Command.set(tax.ids)],
+                })],
+        })
+
+        sale_order.action_confirm()
+
+        # Testing full quantity, should be equal to the price total on the sale order line
+        sale_order.picking_ids.move_ids.quantity = 180
+        self.assertEqual(sale_order.picking_ids.move_line_ids.sale_price, sale_order.order_line.price_total, "Price on delivery slip is not correct")
+
+        # Testing a partial quantity
+        sale_order.picking_ids.move_ids.quantity = 150
+        self.assertEqual(sale_order.picking_ids.move_line_ids.sale_price, 257.03, "Price on delivery slip is not correct")

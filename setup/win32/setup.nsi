@@ -8,6 +8,7 @@ Unicode True
 
 !include 'MUI2.nsh'
 !include 'FileFunc.nsh'
+!include 'WordFunc.nsh'
 !include 'LogicLib.nsh'
 !include 'Sections.nsh'
 !include 'x64.nsh'
@@ -85,6 +86,9 @@ Unicode True
 !define DEFAULT_POSTGRESQL_USERNAME 'openpg'
 !define DEFAULT_POSTGRESQL_PASSWORD 'openpgpwd'
 
+!define DEFAULT_ODOO_DB_USERNAME 'odoo'
+!define DEFAULT_ODOO_DB_PASSWORD 'odoopwd'
+
 Name '${DISPLAY_NAME}'
 Caption "${PRODUCT_NAME} ${VERSION} Setup"
 OutFile "${TOOLSDIR}\server\odoo_setup_${VERSION}.exe"
@@ -112,10 +116,11 @@ Var HWNDPostgreSQLPort
 Var HWNDPostgreSQLUsername
 Var HWNDPostgreSQLPassword
 
-Var ProxyTokenDialog
-Var ProxyTokenLabel
-Var ProxyTokenText
-Var ProxyTokenPwd
+Var TextOdooDBUsername
+Var TextOdooDBPassword
+
+Var HWNDOdooDBUsername
+Var HWNDOdooDBPassword
 
 !define STATIC_PATH "static"
 !define PIXMAPS_PATH "${STATIC_PATH}\pixmaps"
@@ -136,10 +141,10 @@ Var ProxyTokenPwd
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE ComponentLeave
 !insertmacro MUI_PAGE_COMPONENTS
 Page Custom ShowPostgreSQL LeavePostgreSQL
+Page Custom ShowOdooDB LeaveOdooDB
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE dir_leave
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
-Page Custom ShowProxyTokenDialogPage
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_CHECKED
@@ -173,14 +178,17 @@ LangString DESC_PostgreSQL_Hostname ${LANG_ENGLISH} "Hostname"
 LangString DESC_PostgreSQL_Port ${LANG_ENGLISH} "Port"
 LangString DESC_PostgreSQL_Username ${LANG_ENGLISH} "Username"
 LangString DESC_PostgreSQL_Password ${LANG_ENGLISH} "Password"
+LangString DESC_OdooDBSection ${LANG_ENGLISH} "Odoo PostgreSQL User"
+LangString DESC_OdooDBPage ${LANG_ENGLISH} "Configure the Odoo PostgreSQL user credentials"
+LangString DESC_OdooDB_Username ${LANG_ENGLISH} "Odoo DB Username"
+LangString DESC_OdooDB_Password ${LANG_ENGLISH} "Odoo DB Password"
+LangString WARNING_OdooDBUsernameIsEmpty ${LANG_ENGLISH} "The Odoo database username cannot be empty"
+LangString WARNING_OdooDBPasswordIsEmpty ${LANG_ENGLISH} "The Odoo database password cannot be empty"
+LangString WARNING_OdooDBUsernameInvalid ${LANG_ENGLISH} "The Odoo database username must contain only letters, digits and underscores, and start with a letter or underscore"
 LangString Profile_AllInOne ${LANG_ENGLISH} "Odoo Server And PostgreSQL Server"
 LangString Profile_Server ${LANG_ENGLISH} "Odoo Server Only"
-LangString Profile_IOT ${LANG_ENGLISH} "Odoo IoT"
 LangString TITLE_Odoo_Server ${LANG_ENGLISH} "Odoo Server"
 LangString TITLE_PostgreSQL ${LANG_ENGLISH} "PostgreSQL Database"
-LangString TITLE_IOT ${LANG_ENGLISH} "Odoo IoT"
-LangString TITLE_Nginx ${LANG_ENGLISH} "Nginx WebServer"
-LangString TITLE_Ghostscript ${LANG_ENGLISH} "Ghostscript interpreter"
 LangString DESC_FinishPageText ${LANG_ENGLISH} "Start Odoo"
 LangString UnsafeDirText ${LANG_ENGLISH} "Installing outside of $PROGRAMFILES64 is not recommended.$\nDo you want to continue ?"
 
@@ -199,24 +207,26 @@ LangString DESC_PostgreSQL_Hostname ${LANG_FRENCH} "Hôte"
 LangString DESC_PostgreSQL_Port ${LANG_FRENCH} "Port"
 LangString DESC_PostgreSQL_Username ${LANG_FRENCH} "Utilisateur"
 LangString DESC_PostgreSQL_Password ${LANG_FRENCH} "Mot de passe"
+LangString DESC_OdooDBSection ${LANG_FRENCH} "Utilisateur Odoo PostgreSQL"
+LangString DESC_OdooDBPage ${LANG_FRENCH} "Configurez les identifiants de l'utilisateur Odoo pour PostgreSQL"
+LangString DESC_OdooDB_Username ${LANG_FRENCH} "Utilisateur Odoo"
+LangString DESC_OdooDB_Password ${LANG_FRENCH} "Mot de passe Odoo"
+LangString WARNING_OdooDBUsernameIsEmpty ${LANG_FRENCH} "Le nom d'utilisateur Odoo ne peut pas être vide"
+LangString WARNING_OdooDBPasswordIsEmpty ${LANG_FRENCH} "Le mot de passe Odoo ne peut pas être vide"
+LangString WARNING_OdooDBUsernameInvalid ${LANG_FRENCH} "Le nom d'utilisateur Odoo ne peut contenir que des lettres, chiffres et underscores, et doit commencer par une lettre ou un underscore"
 LangString Profile_AllInOne ${LANG_FRENCH} "Serveur Odoo Et Serveur PostgreSQL"
 LangString Profile_Server ${LANG_FRENCH} "Seulement Le Serveur Odoo"
-LangString Profile_IOT ${LANG_FRENCH} "Odoo IoT"
 LangString TITLE_Odoo_Server ${LANG_FRENCH} "Serveur Odoo"
 LangString TITLE_PostgreSQL ${LANG_FRENCH} "Installation du serveur de base de données PostgreSQL"
-LangString TITLE_IOT ${LANG_FRENCH} "Odoo IoT"
-LangString TITLE_Nginx ${LANG_FRENCH} "Installation du serveur web Nginx"
-LangString TITLE_Ghostscript ${LANG_FRENCH} "Installation de l'interpréteur Ghostscript"
 LangString DESC_FinishPageText ${LANG_FRENCH} "Démarrer Odoo"
 LangString UnsafeDirText ${LANG_FRENCH} "Installer en dehors de $PROGRAMFILES64 n'est pas recommandé.$\nVoulez-vous continuer ?"
 
 InstType /NOCUSTOM
 InstType $(Profile_AllInOne)
 InstType $(Profile_Server)
-InstType $(Profile_IOT)
 
 Section $(TITLE_Odoo_Server) SectionOdoo_Server
-    SectionIn 1 2 3
+    SectionIn 1 2
 
     # Installing winpython
     SetOutPath "$INSTDIR\python"
@@ -226,7 +236,15 @@ Section $(TITLE_Odoo_Server) SectionOdoo_Server
     File /r /x "src" "${TOOLSDIR}\nssm-2.24\*"
 
     SetOutPath "$INSTDIR\server"
-    File /r /x "wkhtmltopdf" /x "enterprise" "${TOOLSDIR}\server\*"
+    File /r /x "wkhtmltopdf" /x "enterprise" /x "i18n_bundle.7z"  "${TOOLSDIR}\server\*"
+
+    SetCompress off
+    SetOutPath "$INSTDIR\server"
+    File "${TOOLSDIR}\server\i18n_bundle.7z"
+    SetCompress auto
+    DetailPrint "Extracting translation files"
+    Nsis7z::ExtractWithDetails "$INSTDIR\server\i18n_bundle.7z" "Installing translations %s..."
+    Delete "$INSTDIR\server\i18n_bundle.7z"
 
     SetOutPath "$INSTDIR\vcredist"
     File /r "${TOOLSDIR}\vcredist\*.exe"
@@ -240,14 +258,12 @@ Section $(TITLE_Odoo_Server) SectionOdoo_Server
 
     # If there is a previous install of the Odoo Server, keep the login/password from the config file
     WriteIniStr "$INSTDIR\server\odoo.conf" "options" "db_host" $TextPostgreSQLHostname
-    WriteIniStr "$INSTDIR\server\odoo.conf" "options" "db_user" $TextPostgreSQLUsername
-    WriteIniStr "$INSTDIR\server\odoo.conf" "options" "db_password" $TextPostgreSQLPassword
+    WriteIniStr "$INSTDIR\server\odoo.conf" "options" "db_user" $TextOdooDBUsername
+    WriteIniStr "$INSTDIR\server\odoo.conf" "options" "db_password" $TextOdooDBPassword
     WriteIniStr "$INSTDIR\server\odoo.conf" "options" "db_port" $TextPostgreSQLPort
     # Fix the addons path
     WriteIniStr "$INSTDIR\server\odoo.conf" "options" "addons_path" "$INSTDIR\server\odoo\addons"
     WriteIniStr "$INSTDIR\server\odoo.conf" "options" "bin_path" "$INSTDIR\thirdparty"
-    # Set data_dir
-    WriteIniStr "$INSTDIR\server\odoo.conf" "options" "data_dir" "$INSTDIR\sessions"
 
     # if we're going to install postgresql force it's path,
     # otherwise we consider it's always done and/or correctly tune by users
@@ -262,8 +278,6 @@ Section $(TITLE_Odoo_Server) SectionOdoo_Server
     nsExec::ExecToLog '"$INSTDIR\nssm\win64\nssm.exe" install ${SERVICENAME} "$INSTDIR\python\python.exe"'
     nsExec::ExecToLog '"$INSTDIR\nssm\win64\nssm.exe" set ${SERVICENAME} AppDirectory "$\"$INSTDIR\python$\""'
     nsExec::ExecToLog '"$INSTDIR\nssm\win64\nssm.exe" set ${SERVICENAME} AppParameters "\"$INSTDIR\server\odoo-bin\" -c "\"$INSTDIR\server\odoo.conf\"'
-    nsExec::ExecToLog '"$INSTDIR\nssm\win64\nssm.exe" set ${SERVICENAME} ObjectName "LOCALSERVICE"'
-    AccessControl::GrantOnFile  "$INSTDIR" "LOCALSERVICE" "FullAccess"
 
     Call RestartOdooService
 SectionEnd
@@ -274,7 +288,7 @@ Section $(TITLE_PostgreSQL) SectionPostgreSQL
     VAR /GLOBAL postgresql_exe_filename
     VAR /GLOBAL postgresql_url
 
-    StrCpy $postgresql_exe_filename "postgresql-12.4-1-windows-x64.exe"
+    StrCpy $postgresql_exe_filename "postgresql-16.14-1-windows-x64.exe"
 
     StrCpy $postgresql_url "https://get.enterprisedb.com/postgresql/$postgresql_exe_filename"
     nsExec::Exec 'net user openpgsvc /delete'
@@ -299,73 +313,19 @@ Section $(TITLE_PostgreSQL) SectionPostgreSQL
         --serviceaccount "openpgsvc" --servicepassword "0p3npgsvcPWD" \
         --superaccount "$TextPostgreSQLUsername" --superpassword "$TextPostgreSQLPassword" \
         --serverport $TextPostgreSQLPort'
-SectionEnd
 
-Section $(TITLE_IOT) IOT
-    SectionIn 3
-    DetailPrint "Configuring TITLE_IOT"
-    WriteIniStr "$INSTDIR\server\odoo.conf" "options" "server_wide_modules" "web,hw_posbox_homepage,hw_drivers"
-    WriteIniStr "$INSTDIR\server\odoo.conf" "options" "list_db" "False"
-    WriteIniStr "$INSTDIR\server\odoo.conf" "options" "max_cron_threads" "0"
-    nsExec::ExecToStack '"$INSTDIR\python\python.exe" "$INSTDIR\server\odoo-bin" genproxytoken'
-    pop $0
-    pop $ProxyTokenPwd
-SectionEnd
-
-
-Section $(TITLE_Nginx) Nginx
-    SectionIn 3
-    SetOutPath '$TEMP'
-    VAR /GLOBAL nginx_zip_filename
-    VAR /GLOBAL nginx_url
-
-    # need unzip plugin:
-    # https://nsis.sourceforge.io/mediawiki/images/5/5a/NSISunzU.zip
-    StrCpy $nginx_zip_filename "nginx-1.22.0.zip"
-    StrCpy $nginx_url "https://nginx.org/download/$nginx_zip_filename"
-
-    DetailPrint "Downloading Nginx"
-    NScurl::http get "$nginx_url" "$TEMP\$nginx_zip_filename" /PAGE /END
-    DetailPrint "Temp dir: $TEMP\$nginx_zip_filename"
-    DetailPrint "Unzip Nginx"
-    nsisunz::UnzipToLog "$TEMP\$nginx_zip_filename" "$INSTDIR"
-
-    Pop $0
-    StrCmp $0 "success" ok
-      DetailPrint "$0" ;print error message to log
-    ok:
-
-    FindFirst $0 $1 "$INSTDIR\nginx*"
-    DetailPrint "Setting up nginx"
-    SetOutPath "$INSTDIR\$1\conf"
-    CreateDirectory $INSTDIR\$1\temp
-    CreateDirectory $INSTDIR\$1\logs
-    FindClose $0
-    File "conf\nginx\nginx.conf"
-    # Temporary certs for the first start
-    File "..\..\odoo\addons\point_of_sale\tools\posbox\overwrite_after_init\etc\ssl\certs\nginx-cert.crt"
-    File "..\..\odoo\addons\point_of_sale\tools\posbox\overwrite_after_init\etc\ssl\private\nginx-cert.key"
-SectionEnd
-
-Section $(TITLE_Ghostscript) SectionGhostscript
-    SectionIn 3
-    SetOutPath '$TEMP'
-    VAR /GLOBAL ghostscript_exe_filename
-    VAR /GLOBAL ghostscript_url
-
-    StrCpy $ghostscript_exe_filename "gs10012w64.exe"
-    StrCpy $ghostscript_url "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10012/$ghostscript_exe_filename"
-
-    DetailPrint "Downloading Ghostscript"
-    NScurl::http get "$ghostscript_url" "$TEMP\$ghostscript_exe_filename" /PAGE /END
-    DetailPrint "Temp dir: $TEMP\$ghostscript_exe_filename"
-
-    Rmdir /r "INSTDIR\Ghostscript"
-    DetailPrint "Installing Ghostscript"
-    ExecWait '"$TEMP\$ghostscript_exe_filename" \
-        /S \
-        /D=$INSTDIR\Ghostscript'
-    Call RestartOdooService
+    DetailPrint "Creating Odoo database user with CREATEDB privilege"
+    ${WordReplace} $TextOdooDBPassword "'" "''" "+" $R0
+    System::Call 'Kernel32::SetEnvironmentVariableW(w "PGPASSWORD", w "$TextPostgreSQLPassword")'
+    nsExec::ExecToStack `"$INSTDIR\PostgreSQL\bin\psql.exe" -w -U "$TextPostgreSQLUsername" -h "$TextPostgreSQLHostname" -p $TextPostgreSQLPort -d postgres -c "CREATE ROLE $TextOdooDBUsername WITH CREATEDB NOSUPERUSER NOCREATEROLE LOGIN PASSWORD '$R0'"`
+    Pop $R1
+    Pop $R2
+    System::Call 'Kernel32::SetEnvironmentVariableW(w "PGPASSWORD", w "")'
+    ${If} $R1 != 0
+        DetailPrint "Failed to create Odoo database user (psql exit code $R1)"
+    ${Else}
+        DetailPrint "Odoo database user created successfully"
+    ${EndIf}
 SectionEnd
 
 Section -Post
@@ -389,25 +349,21 @@ SectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Section "Uninstall"
+    SetRegView 64
     # Check if the server is installed
     !insertmacro IfKeyExists "HKLM" "${UNINSTALL_REGISTRY_KEY_SERVER}" "UninstallString"
     Pop $R0
     ReadRegStr $0 HKLM "${UNINSTALL_REGISTRY_KEY_SERVER}" "UninstallString"
     ExecWait '"$0" /S'
-    ExecWait '"$INSTDIR\Ghostscript\uninstgs.exe" /S'
 
     nsExec::Exec "net stop ${SERVICENAME}"
     nsExec::Exec "sc delete ${SERVICENAME}"
     sleep 2
 
     Rmdir /r "$INSTDIR\server"
-    Rmdir /r "$INSTDIR\sessions"
     Rmdir /r "$INSTDIR\thirdparty"
     Rmdir /r "$INSTDIR\python"
     Rmdir /r "$INSTDIR\nssm"
-    FindFirst $0 $1 "$INSTDIR\nginx*"
-    Rmdir /R "$INSTDIR\$1"
-    FindClose $0
     DeleteRegKey HKLM "${UNINSTALL_REGISTRY_KEY}"
 SectionEnd
 
@@ -435,6 +391,9 @@ Function .onInit
     StrCpy $TextPostgreSQLUsername ${DEFAULT_POSTGRESQL_USERNAME}
     StrCpy $TextPostgreSQLPassword ${DEFAULT_POSTGRESQL_PASSWORD}
 
+    StrCpy $TextOdooDBUsername ${DEFAULT_ODOO_DB_USERNAME}
+    StrCpy $TextOdooDBPassword ${DEFAULT_ODOO_DB_PASSWORD}
+
     Push $R0
     ${GetOptions} $cmdLineParams '/allinone' $R0
     IfErrors +2 0
@@ -458,6 +417,21 @@ Function .onInit
     StrCpy $HasPostgreSQL 1
     !insertmacro UnselectSection ${SectionPostgreSQL}
     SectionSetFlags ${SectionPostgreSQL} ${SF_RO}
+
+    EnumRegKey $R5 HKLM "SOFTWARE\PostgreSQL\Installations" 0
+    ReadRegStr $R6 HKLM "SOFTWARE\PostgreSQL\Installations\$R5" "Base Directory"
+
+    System::Call 'Kernel32::SetEnvironmentVariableW(w "PGPASSWORD", w "${DEFAULT_ODOO_DB_PASSWORD}")'
+    nsExec::ExecToStack `"$R6\bin\psql.exe" -w -U "${DEFAULT_ODOO_DB_USERNAME}" -h "${DEFAULT_POSTGRESQL_HOSTNAME}" -p ${DEFAULT_POSTGRESQL_PORT} -d postgres -tAc "SELECT 1"`
+    Pop $R7
+    Pop $R8
+    System::Call 'Kernel32::SetEnvironmentVariableW(w "PGPASSWORD", w "")'
+
+    ${If} $R7 != 0
+        StrCpy $TextOdooDBUsername "${DEFAULT_POSTGRESQL_USERNAME}"
+        StrCpy $TextOdooDBPassword "${DEFAULT_POSTGRESQL_PASSWORD}"
+    ${EndIf}
+
 
     DoInstallPostgreSQL:
 FunctionEnd
@@ -539,27 +513,70 @@ Function LeavePostgreSQL
         MessageBox MB_ICONEXCLAMATION|MB_OK $(WARNING_PasswordIsEmpty)
         Abort
     ${EndIf}
+
 FunctionEnd
 
-Function ShowProxyTokenDialogPage
+Function ShowOdooDB
     GetCurInstType $R0
-    IntCmp $R0 2 doProxyToken bypassProxyToken
-    doProxyToken:
-        nsDialogs::Create 1018
-        Pop $ProxyTokenDialog
-        ${IF} $ProxyTokenDialog == !error
-            Abort
-        ${EndIf}
+    IntCmp $R0 1 bypassOdooDBConfig
+    IntCmp $R0 2 bypassOdooDBConfig
 
-        ${NSD_CreateLabel} 0 0 100% 25% "Here is your access token for the Odoo IOT, please write it down in a safe place, you will need it to configure the IOT"
-        Pop $ProxyTokenLabel
+    ${If} $HasPostgreSQL == 1
+        Goto bypassOdooDBConfig
+    ${EndIf}
 
-        ${NSD_CreateText} 0 30% 100% 13u $ProxyTokenPwd
-        Pop $ProxyTokenText
-        ${NSD_Edit_SetreadOnly} $ProxyTokenText 1
-        ${NSD_AddStyle}  $ProxyTokenText ${SS_CENTER}
-        nsDialogs::Show
-    bypassProxyToken:
+    nsDialogs::Create /NOUNLOAD 1018
+    Pop $0
+
+    ${If} $0 == error
+        Abort
+    ${EndIf}
+
+    ${NSD_CreateLabel} 0 0 100% 10u $(DESC_OdooDBPage)
+    Pop $0
+
+    ${NSD_CreateLabel} 0 45 90u 12u $(DESC_OdooDB_Username)
+    Pop $0
+    ${NSD_CreateText} 130 45 130u 12u $TextOdooDBUsername
+    Pop $HWNDOdooDBUsername
+
+    ${NSD_CreateLabel} 0 75 90u 12u $(DESC_OdooDB_Password)
+    Pop $0
+    ${NSD_CreateText} 130 75 130u 12u $TextOdooDBPassword
+    Pop $HWNDOdooDBPassword
+
+    nsDialogs::Show
+    bypassOdooDBConfig:
+FunctionEnd
+
+Function LeaveOdooDB
+    ${NSD_GetText} $HWNDOdooDBUsername $TextOdooDBUsername
+    ${NSD_GetText} $HWNDOdooDBPassword $TextOdooDBPassword
+
+    StrLen $1 $TextOdooDBUsername
+    ${If} $1 == 0
+        MessageBox MB_ICONEXCLAMATION|MB_OK $(WARNING_OdooDBUsernameIsEmpty)
+        Abort
+    ${EndIf}
+
+    ${StrFilter} $TextOdooDBUsername "12" "_" "" $R0
+    ${If} $R0 != $TextOdooDBUsername
+        MessageBox MB_ICONEXCLAMATION|MB_OK $(WARNING_OdooDBUsernameInvalid)
+        Abort
+    ${EndIf}
+
+    StrCpy $R1 $TextOdooDBUsername 1
+    ${StrFilter} $R1 "1" "" "" $R2
+    ${If} $R1 == $R2
+        MessageBox MB_ICONEXCLAMATION|MB_OK $(WARNING_OdooDBUsernameInvalid)
+        Abort
+    ${EndIf}
+
+    StrLen $1 $TextOdooDBPassword
+    ${If} $1 == 0
+        MessageBox MB_ICONEXCLAMATION|MB_OK $(WARNING_OdooDBPasswordIsEmpty)
+        Abort
+    ${EndIf}
 FunctionEnd
 
 Function ComponentLeave

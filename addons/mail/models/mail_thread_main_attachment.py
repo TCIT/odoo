@@ -5,11 +5,11 @@ from odoo import fields, models
 from odoo.addons.mail.tools.discuss import Store
 
 
-class MailMainAttachmentMixin(models.AbstractModel):
+class MailThreadMainAttachment(models.AbstractModel):
     """ Mixin that adds main attachment support to the MailThread class. """
 
     _name = 'mail.thread.main.attachment'
-    _inherit = 'mail.thread'
+    _inherit = ['mail.thread']
     _description = 'Mail Main Attachment management'
 
     message_main_attachment_id = fields.Many2one(string="Main Attachment", comodel_name='ir.attachment', copy=False, index='btree_not_null')
@@ -36,10 +36,12 @@ class MailMainAttachmentMixin(models.AbstractModel):
           of records;
         """
         if attachments and (force or not self.message_main_attachment_id):
-            # we filter out attachment with 'xml' and 'octet' types
+            # We filter out attachment with 'xml', 'octet' and 'rfc822' (raw email) types
             if filter_xml:
                 attachments = attachments.filtered(
-                    lambda r: not r.mimetype.endswith('xml') and not r.mimetype.endswith('application/octet-stream')
+                    lambda r: not r.mimetype.endswith('xml')
+                    and not r.mimetype.endswith('application/octet-stream')
+                    and r.mimetype != 'message/rfc822'
                 )
 
             # Assign one of the attachments as the main according to the following priority: pdf, image, other types.
@@ -49,11 +51,11 @@ class MailMainAttachmentMixin(models.AbstractModel):
                     key=lambda r: (r.mimetype.endswith('pdf'), r.mimetype.startswith('image'))
                 ).id
 
-    def _thread_to_store(self, store: Store, /, *, request_list=None, **kwargs):
-        super()._thread_to_store(store, request_list=request_list, **kwargs)
+    def _thread_to_store(self, store: Store, fields, *, request_list=None):
+        super()._thread_to_store(store, fields, request_list=request_list)
         if request_list and "attachments" in request_list:
             store.add(
                 self,
-                {"mainAttachment": Store.one(self.message_main_attachment_id, only_id=True)},
+                Store.One("message_main_attachment_id", []),
                 as_thread=True,
             )

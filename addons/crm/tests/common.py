@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from ast import literal_eval
+from collections import defaultdict
 from contextlib import contextmanager
 from datetime import timedelta
 from unittest.mock import patch
@@ -50,7 +51,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
     FIELDS_FIRST_SET = [
         'name', 'partner_id', 'campaign_id', 'company_id', 'country_id',
         'team_id', 'state_id', 'stage_id', 'medium_id', 'source_id', 'user_id',
-        'title', 'city', 'contact_name', 'mobile', 'partner_name',
+        'city', 'contact_name', 'partner_name',
         'phone', 'probability', 'expected_revenue', 'street', 'street2', 'zip',
         'create_date', 'date_automation_last', 'email_from', 'email_cc', 'website'
     ]
@@ -92,35 +93,35 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         })
 
         (cls.user_sales_manager + cls.user_sales_leads + cls.user_sales_salesman).write({
-            'groups_id': [(4, cls.env.ref('crm.group_use_lead').id)]
+            'group_ids': [(4, cls.env.ref('crm.group_use_lead').id)]
         })
 
         cls.env['crm.stage'].search([]).write({'sequence': 9999})  # ensure search will find test data first
         cls.stage_team1_1 = cls.env['crm.stage'].create({
             'name': 'New',
             'sequence': 1,
-            'team_id': cls.sales_team_1.id,
+            'team_ids': [cls.sales_team_1.id],
         })
         cls.stage_team1_2 = cls.env['crm.stage'].create({
             'name': 'Proposition',
             'sequence': 5,
-            'team_id': cls.sales_team_1.id,
+            'team_ids': [cls.sales_team_1.id],
         })
         cls.stage_team1_won = cls.env['crm.stage'].create({
             'name': 'Won',
             'sequence': 70,
-            'team_id': cls.sales_team_1.id,
+            'team_ids': [cls.sales_team_1.id],
             'is_won': True,
         })
         cls.stage_gen_1 = cls.env['crm.stage'].create({
             'name': 'Generic stage',
             'sequence': 3,
-            'team_id': False,
+            'team_ids': False,
         })
         cls.stage_gen_won = cls.env['crm.stage'].create({
             'name': 'Generic Won',
             'sequence': 30,
-            'team_id': False,
+            'team_ids': False,
             'is_won': True,
         })
 
@@ -159,13 +160,18 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         })
         cls.lead_team_1_won.action_set_won()
         cls.lead_team_1_lost = cls.env['crm.lead'].create({
-            'name': 'Already Won',
+            'name': 'Already Lost',
             'type': 'lead',
             'user_id': cls.user_sales_leads.id,
             'team_id': cls.sales_team_1.id,
         })
         cls.lead_team_1_lost.action_set_lost()
         (cls.lead_team_1_won + cls.lead_team_1_lost).flush_recordset()
+
+        # make lead 1 take team history into account for its automated proba.
+        # it should now be 50% as auto proba. (1 lost 1 won for team 1)
+        cls.lead_1._compute_probabilities()
+        cls.lead_1.flush_recordset()
 
         # email / phone data
         cls.test_email_data = [
@@ -202,8 +208,6 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         cls.contact_1 = cls.env['res.partner'].create({
             'name': 'Philip J Fry',
             'email': cls.test_email_data[1],
-            'mobile': cls.test_phone_data[0],
-            'title': cls.env.ref('base.res_partner_title_mister').id,
             'function': 'Delivery Boy',
             'lang': cls.lang_en.code,
             'phone': False,
@@ -218,7 +222,6 @@ class TestCrmCommon(TestSalesCommon, MailCase):
             'name': 'Turanga Leela',
             'email': cls.test_email_data[2],
             'lang': cls.lang_en.code,
-            'mobile': cls.test_phone_data[1],
             'phone': cls.test_phone_data[2],
             'parent_id': False,
             'is_company': False,
@@ -235,7 +238,6 @@ class TestCrmCommon(TestSalesCommon, MailCase):
             'city': 'New new York',
             'country_id': base_us.id,
             'lang': cls.lang_en.code,
-            'mobile': '+1 202 555 0888',
             'zip': '87654',
         })
 
@@ -314,7 +316,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
 
     def _create_leads_batch(self, lead_type='lead', count=10, email_dup_count=0,
                             partner_count=0, partner_ids=None, user_ids=None,
-                            country_ids=None, probabilities=None, suffix=''):
+                            country_ids=None, probabilities=None, suffix='', additional_lead_values=defaultdict(None)):
         """ Helper tool method creating a batch of leads, useful when dealing
         with batch processes. Please update me.
 
@@ -332,6 +334,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
             'name': f'TestLead{suffix}_{x:04d}',
             'type': lead_type if lead_type else types[x % 2],
             'priority': '%s' % (x % 3),
+            **additional_lead_values,
         } for x in range(count)]
 
         # generate customer information
@@ -390,7 +393,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         # duplicates (currently only with email)
         dups_data = []
         if email_dup_count and not partner_ids:
-            for idx, lead_data in enumerate(leads_data):
+            for lead_data in leads_data:
                 if not lead_data.get('partner_id') and lead_data['email_from']:
                     dup_data = dict(lead_data)
                     dup_data['name'] = 'Duplicated-%s' % dup_data['name']
@@ -465,6 +468,8 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         :param leads: merged leads (including opportunity)
         """
         self.assertIn(opportunity, leads)
+        opportunity = opportunity.sudo()
+        leads = leads.sudo()
 
         # save opportunity value before being modified by merge process
         fields_all = self.FIELDS_FIRST_SET + self.merge_fields
@@ -507,11 +512,11 @@ class TestCrmCommon(TestSalesCommon, MailCase):
             yield
         finally:
             # support specific values caller may want to check in addition to generic tests
-            for fname, expected in expected.items():
-                if expected is False:
+            for fname, e_val in expected.items():
+                if e_val is False:
                     self.assertFalse(opportunity[fname], "%s must be False" % fname)
                 else:
-                    self.assertEqual(opportunity[fname], expected, "%s must be equal to %s" % (fname, expected))
+                    self.assertEqual(opportunity[fname], e_val, "%s must be equal to %s" % (fname, e_val))
 
             # classic fields: first not void wins or specific computation
             for fname in fields_all:
@@ -577,7 +582,7 @@ class TestLeadConvertCommon(TestCrmCommon):
         cls.stage_team_convert_1 = cls.env['crm.stage'].create({
             'name': 'New',
             'sequence': 1,
-            'team_id': cls.sales_team_convert.id,
+            'team_ids': [cls.sales_team_convert.id],
         })
 
         cls.lead_1.write({'date_open': Datetime.from_string('2020-01-15 11:30:00')})

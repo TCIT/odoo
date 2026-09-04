@@ -6,7 +6,7 @@
     'name': 'Manufacturing',
     'version': '2.0',
     'website': 'https://www.odoo.com/app/manufacturing',
-    'category': 'Manufacturing/Manufacturing',
+    'category': 'Supply Chain/Manufacturing',
     'sequence': 55,
     'summary': 'Manufacturing Orders & BOMs',
     'depends': ['product', 'stock', 'resource'],
@@ -22,8 +22,8 @@
         'wizard/stock_warn_insufficient_qty_views.xml',
         'wizard/mrp_production_backorder.xml',
         'wizard/mrp_consumption_warning_views.xml',
-        'wizard/mrp_batch_produce.xml',
         'wizard/mrp_production_split.xml',
+        'wizard/mrp_production_serial_numbers.xml',
         'views/mrp_views_menus.xml',
         'views/stock_move_views.xml',
         'views/mrp_workorder_views.xml',
@@ -40,6 +40,7 @@
         'views/mrp_unbuild_views.xml',
         'views/res_config_settings_views.xml',
         'views/stock_scrap_views.xml',
+        'wizard/stock_replenishment_info.xml',  # needs views/mrp_workcenter_views.xml to load first
         'report/report_deliveryslip.xml',
         'report/mrp_report_views_main.xml',
         'report/mrp_report_bom_structure.xml',
@@ -68,5 +69,6 @@
             'mrp/static/tests/**/*',
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

@@ -106,6 +106,7 @@
                                                readonly="1"
                                                invisible="not prerequisite_of_channel_ids"/>
                                         <field name="visibility" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="website_absolute_url" widget="CopyClipboardChar" nolabel="1" colspan="2" invisible="visibility != 'link'"/>
                                         <field name="enroll" widget="radio" options="{'horizontal': true}" invisible="visibility == 'members'"/>
                                         <field name="upload_group_ids" widget="many2many_tags" groups="base.group_no_one"/>
                                         <field name="enroll_group_ids" widget="many2many_tags" groups="base.group_no_one"/>
@@ -286,7 +287,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div name="card_content" class="row mt-auto">
+                            <div name="card_content" class="row g-0 mt-auto">
                                 <a name="action_redirect_to_invited_members" type="object" class="d-flex flex-column align-items-center col-3 border-end">
                                     <field name="members_invited_count" class="fw-bold"/>
                                     <span class="text-muted text-truncate mw-100" title="Invited">Invited</span>

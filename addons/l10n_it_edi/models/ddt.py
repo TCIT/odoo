@@ -3,7 +3,8 @@
 
 from odoo import fields, models, api
 
-class L10nItDdt(models.Model):
+
+class L10n_ItDdt(models.Model):
     _name = 'l10n_it.ddt'
     _description = 'Transport Document'
 

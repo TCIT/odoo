@@ -19,6 +19,7 @@ import {
     onRpc,
     patchWithCleanup,
     serverState,
+    toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
 
 import { download } from "@web/core/network/download";
@@ -29,8 +30,10 @@ async function exportAllAction() {
 }
 const openExportDialog = async () => {
     if (getMockEnv().isSmall) {
-        await pointerDown(".o_data_row:nth-child(1)");
+        await pointerDown(".o_data_row:nth-child(1), .o_kanban_record:nth-child(1)");
         await runAllTimers();
+    } else if (queryFirst(".o_kanban_view")) {
+        await contains(".o_kanban_record").click({ altKey: true });
     } else {
         await contains(".o_list_record_selector input[type='checkbox']").click();
     }
@@ -50,7 +53,7 @@ class Partner extends models.Model {
         { id: 3, foo: "piou piou", display_name: "Jack O'Neill", bar: true },
     ];
 }
-class Users extends models.Model {
+class User extends models.Model {
     _name = "res.users";
     has_group() {
         return true;
@@ -67,7 +70,7 @@ class IrExportsLine extends models.Model {
     name = fields.Char();
     export_id = fields.Many2one({ relation: "ir.exports" });
 }
-defineModels([Partner, Users, IrExports, IrExportsLine]);
+defineModels([Partner, User, IrExports, IrExportsLine]);
 
 const fetchedFields = {
     root: [
@@ -168,15 +171,11 @@ const fetchedFields = {
 };
 
 test("Export dialog UI test", async () => {
-    onRpc("/web/export/formats", () => {
-        return [
-            { tag: "csv", label: "CSV" },
-            { tag: "xls", label: "Excel" },
-        ];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return fetchedFields.root;
-    });
+    onRpc("/web/export/formats", () => [
+        { tag: "csv", label: "CSV" },
+        { tag: "xls", label: "Excel" },
+    ]);
+    onRpc("/web/export/get_fields", () => fetchedFields.root);
 
     await mountView({
         type: "list",
@@ -209,26 +208,22 @@ test("Export dialog UI test", async () => {
 });
 
 test("Export dialog: interacting with export templates", async () => {
-    onRpc("/web/export/formats", () => {
-        return [
-            { tag: "csv", label: "CSV" },
-            { tag: "xls", label: "Excel" },
-        ];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return [
-            ...fetchedFields.root,
-            {
-                children: false,
-                field_type: "string",
-                id: "third_field",
-                relation_field: null,
-                required: false,
-                string: "Third field selected",
-                value: "third_field",
-            },
-        ];
-    });
+    onRpc("/web/export/formats", () => [
+        { tag: "csv", label: "CSV" },
+        { tag: "xls", label: "Excel" },
+    ]);
+    onRpc("/web/export/get_fields", () => [
+        ...fetchedFields.root,
+        {
+            children: false,
+            field_type: "string",
+            id: "third_field",
+            relation_field: null,
+            required: false,
+            string: "Third field selected",
+            value: "third_field",
+        },
+    ]);
     onRpc("/web/export/namelist", async (request) => {
         const { params } = await request.json();
         if (params.export_id === 1) {
@@ -330,14 +325,10 @@ test("Export dialog: interacting with export templates", async () => {
 });
 
 test("Export dialog: interacting with export templates in debug", async () => {
-    serverState.debug = true;
+    serverState.debug = "1";
 
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return [...fetchedFields.root];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
+    onRpc("/web/export/get_fields", () => [...fetchedFields.root]);
     onRpc("/web/export/namelist", async (request) => {
         const { params } = await request.json();
         if (params.export_id === 1) {
@@ -369,9 +360,7 @@ test("Export dialog: interacting with export templates in debug", async () => {
 
 test.tags("desktop");
 test("Export dialog: interacting with available fields", async () => {
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
     onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (!params.parent_field) {
@@ -458,14 +447,18 @@ test("Export dialog: compatible and export type options", async () => {
             expect(JSON.parse(options.data.data)["import_compat"]).toBe(true);
         },
     });
-    onRpc("/web/export/formats", () => {
-        return [
-            { tag: "csv", label: "CSV" },
-            { tag: "xls", label: "Excel" },
-            { tag: "wow", label: "WOW" },
-        ];
-    });
-    onRpc("/web/export/get_fields", () => {
+    onRpc("/web/export/formats", () => [
+        { tag: "csv", label: "CSV" },
+        { tag: "xls", label: "Excel" },
+        { tag: "wow", label: "WOW" },
+    ]);
+    let checkpoint;
+    const def = new Deferred();
+    onRpc("/web/export/get_fields", async () => {
+        if (checkpoint) {
+            await def;
+        }
+        checkpoint = true;
         return fetchedFields.root;
     });
 
@@ -482,7 +475,11 @@ test("Export dialog: compatible and export type options", async () => {
     expect(".o_export_format div:nth-of-type(3)").toHaveText("WOW");
     await check(".o_export_format div:nth-of-type(3) input");
     await animationFrame();
+    expect(".o_export_tree_item").toHaveCount(3);
     await contains(".o_import_compat input").click();
+    expect(".o_export_tree_item").toHaveCount(3);
+    def.resolve();
+    await animationFrame();
     await contains(".o_select_button").click();
     // download file has been called with the correct url
     expect.verifySteps(["/web/export/wow"]);
@@ -495,9 +492,7 @@ test("toggling import compatibility after adding an expanded field", async () =>
             expect(JSON.parse(options.data.data)["import_compat"]).toBe(true);
         },
     });
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
     onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (!params.parent_field) {
@@ -525,9 +520,7 @@ test("toggling import compatibility after adding an expanded field", async () =>
 });
 
 test("Export dialog: many2many fields are extendable", async () => {
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
     onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (!params.parent_field) {
@@ -554,12 +547,10 @@ test("Export dialog: many2many fields are extendable", async () => {
     );
 });
 
-test("Export dialog: export list with 'exportable: false'", async () => {
+test("Export dialog in list view: export list with 'exportable: false'", async () => {
     Partner._fields.not_exportable = fields.Char({ string: "Not exportable", exportable: false });
     Partner._fields.exportable = fields.Char();
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
     onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (!params.parent_field) {
@@ -597,11 +588,55 @@ test("Export dialog: export list with 'exportable: false'", async () => {
     expect(".o_fields_list").toHaveText("Foo\nExportable");
 });
 
+test("Export dialog in kanban view: export list with 'exportable: false'", async () => {
+    Partner._fields.not_exportable = fields.Char({ string: "Not exportable", exportable: false });
+    Partner._fields.exportable = fields.Char();
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
+    onRpc("/web/export/get_fields", async (request) => {
+        const { params } = await request.json();
+        if (!params.parent_field) {
+            return [
+                ...fetchedFields.root,
+                {
+                    id: "not_exportable",
+                    string: "Not exportable",
+                    type: "char",
+                    exportable: false,
+                },
+                {
+                    id: "exportable",
+                    string: "Exportable",
+                },
+            ];
+        }
+        return fetchedFields[params.prefix];
+    });
+
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                        <field name="not_exportable"/>
+                        <field name="exportable"/>
+                    </t>
+                </templates>
+            </kanban>`,
+        loadActionMenus: true,
+    });
+
+    await openExportDialog();
+
+    expect(".o_export_field").toHaveCount(2);
+    expect(".o_fields_list").toHaveText("Foo\nExportable");
+});
+
 test.tags("desktop");
 test("Export dialog: sortable on desktop", async () => {
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
     onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (!params.parent_field) {
@@ -627,9 +662,7 @@ test("Export dialog: sortable on desktop", async () => {
 
 test.tags("mobile");
 test("Export dialog: non-sortable on mobile", async () => {
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
     onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (!params.parent_field) {
@@ -667,14 +700,14 @@ test("ExportDialog: export all records of the domain", async () => {
             }
         },
     });
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "xls", label: "Excel" }];
-    });
-    onRpc("/web/export/get_fields", async (request) =>  {
+    onRpc("/web/export/formats", () => [{ tag: "xls", label: "Excel" }]);
+    onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (isDomainSelected) {
             const expectedDomain = params.parent_field ? [] : [["bar", "!=", "glou"]];
-            expect(params.domain).toEqual(expectedDomain, {message: "Domain is only applied on the root model"});
+            expect(params.domain).toEqual(expectedDomain, {
+                message: "Domain is only applied on the root model",
+            });
             expect.step("get export fields route called with correct domain");
         }
         return fetchedFields.root;
@@ -698,7 +731,7 @@ test("ExportDialog: export all records of the domain", async () => {
     await contains(".o_form_button_cancel").click();
 
     isDomainSelected = true;
-    await contains(".o_list_select_domain").click();
+    await contains(".o_select_domain").click();
     await contains(".o_control_panel .o_cp_action_menus .dropdown-toggle").click();
     await contains(".dropdown-menu span:contains(Export)").click();
     await contains(".o_select_button").click();
@@ -742,12 +775,8 @@ test("Direct export list", async () => {
             });
         },
     });
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "xls", label: "Excel" }];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return fetchedFields.root;
-    });
+    onRpc("/web/export/formats", () => [{ tag: "xls", label: "Excel" }]);
+    onRpc("/web/export/get_fields", () => fetchedFields.root);
 
     await mountView({
         type: "list",
@@ -764,18 +793,73 @@ test("Direct export list", async () => {
     await exportAllAction();
 });
 
+test("Export list with modified context", async () => {
+    patchWithCleanup(download, {
+        _download: (options) => {
+            expect.step("Export records");
+            expect(options.url).toBe("/web/export/xlsx");
+            expect(JSON.parse(options.data.data)).toEqual({
+                context: {
+                    allowed_company_ids: [1],
+                    lang: "en",
+                    uid: 7,
+                    tz: "taht",
+                    yipi: true,
+                },
+                model: "partner",
+                domain: [["bar", "!=", "glou"]],
+                groupby: [],
+                ids: false,
+                import_compat: false,
+                fields: [
+                    {
+                        name: "foo",
+                        label: "Foo",
+                        store: true,
+                        type: "char",
+                    },
+                    {
+                        name: "bar",
+                        label: "Bar",
+                        store: true,
+                        type: "boolean",
+                    },
+                ],
+            });
+        },
+    });
+    onRpc("/web/export/formats", () => [{ tag: "xls", label: "Excel" }]);
+    onRpc("/web/export/get_fields", () => fetchedFields.root);
+
+    await mountView({
+        type: "list",
+        resModel: "partner",
+        arch: `
+        <list export_xlsx="1">
+            <field name="foo"/>
+            <field name="bar"/>
+        </list>`,
+        loadActionMenus: true,
+        domain: [["bar", "!=", "glou"]],
+        searchViewArch: `
+        <search>
+            <filter name="owo" string="OwO" context="{'yipi': True}"/>
+        </search>`,
+    });
+    await toggleSearchBarMenu();
+    await contains(".o-dropdown-item:contains(OwO)").click();
+    await exportAllAction();
+    expect.verifySteps(["Export records"]);
+});
+
 test("Direct export grouped list", async () => {
     patchWithCleanup(download, {
         _download: (options) => {
             expect(JSON.parse(options.data.data).groupby).toEqual(["foo", "bar"]);
         },
     });
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "xls", label: "Excel" }];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return fetchedFields.root;
-    });
+    onRpc("/web/export/formats", () => [{ tag: "xls", label: "Excel" }]);
+    onRpc("/web/export/get_fields", () => fetchedFields.root);
 
     await mountView({
         type: "list",
@@ -802,12 +886,8 @@ test("Direct export list take optional fields into account on desktop", async ()
             ]);
         },
     });
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "xls", label: "Excel" }];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return fetchedFields.root;
-    });
+    onRpc("/web/export/formats", () => [{ tag: "xls", label: "Excel" }]);
+    onRpc("/web/export/get_fields", () => fetchedFields.root);
 
     await mountView({
         type: "list",
@@ -837,12 +917,8 @@ test("Direct export list take optional fields into account on mobile", async () 
             ]);
         },
     });
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "xls", label: "Excel" }];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return fetchedFields.root;
-    });
+    onRpc("/web/export/formats", () => [{ tag: "xls", label: "Excel" }]);
+    onRpc("/web/export/get_fields", () => fetchedFields.root);
 
     await mountView({
         type: "list",
@@ -865,12 +941,8 @@ test("Direct export list take optional fields into account on mobile", async () 
 
 test.tags("desktop");
 test("Export dialog with duplicated fields on desktop", async () => {
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return fetchedFields.root;
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
+    onRpc("/web/export/get_fields", () => fetchedFields.root);
 
     await mountView({
         type: "list",
@@ -894,12 +966,8 @@ test("Export dialog with duplicated fields on desktop", async () => {
 
 test.tags("mobile");
 test("Export dialog with duplicated fields on mobile", async () => {
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return fetchedFields.root;
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
+    onRpc("/web/export/get_fields", () => fetchedFields.root);
 
     await mountView({
         type: "list",
@@ -922,9 +990,7 @@ test("Export dialog with duplicated fields on mobile", async () => {
 });
 
 test("Export dialog: export list contains field with 'default_export: true'", async () => {
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
     onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (!params.parent_field) {
@@ -958,9 +1024,7 @@ test("Export dialog: export list contains field with 'default_export: true'", as
 });
 
 test("Export dialog: search subfields", async () => {
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
     onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (!params.parent_field) {
@@ -993,9 +1057,7 @@ test("Export dialog: search subfields", async () => {
 });
 
 test("Export dialog: expand subfields after search", async () => {
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
     onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (!params.parent_field) {
@@ -1034,11 +1096,9 @@ test("Export dialog: expand subfields after search", async () => {
 });
 
 test("Export dialog: search in debug", async () => {
-    serverState.debug = true;
+    serverState.debug = "1";
 
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "csv", label: "CSV" }];
-    });
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
     onRpc("/web/export/get_fields", async (request) => {
         const { params } = await request.json();
         if (!params.parent_field) {
@@ -1071,12 +1131,8 @@ test("Export dialog: disable button during export", async () => {
     patchWithCleanup(download, {
         _download: () => (def = new Deferred()),
     });
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "xls", label: "Excel" }];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return fetchedFields.root;
-    });
+    onRpc("/web/export/formats", () => [{ tag: "xls", label: "Excel" }]);
+    onRpc("/web/export/get_fields", () => fetchedFields.root);
 
     await mountView({
         type: "list",
@@ -1095,12 +1151,8 @@ test("Export dialog: disable button during export", async () => {
 });
 
 test("Export dialog: no column_invisible fields in default export list", async () => {
-    onRpc("/web/export/formats", () => {
-        return [{ tag: "xls", label: "Excel" }];
-    });
-    onRpc("/web/export/get_fields", () => {
-        return fetchedFields.root;
-    });
+    onRpc("/web/export/formats", () => [{ tag: "xls", label: "Excel" }]);
+    onRpc("/web/export/get_fields", () => fetchedFields.root);
 
     await mountView({
         type: "list",
@@ -1116,4 +1168,176 @@ test("Export dialog: no column_invisible fields in default export list", async (
     await openExportDialog();
     expect(".modal .o_export_field").toHaveCount(1);
     expect(".modal .o_export_field").toHaveText("Foo");
+});
+
+test("Export dialog: fields displayed in same Order as list view when export", async () => {
+    Partner._fields.abc = fields.Char();
+    Partner._fields.demo = fields.Char();
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
+    onRpc("/web/export/get_fields", async (request) => [
+        ...fetchedFields.root,
+        {
+            id: "abc",
+            string: "Abc",
+        },
+        {
+            id: "demo",
+            string: "Demo",
+        },
+    ]);
+
+    await mountView({
+        type: "list",
+        resModel: "partner",
+        arch: `
+            <list>
+                <field name="demo"/>
+                <field name="abc"/>
+            </list>`,
+        loadActionMenus: true,
+    });
+
+    await openExportDialog();
+    expect(".modal .o_export_field:first-child").toHaveText("Demo", {
+        message: "Field demo should appear first in the export list",
+    });
+    expect(".modal .o_export_field:nth-child(2)").toHaveText("Abc", {
+        message: "Field abc should appear second in the export list",
+    });
+});
+
+test("Export dialog in list view: excludes raw properties field, includes enabled properties", async () => {
+    User._fields.properties_definition = fields.PropertiesDefinition();
+    Partner._fields.user_id = fields.Many2one({ relation: "res.users" });
+    Partner._fields.properties = fields.Properties({
+        definition_record: "user_id",
+        definition_record_field: "properties_definition",
+    });
+
+    User._records = [
+        {
+            id: 1,
+            properties_definition: [
+                { name: "my_char", string: "My Char", type: "char" },
+                { name: "my_int", string: "My Int", type: "integer" },
+            ],
+        },
+    ];
+
+    Partner._records[0].user_id = 1;
+    Partner._records[0].properties = { my_char: "hello", my_int: 42 };
+
+    onRpc("/web/export/formats", () => [{ tag: "csv", label: "CSV" }]);
+    onRpc("/web/export/get_fields", async (request) => [
+        ...fetchedFields.root,
+        {
+            field_type: "properties",
+            string: "Properties",
+            required: false,
+            value: "properties",
+            id: "properties",
+        },
+        {
+            field_type: "char",
+            string: "My Char",
+            required: false,
+            value: "properties.my_char",
+            id: "properties.my_char",
+        },
+        {
+            field_type: "integer",
+            string: "My Int",
+            required: false,
+            value: "properties.my_int",
+            id: "properties.my_int",
+        },
+    ]);
+
+    await mountView({
+        type: "list",
+        resModel: "partner",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <field name="properties"/>
+            </list>`,
+        loadActionMenus: true,
+    });
+
+    await contains(".o_optional_columns_dropdown .dropdown-toggle").click();
+    await contains(".o-dropdown-item:nth-child(1) span:contains('My Char')").click();
+
+    await openExportDialog();
+    expect(queryAllTexts(".o_left_field_panel .o_export_tree_item")).toEqual([
+        "Activities",
+        "Foo",
+        "Bar",
+        "Properties",
+        "My Char",
+        "My Int",
+    ]);
+    expect(queryAllTexts(".o_right_field_panel .o_export_field")).toEqual(["Foo", "My Char"]);
+});
+
+test("Export dialog in kanban view: no raw properties fields in default export list", async () => {
+    User._fields.properties_definition = fields.PropertiesDefinition();
+    Partner._fields.user_id = fields.Many2one({ relation: "res.users" });
+    Partner._fields.properties = fields.Properties({
+        definition_record: "user_id",
+        definition_record_field: "properties_definition",
+    });
+
+    User._records = [
+        {
+            id: 1,
+            properties_definition: [{ name: "my_char", string: "My Char", type: "char" }],
+        },
+    ];
+
+    Partner._records[0].user_id = 1;
+    Partner._records[0].properties = { my_char: "hello" };
+
+    onRpc("/web/export/formats", () => [{ tag: "xls", label: "Excel" }]);
+    onRpc("/web/export/get_fields", async (request) => [
+        ...fetchedFields.root,
+        {
+            field_type: "properties",
+            string: "Properties",
+            required: false,
+            value: "properties",
+            id: "properties",
+        },
+        {
+            field_type: "char",
+            string: "My Char",
+            required: false,
+            value: "properties.my_char",
+            id: "properties.my_char",
+        },
+    ]);
+
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                        <field name="properties"/>
+                    </t>
+                </templates>
+            </kanban>`,
+        loadActionMenus: true,
+    });
+
+    await openExportDialog();
+    expect(queryAllTexts(".o_left_field_panel .o_export_tree_item")).toEqual([
+        "Activities",
+        "Foo",
+        "Bar",
+        "Properties",
+        "My Char",
+    ]);
+    expect(queryAllTexts(".o_right_field_panel .o_export_field")).toEqual(["Foo", "My Char"]);
 });

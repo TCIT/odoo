@@ -1,22 +1,25 @@
-/** @odoo-module **/
+import { usePageManager } from "./page_manager_hook";
+import { PageSearchModel } from "./page_search_model";
+import { registry } from "@web/core/registry";
+import { kanbanView } from "@web/views/kanban/kanban_view";
 
-import {PageControllerMixin} from "./page_views_mixin";
-import {PageSearchModel} from "./page_search_model";
-import {registry} from '@web/core/registry';
-import {kanbanView} from "@web/views/kanban/kanban_view";
-import {CheckboxItem} from "@web/core/dropdown/checkbox_item";
-
-export class PageKanbanController extends PageControllerMixin(kanbanView.Controller) {
-    static template = "website.PageKanbanView";
+export class PageKanbanController extends kanbanView.Controller {
     static components = {
         ...kanbanView.Controller.components,
-        CheckboxItem,
     };
+
+    setup() {
+        super.setup();
+        this.pageManager = usePageManager({
+            resModel: this.props.resModel,
+            createAction: this.props.context.create_action,
+        });
+    }
     /**
      * @override
      */
     async createRecord() {
-        return this.createWebsiteContent();
+        return this.pageManager.createWebsiteContent();
     }
 }
 

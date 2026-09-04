@@ -1,38 +1,45 @@
-@media (hover: hover) {
-    .o-mail-AttachmentCard-unlink.o-inComposer {
-        transform: translateX(100%);
+.o-mail-AttachmentContainer {
+    &.o-inMessage.o-isImage:not(.o-inChatter) {
+        min-width: 13em;
+        min-height: 10em;
     }
-    .o-mail-AttachmentCard-aside:hover .o-mail-AttachmentCard-unlink.o-inComposer {
-        transform: translateX(0);
+    &:not(.o-inMessage.o-isImage),&.o-inChatter.o-inMessage.o-isImage {
+        width: 13em;
+        height: 10em;
     }
-}
-
-.o-mail-AttachmentCard-aside {
-    &:not(.o-hasMultipleActions) {
-        min-width: 50px;
-    }
-
-    &.o-hasMultipleActions {
-        min-width: 30px;
-    }
-}
-
-.o-mail-AttachmentList-in-composer {
-    max-height: 300px;
-
-    &.o-inChatWindow {
-        max-height: 100px;
-    }
-}
-
-.o-mail-AttachmentImage {
-    min-width: 75px;
-    min-height: 75px;
     background-color: $gray-200;
 
-    img {
-        object-fit: contain;
+    @include media-breakpoint-down(sm) {
+        width: 12em;
     }
+}
+
+.o-mail-AttachmentCard-image, .o-mail-Attachment-hover-image {
+    width: 1.4em;
+    height: 1.4em;
+}
+
+.o-mail-AttachmentButtons button:hover {
+    filter: brightness(.95);
+}
+
+.o-mail-Attachment-hover {
+    background: $gray-100;
+
+    &.o-image {
+        background: rgba(0, 0, 0, 0.4);
+    }
+}
+
+.o-mail-Attachment-hoverImageText {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.25;
+}
+
+.o-mail-AttachmentImage.o-inMessage {
+    max-height: 300px;
 }
 
 .o-viewable {

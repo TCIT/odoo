@@ -1,12 +1,11 @@
-/** @odoo-module */
-import * as PaymentScreen from "@point_of_sale/../tests/tours/utils/payment_screen_util";
-import * as ProductScreen from "@point_of_sale/../tests/tours/utils/product_screen_util";
-import * as Dialog from "@point_of_sale/../tests/tours/utils/dialog_util";
+import * as PaymentScreen from "@point_of_sale/../tests/pos/tours/utils/payment_screen_util";
+import * as ProductScreen from "@point_of_sale/../tests/pos/tours/utils/product_screen_util";
+import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import * as PosSale from "@pos_sale/../tests/tours/utils/pos_sale_utils";
-import * as Chrome from "@point_of_sale/../tests/tours/utils/chrome_util";
-import * as Order from "@point_of_sale/../tests/tours/utils/generic_components/order_widget_util";
-import * as ReceiptScreen from "@point_of_sale/../tests/tours/utils/receipt_screen_util";
-import { negateStep } from "@point_of_sale/../tests/tours/utils/common";
+import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
+import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_util";
+import * as ReceiptScreen from "@point_of_sale/../tests/pos/tours/utils/receipt_screen_util";
+import { negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("PosSettleOrderIsInvoice", {
@@ -44,5 +43,18 @@ registry.category("web_tour.tours").add("PosSettleOrderTryInvoice", {
             ProductScreen.clickPayButton(),
             PaymentScreen.clickInvoiceButton(),
             PaymentScreen.isInvoiceButtonChecked(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_pos_branch_company_access", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Product A"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.isShown(),
         ].flat(),
 });

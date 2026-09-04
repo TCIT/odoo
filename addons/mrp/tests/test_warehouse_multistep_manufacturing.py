@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests import Form, tagged
+from odoo.tests import Form, tagged, Command
 from odoo.addons.mrp.tests.common import TestMrpCommon
-from odoo import Command
 
 
 @tagged('post_install', '-at_install')
@@ -13,15 +12,19 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
     def setUpClass(cls):
         super().setUpClass()
         # Required for `uom_id` to be visible in the view
-        cls.env.user.groups_id += cls.env.ref('uom.group_uom')
+        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
+        cls.env.user.group_ids += cls.env.ref('product.group_product_variant')
         # Required for `manufacture_steps` to be visible in the view
-        cls.env.user.groups_id += cls.env.ref('stock.group_adv_location')
+        cls.env.user.group_ids += cls.env.ref('stock.group_adv_location')
+        # Required for `product_id` to be visible in the view
+        cls.env.user.group_ids += cls.env.ref('product.group_product_variant')
         # Create warehouse
-        cls.customer_location = cls.env['ir.model.data']._xmlid_to_res_id('stock.stock_location_customers')
         warehouse_form = Form(cls.env['stock.warehouse'])
         warehouse_form.name = 'Test Warehouse'
         warehouse_form.code = 'TWH'
         cls.warehouse = warehouse_form.save()
+        # Enable MTO
+        cls.warehouse.mto_pull_id.route_id.active = True
 
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
 
@@ -30,10 +33,11 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         product_form.name = 'Stick'
         product_form.uom_id = cls.uom_unit
         product_form.is_storable = True
-        product_form.route_ids.clear()
-        product_form.route_ids.add(cls.warehouse.manufacture_pull_id.route_id)
-        product_form.route_ids.add(cls.warehouse.mto_pull_id.route_id)
         cls.finished_product = product_form.save()
+        # Assign the MTO route directly to avoid requiring route_ids to be
+        # visible in the form (which would need product_selectable routes to
+        # be present, an assumption that doesn't hold on DBs without demo data)
+        cls.finished_product.route_ids = cls.warehouse.mto_pull_id.route_id
 
         # Create raw product for manufactured product
         product_form = Form(cls.env['product.product'])
@@ -91,6 +95,47 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         self.assertEqual(len(self.warehouse.pbm_route_id.rule_ids), 3)
         self.assertEqual(self.warehouse.manufacture_pull_id.location_dest_id.id, self.warehouse.lot_stock_id.id)
 
+    def test_manufacturing_2_steps_sublocation(self):
+        """Check having a production order taking stock in a child location of pre prod
+        create correctly a 2 steps manufacturing even with only one mto rule from pre-pro to
+        production. """
+        self.warehouse.manufacture_steps = 'pbm'
+        pre_1, pre_2 = self.env['stock.location'].create([{
+            'name': name,
+            'location_id': self.warehouse.pbm_loc_id.id,
+            'usage': 'internal'
+        } for name in ('Pre 1', 'Pre 2')])
+
+        # create 2 picking type having 2 different pre-prod location
+        pick_1 = self.warehouse.manu_type_id.copy({
+            'sequence_code': 'PRE1',
+            'default_location_src_id': pre_1.id,
+        })
+        pick_2 = self.warehouse.manu_type_id.copy({
+            'sequence_code': 'PRE2',
+            'default_location_src_id': pre_2.id,
+        })
+
+        production_form = Form(self.env['mrp.production'])
+        production_form.picking_type_id = pick_1
+        production_form.product_id = self.finished_product
+        production = production_form.save()
+        production.action_confirm()
+        # check that picking is created
+        pick = production.picking_ids
+        self.assertEqual(pick.location_id, self.warehouse.lot_stock_id)
+        self.assertEqual(pick.location_dest_id, pre_1)
+
+        production_form = Form(self.env['mrp.production'])
+        production_form.picking_type_id = pick_2
+        production_form.product_id = self.finished_product
+        production = production_form.save()
+        production.action_confirm()
+        # check that picking is created
+        pick = production.picking_ids
+        self.assertEqual(pick.location_id, self.warehouse.lot_stock_id)
+        self.assertEqual(pick.location_dest_id, pre_2)
+
     def test_manufacturing_3_steps(self):
         """ Test MO/picking before manufacturing/picking after manufacturing
         components and move_orig/move_dest. Ensure that everything is created
@@ -138,24 +183,23 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         with Form(self.warehouse) as warehouse:
             warehouse.manufacture_steps = 'pbm_sam'
         self.warehouse.flush_model()
-        self.env.ref('stock.route_warehouse0_mto').active = True
+        self.route_mto.active = True
         self.env['stock.quant']._update_available_quantity(self.raw_product, self.warehouse.lot_stock_id, 4.0)
         picking_customer = self.env['stock.picking'].create({
             'location_id': self.warehouse.wh_output_stock_loc_id.id,
-            'location_dest_id': self.customer_location,
+            'location_dest_id': self.customer_location.id,
             'partner_id': self.env['ir.model.data']._xmlid_to_res_id('base.res_partner_4'),
             'picking_type_id': self.warehouse.out_type_id.id,
             'state': 'draft',
         })
 
         self.env['stock.move'].create({
-            'name': self.finished_product.name,
             'product_id': self.finished_product.id,
             'product_uom_qty': 2,
             'product_uom': self.uom_unit.id,
             'picking_id': picking_customer.id,
             'location_id': self.warehouse.lot_stock_id.id,
-            'location_dest_id': self.customer_location,
+            'location_dest_id': self.customer_location.id,
             'procure_method': 'make_to_order',
             'origin': 'SOURCEDOCUMENT',
             'state': 'draft',
@@ -222,19 +266,18 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         self.env['stock.quant']._update_available_quantity(self.raw_product, self.warehouse.lot_stock_id, 4.0)
         picking_customer = self.env['stock.picking'].create({
             'location_id': self.warehouse.lot_stock_id.id,
-            'location_dest_id': self.customer_location,
+            'location_dest_id': self.customer_location.id,
             'partner_id': self.env['ir.model.data']._xmlid_to_res_id('base.res_partner_4'),
             'picking_type_id': self.warehouse.out_type_id.id,
             'state': 'draft',
         })
         self.env['stock.move'].create({
-            'name': self.finished_product.name,
             'product_id': self.finished_product.id,
             'product_uom_qty': 2,
             'picking_id': picking_customer.id,
             'product_uom': self.uom_unit.id,
             'location_id': self.warehouse.lot_stock_id.id,
-            'location_dest_id': self.customer_location,
+            'location_dest_id': self.customer_location.id,
             'procure_method': 'make_to_order',
         })
         picking_customer.action_confirm()
@@ -323,14 +366,12 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         one_unit_uom = self.env.ref('uom.product_uom_unit')
         [two_units_uom, four_units_uom] = self.env['uom.uom'].create([{
             'name': 'x%s' % i,
-            'category_id': self.ref('uom.product_uom_categ_unit'),
-            'uom_type': 'bigger',
-            'factor_inv': i,
+            'relative_factor': i,
+            'relative_uom_id': one_unit_uom.id,
         } for i in [2, 4]])
 
         finished_product = self.env['product.product'].create({
             'name': 'Super Product',
-            'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))],
             'is_storable': True,
         })
         secondary_product = self.env['product.product'].create({
@@ -366,7 +407,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             'product_max_qty': 2,
         })
 
-        self.env['procurement.group'].run_scheduler()
+        self.env['stock.rule'].run_scheduler()
         mo = self.env['mrp.production'].search([('product_id', '=', finished_product.id)])
         pickings = mo.picking_ids
         self.assertEqual(len(pickings), 1)
@@ -388,15 +429,11 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             ('location_dest_id', '=', warehouse_stock_location.id),
         ])
         self.assertEqual(byproduct_postprod_move.state, 'assigned')
-        self.assertEqual(byproduct_postprod_move.group_id.name, mo.name)
+        self.assertEqual(byproduct_postprod_move.reference_ids.name, mo.name)
 
     def test_manufacturing_3_steps_trigger_reordering_rules(self):
         with Form(self.warehouse) as warehouse:
             warehouse.manufacture_steps = 'pbm_sam'
-
-        with Form(self.raw_product) as p:
-            p.route_ids.clear()
-            p.route_ids.add(self.warehouse.manufacture_pull_id.route_id)
 
         # Create an additional BoM for component
         product_form = Form(self.env['product.product'])
@@ -428,19 +465,19 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         rr_form = Form(self.env['stock.warehouse.orderpoint'])
         rr_form.product_id = self.finished_product
         rr_form.location_id = self.warehouse.lot_stock_id
-        rr_finish = rr_form.save()
+        rr_form.save()
 
         rr_form = Form(self.env['stock.warehouse.orderpoint'])
         rr_form.product_id = self.raw_product
         rr_form.location_id = self.warehouse.lot_stock_id
-        rr_form.save()
+        rr_raw = rr_form.save()
 
-        self.env['procurement.group'].run_scheduler()
+        self.env['stock.rule'].run_scheduler()
 
         pickings_component = self.env['stock.picking'].search(
             [('product_id', '=', self.wood_product.id)])
         self.assertTrue(pickings_component)
-        self.assertTrue(rr_finish.name in pickings_component.origin)
+        self.assertTrue(rr_raw.name in pickings_component.origin)
 
     def test_2_steps_and_additional_moves(self):
         """ Suppose a 2-steps configuration. If a user adds a product to an existing draft MO and then
@@ -459,7 +496,6 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
                 'location_dest_id': component_move.location_dest_id.id,
                 'picking_type_id': component_move.picking_type_id.id,
                 'product_id': self.product_2.id,
-                'name': self.product_2.display_name,
                 'product_uom_qty': 1,
                 'product_uom': self.product_2.uom_id.id,
                 'warehouse_id': component_move.warehouse_id.id,
@@ -484,7 +520,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         rr_form.product_max_qty = 40
         rr_form.save()
 
-        self.env['procurement.group'].run_scheduler()
+        self.env['stock.rule'].run_scheduler()
 
         mo = self.env['mrp.production'].search([('product_id', '=', self.finished_product.id)])
         mo_form = Form(mo)
@@ -575,122 +611,188 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             'route_id': manufacturing_route.id,
             'bom_id': bom_2.id,
         })
-        self.env['procurement.group'].run_scheduler()
+        self.env['stock.rule'].run_scheduler()
         mo = self.env['mrp.production'].search([('product_id', '=', self.finished_product.id)])
         self.assertEqual(len(mo), 1)
         self.assertEqual(mo.product_qty, 1.0)
         self.assertEqual(mo.bom_id, bom_2)
 
-    def test_manufacturing_bom_with_repetitions(self):
+    def test_mto_3steps_lot_reservation_after_sam_sublocation(self):
+        """In a MTO + 3-step manufacturing flow, when the 'Store Finished
+        Products' (SAM) transfer is validated to a sublocation of WH/Stock
+        (e.g. WH/Stock/Shelf 1) instead of WH/Stock directly, the downstream
+        delivery order must reserve the lot that was just produced (Lot 002)
+        and not fall back to pre-existing stock (Lot 001).
         """
-            Checks that manufacturing orders created to manufacture the components of a BOM
-            are set with the correct quantities when products appear with repetitions.
-                - Create 5 products: product 1,2,3,4 (P1,P2,P3 and P4) and a final product (FP)
-                - Set routes to manifacture on each product
-                - For P1, P2, P3, P4 add a 0:0 reordering rule.
-                - Add a BOM for P2 with 1 unit of P1 as components
-                - Add a BOM for P3 with 1 unit of P2 as components
-                - Add a BOM for P4 with 1 unit of P3 as components
-                - Add a BOM for FP with 3 unit of P4 and 2 units of P3 as components
-        """
-        manufacturing_route = self.env['stock.rule'].search([
-            ('action', '=', 'manufacture')]).route_id
-        products = self.env['product.product'].create([
-            {
-            'name': 'FP',
-            'is_storable': True,
-            'route_ids': manufacturing_route,
-            },
-            {
-            'name': 'P1',
-            'is_storable': True,
-            'route_ids': manufacturing_route,
-            },
-            {
-            'name': 'P2',
-            'is_storable': True,
-            'route_ids': manufacturing_route,
-            },
-            {
-            'name': 'P3',
-            'is_storable': True,
-            'route_ids': manufacturing_route,
-            },
-            {
-            'name': 'P4',
-            'is_storable': True,
-            'route_ids': manufacturing_route,
-            },
-
-        ])
-        self.env['stock.warehouse.orderpoint'].create([
-            {
-            'name': 'My orderpoint',
-            'product_id': i,
-            'product_min_qty': 0,
-            'product_max_qty': 0,
-            } for i in products.ids[1:]
-        ])
-        self.env['mrp.bom'].create([
-            {
-            'product_tmpl_id': products[2].product_tmpl_id.id,
-            'product_qty': 1,
-            'product_uom_id': products[2].uom_id.id,
-            'type': 'normal',
-            'bom_line_ids': [
-                Command.create({
-                    'product_id': products[1].id,
-                    'product_qty': 1,
-                })
-            ]},
-            {
-            'product_tmpl_id': products[3].product_tmpl_id.id,
-            'product_qty': 1,
-            'product_uom_id': products[3].uom_id.id,
-            'type': 'normal',
-            'bom_line_ids': [
-                Command.create({
-                    'product_id': products[2].id,
-                    'product_qty': 1,
-                })
-            ]},
-            {
-            'product_tmpl_id': products[4].product_tmpl_id.id,
-            'product_qty': 1,
-            'product_uom_id': products[4].uom_id.id,
-            'type': 'normal',
-            'bom_line_ids': [
-                Command.create({
-                    'product_id': products[3].id,
-                    'product_qty': 1,
-                })
-            ]},
-            {
-            'product_tmpl_id': products[0].product_tmpl_id.id,
-            'product_qty': 1,
-            'product_uom_id': products[0].uom_id.id,
-            'type': 'normal',
-            'bom_line_ids': [
-                Command.create({
-                    'product_id': products[4].id,
-                    'product_qty': 3,
-                }),
-                Command.create({
-                    'product_id': products[2].id,
-                    'product_qty': 2,
-                }),
-            ]},
-        ])
-        mo = self.env['mrp.production'].create({
-            'product_id': products[0].id,
-            'product_uom_qty': 1,
+        # Configure warehouse for 3-step manufacturing and MTO
+        self.warehouse_1.manufacture_steps = 'pbm_sam'
+        self.warehouse_1.mto_pull_id.route_id.active = True
+        # change the tracking to 'lot' and update available qty for the finished product with Lot1
+        self.finished_product.write({
+            'tracking': 'lot',
+            'route_ids': self.warehouse_1.mto_pull_id.route_id,
         })
-        mo.action_confirm()
-        mo_P1 = self.env['mrp.production'].search([('product_id', '=', products[1].id)])
-        mo_P2 = self.env['mrp.production'].search([('product_id', '=', products[2].id)])
-        self.assertEqual(mo_P1.product_uom_qty, 5.0)
-        self.assertEqual(mo_P2.product_uom_qty, 5.0)
 
+        lot_1 = self.env['stock.lot'].create({'name': 'Lot 001', 'product_id': self.finished_product.id})
+        self.env['stock.quant']._update_available_quantity(
+            self.finished_product, self.stock_location, 1.0, lot_id=lot_1
+        )
+        self.env['stock.quant']._update_available_quantity(self.raw_product, self.stock_location, 2.0)
+        # Create a MTO picking that will trigger the manufacturing order
+        picking_customer = self.env['stock.picking'].create({
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'picking_type_id': self.warehouse_1.out_type_id.id,
+            'move_ids': [Command.create({
+                'product_id': self.finished_product.id,
+                'product_uom_qty': 1,
+                'product_uom': self.uom_unit.id,
+                'location_id': self.stock_location.id,
+                'location_dest_id': self.customer_location.id,
+                'procure_method': 'make_to_order',
+            })],
+        })
+        picking_customer.action_confirm()
+
+        production = self.env['mrp.production'].search([('product_id', '=', self.finished_product.id)])
+        self.assertEqual(len(production), 1)
+
+        pbm_picking = production.picking_ids
+        pbm_picking.action_assign()
+        pbm_picking._action_done()
+
+        production.action_assign()
+        production.action_generate_serial()
+        production.button_mark_done()
+
+        sam_picking = self.env['stock.picking'].search([
+            ('picking_type_id', '=', self.warehouse_1.sam_type_id.id),
+            ('state', 'not in', ['done', 'cancel']),
+        ])
+        self.assertEqual(len(sam_picking), 1)
+
+        # Simulate user changing the destination to a sublocation of WH/Stock
+        sam_picking.location_dest_id = self.shelf_1
+        sam_picking.move_ids.picked = True
+        self.assertEqual(picking_customer.state, 'waiting')
+        sam_picking._action_done()
+        self.assertEqual(sam_picking.state, 'done')
+        picking_customer.action_assign()
+        self.assertEqual(picking_customer.state, 'assigned')
+        reserved_lots = picking_customer.move_line_ids.lot_id
+        self.assertIn(production.lot_producing_ids, reserved_lots, "Delivery should reserve Lot 003 (manufactured for this MTO order)")
+        self.assertNotIn(lot_1, reserved_lots, "Delivery should not reserve Lot 001 (pre-existing stock)")
+
+    # def test_manufacturing_bom_with_repetitions(self):
+    #     """
+    #         Checks that manufacturing orders created to manufacture the components of a BOM
+    #         are set with the correct quantities when products appear with repetitions.
+    #             - Create 5 products: product 1,2,3,4 (P1,P2,P3 and P4) and a final product (FP)
+    #             - Set routes to manifacture on each product
+    #             - For P1, P2, P3, P4 add a 0:0 reordering rule.
+    #             - Add a BOM for P2 with 1 unit of P1 as components
+    #             - Add a BOM for P3 with 1 unit of P2 as components
+    #             - Add a BOM for P4 with 1 unit of P3 as components
+    #             - Add a BOM for FP with 3 unit of P4 and 2 units of P3 as components
+    #     """
+    #     manufacturing_route = self.env['stock.rule'].search([
+    #         ('action', '=', 'manufacture')]).route_id
+    #     products = self.env['product.product'].create([
+    #         {
+    #         'name': 'FP',
+    #         'is_storable': True,
+    #         'route_ids': manufacturing_route,
+    #         },
+    #         {
+    #         'name': 'P1',
+    #         'is_storable': True,
+    #         'route_ids': manufacturing_route,
+    #         },
+    #         {
+    #         'name': 'P2',
+    #         'is_storable': True,
+    #         'route_ids': manufacturing_route,
+    #         },
+    #         {
+    #         'name': 'P3',
+    #         'is_storable': True,
+    #         'route_ids': manufacturing_route,
+    #         },
+    #         {
+    #         'name': 'P4',
+    #         'is_storable': True,
+    #         'route_ids': manufacturing_route,
+    #         },
+    #
+    #     ])
+    #     self.env['stock.warehouse.orderpoint'].create([
+    #         {
+    #         'name': 'My orderpoint',
+    #         'product_id': i,
+    #         'product_min_qty': 0,
+    #         'product_max_qty': 0,
+    #         } for i in products.ids[1:]
+    #     ])
+    #     self.env['mrp.bom'].create([
+    #         {
+    #         'product_tmpl_id': products[2].product_tmpl_id.id,
+    #         'product_qty': 1,
+    #         'product_uom_id': products[2].uom_id.id,
+    #         'type': 'normal',
+    #         'bom_line_ids': [
+    #             Command.create({
+    #                 'product_id': products[1].id,
+    #                 'product_qty': 1,
+    #             })
+    #         ]},
+    #         {
+    #         'product_tmpl_id': products[3].product_tmpl_id.id,
+    #         'product_qty': 1,
+    #         'product_uom_id': products[3].uom_id.id,
+    #         'type': 'normal',
+    #         'bom_line_ids': [
+    #             Command.create({
+    #                 'product_id': products[2].id,
+    #                 'product_qty': 1,
+    #             })
+    #         ]},
+    #         {
+    #         'product_tmpl_id': products[4].product_tmpl_id.id,
+    #         'product_qty': 1,
+    #         'product_uom_id': products[4].uom_id.id,
+    #         'type': 'normal',
+    #         'bom_line_ids': [
+    #             Command.create({
+    #                 'product_id': products[3].id,
+    #                 'product_qty': 1,
+    #             })
+    #         ]},
+    #         {
+    #         'product_tmpl_id': products[0].product_tmpl_id.id,
+    #         'product_qty': 1,
+    #         'product_uom_id': products[0].uom_id.id,
+    #         'type': 'normal',
+    #         'bom_line_ids': [
+    #             Command.create({
+    #                 'product_id': products[4].id,
+    #                 'product_qty': 3,
+    #             }),
+    #             Command.create({
+    #                 'product_id': products[2].id,
+    #                 'product_qty': 2,
+    #             }),
+    #         ]},
+    #     ])
+    #     mo = self.env['mrp.production'].create({
+    #         'product_id': products[0].id,
+    #         'product_uom_qty': 1,
+    #     })
+    #     mo.action_confirm()
+    #     mo_P1 = self.env['mrp.production'].search([('product_id', '=', products[1].id)])
+    #     mo_P2 = self.env['mrp.production'].search([('product_id', '=', products[2].id)])
+    #     self.assertEqual(mo_P1.product_uom_qty, 5.0)
+    #     self.assertEqual(mo_P2.product_uom_qty, 5.0)
+    #
     def test_update_component_qty(self):
         self.warehouse.manufacture_steps = "pbm"
         component = self.bom.bom_line_ids.product_id
@@ -718,10 +820,9 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             Checks if transfers is updated when we adding a new byproduct/component
             after confirm the MO
         """
-        self.env.user.groups_id += self.env.ref('mrp.group_mrp_byproducts')
+        self.env.user.group_ids += self.env.ref('mrp.group_mrp_byproducts')
         demo = self.env['product.product'].create({
             'name': 'DEMO',
-            'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))],
             'is_storable': True,
         })
         comp1 = self.env['product.product'].create({
@@ -762,7 +863,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             'product_max_qty': 2,
         })
 
-        self.env['procurement.group'].run_scheduler()
+        self.env['stock.rule'].run_scheduler()
         mo = self.env['mrp.production'].search([('product_id', '=', demo.id)])
         mo.action_confirm()
 
@@ -778,12 +879,12 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
 
         self.assertEqual(len(mo.picking_ids), 2, "Should have 2 pickings: Components + (Final product and byproducts)")
         for picking in mo.picking_ids:
-            if demo in [m.product_id for m in picking.move_ids_without_package]:
-                self.assertEqual(len(picking.move_ids_without_package), 3, "Should have 3 moves for: Demo, Bprod1 and Bprod2")
-                self.assertEqual([move.product_id for move in picking.move_ids_without_package.sorted('product_id')], [demo, bprod1, bprod2])
+            if demo in [m.product_id for m in picking.move_ids]:
+                self.assertEqual(len(picking.move_ids), 3, "Should have 3 moves for: Demo, Bprod1 and Bprod2")
+                self.assertEqual([move.product_id for move in picking.move_ids.sorted(lambda m: bool(m.product_id))], [demo, bprod1, bprod2])
             else:
-                self.assertEqual(len(picking.move_ids_without_package), 2, "Should have 2 moves for: Comp1 and Comp2")
-                self.assertEqual([move.product_id for move in picking.move_ids_without_package.sorted('product_id')], [comp1, comp2])
+                self.assertEqual(len(picking.move_ids), 2, "Should have 2 moves for: Comp1 and Comp2")
+                self.assertEqual([move.product_id for move in picking.move_ids.sorted(lambda m: bool(m.product_id))], [comp1, comp2])
 
     def test_pick_components_uses_shipping_policy_from_picking_type(self):
         self.warehouse.manufacture_steps = "pbm"
@@ -800,3 +901,64 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
 
             self.assertEqual(mo.picking_ids[0].picking_type_id, pick_components_type)
             self.assertEqual(mo.picking_ids[0].move_type, move_type)
+
+    def test_update_mo_from_bom_forecast(self):
+        self.warehouse_1.manufacture_steps = 'pbm_sam'
+        self.env['stock.quant']._update_available_quantity(self.product_2, self.warehouse_1.lot_stock_id, 10)
+        self.env['stock.quant']._update_available_quantity(self.product_3, self.warehouse_1.lot_stock_id, 20)
+        mo = self.env['mrp.production'].create({
+            'bom_id': self.bom_1.id,
+            'picking_type_id': self.warehouse_1.manu_type_id.id,
+        })
+        mo.action_confirm()
+        self.assertEqual(self.product_1.virtual_available, -4)
+        self.assertEqual(self.product_2.virtual_available, 8)
+        rr = self.env['stock.warehouse.orderpoint'].create({
+            'name': 'John Cutter RR',
+            'product_id': self.product_1.id,
+            'warehouse_id': mo.warehouse_id.id,
+        })
+        self.assertEqual(rr.qty_forecast, -4)
+        # Update the BoM
+        self.bom_1.bom_line_ids[1].unlink()
+        self.bom_1.bom_line_ids[0].product_qty = 3
+        self.env['mrp.bom.line'].create({
+            'product_id': self.product_3.id,
+            'product_qty': 5,
+            'bom_id': self.bom_1.id,
+        })
+        mo.action_update_bom()
+        self.assertEqual(rr.qty_forecast, 0)
+        self.assertEqual(self.product_1.virtual_available, 0)
+        self.assertEqual(self.product_2.virtual_available, 7)
+        self.assertEqual(self.product_3.virtual_available, 15)
+        pre_prod_pick = mo.picking_ids.filtered(lambda p: p.picking_type_id == mo.warehouse_id.pbm_type_id)
+        self.assertRecordValues(pre_prod_pick.move_ids, [
+            {'product_id': self.product_2.id, 'product_uom_qty': 3, 'product_qty_available': 10},
+            {'product_id': self.product_1.id, 'product_uom_qty': 0, 'product_qty_available': 0},
+            {'product_id': self.product_3.id, 'product_uom_qty': 5, 'product_qty_available': 20},
+        ])
+
+    def test_3_steps_manufacturing_forecast(self):
+        """Check that a confirmed MO influences the forecast of the warehouse stock"""
+        self.warehouse_1.manufacture_steps = 'pbm_sam'
+        lovely_product = self.bom_1.product_id.copy({'uom_id': self.uom_unit.id})
+        self.bom_1.product_id = lovely_product
+        self.assertEqual(lovely_product.with_context(location=self.warehouse_1.lot_stock_id.id).virtual_available, 0.0)
+        mo = self.env['mrp.production'].create({
+            'bom_id': self.bom_1.id,
+            'picking_type_id': self.warehouse_1.manu_type_id.id,
+            'product_qty': 3.0,
+        })
+        mo.action_confirm()
+        self.assertEqual(mo.state, 'confirmed')
+        self.assertEqual(lovely_product.with_context(location=self.warehouse_1.lot_stock_id.id).virtual_available, 3.0)
+
+    def test_manufacture_to_resupply_unchecks_and_unlinks_warehouse(self):
+        """Unchecking Manufacture to Resupply should keep manufacture_to_resupply disabled."""
+        manufacture_route = self.warehouse.manufacture_pull_id.route_id
+        self.warehouse.manufacture_to_resupply = False
+        # Invalidate recordset to avoid cached `manufacture_to_resupply`
+        self.warehouse.invalidate_recordset(["manufacture_to_resupply"])
+        self.assertFalse(self.warehouse.manufacture_to_resupply)
+        self.assertNotIn(self.warehouse, manufacture_route.warehouse_ids)

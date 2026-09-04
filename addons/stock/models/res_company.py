@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import threading
 
-from odoo import _, api, fields, models
+from odoo import _, api, fields, models, modules
 
 
-class Company(models.Model):
+class ResCompany(models.Model):
     _inherit = "res.company"
     _check_company_auto = True
 
@@ -43,18 +41,24 @@ class Company(models.Model):
         string='Day of the month', default=31,
         help="""Day of the month when the annual inventory should occur. If zero or negative, then the first day of the month will be selected instead.
         If greater than the last day of a month, then the last day of the month will be selected instead.""")
+    horizon_days = fields.Float(string="Replenishment Horizon", required=True, default=365,
+                                help="""Configure your horizon to trigger reordering rules earlier to get
+                                a head start on replenishment and avoid delays, or trigger it just-in-time
+                                ('0 days') to avoid overstocking.""")
+
+    # used for sending stock text confirmation
+    stock_text_confirmation = fields.Boolean("Stock Text Confirmation")
+    stock_confirmation_type = fields.Selection([('sms', 'SMS')], default='sms')
 
     def _create_transit_location(self):
         '''Create a transit location with company_id being the given company_id. This is needed
            in case of resuply routes between warehouses belonging to the same company, because
            we don't want to create accounting entries at that time.
         '''
-        parent_location = self.env.ref('stock.stock_location_locations', raise_if_not_found=False)
         for company in self:
             location = self.env['stock.location'].create({
                 'name': _('Inter-warehouse transit'),
                 'usage': 'transit',
-                'location_id': parent_location and parent_location.id or False,
                 'company_id': company.id,
                 'active': False
             })
@@ -67,36 +71,29 @@ class Company(models.Model):
             })
 
     def _create_inventory_loss_location(self):
-        parent_location = self.env.ref('stock.stock_location_locations_virtual', raise_if_not_found=False)
         for company in self:
             inventory_loss_location = self.env['stock.location'].create({
                 'name': 'Inventory adjustment',
                 'usage': 'inventory',
-                'location_id': parent_location.id,
                 'company_id': company.id,
             })
             self.env['ir.default'].set('product.template', 'property_stock_inventory', inventory_loss_location.id, company_id=company.id)
 
     def _create_production_location(self):
-        parent_location = self.env.ref('stock.stock_location_locations_virtual', raise_if_not_found=False)
         for company in self:
             production_location = self.env['stock.location'].create({
                 'name': 'Production',
                 'usage': 'production',
-                'location_id': parent_location.id,
                 'company_id': company.id,
             })
             self.env['ir.default'].set('product.template', 'property_stock_production', production_location.id, company_id=company.id)
 
     def _create_scrap_location(self):
-        parent_location = self.env.ref('stock.stock_location_locations_virtual', raise_if_not_found=False)
         for company in self:
             scrap_location = self.env['stock.location'].create({
                 'name': 'Scrap',
                 'usage': 'inventory',
-                'location_id': parent_location.id,
                 'company_id': company.id,
-                'scrap_location': True,
             })
 
     def _create_scrap_sequence(self):
@@ -152,7 +149,7 @@ class Company(models.Model):
     @api.model
     def create_missing_scrap_location(self):
         company_ids  = self.env['res.company'].search([])
-        companies_having_scrap_loc = self.env['stock.location'].search([('scrap_location', '=', True)]).mapped('company_id')
+        companies_having_scrap_loc = self.env['stock.location'].search([('usage', '=', 'inventory')]).mapped('company_id')
         company_without_property = company_ids - companies_having_scrap_loc
         company_without_property._create_scrap_location()
 
@@ -193,8 +190,7 @@ class Company(models.Model):
             company.sudo()._create_per_company_picking_types()
             company.sudo()._create_per_company_rules()
             company.sudo()._set_per_company_inter_company_locations(inter_company_location)
-        test_mode = getattr(threading.current_thread(), 'testing', False)
-        if test_mode:
+        if modules.module.current_test:
             self.env['stock.warehouse'].sudo().create([{'company_id': company.id} for company in companies])
         return companies
 
@@ -213,3 +209,7 @@ class Company(models.Model):
                 'property_stock_customer': inter_company_location.id,
                 'property_stock_supplier': inter_company_location.id,
             })
+
+    def _get_text_validation(self, confirmation_type):
+        self.ensure_one()
+        return bool(self.stock_text_confirmation and self.stock_confirmation_type == confirmation_type)

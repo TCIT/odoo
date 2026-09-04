@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { addLoadingEffect } from '@web/core/utils/ui';
@@ -13,7 +11,7 @@ import { NameAndSignature } from "@web/core/signature/name_and_signature";
  * @see NameAndSignature for the input fields, adds a submit
  * button, and handles the RPC to save the result.
  */
-class SignatureForm extends Component {
+export class SignatureForm extends Component {
     static template = "portal.SignatureForm"
     static components = { NameAndSignature }
     static props = ["*"];
@@ -26,7 +24,11 @@ class SignatureForm extends Component {
             error: false,
             success: false,
         });
-        this.signature = useState({ name: this.props.defaultName });
+        this.signature = useState({
+            name: this.props.defaultName,
+            getSignatureImage: () => "",
+            resetSignature: () => {},
+        });
         this.nameAndSignatureProps = {
             signature: this.signature,
             fontColor: this.props.fontColor || "black",
@@ -43,10 +45,13 @@ class SignatureForm extends Component {
 
         // Correctly set up the signature area if it is inside a modal
         onMounted(() => {
-            this.rootRef.el.closest('.modal').addEventListener('shown.bs.modal', () => {
-                this.signature.resetSignature();
-                this.toggleSignatureFormVisibility();
-            });
+            const modal_el = this.rootRef.el.closest('.modal');
+            if (modal_el !== null) {
+                modal_el.addEventListener('shown.bs.modal', () => {
+                    this.signature.resetSignature();
+                    this.toggleSignatureFormVisibility();
+                });
+            }
         });
     }
 

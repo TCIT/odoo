@@ -7,8 +7,8 @@ from odoo import api, fields, models
 
 
 class FleetVehicleLogContract(models.Model):
-    _inherit = ['mail.thread', 'mail.activity.mixin']
     _name = 'fleet.vehicle.log.contract'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Vehicle Contract'
     _order = 'state desc,expiration_date'
 
@@ -17,7 +17,7 @@ class FleetVehicleLogContract(models.Model):
         start_date = fields.Date.from_string(strdate)
         return fields.Date.to_string(start_date + oneyear)
 
-    vehicle_id = fields.Many2one('fleet.vehicle', 'Vehicle', required=True, check_company=True, tracking=True)
+    vehicle_id = fields.Many2one('fleet.vehicle', 'Vehicle', required=True, check_company=True, tracking=True, index=True)
     cost_subtype_id = fields.Many2one('fleet.service.type', 'Type', help='Cost type purchased with this cost', domain=[('category', '=', 'contract')])
     amount = fields.Monetary('Cost', tracking=True)
     date = fields.Date(help='Date when the cost has been executed')
@@ -28,7 +28,7 @@ class FleetVehicleLogContract(models.Model):
     user_id = fields.Many2one(
         comodel_name='res.users',
         string='Responsible',
-        default=lambda self: self.env['fleet.vehicle'].browse(self._context.get('active_id')).manager_id,
+        default=lambda self: self.env['fleet.vehicle'].browse(self.env.context.get('active_id')).manager_id,
         index=True)
     start_date = fields.Date(
         'Contract Start Date', default=fields.Date.context_today, tracking=True,
@@ -140,7 +140,7 @@ class FleetVehicleLogContract(models.Model):
         delay_alert_contract = int(params.get_param('hr_fleet.delay_alert_contract', default=30))
         date_today = fields.Date.from_string(fields.Date.today())
         outdated_days = fields.Date.to_string(date_today + relativedelta(days=+delay_alert_contract))
-        reminder_activity_type = self.env.ref('fleet.mail_act_fleet_contract_to_renew', raise_if_not_found=False) or self.env['mail.activity.type']
+        reminder_activity_type = self.env.ref('fleet.mail_act_fleet_contract_to_renew')
         nearly_expired_contracts = self.search([
             ('state', '=', 'open'),
             ('expiration_date', '<', outdated_days),

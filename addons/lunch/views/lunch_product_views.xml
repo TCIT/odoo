@@ -21,7 +21,7 @@
                 <filter name="available_on_sun" string="Sunday" domain="[('supplier_id.sun', '=', True)]"/>
                 <separator/>
                 <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter name="group_by_supplier" string="Vendor" context="{'group_by': 'supplier_id'}"/>
                     <filter name="group_by_category" string="Category" context="{'group_by': 'category_id'}"/>
                 </group>
@@ -87,7 +87,7 @@
                         </group>
                         <group>
                             <field name="new_until"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
                         </group>
                         <label for="description"/>
                         <field name='description'/>
@@ -214,7 +214,7 @@
                         </h1>
                     </div>
                     <label for="company_id" groups="base.group_multi_company"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
                 </sheet>
             </form>
         </field>

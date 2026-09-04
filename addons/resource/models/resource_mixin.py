@@ -1,20 +1,19 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
 from pytz import utc
 
 from odoo import api, fields, models
-from .utils import timezone_datetime
+from odoo.tools.date_utils import localized
 
 
 class ResourceMixin(models.AbstractModel):
-    _name = "resource.mixin"
+    _name = 'resource.mixin'
     _description = 'Resource Mixin'
 
     resource_id = fields.Many2one(
         'resource.resource', 'Resource',
-        auto_join=True, index=True, ondelete='restrict', required=True)
+        bypass_search_access=True, index=True, ondelete='restrict', required=True)
     company_id = fields.Many2one(
         'res.company', 'Company',
         default=lambda self: self.env.company,
@@ -79,7 +78,7 @@ class ResourceMixin(models.AbstractModel):
         return vals_list
 
     def _get_calendars(self, date_from=None):
-        return {resource.id: resource.resource_calendar_id or resource.company_id.resource_calendar_id for resource in self}
+        return {resource.id: resource.resource_calendar_id for resource in self}
 
     def _get_work_days_data_batch(self, from_datetime, to_datetime, compute_leaves=True, calendar=None, domain=None):
         """
@@ -97,8 +96,8 @@ class ResourceMixin(models.AbstractModel):
         result = {}
 
         # naive datetimes are made explicit in UTC
-        from_datetime = timezone_datetime(from_datetime)
-        to_datetime = timezone_datetime(to_datetime)
+        from_datetime = localized(from_datetime)
+        to_datetime = localized(to_datetime)
 
         if calendar:
             mapped_resources = {calendar: self.resource_id}
@@ -142,14 +141,23 @@ class ResourceMixin(models.AbstractModel):
         result = {}
 
         # naive datetimes are made explicit in UTC
-        from_datetime = timezone_datetime(from_datetime)
-        to_datetime = timezone_datetime(to_datetime)
+        from_datetime = localized(from_datetime)
+        to_datetime = localized(to_datetime)
 
         mapped_resources = defaultdict(lambda: self.env['resource.resource'])
         for record in self:
             mapped_resources[calendar or record.resource_calendar_id] |= record.resource_id
 
         for calendar, calendar_resources in mapped_resources.items():
+            # handle fully flexible resources by returning the length of the whole interval
+            # since we do not take into account leaves for fully flexible resources
+            if not calendar:
+                days = (to_datetime - from_datetime).days
+                hours = (to_datetime - from_datetime).total_seconds() / 3600
+                for calendar_resource in calendar_resources:
+                    result[calendar_resource.id] = {'days': days, 'hours': hours}
+                continue
+
             # compute actual hours per day
             attendances = calendar._attendance_intervals_batch(from_datetime, to_datetime, calendar_resources)
             leaves = calendar._leave_intervals_batch(from_datetime, to_datetime, calendar_resources, domain)

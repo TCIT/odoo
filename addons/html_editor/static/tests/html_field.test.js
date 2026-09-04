@@ -14,9 +14,12 @@ import {
     press,
     queryAll,
     queryAllTexts,
+    queryFirst,
     queryOne,
     waitFor,
-    waitUntil,
+    hover,
+    manuallyDispatchProgrammaticEvent,
+    advanceTime,
 } from "@odoo/hoot-dom";
 import { Deferred, animationFrame, mockSendBeacon, tick } from "@odoo/hoot-mock";
 import { onWillDestroy, xml } from "@odoo/owl";
@@ -36,10 +39,20 @@ import {
 import { assets } from "@web/core/assets";
 import { browser } from "@web/core/browser/browser";
 import { patch } from "@web/core/utils/patch";
+import { delay } from "@web/core/utils/concurrency";
 import { FormController } from "@web/views/form/form_controller";
 import { Counter, EmbeddedWrapperMixin } from "./_helpers/embedded_component";
 import { moveSelectionOutsideEditor, setSelection } from "./_helpers/selection";
-import { insertText, pasteOdooEditorHtml, pasteText, undo } from "./_helpers/user_actions";
+import {
+    insertText,
+    pasteHtml,
+    pasteOdooEditorHtml,
+    pasteText,
+    undo,
+} from "./_helpers/user_actions";
+import { unformat } from "./_helpers/format";
+import { expandToolbar } from "./_helpers/toolbar";
+import { expectElementCount } from "./_helpers/ui_expectations";
 
 class Partner extends models.Model {
     txt = fields.Html({ trim: true });
@@ -93,9 +106,33 @@ class IrAttachment extends models.Model {
             image_width: 256,
             image_height: 256,
         },
+        {
+            id: 456,
+            name: "gif image",
+            description: "",
+            mimetype: "image/gif",
+            checksum: false,
+            url: "/web/image/456/transparent.gif",
+            type: "url",
+            res_id: 0,
+            res_model: false,
+            public: true,
+            access_token: false,
+            image_src: "/web/image/456/transparent.gif",
+            image_width: 256,
+            image_height: 256,
+        },
     ];
 }
-defineModels([Partner, IrAttachment]);
+
+class User extends models.Model {
+    _name = "res.users";
+    has_group() {
+        return true;
+    }
+}
+
+defineModels([Partner, IrAttachment, User]);
 
 let htmlEditor;
 beforeEach(() => {
@@ -103,6 +140,11 @@ beforeEach(() => {
         onEditorLoad(editor) {
             htmlEditor = editor;
             return super.onEditorLoad(...arguments);
+        },
+        getConfig() {
+            const config = super.getConfig();
+            config.Plugins = config.Plugins.filter((Plugin) => Plugin.id !== "editorVersion");
+            return config;
         },
     });
 });
@@ -276,16 +318,16 @@ test("html field in readonly with embedded components and editable descendants",
     READONLY_MAIN_EMBEDDINGS.pop();
 });
 
-test("links should open on a new tab in readonly", async () => {
+test("only external links should always open on a new tab in readonly", async () => {
     Partner._records = [
         {
             id: 1,
             txt: `
             <body>
                 <p>first</p>
-                <a href="/contactus">Relative link</a>
-                <a href="${browser.location.origin}/contactus">Internal link</a>
-                <a href="https://google.com">External link</a>
+                <a class="internal" href="/contactus">Relative link</a>
+                <a class="internal" href="${browser.location.origin}/contactus">Internal link</a>
+                <a class="external" href="https://google.com">External link</a>
             </body>`,
         },
         {
@@ -293,9 +335,9 @@ test("links should open on a new tab in readonly", async () => {
             txt: `
             <body>
                 <p>second</p>
-                <a href="/contactus2">Relative link</a>
-                <a href="${browser.location.origin}/contactus2">Internal link</a>
-                <a href="https://google2.com">External link</a>
+                <a class="internal" href="/contactus2">Relative link</a>
+                <a class="internal" href="${browser.location.origin}/contactus2">Internal link</a>
+                <a class="external" href="https://google2.com">External link</a>
             </body>`,
         },
     ];
@@ -311,16 +353,24 @@ test("links should open on a new tab in readonly", async () => {
     });
 
     expect("[name='txt'] p").toHaveText("first");
-    for (const link of queryAll("a")) {
+    for (const link of queryAll("a.external")) {
         expect(link.getAttribute("target")).toBe("_blank");
         expect(link.getAttribute("rel")).toBe("noreferrer");
+    }
+    for (const link of queryAll("a.internal")) {
+        expect(link.getAttribute("target")).toBe(null);
+        expect(link.getAttribute("rel")).toBe(null);
     }
 
     await contains(`.o_pager_next`).click();
     expect("[name='txt'] p").toHaveText("second");
-    for (const link of queryAll("a")) {
+    for (const link of queryAll("a.external")) {
         expect(link.getAttribute("target")).toBe("_blank");
         expect(link.getAttribute("rel")).toBe("noreferrer");
+    }
+    for (const link of queryAll("a.internal")) {
+        expect(link.getAttribute("target")).toBe(null);
+        expect(link.getAttribute("rel")).toBe(null);
     }
 });
 
@@ -434,7 +484,8 @@ test("edit and save a html field containing JSON as some attribute values should
     pasteOdooEditorHtml(htmlEditor, `<div data-value=${value}><p>content</p></div>`);
     const txtField = queryOne('.o_field_html[name="txt"] .odoo-editor-editable');
     expect(txtField).toHaveInnerHTML(
-        `<div data-value="{&quot;myString&quot;:&quot;myString&quot;}"><p>content</p></div><p>first</p>`
+        '<div class="o-paragraph" data-selection-placeholder=""><br></div>' +
+            `<div data-value="{&quot;myString&quot;:&quot;myString&quot;}"><p>content</p></div><p>first</p>`
     );
     expect.verifySteps(["Setup Wysiwyg"]);
 
@@ -516,7 +567,7 @@ test("create new record and load it correctly", async () => {
 
         // Necessary for mobile
         _views = {
-            "kanban,false": `
+            kanban: `
                 <kanban>
                     <templates>
                         <t t-name="card">
@@ -557,6 +608,97 @@ test("create new record and load it correctly", async () => {
     await contains(".ui-menu-item:contains(second), .o_kanban_record:contains(second)").click();
     await animationFrame();
     expect(".odoo-editor-editable").toHaveInnerHTML("<p>2</p>");
+});
+
+test("edit a html field with `o-contenteditable-true` or `o-contenteditable-false` in its content should not reset the editable value when saving", async () => {
+    patchWithCleanup(HtmlField.prototype, {
+        updateValue() {
+            expect.step("update_value");
+            super.updateValue(...arguments);
+        },
+    });
+    patchWithCleanup(Wysiwyg.prototype, {
+        setup() {
+            super.setup();
+            // This should not be called again after the edit (if it is, it
+            // means that the content was reset from the server value, and that
+            // an entirely new editor replaced the previous one).
+            expect.step("setup_wysiwyg");
+        },
+    });
+    const getTxtValue = (innerContent, withContentEditable = false) =>
+        `<div class="o-contenteditable-false"${
+            withContentEditable ? ' contenteditable="false"' : ""
+        }>outside<div class="o-contenteditable-true"${
+            withContentEditable ? ' contenteditable="true"' : ""
+        }><p>${innerContent}</p></div></div>`;
+    Partner._records = [
+        {
+            id: 1,
+            txt: getTxtValue("inside"),
+        },
+    ];
+    onRpc("partner", "web_save", ({ args }) => {
+        expect.step("web_save");
+        // server representation removes `contenteditable` attribute
+        let txt = args[1].txt;
+        txt = txt.replace(` contenteditable="true"`, "");
+        txt = txt.replace(` contenteditable="false"`, "");
+        return [{ id: 1, txt }];
+    });
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    expect.verifySteps(["setup_wysiwyg"]);
+    expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
+        '<div class="o-paragraph" data-selection-placeholder=""><br></div>' +
+            getTxtValue("inside", true) +
+            '<div class="o-paragraph" data-selection-placeholder=""><br></div>'
+    );
+    setSelectionInHtmlField();
+    pasteOdooEditorHtml(htmlEditor, "addon");
+    expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
+        '<div class="o-paragraph" data-selection-placeholder=""><br></div>' +
+            getTxtValue("addoninside", true) +
+            '<div class="o-paragraph" data-selection-placeholder=""><br></div>'
+    );
+    await clickSave();
+    expect.verifySteps(["update_value", "update_value", "web_save"]);
+});
+
+test("blurring an inner contenteditable field by clicking outside should trigger update_value", async () => {
+    patchWithCleanup(HtmlField.prototype, {
+        updateValue() {
+            expect.step("update_value");
+            super.updateValue(...arguments);
+        },
+    });
+    Partner._records = [
+        {
+            id: 1,
+            txt: `<div contenteditable="false">outside<div contenteditable="true"><p class="inner">inside</p></div></div>`,
+        },
+    ];
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    setSelection({ anchorNode: queryOne(".inner"), anchorOffset: 0 });
+    await tick();
+    await insertText(htmlEditor, "a");
+    await click(document.body);
+    expect.verifySteps(["update_value"]);
 });
 
 test.tags("focus required");
@@ -786,7 +928,7 @@ test("A new MediaDialog after switching record in a Form view should have the co
     setSelectionInHtmlField();
     await insertText(htmlEditor, "/Media");
     await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
+    await expectElementCount(".o-we-powerbox", 1);
     expect(".active .o-we-command-name").toHaveText("Media");
 
     await press("Enter");
@@ -801,13 +943,58 @@ test("Embed video by pasting video URL", async () => {
             txt: "<p><br></p>",
         },
     ];
+    const videoId = "qxb74CMR748";
+    const videoURL = `https://www.youtube.com/watch?v=${videoId}`;
 
-    onRpc("/html_editor/video_url/data", async () => {
-        return {
-            platform: "youtube",
-            embed_url: "//www.youtube.com/embed/qxb74CMR748?rel=0&autoplay=0",
-        };
+    onRpc("/html_editor/video_url/data", async () => ({
+        platform: "youtube",
+        video_id: videoId,
+    }));
+
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'debounceHints': false}"/>
+            </form>`,
     });
+
+    const anchorNode = setSelectionInHtmlField();
+
+    // Paste a video URL.
+    pasteText(htmlEditor, videoURL);
+    await animationFrame();
+    expect(anchorNode.outerHTML).toBe(`<p>${videoURL}</p>`);
+    await expectElementCount(".o-we-powerbox", 1);
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Embed Youtube Video", "Paste as URL"]);
+
+    // Press Enter to select first option in the powerbox ("Embed Youtube Video").
+    await press("Enter");
+    // Insertion triggers selectionchange & addStep creates selection
+    // placeholder.fixSelectionInsideEditableRoot moves selection into it,
+    // trigger another selectionchange that removes selection placeholder.
+    // So we must wait for the o-we-hint.
+    await waitFor(".o-we-hint");
+    const videoIframe = queryOne("div[data-embedded='video']");
+    expect(videoIframe.nextElementSibling).toHaveOuterHTML(
+        `<div class="o-paragraph o-we-hint" o-we-hint-text="Type &quot;/&quot; for commands"><br></div>`
+    );
+    expect(
+        `div[data-embedded='video'] iframe[data-src="https://www.youtube.com/embed/${videoId}"]`
+    ).toHaveCount(1);
+});
+
+test("Embedded video shouldn't have the 'media_iframe_video' class", async () => {
+    const videoId = "qxb74CMR748";
+    const videoURL = `https://www.youtube.com/watch?v=${videoId}`;
+
+    onRpc("/html_editor/video_url/data", async () => ({
+        platform: "youtube",
+        video_id: videoId,
+        embed_url: `https://www.youtube.com/embed/${videoId}`,
+    }));
 
     await mountView({
         type: "form",
@@ -819,22 +1006,22 @@ test("Embed video by pasting video URL", async () => {
             </form>`,
     });
 
-    const anchorNode = setSelectionInHtmlField();
+    setSelectionInHtmlField();
 
-    // Paste a video URL.
-    pasteText(htmlEditor, "https://www.youtube.com/watch?v=qxb74CMR748");
-    await animationFrame();
-    expect(anchorNode.outerHTML).toBe("<p>https://www.youtube.com/watch?v=qxb74CMR748</p>");
-    expect(".o-we-powerbox").toHaveCount(1);
-    expect(queryAllTexts(".o-we-command-name")).toEqual(["Embed Youtube Video", "Paste as URL"]);
-
-    // Press Enter to select first option in the powerbox ("Embed Youtube Video").
+    // Open the video tab of the media dialog
+    await insertText(htmlEditor, "/video");
+    await waitFor(".o-we-powerbox");
     await press("Enter");
+    await waitFor(".o_select_media_dialog");
+    expect(".o_select_media_dialog .nav-link:contains('Videos')").toHaveClass("active");
     await animationFrame();
-    expect(anchorNode.outerHTML).toBe("<p></p>");
-    expect(
-        'div.media_iframe_video iframe[src="//www.youtube.com/embed/qxb74CMR748?rel=0&autoplay=0"]'
-    ).toHaveCount(1);
+
+    await contains(".o_video_dialog_form textarea").edit(videoURL);
+    await waitFor(".modal-dialog .modal-footer .btn-primary:not(:disabled)", { timeout: 2000 });
+    await contains(".modal-dialog .modal-footer .btn-primary").click();
+    await animationFrame();
+
+    expect("div[data-embedded='video']").not.toHaveClass(".media_iframe_video");
 });
 
 test("isDirty should be false when the content is being transformed by the editor", async () => {
@@ -860,12 +1047,60 @@ test("isDirty should be false when the content is being transformed by the edito
     expect(`.o_form_button_save`).not.toBeVisible();
 });
 
+test("isDirty should not be reset to false if onChange fired between getEditorContent and updateValue", async () => {
+    let htmlField;
+    const { promise: firstStep, resolve: resolveFirst } = Promise.withResolvers();
+    const { promise: secondStep, resolve: resolveSecond } = Promise.withResolvers();
+    const { promise: thirdStep, resolve: resolveThird } = Promise.withResolvers();
+    patchWithCleanup(HtmlField.prototype, {
+        setup() {
+            super.setup();
+            htmlField = this;
+        },
+        async getEditorContent() {
+            const el = await super.getEditorContent();
+            resolveFirst();
+            await secondStep;
+            return el;
+        },
+        async updateValue() {
+            const updated = await super.updateValue(...arguments);
+            resolveThird();
+            return updated;
+        },
+    });
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    expect(htmlField.isDirty).toBe(false);
+    expect(`.o_form_button_save`).not.toBeVisible();
+    const p = htmlField.editor.editable.querySelector("p");
+    p.append(htmlField.editor.document.createTextNode("Second"));
+    htmlField.editor.shared.history.addStep();
+    await clickSave();
+    await firstStep;
+    p.append(htmlField.editor.document.createTextNode("Third"));
+    htmlField.editor.shared.history.addStep();
+    resolveSecond();
+    await thirdStep;
+    await animationFrame();
+    expect(htmlField.editor.editable).toHaveInnerHTML(`<p>firstSecondThird</p>`);
+    expect(htmlField.isDirty).toBe(true);
+    expect(`.o_form_button_save`).toBeVisible();
+});
+
 test.tags("desktop");
 test("link preview in Link Popover", async () => {
     Partner._records = [
         {
             id: 1,
-            txt: "<p class='test_target'>abc<a href='/test'>This website</a></p>",
+            txt: "<p class='test_target'>abc<a href='http://test.test'>This website</a></p>",
         },
     ];
     await mountView({
@@ -888,44 +1123,44 @@ test("link preview in Link Popover", async () => {
     expect(".o-we-linkpopover input.o_we_label_link").toHaveValue("This website", {
         message: "The label input field should match the link's content",
     });
-    expect(".o-we-linkpopover a#link-preview").toHaveText("This website", {
-        message: "Link label in preview should match label input field",
-    });
 
     await contains(".o-we-linkpopover input.o_we_label_link").edit("Bad new label");
     expect(".o-we-linkpopover input.o_we_label_link").toHaveValue("Bad new label", {
         message: "The label input field should match the link's content",
     });
-    expect(".o-we-linkpopover a#link-preview").toHaveText("Bad new label", {
-        message: "Link label in preview should match label input field",
-    });
-    // Move selection outside to discard
-    setSelectionInHtmlField(".test_target");
-    await waitUntil(() => !document.querySelector(".o-we-linkpopover"), { timeout: 500 });
-    expect(".o-we-linkpopover").toHaveCount(0);
+    // Click on Discard button to undo changes.
+    await contains(".o-we-linkpopover .o_we_discard_link").click();
+    await waitFor("a.o_we_edit_link");
     expect(".test_target a").toHaveText("This website");
 
-    // Select link label to open the floating toolbar.
-    setSelectionInHtmlField(".test_target a");
-    await animationFrame();
     // Click on the edit link icon
     await contains("a.o_we_edit_link").click();
     expect(".o-we-linkpopover input.o_we_label_link").toHaveValue("This website", {
         message: "The label input field should match the link's content",
     });
-    expect(".o-we-linkpopover a#link-preview").toHaveText("This website", {
-        message: "Link label in preview should match label input field",
-    });
 
     // Open the popover option to edit the link
     await contains(".o-we-linkpopover input.o_we_label_link").edit("New label");
-    expect(".o-we-linkpopover a#link-preview").toHaveText("New label", {
-        message: "Preview should be updated on label input field change",
-    });
 
     // Click "Save".
     await contains(".o-we-linkpopover .o_we_apply_link").click();
     expect(".test_target a").toHaveText("New label", {
+        message: "The link's label should be updated",
+    });
+
+    // Click on the edit link icon
+    await contains("a.o_we_edit_link").click();
+    expect(".o-we-linkpopover input.o_we_label_link").toHaveValue("New label", {
+        message: "The label input field should match the link's content",
+    });
+
+    // Open the popover option to edit the link
+    await contains(".o-we-linkpopover input.o_we_label_link").edit("Final label");
+
+    // Move selection outside for auto-save.
+    setSelectionInHtmlField(".test_target");
+    await expectElementCount(".o-we-linkpopover", 0);
+    expect(".test_target a").toHaveText("Final label", {
         message: "The link's label should be updated",
     });
 });
@@ -943,31 +1178,33 @@ test("html field with a placeholder", async () => {
         resModel: "partner",
         arch: `
             <form>
-                <field name="txt" widget="html" placeholder="test"/>
+                <field name="txt" widget="html" placeholder="test" options="{'debounceHints': false}"/>
             </form>`,
     });
 
     expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
-        '<div class="o-paragraph o-we-hint" placeholder="test"><br></div>',
+        '<div class="o-paragraph o-we-hint" o-we-hint-text="test"><br></div>',
         { type: "html" }
     );
 
     setSelectionInHtmlField("div.o-paragraph");
     await tick();
     expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
-        '<div class="o-paragraph o-we-hint" placeholder="Type &quot;/&quot; for commands"><br></div>',
+        '<div class="o-paragraph o-we-hint" o-we-hint-text="Type &quot;/&quot; for commands"><br></div>',
         { type: "html" }
     );
 
     moveSelectionOutsideEditor();
+    htmlEditor.editable.blur();
     await tick();
     expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
-        '<div class="o-paragraph o-we-hint" placeholder="test"><br></div>',
+        '<div class="o-paragraph o-we-hint" o-we-hint-text="test"><br></div>',
         { type: "html" }
     );
 });
 
-test("'Video Link' command is available", async () => {
+test.tags("desktop");
+test("should display overlay on video hover and handle video replacement and removal correctly", async () => {
     await mountView({
         type: "form",
         resId: 1,
@@ -978,9 +1215,186 @@ test("'Video Link' command is available", async () => {
             </form>`,
     });
     setSelectionInHtmlField();
+
+    await onRpc("/html_editor/video_url/data", async (request) => {
+        const videoUrl = (await request.json()).params.video_url;
+
+        if (videoUrl === "https://www.youtube.com/embed/qxb74CMR748?rel=0&autoplay=0") {
+            return {
+                video_id: "qxb74CMR748",
+                platform: "youtube",
+                embed_url: "https://www.youtube.com/embed/qxb74CMR748?rel=0&autoplay=0",
+                params: {
+                    rel: 0,
+                    autoplay: 0,
+                },
+            };
+        } else {
+            return {
+                video_id: "gbE3azm_Io0",
+                platform: "youtube",
+                embed_url: "https://www.youtube.com/embed/gbE3azm_Io0?rel=0&autoplay=0",
+                params: {
+                    rel: 0,
+                    autoplay: 0,
+                },
+            };
+        }
+    });
+
+    // Insert video
     await insertText(htmlEditor, "/video");
     await waitFor(".o-we-powerbox");
-    expect(queryAllTexts(".o-we-command-name")).toEqual(["Video Link"]);
+    expect(queryAllTexts(".o-we-command-name")[0]).toBe("Media");
+
+    await press("Enter");
+    await contains(".modal-body .nav-link:contains('Videos')").click();
+    await waitFor("textarea[id='o_video_text']");
+
+    const input = queryOne("textarea[id='o_video_text']");
+    input.value = "https://www.youtube.com/embed/qxb74CMR748?rel=0&autoplay=0";
+    manuallyDispatchProgrammaticEvent(input, "input", {
+        inputType: "insertText",
+    });
+    await waitFor(".o_video_dialog_options", { timeout: 1500 });
+    await click(queryOne(".modal-footer").firstChild);
+    const embeddedVideoEl = await waitFor("div[data-embedded='video'] iframe");
+    const iframeSrcBefore = embeddedVideoEl.dataset.src;
+
+    // Hover on VideoBlock shows overlay
+    await hover(queryOne("div[data-embedded='video']"));
+    await expectElementCount(".video-overlay", 1);
+
+    // Click on overlay and choose Replace
+    await click(".video-overlay button");
+    await waitFor(".o-dropdown-item");
+    expect(queryAllTexts(".o-dropdown-item")[0]).toBe("Replace");
+    await click(".o-dropdown-item .fa-exchange");
+    await waitFor("textarea[id='o_video_text']");
+
+    // Replace video
+    const replaceInput = queryOne("textarea[id='o_video_text']");
+    replaceInput.value = "https://www.youtube.com/embed/gbE3azm_Io0?rel=0&autoplay=0";
+    manuallyDispatchProgrammaticEvent(replaceInput, "input", {
+        inputType: "insertText",
+    });
+    await waitFor(
+        '.o_video_dialog_iframe[data-src="https://www.youtube.com/embed/gbE3azm_Io0?rel=0&autoplay=0"]',
+        { timeout: 1500 }
+    );
+    await click(queryOne(".modal-footer").firstChild);
+
+    await waitFor(
+        `div[data-embedded='video'] iframe[data-src="https://www.youtube.com/embed/gbE3azm_Io0?rel=0&autoplay=0"]`
+    );
+    const iframeSrcAfter = embeddedVideoEl.dataset.src;
+    expect(iframeSrcBefore).not.toBe(iframeSrcAfter);
+
+    // Hover VideoBlock again, and choose Remove
+    await hover(queryOne("div[data-embedded='video']"));
+    await expectElementCount(".video-overlay", 1);
+    await click(".video-overlay button");
+    await waitFor(".o-dropdown-item");
+    expect(queryAllTexts(".o-dropdown-item")[1]).toBe("Remove");
+    await click(".o-dropdown-item .fa-trash");
+    await expectElementCount('div[data-embedded="video"]', 0);
+});
+
+test.tags("desktop");
+test("add Vimeo video link in 'Videos' tab of MediaDialog", async () => {
+    const vimeoVideoLink = "https://vimeo.com/1128489814?fl=wc";
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    setSelectionInHtmlField();
+
+    await onRpc("/html_editor/video_url/data", async () => ({
+        video_id: "1128489814",
+        platform: "vimeo",
+        embed_url: vimeoVideoLink,
+    }));
+
+    // Insert Vimeo video link
+    await insertText(htmlEditor, "/video");
+    await waitFor(".o-we-powerbox");
+    expect(queryAllTexts(".o-we-command-name")[0]).toBe("Media");
+
+    await press("Enter");
+    await contains(".modal-body .nav-link:contains('Videos')").click();
+    await waitFor("textarea[id='o_video_text']");
+
+    const input = queryOne("textarea[id='o_video_text']");
+    input.value = vimeoVideoLink;
+    manuallyDispatchProgrammaticEvent(input, "input", {
+        inputType: "insertText",
+    });
+    await waitFor(".o_video_dialog_options", { timeout: 1500 });
+    expect(input).toHaveClass("is-valid");
+    await click(queryOne(".modal-footer").firstChild);
+});
+
+test.tags("desktop");
+test("clicking Replace should allow updating video options", async () => {
+    serverState.debug = "1";
+    const videoId = "qxb74CMR748";
+    const videoURL = `https://www.youtube.com/embed/${videoId}`;
+
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    await onRpc("/html_editor/video_url/data", async () => ({
+        video_id: videoId,
+        platform: "youtube",
+        embed_url: videoURL,
+    }));
+
+    // Insert Video
+    setSelectionInHtmlField();
+    await insertText(htmlEditor, "/video");
+    await waitFor(".o-we-powerbox");
+    await press("Enter");
+
+    await contains(".modal-body .nav-link:contains('Videos')").click();
+    await waitFor("textarea#o_video_text");
+    const input = queryOne("textarea#o_video_text");
+    input.value = videoURL;
+    manuallyDispatchProgrammaticEvent(input, "input", {
+        inputType: "insertText",
+    });
+    await waitFor(".o_video_dialog_options", { timeout: 1500 });
+    await click(queryOne(".modal-footer").firstChild);
+
+    // Hover on VideoBlock shows overlay
+    await waitFor("div[data-embedded='video'] iframe");
+    await hover(queryOne("div[data-embedded='video']"));
+    await expectElementCount(".video-overlay", 1);
+
+    // Click on overlay and choose Replace
+    await click(".video-overlay button");
+    await waitFor(".o-dropdown-item");
+    expect(queryAllTexts(".o-dropdown-item")[0]).toBe("Replace");
+    await click(".o-dropdown-item .fa-exchange");
+
+    // Toggle an option to verify the dialog works without triggering a props validation error
+    await waitFor("textarea#o_video_text");
+    await waitFor(".o_video_dialog_options");
+    await contains(".o_video_dialog_options label:contains('Autoplay') input").click();
+    expect(".o_video_dialog_options label:contains('Autoplay') input").toBeChecked();
+    await contains(".o_video_dialog_options label:contains('Autoplay') input").click();
+    expect(".o_video_dialog_options label:contains('Autoplay') input").not.toBeChecked();
+    await click(queryOne(".modal-footer").firstChild);
 });
 
 test("MediaDialog contains 'Videos' tab by default in html field", async () => {
@@ -1008,14 +1422,14 @@ test("MediaDialog contains 'Videos' tab by default in html field", async () => {
     ]);
 });
 
-test("MediaDialog does not contain 'Videos' tab in html field when 'disableVideo' = true", async () => {
+test("MediaDialog does not contain 'Videos' tab in html field when 'allowVideo' = false", async () => {
     await mountView({
         type: "form",
         resId: 1,
         resModel: "partner",
         arch: `
             <form>
-            <field name="txt" widget="html" options="{'disableVideo': True}"/>
+            <field name="txt" widget="html" options="{'allowVideo': False}"/>
             </form>`,
     });
 
@@ -1033,7 +1447,7 @@ test("MediaDialog does not contain 'Videos' tab in html field when 'disableVideo
     ]);
 });
 
-test("MediaDialog does not contain 'Videos' tab when sanitize = true", async () => {
+test("MediaDialog does not contain 'Videos' tab when sanitize = true and embedded_components = false", async () => {
     class SanitizePartner extends models.Model {
         _name = "sanitize.partner";
 
@@ -1048,7 +1462,7 @@ test("MediaDialog does not contain 'Videos' tab when sanitize = true", async () 
         resModel: "sanitize.partner",
         arch: `
             <form>
-                <field name="txt" widget="html"/>
+                <field name="txt" widget="html" options="{'embedded_components': False}"/>
             </form>`,
     });
     setSelectionInHtmlField();
@@ -1065,7 +1479,7 @@ test("MediaDialog does not contain 'Videos' tab when sanitize = true", async () 
     ]);
 });
 
-test("MediaDialog contains 'Videos' tab when sanitize_tags = true and 'disableVideo' = false", async () => {
+test("MediaDialog contains 'Videos' tab when sanitize_tags = true and 'allowVideo' = true", async () => {
     class SanitizePartner extends models.Model {
         _name = "sanitize.partner";
 
@@ -1080,7 +1494,7 @@ test("MediaDialog contains 'Videos' tab when sanitize_tags = true and 'disableVi
         resModel: "sanitize.partner",
         arch: `
             <form>
-                <field name="txt" widget="html" options="{'disableVideo': False}"/>
+                <field name="txt" widget="html" options="{'allowVideo': True}"/>
             </form>`,
     });
     setSelectionInHtmlField();
@@ -1096,6 +1510,42 @@ test("MediaDialog contains 'Videos' tab when sanitize_tags = true and 'disableVi
         "Icons",
         "Videos",
     ]);
+});
+
+test("Image should not be inserted in a formatted empty node", async () => {
+    Partner._records = [
+        {
+            id: 1,
+            txt: `<div class="o-paragraph"><strong>test</strong></div>
+                    <div class="o-paragraph">
+                        <strong data-oe-zws-empty-inline="">\u200b</strong><br />
+                    </div>`,
+        },
+    ];
+
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    setSelection({
+        anchorNode: queryOne("div.o-paragraph strong[data-oe-zws-empty-inline]"),
+        anchorOffset: 0,
+    });
+    await insertText(htmlEditor, "/media");
+    await waitFor(".o-we-powerbox");
+    expect(queryAllTexts(".o-we-command-name")[0]).toBe("Media");
+
+    await press("Enter");
+    await animationFrame();
+    await click(queryFirst(".o_existing_attachment_cell button"));
+    await animationFrame();
+    const img = htmlEditor.editable.querySelector("div.o-paragraph img");
+    expect(img.parentElement.nodeName).toBe("DIV");
 });
 
 test("'Media' command is available by default", async () => {
@@ -1114,20 +1564,61 @@ test("'Media' command is available by default", async () => {
     expect(queryAllTexts(".o-we-command-name")[0]).toBe("Media");
 });
 
-test("'Media' command is not available when 'disableImage' = true", async () => {
+test("'Media' command is not available when 'allowImage' = false", async () => {
     await mountView({
         type: "form",
         resId: 1,
         resModel: "partner",
         arch: `
             <form>
-                <field name="txt" widget="html" options="{'disableImage': True}"/>
+                <field name="txt" widget="html" options="{'allowImage': False}"/>
             </form>`,
     });
     setSelectionInHtmlField();
     await insertText(htmlEditor, "/media");
     await animationFrame();
     expect(queryAllTexts(".o-we-command-name")).not.toInclude("Media");
+});
+
+test("MediaDialog does not contain 'Documents' tab in html field when 'allowMediaDocuments' = false", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+            <field name="txt" widget="html" options="{'allowMediaDocuments': False}"/>
+            </form>`,
+    });
+
+    setSelectionInHtmlField();
+    await insertText(htmlEditor, "/media");
+    await expectElementCount(".o-we-powerbox", 1);
+    expect(queryAllTexts(".o-we-command-name")[0]).toBe("Media");
+
+    await press("Enter");
+    await expectElementCount(".o_select_media_dialog", 1);
+    expect(queryAllTexts(".o_select_media_dialog .nav-tabs .nav-item")).toEqual([
+        "Images",
+        "Icons",
+        "Videos",
+    ]);
+});
+
+test("'Upload a file' command is not available when 'allowFile' = false", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'allowFile': False}"/>
+            </form>`,
+    });
+    setSelectionInHtmlField();
+    await insertText(htmlEditor, "/file");
+    await animationFrame();
+    expect(queryAllTexts(".o-we-command-name")).not.toInclude("Upload a file");
 });
 
 test("codeview is not available by default", async () => {
@@ -1147,7 +1638,6 @@ test("codeview is not available by default", async () => {
 });
 
 test("codeview is not available when not in debug mode", async () => {
-    patchWithCleanup(odoo, { debug: false });
     await mountView({
         type: "form",
         resId: 1,
@@ -1164,7 +1654,7 @@ test("codeview is not available when not in debug mode", async () => {
 });
 
 test("codeview is available when option is active and in debug mode", async () => {
-    patchWithCleanup(odoo, { debug: true });
+    serverState.debug = "1";
     await mountView({
         type: "form",
         resId: 1,
@@ -1176,12 +1666,12 @@ test("codeview is available when option is active and in debug mode", async () =
     });
     const node = queryOne(".odoo-editor-editable p");
     setSelection({ anchorNode: node, anchorOffset: 0, focusNode: node, focusOffset: 1 });
-    await waitFor(".o-we-toolbar");
+    await expandToolbar();
     expect(".o-we-toolbar button[name='codeview']").toHaveCount(1);
 });
 
 test("enable/disable codeview with editor toolbar", async () => {
-    patchWithCleanup(odoo, { debug: true });
+    serverState.debug = "1";
     await mountView({
         type: "form",
         resId: 1,
@@ -1198,7 +1688,7 @@ test("enable/disable codeview with editor toolbar", async () => {
     // Switch to code view
     const node = queryOne(".odoo-editor-editable p");
     setSelection({ anchorNode: node, anchorOffset: 0, focusNode: node, focusOffset: 1 });
-    await waitFor(".o-we-toolbar");
+    await expandToolbar();
     await contains(".o-we-toolbar button[name='codeview']").click();
     expect("[name='txt'] .odoo-editor-editable").toHaveClass("d-none");
     expect("[name='txt'] textarea").toHaveValue("<p>first</p>");
@@ -1210,7 +1700,7 @@ test("enable/disable codeview with editor toolbar", async () => {
 });
 
 test("edit and enable/disable codeview with editor toolbar", async () => {
-    patchWithCleanup(odoo, { debug: true });
+    serverState.debug = "1";
     onRpc("partner", "web_save", ({ args }) => {
         expect(args[1].txt).toBe("<div></div>");
         expect.step("web_save");
@@ -1233,7 +1723,7 @@ test("edit and enable/disable codeview with editor toolbar", async () => {
     // Switch to code view
     const node = queryOne(".odoo-editor-editable p");
     setSelection({ anchorNode: node, anchorOffset: 0, focusNode: node, focusOffset: 1 });
-    await waitFor(".o-we-toolbar");
+    await expandToolbar();
     await contains(".o-we-toolbar button[name='codeview']").click();
     expect("[name='txt'] textarea").toHaveValue("<p>Hello first</p>");
 
@@ -1268,12 +1758,8 @@ test("edit and save a html field in collaborative should keep the same wysiwyg",
             ' data-last-history-steps="12345"'
         );
     });
-    onRpc("/html_editor/get_ice_servers", () => {
-        return [];
-    });
-    onRpc("/html_editor/bus_broadcast", (params) => {
-        return { id: 10 };
-    });
+    onRpc("/html_editor/get_ice_servers", () => []);
+    onRpc("/html_editor/bus_broadcast", (params) => ({ id: 10 }));
 
     await mountView({
         type: "form",
@@ -1292,6 +1778,95 @@ test("edit and save a html field in collaborative should keep the same wysiwyg",
 
     await clickSave();
     expect.verifySteps(["web_save"]);
+});
+
+test("'checklist' command is not available when 'allowChecklist' = false", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'allowChecklist': false}"/>
+            </form>`,
+    });
+    setSelectionInHtmlField();
+    await insertText(htmlEditor, "/chec");
+    await waitFor(".o-we-powerbox");
+    expect(queryAllTexts(".o-we-command-name")).not.toInclude("Checklist");
+});
+
+test("'checklist' toolbar option is not available when 'allowChecklist' = false", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'allowChecklist': false}"/>
+            </form>`,
+    });
+    const node = queryOne(".odoo-editor-editable p");
+    setSelection({ anchorNode: node, anchorOffset: 0, focusNode: node, focusOffset: 1 });
+    await waitFor(".o-we-toolbar");
+    await expandToolbar();
+    await contains(".o-we-toolbar button[name='list_selector']").click();
+    await waitFor(".o-we-toolbar-dropdown");
+    expect("button[name='checklist']").toHaveCount(0);
+});
+
+test("typing '[] ' does not create a checklist when 'allowChecklist' is false", async () => {
+    Partner._records = [
+        {
+            id: 1,
+            txt: "<p><br></p>",
+        },
+    ];
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'allowChecklist': false}"/>
+            </form>`,
+    });
+    setSelectionInHtmlField();
+    await insertText(htmlEditor, "[] ");
+    expect(queryOne(".odoo-editor-editable")).toHaveInnerHTML("<p>[] </p>");
+});
+
+test("should not paste checklist when allowchecklist is false", async () => {
+    Partner._records = [
+        {
+            id: 1,
+            txt: "<p><br></p>",
+        },
+    ];
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'allowChecklist': false}"/>
+            </form>`,
+    });
+    setSelectionInHtmlField();
+    pasteOdooEditorHtml(
+        htmlEditor,
+        `<ul class="o_checklist"><li><div class="o-paragraph">1</div><ul class="o_checklist"><li><div class="o-paragraph">2</div><ul class="o_checklist"><li>3</li></ul></li></ul></li></ul>`
+    );
+    expect(queryOne(".odoo-editor-editable")).toHaveInnerHTML(
+        `<div class="o-paragraph">1</div><div class="o-paragraph">2</div><div class="o-paragraph">3</div>`
+    );
+    pasteHtml(
+        htmlEditor,
+        `<ul class="o_checklist"><li><div class="o-paragraph">1</div><ul class="o_checklist"><li><div class="o-paragraph">2</div><ul class="o_checklist"><li>3</li></ul></li></ul></li></ul>`
+    );
+    expect(queryOne(".odoo-editor-editable")).toHaveInnerHTML(
+        `<div class="o-paragraph">1</div><div class="o-paragraph">2</div><div class="o-paragraph">31</div><div class="o-paragraph">2</div><div class="o-paragraph">3</div>`
+    );
 });
 
 describe("sandbox", () => {
@@ -1372,7 +1947,7 @@ describe("sandbox", () => {
     });
 
     function htmlDocumentTextTemplate(text, color) {
-        return `
+        return unformat(`
         <html>
             <head>
                 <style>
@@ -1385,7 +1960,7 @@ describe("sandbox", () => {
                 ${text}
             </body>
         </html>
-        `;
+        `);
     }
 
     test("sandboxed preview display and editing", async () => {
@@ -1794,7 +2369,7 @@ describe("save image", () => {
                 if (route === "/web/dataset/call_kw/partner/web_save" && model === "partner") {
                     if (writeCount === 0) {
                         // Save normal value without image.
-                        expect(args[1].txt).toBe(`<p class="test_target">a<br></p>`);
+                        expect(args[1].txt).toBe(`<p class="test_target">a</p>`);
                     } else if (writeCount === 1) {
                         // Save image with unfinished modification changes.
                         expect(args[1].txt).toBe(imageContainerHTML);
@@ -1803,7 +2378,6 @@ describe("save image", () => {
                         expect(args[1].txt).toBe(getImageContainerHTML(newImageSrc, false));
                     } else {
                         // Fail the test if too many write are called.
-                        expect(true).toBe("false");
                         throw new Error("Write should only be called 3 times during this test");
                     }
                     writeCount += 1;
@@ -1824,13 +2398,14 @@ describe("save image", () => {
 
         const imageRecord = IrAttachment._records[0];
         // Method to get the html of a cropped image.
-        const getImageContainerHTML = (src, isModified) => {
-            return `
+        const getImageContainerHTML = (src, isModified) =>
+            `
             <p>
                 <img
                     class="img img-fluid o_we_custom_image o_we_image_cropped${
                         isModified ? " o_modified_image_to_save" : ""
                     }"
+                    data-attachment-id="${imageRecord.id}"
                     data-original-id="${imageRecord.id}"
                     data-original-src="${imageRecord.image_src}"
                     data-mimetype="image/png"
@@ -1846,7 +2421,6 @@ describe("save image", () => {
         `
                 .replace(/(?:\s|(?:\r\n))+/g, " ")
                 .replace(/\s?(<|>)\s?/g, "$1");
-        };
         // Promise to resolve when we want the response of the modify_image RPC.
         const modifyImagePromise = new Deferred();
         let writeCount = 0;
@@ -1860,7 +2434,6 @@ describe("save image", () => {
         // "registered".
         const newImageSrc = "/web/image/1234/cropped_transparent.png";
         onRpc("web_save", () => {
-            expect(true).toBe(false);
             throw new Error("web_save should only be called through sendBeacon");
         });
         onRpc(`/html_editor/modify_image/${imageRecord.id}`, async (request) => {
@@ -1873,7 +2446,6 @@ describe("save image", () => {
                 return newImageSrc;
             } else {
                 // Fail the test if too many modify_image are called.
-                expect(true).toBe(false);
                 throw new Error("The image should only have been modified once during this test");
             }
         });
@@ -2154,6 +2726,70 @@ describe("save image", () => {
         expect(img).not.toHaveClass("o_b64_image_to_save");
         expect.verifySteps(["add_data: partner 1", "generate_access_token: 123"]);
     });
+
+    test("Ensure a traceback is not raised when hiding an HtmlField with unsaved images", async () => {
+        Partner._records = [
+            {
+                id: 1,
+                txt: "<p class='test_target'><br></p>",
+            },
+        ];
+
+        onRpc("/html_editor/attachment/add_data", async (request) => {
+            const { params } = await request.json();
+            const { res_id, res_model } = params;
+            expect.step(`add_data-start: ${res_model} ${res_id}`);
+            // add a delay to emulate saving a big image.
+            await delay(50);
+            expect.step(`add_data-end: ${res_model} ${res_id}`);
+            return {
+                image_src: "/test_image_url.png",
+                access_token: "1234",
+                public: false,
+            };
+        });
+
+        await mountView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            arch: `
+            <form>
+                <notebook>
+                    <page string="html" name="html">
+                        <field name="txt" widget="html"/>
+                    </page>
+                    <page string="empty" name="empty"/>
+                </notebook>
+            </form>`,
+        });
+        setSelectionInHtmlField(".test_target");
+
+        // Paste image.
+        pasteFile(
+            htmlEditor,
+            createBase64ImageFile(
+                "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII"
+            )
+        );
+        await waitFor("img");
+        const b64img = htmlEditor.editable.querySelector("img");
+        expect(b64img.src.startsWith("data:image/png;base64,")).toBe(true);
+        expect(b64img).toHaveClass("o_b64_image_to_save");
+
+        // Switch tab, this should trigger the image save.
+        await contains(".o_notebook_headers .nav-link:not(.active)[name='empty']").click();
+        await waitFor(".o_notebook_headers .nav-link.active[name='empty']");
+        // Reswitch tab, and check the image was saved properly.
+        await contains(".o_notebook_headers .nav-link:not(.active)[name='html']").click();
+        await waitFor(".o_notebook_headers .nav-link.active[name='html']");
+        await waitFor(".odoo-editor-editable", { timeout: 1500 });
+        const savedImg = htmlEditor.editable.querySelector("img");
+        expect(savedImg.getAttribute("src")).toBe("/test_image_url.png?access_token=1234");
+        expect(savedImg).not.toHaveClass("o_b64_image_to_save");
+
+        expect.verifySteps(["add_data-start: partner 1", "add_data-end: partner 1"]);
+    });
 });
 
 describe("translatable", () => {
@@ -2186,4 +2822,99 @@ describe("translatable", () => {
         await contains(".o_form_label").click();
         expect(".o_field_html .btn.o_field_translate").not.toBeVisible();
     });
+});
+
+describe("codeview enabled", () => {
+    test("Code view command should be available", async () => {
+        await mountView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            arch: `
+                <form>
+                    <field name="txt" widget="html" options="{'codeview': True}"/>
+                </form>`,
+        });
+        const anchorNode = queryOne(`[name='txt'] .odoo-editor-editable p`);
+        setSelection({ anchorNode, anchorOffset: 0 });
+        await insertText(htmlEditor, "/code");
+        await waitFor(".o-we-powerbox");
+        expect(queryAllTexts(".o-we-command-name")).toInclude("Code");
+    });
+
+    test("Video tab in media dialog should be available when codeview enabled", async () => {
+        await mountView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            arch: `
+                <form>
+                    <field name="txt" widget="html" options="{'codeview': True}"/>
+                </form>`,
+        });
+        const anchorNode = queryOne(`[name='txt'] .odoo-editor-editable p`);
+        setSelection({ anchorNode, anchorOffset: 0 });
+        await insertText(htmlEditor, "/video");
+        await waitFor(".o-we-powerbox");
+        await click(".o-we-powerbox .o-we-command-name:contains('Media')");
+        await waitFor(".o_select_media_dialog");
+        expect(".o_select_media_dialog .nav-link:contains('Videos')").toHaveCount(1);
+    });
+});
+
+test("should always have a block before a Table of Contents", async () => {
+    Partner._records = [
+        {
+            id: 1,
+            txt: `<h1>first</h1>`,
+        },
+    ];
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    setSelectionInHtmlField("h1");
+    await insertText(htmlEditor, "/tableofcontents");
+    await waitFor(".o-we-powerbox");
+    expect(queryAllTexts(".o-we-command-name")[0]).toBe("Table of Contents");
+    await press("Enter");
+    await animationFrame();
+    const firstChild = htmlEditor.editable.firstChild;
+    expect(firstChild.getAttribute("data-embedded")).not.toBe("tableOfContent");
+    expect(firstChild).toHaveOuterHTML(
+        '<div class="o-paragraph" data-selection-placeholder="" style="margin: 8px 0px -9px;"><br></div>'
+    );
+});
+
+test.tags("desktop");
+test("should not open icon toolbar when creating table of contents inside a list", async () => {
+    Partner._records = [
+        {
+            id: 1,
+            txt: `<ol><li><br></li></ol>`,
+        },
+    ];
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    setSelectionInHtmlField("li");
+    await insertText(htmlEditor, "/tableofcontents");
+    await waitFor(".o-we-powerbox");
+    expect(queryAllTexts(".o-we-command-name")[0]).toBe("Table of Contents");
+    await press("Enter");
+    await animationFrame();
+    setSelectionInHtmlField("li");
+    await advanceTime(200);
+    await expectElementCount(".o-we-toolbar", 0);
 });

@@ -11,14 +11,14 @@ patch(Message.prototype, {
         this.url = url;
     },
 
-    get quickActionCount() {
-        return this.props.thread?.channel_type === "livechat" ? 3 : super.quickActionCount;
-    },
-
     /**
-     * @param {import("@im_livechat/embed/common/chatbot/chatbot_step_model").StepAnswer} answer
+     * @param {import("@im_livechat/core/common/chatbot_step_model").StepAnswer} answer
      */
     answerChatbot(answer) {
+        if (this.props.message.disableChatbotAnswers) {
+            return;
+        }
+        this.props.message.disableChatbotAnswers = true;
         return this.props.message.thread.post(answer.name, {}, { selected_answer_id: answer.id });
     },
 });

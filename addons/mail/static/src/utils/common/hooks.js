@@ -1,16 +1,23 @@
 import {
+    Component,
     onMounted,
     onPatched,
     onWillUnmount,
+    toRaw,
     useComponent,
     useEffect,
     useRef,
     useState,
+    useSubEnv,
+    xml,
 } from "@odoo/owl";
 
+import { monitorAudio } from "@mail/utils/common/media_monitoring";
 import { browser } from "@web/core/browser/browser";
+import { OVERLAY_SYMBOL } from "@web/core/overlay/overlay_container";
 import { Deferred } from "@web/core/utils/concurrency";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
+import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
 export function useLazyExternalListener(target, eventName, handler, eventParams) {
@@ -75,9 +82,9 @@ export function onExternalClick(refName, cb) {
  * Should provide a list of ref names, and can add callbacks when elements are
  * hovered-in (onHover), hovered-out (onAway), hovering for some time (onHovering).
  *
- * @param {string | string[]} refNames name of refs that determine whether this is in state "hovering".
+ * @param {string | string[] | Function} refNames name of refs that determine whether this is in state "hovering".
  *   ref name that end with "*" means it takes parented HTML node into account too. Useful for floating
- *   menu where dropdown menu container is not accessible.
+ *   menu where dropdown menu container is not accessible. Function type is for useChildRef support.
  * @param {Object} param1
  * @param {() => void} [param1.onHover] callback when hovering the ref names.
  * @param {() => void} [param1.onAway] callback when stop hovering the ref names.
@@ -96,11 +103,12 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
     let awayTimeout;
     let lastHoveredTarget;
     for (const refName of refNames) {
-        targets.push({
-            ref: refName.endsWith("*")
-                ? useRef(refName.substring(0, refName.length - 1))
-                : useRef(refName),
-        });
+        if (typeof refName === "function") {
+            // Special case: useChildRef support
+            targets.push({ ref: refName });
+            continue;
+        }
+        targets.push({ ref: useRef(refName) });
     }
     const state = useState({
         set isHover(newIsHover) {
@@ -113,8 +121,25 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
             void this._count;
             return this._isHover;
         },
+        _contains: [],
         _count: 0,
         _isHover: false,
+        _targets: targets,
+        addTarget(target) {
+            state._targets.push(target);
+            const handleMouseenter = (ev) => onmouseenter(ev);
+            const handleMouseleave = (ev) => onmouseleave(ev);
+            target.ref.el.addEventListener("mouseenter", handleMouseenter, true);
+            target.ref.el.addEventListener("mouseleave", handleMouseleave, true);
+            return () => {
+                target.ref.el.removeEventListener("mouseenter", handleMouseenter, true);
+                target.ref.el.removeEventListener("mouseleave", handleMouseleave, true);
+                const idx = state._targets.findIndex((t) => t === target);
+                if (idx) {
+                    state._targets.splice(idx, 1);
+                }
+            };
+        },
     });
     function setHover(hovering) {
         if (hovering && !wasHovering) {
@@ -137,7 +162,7 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
                 awayTimeout = setTimeout(() => {
                     clearTimeout(hoveringTimeout);
                     onAway();
-                }, 200);
+                }, 100);
             }
         }
         wasHovering = hovering;
@@ -146,7 +171,7 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
         if (state.isHover) {
             return;
         }
-        for (const target of targets) {
+        for (const target of toRaw(state)._targets) {
             if (!target.ref.el) {
                 continue;
             }
@@ -156,16 +181,27 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
                 return;
             }
         }
+        for (const contains of state._contains) {
+            if (contains(ev.target)) {
+                setHover(true);
+                return;
+            }
+        }
     }
     function onmouseleave(ev) {
         if (!state.isHover) {
             return;
         }
-        for (const target of targets) {
+        for (const target of toRaw(state._targets)) {
             if (!target.ref.el) {
                 continue;
             }
             if (target.ref.el.contains(ev.relatedTarget)) {
+                return;
+            }
+        }
+        for (const contains of state._contains) {
+            if (contains(ev.relatedTarget)) {
                 return;
             }
         }
@@ -189,14 +225,42 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
     }
 
     if (stateObserver) {
-        useEffect(() => {
-            if (lastHoveredTarget && !lastHoveredTarget.ref.el) {
+        useEffect((open) => {
+            // Note: stateObserver is essentially used with useDropdownState()?.isOpen.
+            // While isOpen can become false, the ref.el can still be there for a short period of time.
+            // Relying on isOpen becoming false forces good syncing of isHover state on dropdown close.
+            if ((lastHoveredTarget && !lastHoveredTarget.ref.el) || !open) {
                 setHover(false);
                 lastHoveredTarget = null;
             }
         }, stateObserver);
     }
     return state;
+}
+
+export class UseHoverOverlay extends Component {
+    static props = ["slots", "hover"];
+    static template = xml`<div t-ref="root"><t t-slot="default"/></div>`;
+
+    setup() {
+        super.setup();
+        this.root = useRef("root");
+        const overlayContains = toRaw(this.env[OVERLAY_SYMBOL].contains);
+        let removeTarget;
+        onMounted(() => {
+            this.props.hover._contains.push(overlayContains);
+            removeTarget = this.props.hover.addTarget({
+                ref: { el: this.root.el.closest(".o-overlay-item") },
+            });
+        });
+        onWillUnmount(() => {
+            const idx = this.props.hover._contains.find((c) => c === overlayContains);
+            if (idx) {
+                this.props.hover._contains.splice(idx, 1);
+            }
+            removeTarget?.();
+        });
+    }
 }
 
 /**
@@ -215,16 +279,16 @@ export function useOnBottomScrolled(refName, callback, threshold = 1) {
         }
     }
     onMounted(() => {
-        ref.el.addEventListener("scroll", onScroll);
+        ref.el?.addEventListener("scroll", onScroll);
     });
     onWillUnmount(() => {
-        ref.el.removeEventListener("scroll", onScroll);
+        ref.el?.removeEventListener("scroll", onScroll);
     });
 }
 
 /**
  * @param {string} refName
- * @param {function} cb
+ * @param {function} [cb]
  */
 export function useVisible(refName, cb, { ready = true } = {}) {
     const ref = useRef(refName);
@@ -234,7 +298,7 @@ export function useVisible(refName, cb, { ready = true } = {}) {
     });
     function setValue(value) {
         state.isVisible = value;
-        cb(state.isVisible);
+        cb?.(state.isVisible);
     }
     const observer = new IntersectionObserver((entries) => {
         setValue(entries.at(-1).isIntersecting);
@@ -254,10 +318,17 @@ export function useVisible(refName, cb, { ready = true } = {}) {
     return state;
 }
 
-export function useMessageHighlight(duration = 2000) {
+/**
+ * @typedef {Object} MessageScrolling
+ * @property {function} clear
+ * @property {function} highlightMessage
+ * @property {number|null} highlightedMessageId
+ * @returns {MessageScrolling}
+ */
+export function useMessageScrolling(duration = 2000) {
     let timeout;
     const state = useState({
-        clearHighlight() {
+        clear() {
             if (this.highlightedMessageId) {
                 browser.clearTimeout(timeout);
                 timeout = null;
@@ -269,20 +340,35 @@ export function useMessageHighlight(duration = 2000) {
          * @param {import("models").Thread} thread
          */
         async highlightMessage(message, thread) {
-            if (thread.notEq(message.thread)) {
-                return;
+            state.initiated = true;
+            let messageScrollDirection;
+            if (message.notIn(thread.messages)) {
+                messageScrollDirection = message.id < thread.messages[0]?.id ? "top" : "bottom";
+                await thread.loadAround(message.id);
             }
-            await thread.loadAround(message.id);
             const lastHighlightedMessageId = state.highlightedMessageId;
-            this.clearHighlight();
+            this.clear();
             if (lastHighlightedMessageId === message.id) {
                 // Give some time for the state to update.
                 await new Promise(setTimeout);
             }
-            thread.scrollTop = undefined;
+            thread.scrollTop = messageScrollDirection === "top" ? "bottom" : undefined;
+            if (thread.scrollTop === "bottom") {
+                state.startupDeferred = new Deferred();
+                await state.startupDeferred;
+                state.startupDeferred = null;
+            }
             state.highlightedMessageId = message.id;
-            timeout = browser.setTimeout(() => this.clearHighlight(), duration);
+            state.initiated = false;
+            timeout = browser.setTimeout(() => this.clear(), duration);
         },
+        initiated: false,
+        /**
+         * Deferred during highlight startup, i.e. highlight is initiated but isn't scrolling yet
+         * Useful to set correct starting condition to initiate scroll to highlight, like scroll to bottom.
+         */
+        startupDeferred: null,
+        /** Deferred during scrolling to highlight */
         scrollPromise: null,
         /**
          * Scroll the element into view and expose a promise that will resolved
@@ -311,8 +397,73 @@ export function useMessageHighlight(duration = 2000) {
     return state;
 }
 
+export function useMicrophoneVolume() {
+    let isClosed = false;
+    let audioTrack = null;
+    let disconnectAudioMonitor;
+    let audioMonitorPromise;
+    const store = useService("mail.store");
+    const state = useState({
+        isReady: true,
+        isActive: false,
+        value: 0,
+        toggle: async () => {
+            if (!state.isReady) {
+                return;
+            }
+            state.isReady = false;
+            disconnectAudioMonitor?.();
+            disconnectAudioMonitor = undefined;
+            if (audioTrack) {
+                audioTrack.stop();
+                audioTrack = null;
+                state.isReady = true;
+                state.isActive = false;
+                state.value = 0;
+                return;
+            }
+            let track;
+            try {
+                const audioStream = await browser.navigator.mediaDevices.getUserMedia({
+                    audio: store.settings.audioConstraints,
+                });
+                track = audioStream.getAudioTracks()[0];
+            } catch {
+                store.env.services.notification.add(
+                    _t('"%(hostname)s" requires microphone access', {
+                        hostname: browser.location.host,
+                    }),
+                    { type: "warning" }
+                );
+                return;
+            }
+            if (isClosed) {
+                track.stop();
+                return;
+            }
+            audioMonitorPromise = monitorAudio(track, {
+                onTic: (value) => {
+                    state.value = value;
+                },
+                processInterval: 100,
+            });
+            disconnectAudioMonitor = await audioMonitorPromise;
+            audioTrack = track;
+            state.isActive = true;
+            state.isReady = true;
+        },
+    });
+    onWillUnmount(async () => {
+        isClosed = true;
+        await audioMonitorPromise;
+        audioTrack?.stop();
+        disconnectAudioMonitor?.();
+    });
+    return state;
+}
+
 export function useSelection({ refName, model, preserveOnClickAwayPredicate = () => false }) {
-    const ui = useState(useService("ui"));
+    const ui = useService("ui");
     const ref = useRef(refName);
     function onSelectionChange() {
         const activeElement = ref.el?.getRootNode().activeElement;
@@ -351,78 +502,13 @@ export function useSelection({ refName, model, preserveOnClickAwayPredicate = ()
         },
         moveCursor(position) {
             model.start = model.end = position;
-            if (!ui.isSmall) {
+            if (ref.el && !ui.isSmall) {
                 // In mobile, selection seems to adjust correctly.
                 // Don't programmatically adjust, otherwise it shows soft keyboard!
                 ref.el.selectionStart = ref.el.selectionEnd = position;
             }
         },
     };
-}
-
-export function useMessageEdition() {
-    const state = useState({
-        /** @type {import('@mail/core/common/composer').Composer} */
-        composerOfThread: null,
-        /** @type {import('@mail/core/common/message_model').Message} */
-        editingMessage: null,
-        exitEditMode() {
-            state.editingMessage = null;
-            if (state.composerOfThread) {
-                state.composerOfThread.props.composer.autofocus++;
-            }
-        },
-    });
-    return state;
-}
-
-/**
- * @typedef {Object} MessageToReplyTo
- * @property {function} cancel
- * @property {function} isNotSelected
- * @property {function} isSelected
- * @property {import("models").Message|null} message
- * @property {import("models").Thread|null} thread
- * @property {function} toggle
- * @returns {MessageToReplyTo}
- */
-export function useMessageToReplyTo() {
-    return useState({
-        cancel() {
-            Object.assign(this, { message: null, thread: null });
-        },
-        /**
-         * @param {import("models").Thread} thread
-         * @param {import("models").Message} message
-         * @returns {boolean}
-         */
-        isNotSelected(thread, message) {
-            return thread.eq(this.thread) && message.notEq(this.message);
-        },
-        /**
-         * @param {import("models").Thread} thread
-         * @param {import("models").Message} message
-         * @returns {boolean}
-         */
-        isSelected(thread, message) {
-            return thread.eq(this.thread) && message.eq(this.message);
-        },
-        /** @type {import("models").Message|null} */
-        message: null,
-        /** @type {import("models").Thread|null} */
-        thread: null,
-        /**
-         * @param {import("models").Thread} thread
-         * @param {import("models").Message} message
-         */
-        toggle(thread, message) {
-            if (message.eq(this.message)) {
-                this.cancel();
-            } else {
-                Object.assign(this, { message, thread });
-            }
-        },
-    });
 }
 
 export function useSequential() {
@@ -463,13 +549,26 @@ export function useSequential() {
     };
 }
 
-export function useDiscussSystray() {
-    const ui = useState(useService("ui"));
+export function useDiscussSystray(dropdownState) {
+    const ui = useService("ui");
+    if (dropdownState) {
+        useEffect(
+            (isOpen) => {
+                if (isOpen) {
+                    document.body.classList.add("o-mail-discuss-systray-menu-open");
+                    return () => {
+                        document.body.classList.remove("o-mail-discuss-systray-menu-open");
+                    };
+                }
+            },
+            () => [dropdownState.isOpen]
+        );
+    }
     return {
         class: "o-mail-DiscussSystray-class",
         get contentClass() {
             return `d-flex flex-column flex-grow-1 ${
-                ui.isSmall ? "overflow-auto w-100 mh-100" : ""
+                ui.isSmall ? "overflow-auto o-scrollbar-thin w-100 mh-100" : ""
             }`;
         },
         get menuClass() {
@@ -485,20 +584,90 @@ export function useDiscussSystray() {
 export const useMovable = makeDraggableHook({
     name: "useMovable",
     onWillStartDrag({ ctx, addCleanup, addStyle, getRect }) {
-        const { height } = getRect(ctx.current.element);
         ctx.current.container = document.createElement("div");
         addStyle(ctx.current.container, {
             position: "fixed",
             top: 0,
-            bottom: `${height}px`,
+            bottom: 0,
             left: 0,
             right: 0,
         });
         ctx.current.element.after(ctx.current.container);
         addCleanup(() => ctx.current.container.remove());
     },
+    onDragStart: () => true,
+    onDragEnd: () => true,
     onDrop({ ctx, getRect }) {
         const { top, left } = getRect(ctx.current.element);
         return { top, left };
     },
 });
+
+export const LONG_PRESS_DELAY = 400;
+
+/**
+ * Subscribes to long press events on the element matching the given ref name.
+ * It internally prevents false positives caused by scroll gestures.
+ *
+ * @param {string} refName The ref name of the element to listen for long presses on.
+ * @param {Object} options
+ * @param {() => void} [options.action] Function called when a long press is detected.
+ * @param {() => boolean} [options.predicate] Optional function to enable long press detection.
+ */
+export function useLongPress(refName, { action, predicate = () => true } = {}) {
+    const MOVE_TRESHOLD = 10;
+    const ref = useRef(refName);
+    let timer = null;
+    let startX = 0;
+    let startY = 0;
+
+    function reset() {
+        clearTimeout(timer);
+        timer = null;
+    }
+    useLazyExternalListener(
+        () => ref.el,
+        "touchstart",
+        (ev) => {
+            if (!predicate()) {
+                return;
+            }
+            const touch = ev.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            timer = setTimeout(() => {
+                action();
+                reset();
+            }, LONG_PRESS_DELAY);
+        }
+    );
+    useLazyExternalListener(
+        () => ref.el,
+        "touchmove",
+        (ev) => {
+            if (!timer) {
+                return;
+            }
+            const touch = ev.touches[0];
+            const dx = touch.screenX - startX;
+            const dy = touch.screenY - startY;
+            if (Math.hypot(dx, dy) > MOVE_TRESHOLD) {
+                reset();
+            }
+        }
+    );
+    useLazyExternalListener(() => ref.el, "touchend", reset);
+    useLazyExternalListener(() => ref.el, "touchcancel", reset);
+}
+
+export const inDiscussCallViewProps = ["isPip?"];
+export function useInDiscussCallView() {
+    const component = useComponent();
+    useSubEnv({
+        inDiscussCallView: {
+            get isPip() {
+                return component.props.isPip;
+            },
+        },
+    });
+}

@@ -9,8 +9,8 @@ from freezegun import freeze_time
 from PIL import Image
 from werkzeug.urls import url_unquote_plus
 
+from odoo.tests.common import HttpCase, new_test_user, tagged
 from odoo.tools.misc import limited_field_access_token
-from odoo.tests.common import HttpCase, tagged
 
 
 @tagged('-at_install', 'post_install')
@@ -167,9 +167,6 @@ class TestImage(HttpCase):
         def get_datetime_from_token(token):
             return datetime.fromtimestamp(int(token.rsplit("o", 1)[1], 16))
 
-        def get_datetime_from_record_field(record, field):
-            return get_datetime_from_token(limited_field_access_token(record, field))
-
         attachment = self.env["ir.attachment"].create(
             {
                 "datas": b"R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=",
@@ -185,8 +182,13 @@ class TestImage(HttpCase):
         res = self.url_open(f"/web/image/{attachment.id}?access_token=invalid_token")
         res.raise_for_status()
         self.assertEqual(res.headers["Content-Disposition"], "inline; filename=placeholder.png")
+        # token from a different scope: ko
+        token = limited_field_access_token(attachment, "raw", scope="other_scope")
+        res = self.url_open(f"/web/image/{attachment.id}?access_token={token}")
+        res.raise_for_status()
+        self.assertEqual(res.headers["Content-Disposition"], "inline; filename=placeholder.png")
         # valid token: ok
-        token = limited_field_access_token(attachment, "raw")
+        token = attachment._get_raw_access_token()
         res = self.url_open(f"/web/image/{attachment.id}?access_token={token}")
         res.raise_for_status()
         self.assertEqual(res.headers["Content-Disposition"], "inline; filename=test.gif")
@@ -206,7 +208,7 @@ class TestImage(HttpCase):
         for i in range(14):
             with freeze_time(start_of_period + timedelta(days=i, hours=i % 24, minutes=i % 60)):
                 self.assertEqual(
-                    get_datetime_from_record_field(self.env["ir.attachment"].browse(2), "raw"),
+                    get_datetime_from_token(self.env["ir.attachment"].browse(2)._get_raw_access_token()),
                     base_result,
                 )
         # on each following 14-days period another token is generated, valid for exactly 14 extra
@@ -216,21 +218,133 @@ class TestImage(HttpCase):
                 start_of_period + timedelta(days=14 * i + i % 14, hours=i % 24, minutes=i % 60)
             ):
                 self.assertEqual(
-                    get_datetime_from_record_field(self.env["ir.attachment"].browse(2), "raw"),
+                    get_datetime_from_token(
+                        self.env["ir.attachment"].browse(2)._get_raw_access_token()
+                    ),
                     base_result + timedelta(days=14 * i),
                 )
         with freeze_time(datetime(2021, 3, 1, 1, 2, 3)):
             # at the same time...
             self.assertEqual(
-                get_datetime_from_record_field(self.env["ir.attachment"].browse(2), "raw"),
+                get_datetime_from_token(
+                    self.env["ir.attachment"].browse(2)._get_raw_access_token()
+                ),
                 base_result,
             )
             # a different record generates a different token
-            record_res = get_datetime_from_record_field(self.env["ir.attachment"].browse(3), "raw")
+            record_res = self.env["ir.attachment"].browse(3)._get_raw_access_token()
             self.assertNotIn(record_res, [base_result])
             # a different field generates a different token
-            field_res = get_datetime_from_record_field(self.env["ir.attachment"].browse(3), "datas")
+            field_res = get_datetime_from_token(
+                limited_field_access_token(self.env["ir.attachment"].browse(3), "datas", scope="binary")
+            )
             self.assertNotIn(field_res, [base_result, record_res])
             # a different model generates a different token
-            model_res = get_datetime_from_record_field(self.env["res.partner"].browse(3), "raw")
+            model_res = get_datetime_from_token(
+                limited_field_access_token(self.env["res.partner"].browse(3), "raw", scope="binary")
+            )
             self.assertNotIn(model_res, [base_result, record_res, field_res])
+
+    def test_06_web_image_attachment_access(self):
+        """Tests all the combination of user/ways to access an attachment through `/web/content`
+        or `/web/image` routes"""
+        new_test_user(self.env, "portal_user", groups="base.group_portal")
+        new_test_user(self.env, "internal_user")
+        # record of arbitrary model with restrictive ACL even for internal users
+        restricted_record = self.env["res.users.settings"].create({"user_id": self.env.user.id})
+        # record of arbitrary model with permissive ACL for internal users
+        accessible_record = self.env["res.partner"].create({"name": "test partner"})
+        attachments = self.env["ir.attachment"].create(
+            [
+                {
+                    "datas": b"R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=",
+                    "description": "restricted attachment",
+                    "name": "test.gif",
+                    "res_id": restricted_record.id,
+                    "res_model": restricted_record._name,
+                },
+                {
+                    "datas": b"R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=",
+                    "description": "restricted attachment",
+                    "name": "test.gif",
+                    "res_id": accessible_record.id,
+                    "res_model": accessible_record._name,
+                },
+                {
+                    "datas": b"R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=",
+                    "description": "standalone attachment",
+                    "name": "test.gif",
+                },
+                {
+                    "datas": b"R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=",
+                    "description": "public attachment",
+                    "name": "test.gif",
+                    "public": True,
+                },
+            ]
+        )
+        attachments.generate_access_token()
+        internal_restricted, internal_accessible, standalone, public = attachments
+        tests = [
+            # (attachment, user, token, expected result (True if accessible))
+            (internal_restricted, "public_user", None, False),
+            (internal_restricted, "public_user", "token", True),
+            (internal_restricted, "public_user", "limited token", True),
+            (internal_restricted, "portal_user", None, False),
+            (internal_restricted, "portal_user", "token", True),
+            (internal_restricted, "portal_user", "limited token", True),
+            (internal_restricted, "internal_user", None, False),
+            (internal_restricted, "internal_user", "token", True),
+            (internal_restricted, "internal_user", "limited token", True),
+            (internal_accessible, "public_user", None, False),
+            (internal_accessible, "public_user", "token", True),
+            (internal_accessible, "public_user", "limited token", True),
+            (internal_accessible, "portal_user", None, False),
+            (internal_accessible, "portal_user", "token", True),
+            (internal_accessible, "portal_user", "limited token", True),
+            (internal_accessible, "internal_user", None, True),
+            (internal_accessible, "internal_user", "token", True),
+            (internal_accessible, "internal_user", "limited token", True),
+            (standalone, "public_user", None, False),
+            (standalone, "public_user", "token", True),
+            (standalone, "public_user", "limited token", True),
+            (standalone, "portal_user", None, False),
+            (standalone, "portal_user", "token", True),
+            (standalone, "portal_user", "limited token", True),
+            (standalone, "internal_user", None, False),
+            (standalone, "internal_user", "token", True),
+            (standalone, "internal_user", "limited token", True),
+            (public, "public_user", None, True),
+            (public, "public_user", "token", True),
+            (public, "public_user", "limited token", True),
+            (public, "portal_user", None, True),
+            (public, "portal_user", "token", True),
+            (public, "portal_user", "limited token", True),
+            (public, "internal_user", None, True),
+            (public, "internal_user", "token", True),
+            (public, "internal_user", "limited token", True),
+        ]
+        for attachment, user, token, result in tests:
+            login = None if user == "public_user" else user
+            self.authenticate(login, login)
+            access_token_param = ""
+            if token:
+                access_token = (
+                    attachment.access_token
+                    if token == "token"
+                    else attachment._get_raw_access_token()
+                )
+                access_token_param = f"?access_token={access_token}"
+            res = self.url_open(f"/web/image/{attachment.id}{access_token_param}")
+            if result:
+                self.assertEqual(
+                    res.headers["Content-Disposition"],
+                    "inline; filename=test.gif",
+                    f"{user} should have access to {attachment.description} with {token or 'no token'}",
+                )
+            else:
+                self.assertEqual(
+                    res.headers["Content-Disposition"],
+                    "inline; filename=placeholder.png",
+                    f"{user} should not have access to {attachment.description} with {token or 'no token'}",
+                )

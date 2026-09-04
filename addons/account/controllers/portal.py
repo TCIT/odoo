@@ -1,14 +1,17 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import OrderedDict
 
-from odoo import fields, http, _
-from odoo.osv import expression
-from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
-from odoo.addons.account.controllers.download_docs import _get_headers, _build_zip_from_data
+from odoo import _, fields, http
 from odoo.exceptions import AccessError, MissingError
+from odoo.fields import Domain
 from odoo.http import request
+from odoo.tools import email_normalize, email_normalize_all
+from odoo.tools.misc import verify_hash_signed
+
+from odoo.addons.account.controllers.download_docs import _build_zip_from_data, _get_headers
+from odoo.addons.portal.controllers.portal import CustomerPortal
+from odoo.addons.portal.controllers.portal import pager as portal_pager
 
 
 class PortalAccount(CustomerPortal):
@@ -51,7 +54,7 @@ class PortalAccount(CustomerPortal):
             move_type = [m_type+move for move in ('_invoice', '_refund', '_receipt')]
         else:
             move_type = ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
-        return [('state', 'not in', ('cancel', 'draft')), ('move_type', 'in', move_type)]
+        return Domain('state', 'not in', ('cancel', 'draft')) & Domain('move_type', 'in', move_type)
 
     def _get_overdue_invoices_domain(self, partner_id=None):
         return [
@@ -67,7 +70,7 @@ class PortalAccount(CustomerPortal):
             'date': {'label': _('Date'), 'order': 'invoice_date desc'},
             'duedate': {'label': _('Due Date'), 'order': 'invoice_date_due desc'},
             'name': {'label': _('Reference'), 'order': 'name desc'},
-            'state': {'label': _('Status'), 'order': 'state'},
+            'state': {'label': _('Status'), 'order': 'payment_state'},
         }
 
     def _get_account_searchbar_filters(self):
@@ -99,10 +102,7 @@ class PortalAccount(CustomerPortal):
         values = self._prepare_portal_layout_values()
         AccountInvoice = request.env['account.move']
 
-        domain = expression.AND([
-            domain or [],
-            self._get_invoices_domain(),
-        ])
+        domain = Domain(domain or Domain.TRUE) & self._get_invoices_domain()
 
         searchbar_sortings = self._get_account_searchbar_sortings()
         # default sort by order
@@ -172,6 +172,10 @@ class PortalAccount(CustomerPortal):
         elif report_type in ('html', 'pdf', 'text'):
             has_generated_invoice = bool(invoice_sudo.invoice_pdf_report_id)
             request.update_context(proforma_invoice=not has_generated_invoice)
+            # If the partner's language is RTL, set the context language to match, ensuring the report shows the correct text direction.
+            partner_lang = invoice_sudo.partner_id.lang
+            if partner_lang and request.env['res.lang']._get_data(code=partner_lang).direction == 'rtl':
+                request.update_context(lang=partner_lang)
             # Use the template set on the related partner if there is.
             # This is not perfect as the invoice can still have been computed with another template, but it's a slight fix/imp for stable.
             pdf_report_name = invoice_sudo.partner_id.invoice_template_pdf_report_id.report_name or 'account.account_invoices'
@@ -180,47 +184,58 @@ class PortalAccount(CustomerPortal):
         values = self._invoice_get_page_view_values(invoice_sudo, access_token, **kw)
         return request.render("account.portal_invoice_page", values)
 
+    @http.route(['/my/journal/<int:journal_id>/unsubscribe'], type='http', auth="public", methods=['GET', 'POST'], website=True)
+    def portal_my_journal_unsubscribe(self, journal_id, **kw):
+        def _render(ctx, status=200):
+            return request.render('account.portal_my_journal_mail_notifications', ctx, status=status)
+
+        if access_token := kw.get('token'):
+            try:
+                token_data = verify_hash_signed(request.env(su=True), request.env['account.journal']._get_journal_notification_unsubscribe_scope(), access_token)
+            except ValueError:
+                return _render({'error': _('Invalid token')}, 403)
+            if not token_data or token_data.get('journal_id') != journal_id:
+                return _render({'error': _('Invalid token')}, 403)
+            journal = request.env['account.journal'].sudo().browse(journal_id)
+        else:
+            # Legacy link for authenticated user trying to unsubscribe (needs access rights on journal)
+            journal = request.env['account.journal'].browse(journal_id)
+
+        if access_token:
+            email_to_unsubscribe = email_normalize(token_data.get('email_to_unsubscribe'), strict=False)
+        else:
+            emails = email_normalize_all(journal.incoming_einvoice_notification_email or '')
+            if len(emails) != 1:
+                return _render({'error': _('Deprecated link')}, 410)
+            email_to_unsubscribe = emails[0]
+
+        if not journal.exists() or not email_to_unsubscribe:
+            return _render({'error': _('Already unsubscribed')}, 404)
+
+        if not journal.has_access('write'):
+            return _render({'error': _('Invalid token')}, 403)
+
+        journal = journal.with_company(journal.sudo().company_id.id)
+
+        all_recipients = email_normalize_all(journal.incoming_einvoice_notification_email or '')
+        email_found = any(r == email_to_unsubscribe for r in all_recipients)
+
+        if not email_found:
+            return _render({'error': _('Already unsubscribed')}, 404)
+
+        if request.httprequest.method == 'POST':
+            journal._unsubscribe_invoice_notification_email(email_to_unsubscribe)
+            return _render({'journal': journal, 'email': email_to_unsubscribe, 'completed': True})
+
+        return _render({'journal': journal, 'email': email_to_unsubscribe})
     # ------------------------------------------------------------
     # My Home
     # ------------------------------------------------------------
 
-    def details_form_validate(self, data, partner_creation=False):
-        error, error_message = super(PortalAccount, self).details_form_validate(data)
-        # prevent VAT/name change if invoices exist
-        partner = request.env['res.users'].browse(request.uid).partner_id
-        # Skip this test if we're creating a new partner as we won't ever block him from filling values.
-        if not partner_creation and not partner.can_edit_vat():
-            if 'vat' in data and (data['vat'] or False) != (partner.vat or False):
-                error['vat'] = 'error'
-                error_message.append(_('Changing VAT number is not allowed once invoices have been issued for your account. Please contact us directly for this operation.'))
-            if 'name' in data and (data['name'] or False) != (partner.name or False):
-                error['name'] = 'error'
-                error_message.append(_('Changing your name is not allowed once invoices have been issued for your account. Please contact us directly for this operation.'))
-            if 'company_name' in data and (data['company_name'] or False) != (partner.company_name or False):
-                error['company_name'] = 'error'
-                error_message.append(_('Changing your company name is not allowed once invoices have been issued for your account. Please contact us directly for this operation.'))
-        return error, error_message
-
-    def extra_details_form_validate(self, data, additional_required_fields, error, error_message):
-        """ Ensure that all additional required fields have a value in the data """
-        for field in additional_required_fields:
-            if field.name not in data or not data[field.name]:
-                error[field.name] = 'error'
-                error_message.append(_('The field %s must be filled.', field.field_description.lower()))
-        return error, error_message
-
-    def _get_optional_fields(self):
-        # EXTENDS 'portal
-        optional_fields = super()._get_optional_fields()
-        optional_fields.extend(('invoice_sending_method', 'invoice_edi_format'))
-        return optional_fields
-
-    def _prepare_portal_layout_values(self):
-        # EXTENDS 'portal'
-        portal_layout_values = super()._prepare_portal_layout_values()
-        partner = request.env.user.partner_id
-        portal_layout_values.update({
-            'invoice_sending_methods': {'email': _('by Email')},
-            'invoice_edi_formats': dict(partner._fields['invoice_edi_format'].selection),
+    def _prepare_my_account_rendering_values(self, *args, **kwargs):
+        rendering_values = super()._prepare_my_account_rendering_values(*args, **kwargs)
+        rendering_values.update({
+            'invoice_sending_methods': {'email': _("by Email")},
+            'invoice_edi_formats': dict(request.env['res.partner']._fields['invoice_edi_format']._description_selection(request.env)),
         })
-        return portal_layout_values
+        return rendering_values

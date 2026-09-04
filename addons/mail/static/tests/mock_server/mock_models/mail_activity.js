@@ -4,22 +4,16 @@ import { fields, getKwArgs, makeKwArgs, models, serverState } from "@web/../test
 import { Domain } from "@web/core/domain";
 import { deserializeDate, serializeDate, today } from "@web/core/l10n/dates";
 import { groupBy, sortBy, unique } from "@web/core/utils/arrays";
-import { DEFAULT_MAIL_SEARCH_ID, DEFAULT_MAIL_VIEW_ID } from "./constants";
-import { MailActivityType } from "./mail_activity_type";
 
 const { DateTime } = luxon;
 
 export class MailActivity extends models.ServerModel {
     _name = "mail.activity";
-    _views = {
-        [`search,${DEFAULT_MAIL_SEARCH_ID}`]: /* xml */ `<search/>`,
-        [`form,${DEFAULT_MAIL_VIEW_ID}`]: /* xml */ `<form/>`,
-    };
 
     activity_type_id = fields.Many2one({
         relation: "mail.activity.type",
         default() {
-            return MailActivityType._records[0].id;
+            return this.env["mail.activity.type"][0].id;
         },
     });
     user_id = fields.Many2one({ relation: "res.users", default: () => serverState.userId });
@@ -29,27 +23,7 @@ export class MailActivity extends models.ServerModel {
 
     /** @param {number[]} ids */
     action_feedback(ids) {
-        /** @type {import("mock_models").MailActivityType} */
-        const MailActivityType = this.env["mail.activity.type"];
-
-        const activities = this.browse(ids);
-        const activityTypes = MailActivityType.browse(
-            unique(activities.map((a) => a.activity_type_id))
-        );
-        const activityTypeById = Object.fromEntries(
-            activityTypes.map((actType) => [actType.id, actType])
-        );
-        this.write(
-            activities
-                .filter((act) => activityTypeById[act.activity_type_id].keep_done)
-                .map((act) => act.id),
-            { active: false, date_done: serializeDate(today()), state: "done" }
-        );
-        this.unlink(
-            activities
-                .filter((act) => !activityTypeById[act.activity_type_id].keep_done)
-                .map((act) => act.id)
-        );
+        this.write(ids, { active: false, date_done: serializeDate(today()), state: "done" });
     }
 
     /** @param {number[]} ids */
@@ -70,18 +44,21 @@ export class MailActivity extends models.ServerModel {
     }
 
     /** @param {number[]} ids */
-    _to_store(ids, store) {
+    _to_store(store, fields) {
         /** @type {import("mock_models").MailActivityType} */
         const MailActivityType = this.env["mail.activity.type"];
         /** @type {import("mock_models").MailTemplate} */
         const MailTemplate = this.env["mail.template"];
-        /** @type {import("mock_models").ResPartner} */
-        const ResPartner = this.env["res.partner"];
-        /** @type {import("mock_models").ResUsers} */
-        const ResUsers = this.env["res.users"];
+        store._add_record_fields(
+            this,
+            fields.filter((f) => !["activity_type_id"].includes(f))
+        );
 
-        for (const activity of this.browse(ids)) {
-            const [data] = this.read(activity.id);
+        for (const activity of this) {
+            const [data] = this._read_format(
+                activity.id,
+                ["activity_type_id", "summary"].filter((f) => fields.includes(f))
+            );
             // simulate computes
             const activityType = data.activity_type_id
                 ? MailActivityType.find((r) => r.id === data.activity_type_id[0])
@@ -100,14 +77,38 @@ export class MailActivity extends models.ServerModel {
             if (data.summary) {
                 data.display_name = data.summary;
             }
-            const [user] = ResUsers.browse(data.user_id[0]);
-            data["attachment_ids"] = mailDataHelpers.Store.many(
-                this.env["ir.attachment"].browse(activity.attachment_ids),
-                makeKwArgs({ fields: ["name"] })
-            );
-            data.persona = mailDataHelpers.Store.one(ResPartner.browse(user.partner_id));
-            store.add(this.browse(activity.id), data);
+            store._add_record_fields(this.browse(activity.id), data);
         }
+    }
+
+    get _to_store_defaults() {
+        return [
+            "activity_category",
+            "activity_type_id",
+            mailDataHelpers.Store.many(
+                "attachment_ids",
+                makeKwArgs({
+                    fields: ["name"],
+                })
+            ),
+            "can_write",
+            "chaining_type",
+            "create_date",
+            "create_uid",
+            "date_deadline",
+            "date_done",
+            mailDataHelpers.Store.attr("note", (activity) => ["markup", activity.note]),
+            "res_id",
+            "res_model",
+            "state",
+            "summary",
+            mailDataHelpers.Store.one(
+                "user_id",
+                makeKwArgs({
+                    fields: [mailDataHelpers.Store.one("partner_id")],
+                })
+            ),
+        ];
     }
 
     /**
@@ -238,6 +239,7 @@ export class MailActivity extends models.ServerModel {
                 reporting_date: reportingDate ? reportingDate.toFormat("yyyy-LL-dd") : false,
                 state: ongoing.length ? this._compute_state_from_date(dateDeadline) : "done",
                 user_assigned_ids: userAssignedIds,
+                summaries: ongoing.map((a) => (a.summary ? a.summary : "")),
                 ...attachmentsInfo,
             };
         }
@@ -256,7 +258,6 @@ export class MailActivity extends models.ServerModel {
                     id: type.id,
                     name: type.display_name,
                     template_ids: templates,
-                    keep_done: type.keep_done,
                 };
             }),
             activity_res_ids: ongoingResIds.concat(completedResIds).map((idStr) => Number(idStr)),

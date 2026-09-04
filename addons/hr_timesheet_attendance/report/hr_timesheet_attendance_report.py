@@ -4,7 +4,7 @@
 from odoo import api, fields, models, tools
 
 
-class TimesheetAttendance(models.Model):
+class HrTimesheetAttendanceReport(models.Model):
     _name = 'hr.timesheet.attendance.report'
     _auto = False
     _description = 'Timesheet Attendance Report'
@@ -21,7 +21,7 @@ class TimesheetAttendance(models.Model):
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        self._cr.execute("""CREATE OR REPLACE VIEW %s AS (
+        self.env.cr.execute("""CREATE OR REPLACE VIEW %s AS (
             SELECT
                 max(id) AS id,
                 t.employee_id,
@@ -40,10 +40,18 @@ class TimesheetAttendance(models.Model):
                     hr_attendance.employee_id AS employee_id,
                     hr_attendance.worked_hours AS attendance,
                     NULL AS timesheet,
-                    hr_attendance.check_in::date AS date,
+                    CAST(hr_attendance.check_in
+                            at time zone 'utc'
+                            at time zone
+                                (SELECT calendar.tz FROM resource_calendar as calendar
+                                INNER JOIN hr_employee as employee ON employee.id = hr_attendance.employee_id
+                                LEFT JOIN hr_version v ON v.id = employee.current_version_id
+                                WHERE calendar.id = v.resource_calendar_id)
+                    as DATE) as date,
                     hr_employee.company_id as company_id
                 FROM hr_attendance
                 LEFT JOIN hr_employee ON hr_employee.id = hr_attendance.employee_id
+                WHERE hr_attendance.check_in::date <= CURRENT_DATE
             UNION ALL
                 SELECT
                     ts.id AS id,
@@ -56,6 +64,7 @@ class TimesheetAttendance(models.Model):
                 FROM account_analytic_line AS ts
                 LEFT JOIN hr_employee ON hr_employee.id = ts.employee_id
                 WHERE ts.project_id IS NOT NULL
+                  AND ts.date <= CURRENT_DATE
             ) AS t
             GROUP BY t.employee_id, t.date, t.company_id, t.emp_cost
             ORDER BY t.date
@@ -63,9 +72,7 @@ class TimesheetAttendance(models.Model):
         """ % self._table)
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        if not orderby and groupby:
-            orderby_list = [groupby] if isinstance(groupby, str) else groupby
-            orderby_list = [field.split(':')[0] for field in orderby_list]
-            orderby = ','.join([f"{field} desc" if field == 'date' else field for field in orderby_list])
-        return super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+    def formatted_read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None) -> list[dict]:
+        if not order and groupby:
+            order = ', '.join(f"{spec} DESC" if spec.startswith('date:') else spec for spec in groupby)
+        return super().formatted_read_group(domain, groupby, aggregates, having=having, offset=offset, limit=limit, order=order)

@@ -1,7 +1,5 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 import configuratorTourUtils from "@sale/js/tours/product_configurator_tour_utils";
 import tourUtils from "@sale/js/tours/tour_utils";
 
@@ -24,7 +22,7 @@ registry.category("web_tour.tours").add('sale_product_configurator_tour', {
             run: "click",
         },
         {
-            trigger: '.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] span:contains("Customizable Desk")) td[name="price"] span:contains("800.40")',
+            trigger: '.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] span:contains("Customizable Desk")) span[name="sale_product_configurator_formatted_price"]:contains("800.40")',
         },
         {
             trigger: 'label[style="background-color:#000000"] input:not(:visible)',
@@ -47,8 +45,8 @@ registry.category("web_tour.tours").add('sale_product_configurator_tour', {
             trigger: '.o_sale_product_configurator_table_optional span:contains("Aluminium")',
             run: "click",
         },
-        configuratorTourUtils.addOptionalProduct("Conference Chair"),
-        configuratorTourUtils.addOptionalProduct("Chair floor protection"),
+        configuratorTourUtils.addOptionalProduct("Conference Chair (TEST)"),
+        configuratorTourUtils.addOptionalProduct("Chair floor protection (TEST)"),
         ...configuratorTourUtils.saveConfigurator(),
         // check that 3 products were added to the SO
         {

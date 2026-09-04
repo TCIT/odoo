@@ -1,4 +1,4 @@
-import { Record } from "@mail/core/common/record";
+import { fields, Record } from "@mail/core/common/record";
 import { markRaw } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
@@ -6,18 +6,8 @@ import { _t } from "@web/core/l10n/translation";
 export class Failure extends Record {
     static nextId = markRaw({ value: 1 });
     static id = "id";
-    /** @type {Object.<number, import("models").Failure>} */
-    static records = {};
-    /** @returns {import("models").Failure} */
-    static get(data) {
-        return super.get(data);
-    }
-    /** @returns {import("models").Failure|import("models").Failure[]} */
-    static insert(data) {
-        return super.insert(...arguments);
-    }
 
-    notifications = Record.many("Notification", {
+    notifications = fields.Many("mail.notification", {
         /** @this {import("models").Failure} */
         onUpdate() {
             if (this.notifications.length === 0) {
@@ -28,23 +18,25 @@ export class Failure extends Record {
         },
     });
     get modelName() {
-        return this.notifications?.[0]?.message?.thread?.modelName;
+        return this.notifications?.[0]?.mail_message_id?.thread?.modelName;
     }
     get resModel() {
-        return this.notifications?.[0]?.message?.thread?.model;
+        return this.notifications?.[0]?.mail_message_id?.thread?.model;
     }
     get resIds() {
         return new Set([
-            ...this.notifications.map((notif) => notif.message?.thread?.id).filter((id) => !!id),
+            ...this.notifications
+                .map((notif) => notif.mail_message_id?.thread?.id)
+                .filter((id) => !!id),
         ]);
     }
-    lastMessage = Record.one("Message", {
+    lastMessage = fields.One("mail.message", {
         /** @this {import("models").Failure} */
         compute() {
-            let lastMsg = this.notifications[0]?.message;
+            let lastMsg = this.notifications[0]?.mail_message_id;
             for (const notification of this.notifications) {
-                if (lastMsg?.id < notification.message?.id) {
-                    lastMsg = notification.message;
+                if (lastMsg?.id < notification.mail_message_id?.id) {
+                    lastMsg = notification.mail_message_id;
                 }
             }
             return lastMsg;
@@ -65,7 +57,7 @@ export class Failure extends Record {
     get body() {
         if (this.notifications.length === 1 && this.lastMessage?.thread) {
             return _t("An error occurred when sending an email on “%(record_name)s”", {
-                record_name: this.lastMessage.thread.name,
+                record_name: this.lastMessage.thread.display_name,
             });
         }
         return _t("An error occurred when sending an email");

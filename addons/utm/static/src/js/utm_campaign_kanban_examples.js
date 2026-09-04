@@ -1,10 +1,7 @@
-/** @odoo-module */
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 
 const exampleData = {
-    ghostColumns: [_t('Ideas'), _t('Design'), _t('Review'), _t('Send'), _t('Done')],
     applyExamplesText: _t("Use This For My Campaigns"),
     allowedGroupBys: ['stage_id'],
     examples: [{

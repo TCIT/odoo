@@ -1,25 +1,22 @@
-# -*- coding: utf-8 -*-
-
-import qrcode
 import zipfile
 from io import BytesIO
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+from odoo.fields import Domain
 from odoo.tools.misc import split_every
-from odoo.osv.expression import AND
 from werkzeug.urls import url_unquote
 
 
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    pos_self_ordering_takeaway = fields.Boolean(related="pos_config_id.self_ordering_takeaway", readonly=False)
     pos_self_ordering_service_mode = fields.Selection(related="pos_config_id.self_ordering_service_mode", readonly=False, required=True)
     pos_self_ordering_mode = fields.Selection(related="pos_config_id.self_ordering_mode", readonly=False, required=True)
     pos_self_ordering_default_language_id = fields.Many2one(related="pos_config_id.self_ordering_default_language_id", readonly=False)
     pos_self_ordering_available_language_ids = fields.Many2many(related="pos_config_id.self_ordering_available_language_ids", readonly=False)
     pos_self_ordering_image_home_ids = fields.Many2many(related="pos_config_id.self_ordering_image_home_ids", readonly=False)
+    pos_self_ordering_image_background_ids = fields.Many2many(related="pos_config_id.self_ordering_image_background_ids", readonly=False)
     pos_self_ordering_image_brand = fields.Image(related="pos_config_id.self_ordering_image_brand", readonly=False)
     pos_self_ordering_image_brand_name = fields.Char(related="pos_config_id.self_ordering_image_brand_name", readonly=False)
     pos_self_ordering_pay_after = fields.Selection(related="pos_config_id.self_ordering_pay_after", readonly=False, required=True)
@@ -73,9 +70,6 @@ class ResConfigSettings(models.TransientModel):
         if self.pos_self_ordering_service_mode == 'counter' and self.pos_self_ordering_mode == 'mobile':
             self.pos_self_ordering_pay_after = "each"
 
-        if self.pos_self_ordering_mode not in ['nothing', 'consultation'] and self.pos_self_ordering_pay_after == "each" and not self.module_pos_preparation_display:
-            self.module_pos_preparation_display = True
-
     def custom_link_action(self):
         self.ensure_one()
         return {
@@ -85,22 +79,36 @@ class ResConfigSettings(models.TransientModel):
             "domain": ['|', ['pos_config_ids', 'in', self.pos_config_id.id], ["pos_config_ids", "=", False]],
         }
 
-    def _generate_single_qr_code(self, url):
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(url)
-        qr.make(fit=True)
-        return qr.make_image(fill_color="black", back_color="transparent")
+    def _generate_excel(self, rows, headers):
+        import xlsxwriter  # noqa: PLC0415
+        with BytesIO() as buffer:
+            with xlsxwriter.Workbook(buffer, {'in_memory': True}) as workbook:
+                worksheet = workbook.add_worksheet()
+
+                for col, header in enumerate(headers):
+                    worksheet.write(0, col, header)
+                for row_idx, row in enumerate(rows, start=1):
+                    for col_idx, cell in enumerate(row):
+                        worksheet.write(row_idx, col_idx, cell)
+            return buffer.getvalue()
+
+    def get_pos_qr_stands(self):
+        """Redirect to the get the free stands with the data of QR codes for the current POS config"""
+        self.ensure_one()
+        return {
+            "type": "ir.actions.client",
+            "tag": "pos_qr_stands",
+            "params": {
+                "data": self.pos_config_id.get_pos_qr_order_data(),
+            },
+        }
 
     def generate_qr_codes_zip(self):
         if not self.pos_self_ordering_mode in ['mobile', 'consultation']:
             raise ValidationError(_("QR codes can only be generated in mobile or consultation mode."))
 
         qr_images = []
+        excel_rows = []
 
         if self.pos_module_pos_restaurant:
             table_ids = self.pos_config_id.floor_ids.table_ids
@@ -108,23 +116,36 @@ class ResConfigSettings(models.TransientModel):
             if not table_ids:
                 raise ValidationError(_("In Self-Order mode, you must have at least one table to generate QR codes"))
 
-            for table in table_ids:
+            for row_num, table in enumerate(table_ids, start=1):
+                table_number = table.table_number
+                floor_name = table.floor_id.name
+                url = url_unquote(self.pos_config_id._get_self_order_url(table.id))
                 qr_images.append({
-                    'image': self._generate_single_qr_code(url_unquote(self.pos_config_id._get_self_order_url(table.id))),
-                    'name': f"{table.floor_id.name} - {table.table_number}",
+                    'images': self.pos_config_id._generate_single_qr_code__(url),
+                    'name': f"{floor_name} - {table_number}",
                 })
+                excel_rows.append([self.pos_config_id.name, floor_name, table_number, url])
+            headers = ['Pos config', 'Floor', 'Table id', 'Url shortened']
         else:
+            url = url_unquote(self.pos_config_id._get_self_order_url())
             qr_images.append({
-                'image': self._generate_single_qr_code(url_unquote(self.pos_config_id._get_self_order_url())),
+                'images': self.pos_config_id._generate_single_qr_code__(url),
                 'name': "generic",
             })
+            excel_rows.append([self.pos_config_id.name, url])
+            headers = ['Pos config', 'Url shortened']
+
+        xlsx_content = self._generate_excel(excel_rows, headers)
 
         # Create a zip with all images in qr_images
         zip_buffer = BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", 0) as zip_file:
+            zip_file.writestr("Table_url.xlsx", xlsx_content)
             for index, qr_image in enumerate(qr_images):
                 with zip_file.open(f"{qr_image['name']} ({index + 1}).png", "w") as buf:
-                    qr_image['image'].save(buf, format="PNG")
+                    qr_image['images']['png'].save(buf, format="PNG")
+                with zip_file.open(f"{qr_image['name']} ({index + 1}).svg", "w") as buf:
+                    buf.write(qr_image['images']['svg'].to_string())
         zip_buffer.seek(0)
 
         # Delete previous attachments
@@ -151,17 +172,16 @@ class ResConfigSettings(models.TransientModel):
         """
         Generate the data needed to print the QR codes page
         """
+        name = ""
+        url = url_unquote(self.pos_config_id._get_self_order_url())
         if self.pos_self_ordering_mode == 'mobile' and self.pos_module_pos_restaurant:
             table_ids = self.pos_config_id.floor_ids.table_ids
-
             if not table_ids:
                 raise ValidationError(_("In Self-Order mode, you must have at least one table to generate QR codes"))
 
-            url = url_unquote(self.pos_config_id._get_self_order_url(table_ids[0].id))
-            name = table_ids[0].table_number
-        else:
-            url = url_unquote(self.pos_config_id._get_self_order_url())
-            name = ""
+            if self.pos_self_ordering_service_mode == 'table':
+                url = url_unquote(self.pos_config_id._get_self_order_url(table_ids[0].id))
+                name = table_ids[0].table_number
 
         return self.env.ref("pos_self_order.report_self_order_qr_codes_page").report_action(
             [], data={
@@ -183,6 +203,14 @@ class ResConfigSettings(models.TransientModel):
             }
         )
 
+    def pos_close_ui(self):
+        if self.pos_self_ordering_mode == "kiosk":
+            if self.env.context.get('pos_config_id'):
+                pos_config_id = self.env.context['pos_config_id']
+                pos_config = self.env['pos.config'].browse(pos_config_id)
+                return pos_config.action_close_kiosk_session()
+        return super().pos_close_ui()
+
     def preview_self_order_app(self):
         self.ensure_one()
         return self.pos_config_id.preview_self_order_app()
@@ -197,5 +225,5 @@ class ResConfigSettings(models.TransientModel):
         for res_config in self:
             if res_config.pos_self_ordering_mode == 'kiosk':
                 currency_id = res_config.pos_journal_id.currency_id.id if res_config.pos_journal_id.currency_id else res_config.pos_config_id.company_id.currency_id.id
-                domain = AND([self.env['product.pricelist']._check_company_domain(res_config.pos_config_id.company_id), [('currency_id', '=', currency_id)]])
+                domain = Domain.AND([self.env['product.pricelist']._check_company_domain(res_config.pos_config_id.company_id), [('currency_id', '=', currency_id)]])
                 res_config.pos_available_pricelist_ids = self.env['product.pricelist'].search(domain)

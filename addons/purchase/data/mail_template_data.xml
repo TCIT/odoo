@@ -5,7 +5,8 @@
             <field name="name">Purchase: Request For Quotation</field>
             <field name="model_id" ref="purchase.model_purchase_order"/>
             <field name="subject">{{ object.company_id.name }} Order (Ref {{ object.name or 'n/a' }})</field>
-            <field name="partner_to">{{ object.partner_id.id }}</field>
+            <field name="partner_to" eval="False"/>
+            <field name="use_default_to" eval="True"/>
             <field name="description">Sent manually to vendor to request a quotation</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
@@ -23,25 +24,14 @@
         <br/><br/>
         If you have any questions, please do not hesitate to contact us.
         <br/><br/>
-            <a t-att-href="object.get_confirm_url(confirm_type='reception')"
-                target="_blank"
-                style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
-                Accept</a>
-
-            <a t-att-href="object.get_confirm_url(confirm_type='decline')"
-                target="_blank"
-                style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
-                Decline</a>
-        <br/><br/>
         Best regards,
         <t t-if="not is_html_empty(object.user_id.signature)">
             <br/><br/>
-            <t t-out="object.user_id.signature or ''">--<br/>Mitchell Admin</t>
+            <div>--<br/><t t-out="object.user_id.signature or ''">Mitchell Admin</t></div>
         </t>
     </p>
 </div></field>
             <field name="report_template_ids" eval="[(4, ref('purchase.report_purchase_quotation'))]"/>
-            <field name="lang">{{ object.partner_id.lang }}</field>
             <field name="auto_delete" eval="True"/>
         </record>
 
@@ -49,7 +39,8 @@
             <field name="name">Purchase: Purchase Order</field>
             <field name="model_id" ref="purchase.model_purchase_order"/>
             <field name="subject">{{ object.company_id.name }} Order (Ref {{ object.name or 'n/a' }})</field>
-            <field name="partner_to">{{ object.partner_id.id }}</field>
+            <field name="partner_to" eval="False"/>
+            <field name="use_default_to" eval="True"/>
             <field name="description">Sent to vendor with the purchase order in attachment</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
@@ -70,16 +61,20 @@
             The receipt is expected for <span style="font-weight:bold;" t-out="format_date(object.date_planned) or ''">05/05/2021</span>.
             <br/><br/>
             Could you please acknowledge the receipt of this order?
+            <br/><br/>
+            <a t-att-href="object.get_acknowledge_url()"
+                target="_blank"
+                style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
+                Acknowledge</a>
         </t>
         <t t-if="not is_html_empty(object.user_id.signature)">
             <br/><br/>
-            <t t-out="object.user_id.signature or ''">--<br/>Mitchell Admin</t>
+            <div>--<br/><t t-out="object.user_id.signature or ''">Mitchell Admin</t></div>
         </t>
         <br/><br/>
     </p>
 </div></field>
             <field name="report_template_ids" eval="[(4, ref('purchase.action_report_purchase_order'))]"/>
-            <field name="lang">{{ object.partner_id.lang }}</field>
             <field name="auto_delete" eval="True"/>
         </record>
 
@@ -88,7 +83,8 @@
             <field name="model_id" ref="purchase.model_purchase_order"/>
             <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted) }}</field>
             <field name="subject">{{ object.company_id.name }} Order (Ref {{ object.name or 'n/a' }})</field>
-            <field name="partner_to">{{ object.partner_id.id }}</field>
+            <field name="partner_to" eval="False"/>
+            <field name="use_default_to" eval="True"/>
             <field name="description">Sent to vendors before expected arrival, based on the purchase order setting</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
@@ -110,15 +106,20 @@
             <span style="font-weight:bold;">undefined</span>.
         </t>
         Could you please confirm it will be delivered on time?
+        <br/><br/>
+        <a t-att-href="object.get_acknowledge_url()"
+            target="_blank"
+            style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px">
+            Acknowledge</a>
+        <br/><br/>
         <t t-if="not is_html_empty(object.user_id.signature)">
             <br/><br/>
-            <t t-out="object.user_id.signature or ''">--<br/>Mitchell Admin</t>
+            <div>--<br/><t t-out="object.user_id.signature or ''">Mitchell Admin</t></div>
         </t>
         <br/><br/>
     </p>
 </div></field>
             <field name="report_template_ids" eval="[(4, ref('purchase.action_report_purchase_order'))]"/>
-            <field name="lang">{{ object.partner_id.lang }}</field>
             <field name="auto_delete" eval="True"/>
         </record>
 

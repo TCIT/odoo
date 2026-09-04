@@ -4,9 +4,9 @@
     <t t-name="web.ControlPanel">
         <div class="o_control_panel d-flex flex-column gap-3 px-3 pt-2 pb-3" t-ref="root" data-command-category="actions">
             <Transition t-if="!env.isSmall" visible="state.embeddedInfos.showEmbedded" name="'o-fade'" t-slot-scope="transition" leaveDuration="500">
-                <div class="o_embedded_actions overflow-hidden d-flex flex-wrap w-100 align-items-center justify-content-center gap-2" t-att-class="transition.className">
+                <div class="o_embedded_actions d-flex flex-wrap w-100 align-items-center justify-content-center gap-2" t-att-class="transition.className">
                     <t t-foreach="state.embeddedInfos.embeddedActions" t-as="action" t-key="action.id">
-                        <t t-if="_checkValueLocalStorage(action)">
+                        <t t-if="_isEmbeddedActionVisible(action)">
                             <button class="btn btn-secondary o_draggable"
                                     t-att-class="{ 'active': state.embeddedInfos.currentEmbeddedAction?.id === action.id}"
                                     t-on-click="() => this.onEmbeddedActionClick(action)"
@@ -19,24 +19,22 @@
                     <t t-call="web.embeddedActionsDropdown" />
                 </div>
             </Transition>
-            <div class="o_control_panel_main d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-lg-start gap-lg-3 flex-grow-1">
+            <div class="o_control_panel_main d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-lg-start gap-2 gap-lg-3 flex-grow-1">
                 <div class="o_control_panel_breadcrumbs d-flex align-items-center gap-1 order-0 h-lg-100">
-                    <div class="o_control_panel_main_buttons d-flex gap-1 d-empty-none d-print-none" t-ref="mainButtons" t-on-keydown="onMainButtonsKeydown">
-                        <div t-if="env.isSmall" class="btn-group o_control_panel_collapsed_create">
-                            <t t-slot="control-panel-create-button"/>
-                            <button t-att-class="{invisible: display.disableDropdown}" type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split o_control_panel_collapsed_create" data-bs-toggle="dropdown" aria-expanded="false">
-                                 <span class="visually-hidden">Toggle Dropdown</span>
+                    <div class="o_control_panel_main_buttons d-flex gap-1 d-empty-none d-print-none" t-on-keydown="onMainButtonsKeydown">
+                        <t t-slot="control-panel-create-button"/>
+                        <t t-slot="layout-buttons"/>
+                        <t t-slot="control-panel-always-buttons"/>
+                        <Dropdown t-if="env.isSmall" menuClass="'o-control-panel-adaptive-dropdown'" onOpened.bind="dropdownifyButtons">
+                            <button class="btn btn-secondary o-control-panel-adaptive-dropdown" title="More">
+                                <i class="oi oi-fw oi-ellipsis-v" />
                             </button>
-                            <ul class="dropdown-menu o_control_panel_collapsed_create">
+                            <t t-set-slot="content">
+                                <t t-slot="control-panel-create-button"/>
                                 <t t-slot="layout-buttons"/>
                                 <t t-slot="control-panel-always-buttons"/>
-                            </ul>
-                        </div>
-                        <div t-else="" class="d-inline-flex gap-1">
-                            <t t-slot="control-panel-create-button"/>
-                            <t t-slot="layout-buttons"/>
-                            <t t-slot="control-panel-always-buttons"/>
-                        </div>
+                            </t>
+                        </Dropdown>
                     </div>
                     <t t-if="env.config.noBreadcrumbs">
                         <section class="o_control_panel_breadcrumbs_actions d-contents d-print-none">
@@ -86,14 +84,15 @@
                     <div t-if="pagerProps and pagerProps.total > 0" class="o_cp_pager text-nowrap " role="search">
                         <Pager t-props="pagerProps"/>
                     </div>
-                    <button t-if="state.embeddedInfos.embeddedActions?.length and !env.isSmall" class="btn btn-secondary"
+                    <button t-if="state.embeddedInfos.embeddedActions?.length and !env.isSmall" name="embedded_actions" class="btn btn-secondary"
                             t-att-class="{active: state.embeddedInfos.showEmbedded}"
-                            t-on-click="onClickShowEmbedded">
+                            t-on-click="onClickShowEmbedded"
+                            title="View related documents">
                         <i class="fa fa-sliders" />
                     </button>
                     <t t-if="env.config.viewSwitcherEntries?.length > 1">
                         <div t-if="env.isSmall" class="o_cp_switch_buttons btn-group d-print-none">
-                            <Dropdown>
+                            <Dropdown menuClass="{o_cp_switch_buttons: true, o_custom_bottom_sheet: true }">
                                 <button class="btn btn-secondary">
                                     <t t-set="activeView" t-value="env.config.viewSwitcherEntries.find((view) => view.active)"/>
                                     <i class="oi-fw" t-att-class="activeView.icon"/>
@@ -113,9 +112,10 @@
                                 <button class="btn btn-secondary o_switch_view "
                                     t-attf-class="o_{{view.type}} {{view.active ? 'active' : ''}}"
                                     t-att-data-tooltip="view.name"
-                                    t-on-click="() => this.switchView(view.type)"
+                                    t-custom-click="(ev, isMiddleClick) => this.switchView(view.type, isMiddleClick)"
+                                    t-att-aria-label="view.name + ' View'"
                                 >
-                                    <i t-att-class="view.icon" />
+                                    <i class="oi-fw" t-att-class="view.icon" />
                                 </button>
                             </t>
                         </nav>
@@ -128,12 +128,12 @@
 
     <t t-name="web.embeddedActionsDropdown">
         <Dropdown menuClass="'o_embedded_actions_dropdown_menu'">
-            <button class="btn btn-secondary">
+            <button name="openEmbeddedActions" class="btn btn-secondary">
                 <i class="fa fa-fw fa-sliders"/>
             </button>
             <t t-set-slot="content">
                 <t t-foreach="state.embeddedInfos.embeddedActions" t-as="action" t-key="action.id">
-                    <DropdownItem 
+                    <DropdownItem
                         class="this.getDropdownClass(action)"
                         onSelected="() => this.env.isSmall ? this.onEmbeddedActionClick(action) : this._setVisibility(action.id)"
                         closingMode="'none'"

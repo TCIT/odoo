@@ -71,8 +71,8 @@ class ReportController(http.Controller):
         :param height: Pixel height of the barcode
         :param humanreadable: Accepted values: 0 (default) or 1. 1 will insert the readable value
         at the bottom of the output image
-        :param quiet: Accepted values: 0 (default) or 1. 1 will display white
-        margins on left and right.
+        :param quiet: Accepted values: 0 or 1 (default). 1 will display white
+        margins on left and right for barcodes and on all sides for QR codes.
         :param mask: The mask code to be used when rendering this QR-code.
                      Masks allow adding elements on top of the generated image,
                      such as the Swiss cross in the center of QR-bill codes.
@@ -143,13 +143,13 @@ class ReportController(http.Controller):
             _logger.warning("Error while generating report %s", reportname, exc_info=True)
             se = http.serialize_exception(e)
             error = {
-                'code': 200,
+                'code': 0,
                 'message': "Odoo Server Error",
                 'data': se
             }
             res = request.make_response(html_escape(json.dumps(error)))
             raise werkzeug.exceptions.InternalServerError(response=res) from e
 
-    @http.route(['/report/check_wkhtmltopdf'], type='json', auth='user', readonly=True)
+    @http.route(['/report/check_wkhtmltopdf'], type='jsonrpc', auth='user', readonly=True)
     def check_wkhtmltopdf(self):
         return request.env['ir.actions.report'].get_wkhtmltopdf_state()

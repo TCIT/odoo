@@ -30,6 +30,7 @@ bullets.
 """
 
 import argparse
+import functools
 import sys
 
 from importlib.machinery import SourceFileLoader
@@ -38,6 +39,9 @@ from types import ModuleType
 from typing import Iterator
 
 ROOT = Path(__file__).parent.parent
+UPGRADE = ROOT / 'upgrade_code'
+AVAILABLE_EXT = ('.py', '.js', '.css', '.scss', '.xml', '.csv', '.po', '.pot')
+
 
 try:
     import odoo.addons
@@ -53,14 +57,18 @@ except ImportError:
     sys.path.insert(0, str(ROOT / 'tools'))
     import release
     from parse_version import parse_version
+    # Avoid shadowing stdlib modules when running upgrade scripts, e.g. json with odoo/tools/json.py
+    del sys.path[:2]
     class Command:
-        pass
-    config = {'addons_path': ''}
+        """ Simplified version of the one in command.py, for standalone execution """
+        def __init__(self):
+            self.parser = argparse.ArgumentParser(
+                prog=Path(sys.argv[0]).name,
+                description=__doc__.replace('/odoo/upgrade_code', str(UPGRADE)),
+                formatter_class=argparse.RawDescriptionHelpFormatter,
+            )
+    config = None
     initialize_sys_path = None
-
-
-UPGRADE = ROOT / 'upgrade_code'
-AVAILABLE_EXT = ('.py', '.js', '.css', '.scss', '.xml', '.csv')
 
 
 class FileAccessor:
@@ -113,11 +121,11 @@ class FileManager:
         return self._files.get(str(path))
 
     if sys.stdout.isatty():
-        def print_progress(self, current, total=None):
+        def print_progress(self, current: int, total: int | None =None, file_name : str | Path = ""):
             total = total or len(self) or 1
-            print(f'{current / total:>4.0%}', end='\r', file=sys.stderr)  # noqa: T201
+            print(f'\033[K{current / total:>4.0%} \033[37m{file_name}\033[0m', end='\r', file=sys.stderr)  # noqa: T201
     else:
-        def print_progress(self, current, total=None):
+        def print_progress(self, current: int, total: int | None =None, file_name : str | Path = ""):
             pass
 
 
@@ -168,18 +176,9 @@ def migrate(
 class UpgradeCode(Command):
     """ Rewrite the entire source code using the scripts found at /odoo/upgrade_code """
     name = 'upgrade_code'
-    prog_name = Path(sys.argv[0]).name
 
     def __init__(self):
-        self.parser = argparse.ArgumentParser(
-            prog=(
-                f"{self.prog_name} [--addons-path=PATH,...] {self.name}"
-                if initialize_sys_path else
-                self.prog_name
-            ),
-            description=__doc__.replace('/odoo/upgrade_code', str(UPGRADE)),
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-        )
+        super().__init__()
         group = self.parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             '--script',
@@ -208,7 +207,13 @@ class UpgradeCode(Command):
             help="list the files that would be re-written, but rewrite none")
         self.parser.add_argument(
             '--addons-path',
-            default=config['addons_path'],
+            type=(
+                functools.partial(config.parse, 'addons_path')
+                if config else
+                # the paths must be resolved already
+                lambda addons_path: [p for p in addons_path.split(',') if p]
+            ),
+            default=config['addons_path'] if config else [],
             metavar='PATH,...',
             help="specify additional addons paths (separated by commas)",
         )
@@ -219,8 +224,6 @@ class UpgradeCode(Command):
             config['addons_path'] = options.addons_path
             initialize_sys_path()
             options.addons_path = odoo.addons.__path__
-        else:
-            options.addons_path = [p for p in options.addons_path.split(',') if p]
         if not options.addons_path:
             self.parser.error("--addons-path is required when used standalone")
         is_dirty = migrate(**vars(options))

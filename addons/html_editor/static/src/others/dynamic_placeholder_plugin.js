@@ -1,7 +1,8 @@
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
-import { DynamicPlaceholderPopover } from "@web/views/fields/dynamic_placeholder_popover";
 import { withSequence } from "@html_editor/utils/resource";
+import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
+import { EditorDynamicPlaceholderPopover } from "./editor_dynamic_placeholder_popover";
 
 /**
  * @typedef {Object} DynamicPlaceholderShared
@@ -12,6 +13,7 @@ export class DynamicPlaceholderPlugin extends Plugin {
     static id = "dynamicPlaceholder";
     static dependencies = ["overlay", "selection", "history", "dom"];
     static shared = ["updateDphDefaultModel"];
+    /** @type {import("plugins").EditorResources} */
     resources = {
         user_commands: [
             {
@@ -19,9 +21,8 @@ export class DynamicPlaceholderPlugin extends Plugin {
                 title: _t("Dynamic Placeholder"),
                 description: _t("Insert a field"),
                 icon: "fa-hashtag",
-                run: (params = {}) => {
-                    return this.open(params.resModel || this.defaultResModel);
-                },
+                run: (params = {}) => this.open(params.resModel || this.defaultResModel),
+                isAvailable: isHtmlContentSupported,
             },
         ],
         powerbox_categories: withSequence(60, {
@@ -38,7 +39,7 @@ export class DynamicPlaceholderPlugin extends Plugin {
         this.defaultResModel = this.config.dynamicPlaceholderResModel;
 
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
-        this.overlay = this.dependencies.overlay.createOverlay(DynamicPlaceholderPopover, {
+        this.overlay = this.dependencies.overlay.createOverlay(EditorDynamicPlaceholderPopover, {
             hasAutofocus: true,
             className: "popover",
         });
@@ -73,20 +74,45 @@ export class DynamicPlaceholderPlugin extends Plugin {
     /**
      * @param {string} chain
      * @param {string} defaultValue
+     * @param {string} fieldType
      */
-    onValidate(chain, defaultValue) {
+    async onValidate(chain, defaultValue, fieldType) {
         if (!chain) {
             return;
         }
 
+        const dynamicPlaceholder =
+            fieldType === "datetime"
+                ? await this._onValidateDatetime(chain, defaultValue)
+                : `object.${chain}`;
+
         const t = document.createElement("T");
-        t.setAttribute("t-out", `object.${chain}`);
+        t.setAttribute("t-out", dynamicPlaceholder);
         if (defaultValue?.length) {
             t.innerText = defaultValue;
         }
 
         this.dependencies.dom.insert(t);
         this.dependencies.history.addStep();
+    }
+
+    async _onValidateDatetime(chain, defaultValue) {
+        const partnerFields = await this.services.orm.call(
+            `${this.defaultResModel}`,
+            "mail_get_partner_fields",
+            [[]]
+        );
+
+        let dynamicPlaceholder = partnerFields.length
+            ? `format_datetime(object.${chain}, tz=object.${partnerFields[0]}.tz)`
+            : `format_datetime(object.${chain})`;
+
+        if (defaultValue) {
+            const safeDefaultValue = defaultValue.replace(/'/g, "\\'");
+            dynamicPlaceholder += ` or '${safeDefaultValue}'`;
+        }
+
+        return dynamicPlaceholder;
     }
 
     onClose() {

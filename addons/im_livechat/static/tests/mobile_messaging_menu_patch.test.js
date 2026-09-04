@@ -25,10 +25,12 @@ test("Livechat button is present when there is at least one livechat thread", as
     patchUiSize({ size: SIZES.SM });
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create({
-        anonymous_name: "Visitor 11",
         channel_member_ids: [
-            Command.create({ partner_id: serverState.partnerId }),
-            Command.create({ partner_id: serverState.publicPartnerId }),
+            Command.create({ partner_id: serverState.partnerId, livechat_member_type: "agent" }),
+            Command.create({
+                partner_id: serverState.publicPartnerId,
+                livechat_member_type: "visitor",
+            }),
         ],
         channel_type: "livechat",
         livechat_operator_id: serverState.partnerId,
@@ -36,5 +38,5 @@ test("Livechat button is present when there is at least one livechat thread", as
     await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await contains(".o-mail-MessagingMenu");
-    await contains(".o-mail-MessagingMenu-navbar", { text: "Livechat" });
+    await contains(".o-mail-MessagingMenu-navbar", { text: "Live Chats" });
 });

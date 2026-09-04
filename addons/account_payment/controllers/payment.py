@@ -11,7 +11,7 @@ from odoo.addons.payment.controllers import portal as payment_portal
 
 class PaymentPortal(payment_portal.PaymentPortal):
 
-    @route('/invoice/transaction/<int:invoice_id>', type='json', auth='public')
+    @route('/invoice/transaction/<int:invoice_id>', type='jsonrpc', auth='public')
     def invoice_transaction(self, invoice_id, access_token, **kwargs):
         """ Create a draft transaction and return its processing values.
 
@@ -35,7 +35,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
         self._validate_transaction_kwargs(kwargs, additional_allowed_keys={'name_next_installment'})
         return self._process_transaction(partner_sudo.id, invoice_sudo.currency_id.id, [invoice_id], False, **kwargs)
 
-    @route('/invoice/transaction/overdue', type='json', auth='public')
+    @route('/invoice/transaction/overdue', type='jsonrpc', auth='public')
     def overdue_invoices_transaction(self, payment_reference, **kwargs):
         """ Create a draft transaction for overdue invoices and return its processing values.
 
@@ -60,11 +60,11 @@ class PaymentPortal(payment_portal.PaymentPortal):
         kwargs.update({
             'currency_id': currency_id,
             'partner_id': partner_id,
+            'reference_prefix': payment_reference,
         })  # Inject the create values taken from the invoice into the kwargs.
         tx_sudo = self._create_transaction(
             custom_create_values={
                 'invoice_ids': [Command.set(invoice_ids)],
-                'reference': payment_reference,
             },
             **kwargs,
         )

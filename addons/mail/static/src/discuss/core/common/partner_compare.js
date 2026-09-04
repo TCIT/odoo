@@ -21,12 +21,12 @@ partnerCompareRegistry.add(
             return 1;
         }
     },
-    { sequence: 25 }
+    { sequence: 45 }
 );
 
 partnerCompareRegistry.add(
     "discuss.members",
-    (p1, p2, { thread, memberPartnerIds }) => {
+    (p1, p2, { thread, context: { memberPartnerIds } }) => {
         if (thread?.model === "discuss.channel") {
             const isMember1 = memberPartnerIds.has(p1.id);
             const isMember2 = memberPartnerIds.has(p2.id);

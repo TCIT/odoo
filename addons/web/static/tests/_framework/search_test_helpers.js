@@ -1,4 +1,4 @@
-import { queryAll, queryAllTexts, queryOne, queryText } from "@odoo/hoot-dom";
+import { queryAll, queryAllTexts, queryOne, queryText } from "@odoo/hoot";
 import { Component, xml } from "@odoo/owl";
 import { findComponent, mountWithCleanup } from "./component_test_helpers";
 import { contains } from "./dom_test_helpers";
@@ -13,7 +13,7 @@ const ensureSearchView = async () => {
         queryAll`.o_control_panel_navigation`.length &&
         !queryAll`.o_searchview`.length
     ) {
-        await contains(`.o_control_panel_navigation button`).click();
+        await contains(`.o_control_panel_navigation .fa-search`).click();
     }
 };
 
@@ -113,14 +113,14 @@ export async function mountWithSearch(componentConstructor, searchProps = {}, co
  * @param {string} label
  */
 export async function toggleMenu(label) {
-    await contains(`button.o-dropdown:contains(/^${label}$/)`).click();
+    await contains(`button.o-dropdown:text(${label})`).click();
 }
 
 /**
  * @param {string} label
  */
 export async function toggleMenuItem(label) {
-    const target = queryOne`.o_menu_item:contains(/^${label}$/)`;
+    const target = queryOne`.o_menu_item:text(${label})`;
     if (target.classList.contains("dropdown-toggle")) {
         await contains(target).hover();
     } else {
@@ -133,8 +133,8 @@ export async function toggleMenuItem(label) {
  * @param {string} optionLabel
  */
 export async function toggleMenuItemOption(itemLabel, optionLabel) {
-    const { parentElement: root } = queryOne`.o_menu_item:contains(/^${itemLabel}$/)`;
-    const target = queryOne(`.o_item_option:contains(/^${optionLabel}$/)`, { root });
+    const { parentElement: root } = queryOne`.o_menu_item:text(${itemLabel})`;
+    const target = queryOne(`.o_item_option:text(${optionLabel})`, { root });
     if (target.classList.contains("dropdown-toggle")) {
         await contains(target).hover();
     } else {
@@ -146,7 +146,7 @@ export async function toggleMenuItemOption(itemLabel, optionLabel) {
  * @param {string} label
  */
 export function isItemSelected(label) {
-    return queryOne`.o_menu_item:contains(/^${label}$/)`.classList.contains("selected");
+    return queryOne`.o_menu_item:text(${label})`.classList.contains("selected");
 }
 
 /**
@@ -154,8 +154,8 @@ export function isItemSelected(label) {
  * @param {string} optionLabel
  */
 export function isOptionSelected(itemLabel, optionLabel) {
-    const { parentElement: root } = queryOne`.o_menu_item:contains(/^${itemLabel}$/)`;
-    return queryOne(`.o_item_option:contains(/^${optionLabel}$/)`, { root }).classList.contains(
+    const { parentElement: root } = queryOne`.o_menu_item:text(${itemLabel})`;
+    return queryOne(`.o_item_option:text(${optionLabel})`, { root }).classList.contains(
         "selected"
     );
 }
@@ -215,9 +215,11 @@ export async function toggleFavoriteMenu() {
 /**
  * @param {string} text
  */
-export async function deleteFavorite(text) {
+export async function editFavorite(text) {
     await ensureSearchBarMenu();
-    await contains(`.o_favorite_menu .o_menu_item:contains(/^${text}$/) i.fa-trash-o`).click();
+    await contains(`.o_favorite_menu .o_menu_item:text(${text}) i.fa-pencil`, {
+        visible: false,
+    }).click();
 }
 
 export async function toggleSaveFavorite() {
@@ -237,16 +239,12 @@ export async function editFavoriteName(name) {
 
 export async function saveFavorite() {
     await ensureSearchBarMenu();
-    await contains(`.o_favorite_menu .o_add_favorite + .o_accordion_values button`).click();
+    await contains(`.o_favorite_menu .o_save_favorite`).click();
 }
 
-//-----------------------------------------------------------------------------
-// Comparison menu
-//-----------------------------------------------------------------------------
-
-export async function toggleComparisonMenu() {
+export async function saveAndEditFavorite() {
     await ensureSearchBarMenu();
-    await contains(`.o_comparison_menu button.dropdown-toggle`).click();
+    await contains(`.o_favorite_menu .o_edit_favorite`).click();
 }
 
 //-----------------------------------------------------------------------------
@@ -262,7 +260,7 @@ export function getFacetTexts() {
  */
 export async function removeFacet(label) {
     await ensureSearchView();
-    await contains(`.o_searchview_facet:contains(/^${label}$/) .o_facet_remove`).click();
+    await contains(`.o_searchview_facet:text(${label}) .o_facet_remove`).click();
 }
 
 /**
@@ -286,7 +284,12 @@ export async function validateSearch() {
  * @param {import("./mock_server/mock_server").ViewType} viewType
  */
 export async function switchView(viewType) {
-    await contains(`button.o_switch_view.o_${viewType}`).click();
+    if (getMockEnv().isSmall) {
+        await contains(".o_cp_switch_buttons .dropdown-toggle").click();
+        await contains(`.dropdown-item:contains(${viewType.toUpperCase()})`).click();
+    } else {
+        await contains(`button.o_switch_view.o_${viewType}`).click();
+    }
 }
 
 //-----------------------------------------------------------------------------

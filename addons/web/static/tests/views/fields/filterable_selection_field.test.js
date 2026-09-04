@@ -1,5 +1,13 @@
 import { expect, test } from "@odoo/hoot";
-import { contains, defineModels, fields, models, mountView } from "@web/../tests/web_test_helpers";
+import { queryAllTexts } from "@odoo/hoot-dom";
+import {
+    contains,
+    defineModels,
+    editSelectMenu,
+    fields,
+    models,
+    mountView,
+} from "@web/../tests/web_test_helpers";
 
 class Program extends models.Model {
     type = fields.Selection({
@@ -17,11 +25,10 @@ class Program extends models.Model {
     _records = [
         { id: 1, type: "coupon", available_types: "['coupon', 'promotion']" },
         { id: 2, type: "gift_card", available_types: "['gift_card', 'promotion']" },
+        { id: 3, type: "coupon", available_types: false },
     ];
 }
 defineModels([Program]);
-
-// Note: the `toHaveCount` always check for one more as there will be an invisible empty option every time.
 
 test(`FilterableSelectionField test whitelist`, async () => {
     await mountView({
@@ -34,9 +41,9 @@ test(`FilterableSelectionField test whitelist`, async () => {
         `,
         resId: 1,
     });
-    expect(`select option`).toHaveCount(3);
-    expect(`.o_field_widget[name="type"] select option[value='"coupon"']`).toHaveCount(1);
-    expect(`.o_field_widget[name="type"] select option[value='"promotion"']`).toHaveCount(1);
+    await contains(".o_field_widget[name='type'] input").click();
+    expect(`.o_select_menu_item`).toHaveCount(2);
+    expect(queryAllTexts(".o_select_menu_item")).toEqual(["Coupons", "Promotion"]);
 });
 
 test(`FilterableSelectionField test blacklist`, async () => {
@@ -50,9 +57,9 @@ test(`FilterableSelectionField test blacklist`, async () => {
         `,
         resId: 1,
     });
-    expect(`select option`).toHaveCount(3);
-    expect(`.o_field_widget[name="type"] select option[value='"coupon"']`).toHaveCount(1);
-    expect(`.o_field_widget[name="type"] select option[value='"promotion"']`).toHaveCount(1);
+    await contains(".o_field_widget[name='type'] input").click();
+    expect(`.o_select_menu_item`).toHaveCount(2);
+    expect(queryAllTexts(".o_select_menu_item")).toEqual(["Coupons", "Promotion"]);
 });
 
 test(`FilterableSelectionField test with invalid value`, async () => {
@@ -67,16 +74,13 @@ test(`FilterableSelectionField test with invalid value`, async () => {
         `,
         resId: 2,
     });
-    expect(`select option`).toHaveCount(4);
-    expect(`.o_field_widget[name="type"] select option[value='"gift_card"']`).toHaveCount(1);
-    expect(`.o_field_widget[name="type"] select option[value='"coupon"']`).toHaveCount(1);
-    expect(`.o_field_widget[name="type"] select option[value='"promotion"']`).toHaveCount(1);
-
-    await contains(`.o_field_widget[name="type"] select`).select(`"coupon"`);
-    expect(`select option`).toHaveCount(3);
-    expect(`.o_field_widget[name="type"] select option[value='"gift_card"']`).toHaveCount(0);
-    expect(`.o_field_widget[name="type"] select option[value='"coupon"']`).toHaveCount(1);
-    expect(`.o_field_widget[name="type"] select option[value='"promotion"']`).toHaveCount(1);
+    await contains(".o_field_widget[name='type'] input").click();
+    expect(`.o_select_menu_item`).toHaveCount(3);
+    expect(queryAllTexts(".o_select_menu_item")).toEqual(["Coupons", "Promotion", "Gift card"]);
+    await editSelectMenu(".o_field_widget[name='type'] input", { value: "Coupons" });
+    await contains(".o_field_widget[name='type'] input").click();
+    expect(`.o_select_menu_item`).toHaveCount(2);
+    expect(queryAllTexts(".o_select_menu_item")).toEqual(["Coupons", "Promotion"]);
 });
 
 test(`FilterableSelectionField test whitelist_fname`, async () => {
@@ -91,7 +95,24 @@ test(`FilterableSelectionField test whitelist_fname`, async () => {
         `,
         resId: 1,
     });
-    expect(`select option`).toHaveCount(3);
-    expect(`.o_field_widget[name="type"] select option[value='"coupon"']`).toHaveCount(1);
-    expect(`.o_field_widget[name="type"] select option[value='"promotion"']`).toHaveCount(1);
+    await contains(".o_field_widget[name='type'] input").click();
+    expect(`.o_select_menu_item`).toHaveCount(2);
+    expect(queryAllTexts(".o_select_menu_item")).toEqual(["Coupons", "Promotion"]);
+});
+
+test(`FilterableSelectionField test whitelist_fname with falsy value`, async () => {
+    await mountView({
+        resModel: "program",
+        type: "form",
+        arch: `
+            <form>
+                <field name="available_types" invisible="1"/>
+                <field name="type" widget="filterable_selection" options="{'whitelist_fname': 'available_types'}"/>
+            </form>
+        `,
+        resId: 3,
+    });
+    await contains(".o_field_widget[name='type'] input").click();
+    expect(`.o_select_menu_item`).toHaveCount(1);
+    expect(queryAllTexts(".o_select_menu_item")).toEqual(["Coupons"]);
 });

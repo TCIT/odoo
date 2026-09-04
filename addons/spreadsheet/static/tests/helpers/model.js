@@ -1,15 +1,19 @@
+import { animationFrame } from "@odoo/hoot-mock";
 import { Model } from "@odoo/o-spreadsheet";
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
-import { animationFrame } from "@odoo/hoot-mock";
-import { defineActions, defineParams, makeMockEnv, onRpc } from "@web/../tests/web_test_helpers";
-import { addRecordsFromServerData, addViewsFromServerData } from "./data";
-import { getMockEnv } from "@web/../tests/_framework/env_test_helpers";
+import {
+    defineActions,
+    defineMenus,
+    getMockEnv,
+    makeMockEnv,
+    onRpc,
+} from "@web/../tests/web_test_helpers";
 import { setCellContent } from "./commands";
+import { addRecordsFromServerData, addViewsFromServerData } from "./data";
 
 /**
  * @typedef {import("@spreadsheet/../tests/helpers/data").ServerData} ServerData
  * @typedef {import("@spreadsheet/helpers/model").OdooSpreadsheetModel} OdooSpreadsheetModel
- * @typedef {import("@web/../tests/_framework/mock_server/mock_server").MockServerEnvironment} MockServerEnvironment
  */
 
 export function setupDataSourceEvaluation(model) {
@@ -27,7 +31,7 @@ export function setupDataSourceEvaluation(model) {
  * @param {object} [params.modelConfig]
  * @param {ServerData} [params.serverData] Data to be injected in the mock server
  * @param {function} [params.mockRPC] Mock rpc function
- * @returns {Promise<OdooSpreadsheetModel>}
+ * @returns {Promise<{ model: OdooSpreadsheetModel, env: Object }>}
  */
 export async function createModelWithDataSource(params = {}) {
     const env = await makeSpreadsheetMockEnv(params);
@@ -41,12 +45,13 @@ export async function createModelWithDataSource(params = {}) {
             ...config?.custom,
         },
     });
+    env.model = model;
     // if (params.serverData) {
     //     await addRecordsFromServerData(params.serverData);
     // }
     setupDataSourceEvaluation(model);
     await animationFrame(); // initial async formulas loading
-    return model;
+    return { model, env };
 }
 
 /**
@@ -65,8 +70,7 @@ export async function makeSpreadsheetMockEnv(params = {}) {
         onRpc((args) => params.mockRPC(args.route, args)); // separate route from args for legacy (& forward ports) compatibility
     }
     if (params.serverData?.menus) {
-        const menus = Object.values(params.serverData.menus);
-        defineParams({ menus }, "replace");
+        defineMenus(Object.values(params.serverData.menus));
     }
     if (params.serverData?.actions) {
         defineActions(Object.values(params.serverData.actions));
@@ -82,11 +86,11 @@ export async function makeSpreadsheetMockEnv(params = {}) {
 }
 
 export function createModelFromGrid(grid) {
-  const model = new Model();
-  for (let xc in grid) {
-    if (grid[xc] !== undefined) {
-      setCellContent(model, xc, grid[xc]);
+    const model = new Model();
+    for (const xc in grid) {
+        if (grid[xc] !== undefined) {
+            setCellContent(model, xc, grid[xc]);
+        }
     }
-  }
-  return model;
+    return model;
 }

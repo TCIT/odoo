@@ -28,7 +28,7 @@ class WebsocketController(Controller):
                    ('Cache-Control', 'no-store')]
         return request.make_response(data, headers)
 
-    @route('/websocket/peek_notifications', type='json', auth='public', cors='*')
+    @route('/websocket/peek_notifications', type='jsonrpc', auth='public', cors='*')
     def peek_notifications(self, channels, last, is_first_poll=False):
         if is_first_poll:
             # Used to detect when the current session is expired.
@@ -36,21 +36,15 @@ class WebsocketController(Controller):
         elif 'is_websocket_session' not in request.session:
             raise SessionExpiredException()
         subscribe_data = request.env["ir.websocket"]._prepare_subscribe_data(channels, last)
-        if bus_target := request.env["ir.websocket"]._get_missed_presences_bus_target():
-            subscribe_data["missed_presences"]._send_presence(bus_target=bus_target)
+        request.env["ir.websocket"]._after_subscribe_data(subscribe_data)
         channels_with_db = [channel_with_db(request.db, c) for c in subscribe_data["channels"]]
         notifications = request.env["bus.bus"]._poll(channels_with_db, subscribe_data["last"])
         return {"channels": channels_with_db, "notifications": notifications}
 
-    @route('/websocket/update_bus_presence', type='json', auth='public', cors='*')
-    def update_bus_presence(self, inactivity_period, im_status_ids_by_model):
-        if 'is_websocket_session' not in request.session:
-            raise SessionExpiredException()
-        request.env['ir.websocket']._update_bus_presence(int(inactivity_period), im_status_ids_by_model)
-        return {}
-
-    @route("/websocket/on_closed", type="json", auth="public", cors="*")
+    @route("/websocket/on_closed", type="jsonrpc", auth="public", cors="*")
     def on_websocket_closed(self):
+        """Manually notify the closure of a websocket, useful when implementing custom websocket code.
+        This is mainly used by Odoo.sh."""
         request.env["ir.websocket"]._on_websocket_closed(request.cookies)
 
     @route('/bus/websocket_worker_bundle', type='http', auth='public', cors='*')

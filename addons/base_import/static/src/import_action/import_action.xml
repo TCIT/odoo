@@ -5,9 +5,16 @@
             <Layout className="'o_import_action d-flex h-100 overflow-auto'" display="display">
                 <t t-set-slot="control-panel-create-button">
                     <t t-if="isPreviewing">
-                        <button t-if="!state.isPaused" type="button" class="btn btn-primary" t-on-click="() => this.handleImport(false)">Import</button>
-                        <button t-else="" type="button" class="btn btn-primary" t-on-click="() => this.handleImport(false)">Resume</button>
-                        <button type="button" class="btn btn-secondary" t-on-click="() => this.handleImport(true)">Test</button>
+                        <t t-if="!state.isTested">
+                            <button type="button" class="btn btn-primary" t-on-click="() => this.handleImport(true)">Test</button>
+                            <button t-if="!state.isPaused" type="button" class="btn btn-secondary" t-on-click="() => this.handleImport(false)">Import</button>
+                            <button t-else="" type="button" class="btn btn-secondary" t-on-click="() => this.handleImport(false)">Resume</button>
+                        </t>
+                        <t t-else="">
+                            <button t-if="!state.isPaused" type="button" class="btn btn-primary" t-on-click="() => this.handleImport(false)">Import</button>
+                            <button t-else="" type="button" class="btn btn-primary" t-on-click="() => this.handleImport(false)">Resume</button>
+                            <button type="button" class="btn btn-secondary" t-on-click="() => this.handleImport(true)">Test</button>
+                        </t>
                     </t>
                     <FileInput
                         acceptedFileExtensions="'.csv, .xls, .xlsx, .xlsm, .ods'"
@@ -19,7 +26,7 @@
                         <button t-if="isPreviewing" type="button" class="btn btn-secondary">Load Data File</button>
                         <button t-else="" type="button" class="btn btn-primary o_import_file">Upload Data File</button>
                     </FileInput>
-                    <button t-on-click="() => this.exit()" type="button" class="btn btn-secondary">Cancel</button>
+                    <button t-on-click="cancel" type="button" class="btn btn-secondary">Cancel</button>
                 </t>
                 <t t-if="isPreviewing">
                     <ImportDataSidepanel
@@ -56,8 +63,8 @@
                         <div class="mt16 mb4">
                             Need Help? <DocumentationLink path="'/applications/general/export_import_data.html'" label.translate="Import FAQ"/>
                         </div>
-                        <div t-foreach="importTemplates" t-as="template" t-key="template">
-                            <a class="btn btn-outline-primary mb32 mt8" t-att-href="template.template" aria-label="Download" data-tooltip="Download">
+                        <div t-foreach="importTemplates" t-as="template" t-key="template.template">
+                            <a class="btn btn-outline-primary my8" t-att-href="template.template" aria-label="Download" data-tooltip="Download">
                                 <i class="fa fa-download"/> <span><t t-esc="template.label"/></span>
                             </a>
                         </div>

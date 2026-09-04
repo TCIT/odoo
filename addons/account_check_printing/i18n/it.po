@@ -1,30 +1,41 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_check_printing
-# 
+# * account_check_printing
+#
 # Translators:
-# Marianna Ciofani, 2024
-# Wil Odoo, 2025
-# 
+# Martin Trigaux, 2022
+# Sergio Zanchetta <primes2h@gmail.com>, 2022
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Marianna Ciofani (cima)" <cima@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
-"Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 19:02+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Italian <https://translate.odoo.com/projects/odoo-19/"
+"account_check_printing/it/>\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_check_printing
 #. odoo-python
 #: code:addons/account_check_printing/models/account_journal.py:0
 msgid "%(journal)s: Check Number Sequence"
 msgstr "%(journal)s: sequenza numero assegno"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "%(number)s in journal %(journal)s"
+msgstr "%(number)s nel registro %(journal)s"
 
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.account_journal_dashboard_kanban_view_inherited
@@ -115,7 +126,7 @@ msgstr "Selezionare l'opzione se gli assegni prestampati non sono numerati."
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.account_journal_dashboard_kanban_view_inherited
 msgid "Check to print"
-msgstr "Assegno da stampare"
+msgstr "assegno da stampare"
 
 #. module: account_check_printing
 #. odoo-python
@@ -139,7 +150,7 @@ msgstr "Assegni da stampare"
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.account_journal_dashboard_kanban_view_inherited
 msgid "Checks to print"
-msgstr "Assegni da stampare"
+msgstr "assegni da stampare"
 
 #. module: account_check_printing
 #: model:ir.model,name:account_check_printing.model_res_company
@@ -167,7 +178,12 @@ msgid "Default"
 msgstr "Predefinito"
 
 #. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment_method__display_name
 #: model:ir.model.fields,field_description:account_check_printing.field_print_prenumbered_checks__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_res_company__display_name
+#: model:ir.model.fields,field_description:account_check_printing.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "Nome visualizzato"
 
@@ -178,7 +194,17 @@ msgid "Go to the configuration panel"
 msgstr "Vai al pannello di configurazione"
 
 #. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__check_layout_available
+msgid "Has Check Layout"
+msgstr "Ha struttura assegno"
+
+#. module: account_check_printing
+#: model:ir.model.fields,field_description:account_check_printing.field_account_journal__id
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment__id
+#: model:ir.model.fields,field_description:account_check_printing.field_account_payment_method__id
 #: model:ir.model.fields,field_description:account_check_printing.field_print_prenumbered_checks__id
+#: model:ir.model.fields,field_description:account_check_printing.field_res_company__id
+#: model:ir.model.fields,field_description:account_check_printing.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -186,8 +212,8 @@ msgstr "ID"
 #. odoo-python
 #: code:addons/account_check_printing/models/account_payment.py:0
 msgid ""
-"In order to print multiple checks at once, they must belong to the same bank"
-" journal."
+"In order to print multiple checks at once, they must belong to the same bank "
+"journal."
 msgstr ""
 "Per stampare più di un assegno alla volta, devono tutti appartenere allo "
 "stesso registro banca."
@@ -217,18 +243,36 @@ msgstr "Numerazione manuale"
 #: model:ir.model.fields,help:account_check_printing.field_account_payment__payment_method_line_id
 msgid ""
 "Manual: Pay or Get paid by any method outside of Odoo.\n"
-"Payment Providers: Each payment provider has its own Payment Method. Request a transaction on/to a card thanks to a payment token saved by the partner when buying or subscribing online.\n"
+"Payment Providers: Each payment provider has its own Payment Method. Request "
+"a transaction on/to a card thanks to a payment token saved by the partner "
+"when buying or subscribing online.\n"
 "Check: Pay bills by check and print it from Odoo.\n"
-"Batch Deposit: Collect several customer checks at once generating and submitting a batch deposit to your bank. Module account_batch_payment is necessary.\n"
-"SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit Transfer file to your bank. Module account_sepa is necessary.\n"
-"SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your partner will have granted to you. Module account_sepa is necessary.\n"
+"Batch Deposit: Collect several customer checks at once generating and "
+"submitting a batch deposit to your bank. Module account_batch_payment is "
+"necessary.\n"
+"SEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit "
+"Transfer file to your bank. Module account_iso20022 is necessary.\n"
+"SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your "
+"partner will have granted to you. Module account_iso20022 is necessary.\n"
+"U.S. ISO20022: Pay in the US by submitting an ISO20022 file to your bank. "
+"Module account_iso20022 is necessary.\n"
 msgstr ""
-"Manuale: paga oppure ricevi pagamenti al di fuori di Odoo, con qualsiasi metodo.\n"
-"Fornitori di pagamento: ogni fornitore ha il proprio metodo. Richiedi una transazione su o verso una carta grazie ad un token di pagamento salvato dal partner quando compri o effettui un abbonamento online.\n"
-"Assegno: paga le fatture con gli assegni e stampali da Odoo.\n"
-"Versamento in lotto: colleziona vari assegni dei clienti generando e inviando un versamento complessivo alla tua banca. È necessario il modulo account_batch_payment.\n"
-"Bonifico SEPA: paga nella zona SEPA inviando un bonifico SEPA alla tua banca. È necessario il modulo account_sepa.\n"
-"Addebito diretto SEPA: ricevi pagamenti nella zona SEPA grazie ad un mandato che il partner deve garantirti. È necessario il modulo account_sepa.\n"
+"Manuale: paga o ricevi pagamenti con qualsiasi metodo al di fuori di Odoo.\n"
+"Fornitori di servizi di pagamento: ogni fornitore di servizi di pagamento ha "
+"il proprio metodo di pagamento. Richiedi una transazione su/verso una carta "
+"grazie a un token di pagamento salvato dal partner al momento dell'acquisto "
+"o dell'abbonamento online.\n"
+"Assegno: paga le fatture con assegno e stampalo da Odoo.\n"
+"Deposito in batch: raccogli più assegni dei clienti contemporaneamente "
+"generando e inviando un deposito in batch alla tua banca. È necessario il "
+"modulo account_batch_payment.\n"
+"Bonifico SEPA: effettua pagamenti nella zona SEPA inviando un file di "
+"bonifico SEPA alla tua banca. È necessario il modulo account_iso20022.\n"
+"Addebito diretto SEPA: ricevi pagamenti nella zona SEPA grazie a un mandato "
+"che il tuo partner ti avrà concesso. È necessario il modulo "
+"account_iso20022.\n"
+"U.S. ISO20022: paga negli Stati Uniti inviando un file ISO20022 alla tua "
+"banca. È necessario il modulo account_iso20022.\n"
 
 #. module: account_check_printing
 #: model:ir.model.fields,field_description:account_check_printing.field_res_company__account_check_printing_multi_stub
@@ -276,14 +320,14 @@ msgid ""
 "Payments to print as a checks must have 'Check' selected as payment method "
 "and not have already been reconciled"
 msgstr ""
-"I pagamenti da stampare come assegni devono avere \"Assegno\" come metodo di"
-" pagamento selezionato e non devono essere già riconciliati"
+"I pagamenti da stampare come assegni devono avere \"Assegno\" come metodo di "
+"pagamento selezionato e non devono essere già riconciliati"
 
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.print_pre_numbered_checks_view
 msgid ""
-"Please enter the number of the first pre-printed check that you are about to"
-" print on."
+"Please enter the number of the first pre-printed check that you are about to "
+"print on."
 msgstr ""
 "Inserire il numero del primo assegno prestampato sul quale si sta per "
 "stampare."
@@ -332,10 +376,12 @@ msgstr "Margine destro"
 #: model:ir.model.fields,help:account_check_printing.field_res_company__account_check_printing_layout
 #: model:ir.model.fields,help:account_check_printing.field_res_config_settings__account_check_printing_layout
 msgid ""
-"Select the format corresponding to the check paper you will be printing your checks on.\n"
+"Select the format corresponding to the check paper you will be printing your "
+"checks on.\n"
 "In order to disable the printing feature, select 'None'."
 msgstr ""
-"Selezionare il formato corrispondente alla carta da usare per stampare gli assegni.\n"
+"Selezionare il formato corrispondente alla carta da usare per stampare gli "
+"assegni.\n"
 "Per disattivare la funzionalità di stampa, scegliere \"Nessuna\"."
 
 #. module: account_check_printing
@@ -361,8 +407,18 @@ msgid ""
 "Invoicing/Accounting Settings and try again."
 msgstr ""
 "Qualcosa non ha funzionato con la struttura dell'assegno. Riprovare "
-"selezionando un'altra struttura nelle impostazioni di "
-"Fatturazione/Contabilità."
+"selezionando un'altra struttura nelle impostazioni di Fatturazione/"
+"Contabilità."
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_journal.py:0
+msgid ""
+"The check number you entered (%(num)s) exceeds the maximum allowed value of %"
+"(max)d. Please enter a smaller number."
+msgstr ""
+"Il numero di assegno inserito (%(num)s) supera il valore massimo consentito "
+"di %(max)d. Inserisci un numero più piccolo."
 
 #. module: account_check_printing
 #. odoo-python
@@ -413,7 +469,8 @@ msgid ""
 "This option allows you to print the date label on the check as per CPA.\n"
 "Disable this if your pre-printed check includes the date label."
 msgstr ""
-"L'opzione consente di stampare l'etichetta della data sull'assegno come da CPA.\n"
+"L'opzione consente di stampare l'etichetta della data sull'assegno come da "
+"CPA.\n"
 "Disattivarla se l'assegno prestampato include l'etichetta."
 
 #. module: account_check_printing
@@ -431,7 +488,7 @@ msgstr "Deseleziona inviato"
 #. module: account_check_printing
 #: model_terms:ir.ui.view,arch_db:account_check_printing.view_account_payment_form_inherited
 msgid "Void Check"
-msgstr "Invalida assegno"
+msgstr "Annulla assegno"
 
 #. module: account_check_printing
 #. odoo-python
@@ -440,5 +497,45 @@ msgid ""
 "You have to choose a check layout. For this, go in Invoicing/Accounting "
 "Settings, search for 'Checks layout' and set one."
 msgstr ""
-"Deve essere scelta una struttura per l'assegno. Andare nelle impostazioni di"
-" Fatturazione/Contabilità, cercare \"Struttura assegno\" e impostarne una."
+"Deve essere scelta una struttura per l'assegno. Andare nelle impostazioni di "
+"Fatturazione/Contabilità, cercare \"Struttura assegno\" e impostarne una."
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "check_number"
+msgstr "check_number"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "out_refund"
+msgstr "out_refund"
+
+#. module: account_check_printing
+#. odoo-python
+#: code:addons/account_check_printing/models/account_payment.py:0
+msgid "sep"
+msgstr "sep"
+
+#~ msgid "Contact"
+#~ msgstr "Contatto"
+
+#~ msgid "Journal Entry"
+#~ msgstr "Registrazione contabile"
+
+#~ msgid "Preferred Payment Method"
+#~ msgstr "Metodo di pagamento preferito"
+
+#~ msgid ""
+#~ "Preferred payment method when paying this vendor. This is used to filter "
+#~ "vendor bills by preferred payment method to register payments in mass. "
+#~ "Use cases: create bank files for batch wires, check runs."
+#~ msgstr ""
+#~ "Metodo preferito per il pagamento del fornitore. Usato per filtrare le "
+#~ "fatture fornitore in base al metodo preferito per registrare pagamenti "
+#~ "massivi. Casi d'uso: creazione file bancari per bonifici raggruppati, "
+#~ "processi di verifica."
+
+#~ msgid "Register Payment"
+#~ msgstr "Registra pagamento"

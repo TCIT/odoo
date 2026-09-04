@@ -25,7 +25,7 @@ class MockVisitor(common.BaseCase):
             yield
 
 
-@tagged('-at_install', 'post_install', 'website_visitor')
+@tagged('-at_install', 'post_install', 'website_visitor', 'is_query_count')
 class WebsiteVisitorTestsCommon(MockVisitor, HttpCaseWithUserDemo):
 
     def setUp(self):
@@ -38,34 +38,34 @@ class WebsiteVisitorTestsCommon(MockVisitor, HttpCaseWithUserDemo):
         untracked_view = self.env['ir.ui.view'].create({
             'name': 'UntackedView',
             'type': 'qweb',
-            'arch': '''<t name="Homepage" t-name="website.base_view">
+            'arch': '''<t name="Homepage" t-name="test.untracked_page">
                         <t t-call="website.layout">
                             I am a generic page²
                         </t>
                     </t>''',
-            'key': 'test.base_view',
+            'key': 'test.untracked_page',
             'track': False,
         })
         tracked_view = self.env['ir.ui.view'].create({
             'name': 'TrackedView',
             'type': 'qweb',
-            'arch': '''<t name="Homepage" t-name="website.base_view">
+            'arch': '''<t name="Homepage" t-name="test.tracked_page">
                         <t t-call="website.layout">
                             I am a generic page
                         </t>
                     </t>''',
-            'key': 'test.base_view',
+            'key': 'test.tracked_page',
             'track': True,
         })
         tracked_view_2 = self.env['ir.ui.view'].create({
             'name': 'TrackedView2',
             'type': 'qweb',
-            'arch': '''<t name="OtherPage" t-name="website.base_view">
+            'arch': '''<t name="OtherPage" t-name="test.tracked_page_2">
                         <t t-call="website.layout">
                             I am a generic second page
                         </t>
                     </t>''',
-            'key': 'test.base_view',
+            'key': 'test.tracked_page_2',
             'track': True,
         })
         [self.untracked_page, self.tracked_page, self.tracked_page_2] = self.env['website.page'].create([
@@ -98,7 +98,7 @@ class WebsiteVisitorTestsCommon(MockVisitor, HttpCaseWithUserDemo):
                 'login': 'portal',
                 'password': 'portal',
                 'partner_id': self.partner_portal.id,
-                'groups_id': [(6, 0, [self.env.ref('base.group_portal').id])],
+                'group_ids': [(6, 0, [self.env.ref('base.group_portal').id])],
             })
         # Partner with no user associated, to test partner merge that forbids merging partners with more than 1 user
         self.partner_admin_duplicate = self.env['res.partner'].create({'name': 'Mitchell'})
@@ -150,7 +150,7 @@ class WebsiteVisitorTestsCommon(MockVisitor, HttpCaseWithUserDemo):
         inactive_visitor_ids = inactive_visitors.ids
         active_visitor_ids = active_visitors.ids
 
-        WebsiteVisitor._cron_unlink_old_visitors()
+        self.env.ref('website.website_visitor_cron').method_direct_trigger()
         if inactive_visitor_ids:
             # all inactive visitors should be deleted
             self.assertFalse(bool(WebsiteVisitor.search([('id', 'in', inactive_visitor_ids)])))
@@ -182,28 +182,31 @@ class WebsiteVisitorTestsCommon(MockVisitor, HttpCaseWithUserDemo):
             })]
         }
 
+    def _authenticate_via_web(self, login, pwd):
+        # We can't call `self.authenticate` because that tour util is
+        # regenerating a new session.id before calling the real
+        # `authenticate` method.
+        # But we need the session id in the `authenticate` method because
+        # we need to retrieve the visitor before the authentication, which
+        # require the session id.
+        res = self.url_open('/web/login')
+        csrf_anchor = '<input type="hidden" name="csrf_token" value="'
+        self.url_open('/web/login', timeout=200, data={
+            'login': login,
+            'password': pwd,
+            'csrf_token': res.text.partition(csrf_anchor)[2].partition('"')[0],
+        })
+
 
 class WebsiteVisitorTests(WebsiteVisitorTestsCommon):
 
-    readonly_enabled = False
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.set_registry_readonly_mode(False)
 
     def test_visitor_creation_on_tracked_page(self):
         """ Test various flows involving visitor creation and update. """
-
-        def authenticate(login, pwd):
-            # We can't call `self.authenticate` because that tour util is
-            # regenerating a new session.id before calling the real
-            # `authenticate` method.
-            # But we need the session id in the `authenticate` method because
-            # we need to retrieve the visitor before the authentication, which
-            # require the session id.
-            res = self.url_open('/web/login')
-            csrf_anchor = '<input type="hidden" name="csrf_token" value="'
-            self.url_open('/web/login', timeout=200, data={
-                'login': login,
-                'password': pwd,
-                'csrf_token': res.text.partition(csrf_anchor)[2].partition('"')[0],
-            })
 
         existing_visitors = self.env['website.visitor'].search([])
         existing_tracks = self.env['website.track'].search([])
@@ -223,7 +226,7 @@ class WebsiteVisitorTests(WebsiteVisitorTestsCommon):
         # Admin connects
         # ------------------------------------------------------------
 
-        authenticate(self.user_admin.login, 'admin')
+        self._authenticate_via_web(self.user_admin.login, 'admin')
 
         visitor_admin = new_visitor
         # visit a page
@@ -241,7 +244,7 @@ class WebsiteVisitorTests(WebsiteVisitorTestsCommon):
         # ------------------------------------------------------------
 
         self.url_open('/web/session/logout')
-        authenticate(self.user_portal.login, 'portal')
+        self._authenticate_via_web(self.user_portal.login, 'portal')
 
         self.assertFalse(
             self.env['website.visitor'].search([('id', 'not in', (existing_visitors | visitor_admin).ids)]),
@@ -285,7 +288,7 @@ class WebsiteVisitorTests(WebsiteVisitorTestsCommon):
         # Admin connects again
         # ------------------------------------------------------------
 
-        authenticate(self.user_admin.login, 'admin')
+        self._authenticate_via_web(self.user_admin.login, 'admin')
 
         new_visitors = self.env['website.visitor'].search([('id', 'not in', existing_visitors.ids)])
         self.assertEqual(new_visitors, visitor_admin | visitor_portal)
@@ -318,7 +321,7 @@ class WebsiteVisitorTests(WebsiteVisitorTestsCommon):
         # ------------------------------------------------------------
         # Portal connects again
         # ------------------------------------------------------------
-        authenticate(self.user_portal.login, 'portal')
+        self._authenticate_via_web(self.user_portal.login, 'portal')
 
         # one visitor is deleted
         new_visitors = self.env['website.visitor'].search([('id', 'not in', existing_visitors.ids)])

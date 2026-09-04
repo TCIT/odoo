@@ -2,6 +2,7 @@
 
 from odoo import api, fields, models
 
+
 class SurveySurvey(models.Model):
     _inherit = 'survey.survey'
 

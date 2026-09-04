@@ -3,11 +3,11 @@
     'name': 'Colombia - Accounting',
     'icon': '/account/static/description/l10n.png',
     'countries': ['co'],
-    'version': '0.9',
+    'version': '1.0',
     'category': 'Accounting/Localizations/Account Charts',
     'description': 'Colombian Accounting and Tax Preconfiguration',
     'author': 'David Arnold (XOE Solutions)',
-    'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations/colombia.html',
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations/colombia.html',
     'depends': [
         'account_debit_note',
         'l10n_latam_base',

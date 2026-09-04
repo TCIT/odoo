@@ -8,7 +8,7 @@ class PosConfig(models.Model):
     _inherit = 'pos.config'
 
     crm_team_id = fields.Many2one(
-        'crm.team', string="Sales Team", ondelete="set null",
+        'crm.team', string="Sales Team", ondelete="set null", index='btree_not_null',
         help="This Point of sale's sales will be related to this Sales Team.")
     down_payment_product_id = fields.Many2one('product.product',
         string="Down Payment Product",
@@ -26,6 +26,7 @@ class PosConfig(models.Model):
             pos_config.write({'down_payment_product_id': downpayment_product.id})
 
     @api.model
-    def load_onboarding_furniture_scenario(self):
-        super().load_onboarding_furniture_scenario()
+    def load_onboarding_furniture_scenario(self, with_demo_data=True):
+        res = super().load_onboarding_furniture_scenario(with_demo_data)
         self._ensure_downpayment_product()
+        return res

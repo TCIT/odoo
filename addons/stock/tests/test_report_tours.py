@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.fields import Command
 from odoo.tests import HttpCase, tagged
 
 
@@ -12,7 +13,8 @@ class TestStockReportTour(HttpCase):
     def test_stock_route_diagram_report(self):
         """ Open the route diagram report."""
         # Do not make the test rely on demo data
-        self.env['product.template'].search([('type', '!=', 'service')]).action_archive()
+        self.env.ref('stock.route_warehouse0_mto').active = True
+        self.env['product.template'].search([('type', '!=', 'service')]).write({'active': False})
         self.env['product.template'].create({
             'name': 'Test Storable Product',
             'is_storable': True,
@@ -43,3 +45,34 @@ class TestStockReportTour(HttpCase):
         })
 
         self.start_tour(self._get_report_url(), 'test_context_from_warehouse_filter', login='admin', timeout=180)
+
+    def test_forecast_replenishment(self):
+        """
+        Test repenish from the forecast page.
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        interdimensional_protal = self.env['stock.location'].create({
+            'name': 'Interdimensional portal',
+            'usage': 'internal',
+            'location_id': warehouse.lot_stock_id.id,
+        })
+        lovely_route = self.env['stock.route'].create({
+            'name': 'Lovely Route',
+            'product_selectable': True,
+            'product_categ_selectable': True,
+            'sequence': 1,
+            'rule_ids': [Command.create({
+                'name': 'Interdimensional portal -> Stock',
+                'action': 'pull',
+                'picking_type_id': self.ref('stock.picking_type_internal'),
+                'location_src_id': interdimensional_protal.id,
+                'location_dest_id':  warehouse.lot_stock_id.id,
+            })],
+        })
+        self.env['product.template'].create({
+            'name': 'Lovely Product',
+            'is_storable': True,
+            'is_favorite': True,
+            'route_ids': [Command.link(lovely_route.id)],
+        })
+        self.start_tour(self._get_report_url(), 'test_forecast_replenishment', login='admin', timeout=180)

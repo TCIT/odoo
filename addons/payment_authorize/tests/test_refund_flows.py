@@ -20,8 +20,8 @@ class TestRefundFlows(AuthorizeCommon):
             '.get_transaction_details',
             return_value={'transaction': {'transactionStatus': 'voided'}},
         ):
-            source_tx._send_refund_request(amount_to_refund=source_tx.amount)
-        self.assertEqual(source_tx.state, 'cancel')
+            child_tx = source_tx._refund(amount_to_refund=source_tx.amount)
+        self.assertEqual(child_tx.state, 'cancel')
 
     def test_refunding_refunded_tx_creates_refund_tx(self):
         """ Test that refunding a transaction that has been refunded from Authorize.net side creates
@@ -32,7 +32,7 @@ class TestRefundFlows(AuthorizeCommon):
             '.get_transaction_details',
             return_value={'transaction': {'transactionStatus': 'refundSettledSuccessfully'}},
         ):
-            source_tx._send_refund_request(amount_to_refund=source_tx.amount)
+            source_tx._refund(amount_to_refund=source_tx.amount)
         refund_tx = self.env['payment.transaction'].search(
             [('source_transaction_id', '=', source_tx.id)]
         )
@@ -50,10 +50,9 @@ class TestRefundFlows(AuthorizeCommon):
         ), patch(
             'odoo.addons.payment_authorize.models.authorize_request.AuthorizeAPI.void'
         ) as void_mock, patch(
-            'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
-            '._handle_notification_data'
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction._process'
         ):
-            source_tx._send_refund_request(amount_to_refund=source_tx.amount)
+            source_tx._refund(amount_to_refund=source_tx.amount)
         self.assertEqual(void_mock.call_count, 1)
 
     @mute_logger('odoo.addons.payment_authorize.models.payment_transaction')
@@ -68,12 +67,28 @@ class TestRefundFlows(AuthorizeCommon):
         ), patch(
             'odoo.addons.payment_authorize.models.authorize_request.AuthorizeAPI.refund'
         ) as refund_mock, patch(
-            'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
-            '._handle_notification_data'
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction._process'
         ):
-            source_tx._send_refund_request(amount_to_refund=source_tx.amount)
+            source_tx._refund(amount_to_refund=source_tx.amount)
         self.assertEqual(refund_mock.call_count, 1)
         refund_tx = self.env['payment.transaction'].search(
             [('source_transaction_id', '=', source_tx.id)]
         )
         self.assertTrue(refund_tx)
+
+    def test_voided_refund_tx_is_done(self):
+        """ Test that voided refund transactions due to the payment not being settled yet are
+        correctly marked as done. """
+        source_tx = self._create_transaction('direct', state='done')
+        with patch(
+            'odoo.addons.payment_authorize.models.authorize_request.AuthorizeAPI'
+            '.get_transaction_details',
+            return_value={'transaction': {'transactionStatus': 'authorizedPendingCapture'}},
+        ), patch(
+            'odoo.addons.payment_authorize.models.authorize_request.AuthorizeAPI.void',
+            return_value={'x_response_code': '1', 'x_type': 'void'}
+        ), patch(
+            'odoo.addons.payment.models.payment_transaction.PaymentTransaction._validate_amount'
+        ):
+            refund_tx = source_tx._refund(amount_to_refund=source_tx.amount)
+        self.assertEqual(refund_tx.state, 'done')

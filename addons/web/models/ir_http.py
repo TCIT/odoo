@@ -1,13 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import hashlib
-import json
-
 import odoo
 from odoo import api, models, fields
 from odoo.http import request, DEFAULT_MAX_CONTENT_LENGTH
-from odoo.tools import ormcache, config
-from odoo.tools.misc import str2bool
+from odoo.tools import config
+from odoo.tools.misc import hmac, str2bool
 
 
 """
@@ -24,13 +21,18 @@ You can use any truthy/falsy value from `str2bool` (eg: 'on', 'f'..)
 Multiple debug modes can be activated simultaneously, separated with a
 comma (eg: 'tests, assets').
 """
-ALLOWED_DEBUG_MODES = ['', '1', 'assets', 'tests', 'disable-t-cache']
+ALLOWED_DEBUG_MODES = ['', '1', 'assets', 'tests']
 
 
-class Http(models.AbstractModel):
+class IrHttp(models.AbstractModel):
     _inherit = 'ir.http'
 
-    bots = ["bot", "crawl", "slurp", "spider", "curl", "wget", "facebookexternalhit", "whatsapp", "trendsmapresolver", "pinterest", "instagram"]
+    bots = [
+        "bot", "crawl", "slurp", "spider", "curl", "wget", "facebookexternalhit",
+        "whatsapp", "trendsmapresolver", "pinterest", "instagram",
+        "google-pagerenderer", "preview", "google-inspectiontool", "googleother",
+        "meta-external", "meta-webindexer", "chatgpt-user", "claude-user", "perplexity-user",
+    ]
 
     @classmethod
     def is_a_bot(cls):
@@ -68,9 +70,16 @@ class Http(models.AbstractModel):
 
     def webclient_rendering_context(self):
         return {
-            'menu_data': request.env['ir.ui.menu'].load_menus(request.session.debug),
+            'color_scheme': self.color_scheme(),
             'session_info': self.session_info(),
         }
+
+    def color_scheme(self):
+        return "light"
+
+    @api.model
+    def lazy_session_info(self):
+        return {}
 
     def session_info(self):
         user = self.env.user
@@ -89,9 +98,6 @@ class Http(models.AbstractModel):
             'web.max_file_upload_size',
             default=DEFAULT_MAX_CONTENT_LENGTH,
         ))
-        mods = odoo.conf.server_wide_modules or []
-        if request.db:
-            mods = list(request.registry._init_modules) + mods
         is_internal_user = user._is_internal()
         session_info = {
             "uid": session_uid,
@@ -101,50 +107,42 @@ class Http(models.AbstractModel):
             "is_internal_user": is_internal_user,
             "user_context": user_context,
             "db": self.env.cr.dbname,
+            "registry_hash": hmac(self.env(su=True), "webclient-cache", self.env.registry.registry_sequence),
             "user_settings": self.env['res.users.settings']._find_or_create_for_user(user)._res_users_settings_format(),
             "server_version": version_info.get('server_version'),
             "server_version_info": version_info.get('server_version_info'),
             "support_url": "https://www.odoo.com/buy",
             "name": user.name,
             "username": user.login,
+            "quick_login": str2bool(IrConfigSudo.get_param('web.quick_login', default=True), True),
             "partner_write_date": fields.Datetime.to_string(user.partner_id.write_date),
             "partner_display_name": user.partner_id.display_name,
             "partner_id": user.partner_id.id if session_uid and user.partner_id else None,
             "web.base.url": IrConfigSudo.get_param('web.base.url', default=''),
             "active_ids_limit": int(IrConfigSudo.get_param('web.active_ids_limit', default='20000')),
-            'profile_session': request.session.profile_session,
-            'profile_collectors': request.session.profile_collectors,
-            'profile_params': request.session.profile_params,
+            'profile_session': request.session.get('profile_session'),
+            'profile_collectors': request.session.get('profile_collectors'),
+            'profile_params': request.session.get('profile_params'),
             "max_file_upload_size": max_file_upload_size,
             "home_action_id": user.action_id.id,
-            "cache_hashes": {
-                "translations": self.env['ir.http'].sudo().get_web_translations_hash(
-                    mods, request.session.context['lang']
-                ) if session_uid else None,
-            },
-            "currencies": self.sudo().get_currencies(),
+            "currencies": self.env['res.currency'].get_all_currencies(),
             'bundle_params': {
                 'lang': request.session.context['lang'],
             },
-            'test_mode': bool(config['test_enable'] or config['test_file']),
+            'test_mode': config['test_enable'],
             'view_info': self.env['ir.ui.view'].get_view_info(),
+            'groups': {
+                'base.group_allow_export': user.has_group('base.group_allow_export') if session_uid else False,
+            },
         }
         if request.session.debug:
             session_info['bundle_params']['debug'] = request.session.debug
         if is_internal_user:
-            # the following is only useful in the context of a webclient bootstrapping
-            # but is still included in some other calls (e.g. '/web/session/authenticate')
-            # to avoid access errors and unnecessary information, it is only included for users
-            # with access to the backend ('internal'-type users)
-            menus = self.env['ir.ui.menu'].with_context(lang=request.session.context['lang']).load_menus(request.session.debug)
-            ordered_menus = {str(k): v for k, v in menus.items()}
-            menu_json_utf8 = json.dumps(ordered_menus, sort_keys=True).encode()
-            session_info['cache_hashes'].update({
-                "load_menus": hashlib.sha512(menu_json_utf8).hexdigest()[:64], # sha512/256
-            })
             # We need sudo since a user may not have access to ancestor companies
-            disallowed_ancestor_companies_sudo = user.company_ids.sudo().parent_ids - user.company_ids
-            all_companies_in_hierarchy_sudo = disallowed_ancestor_companies_sudo + user.company_ids
+            # We use `_get_company_ids` because it is cached and we sudo it because env.user return a sudo user.
+            user_companies = self.env['res.company'].browse(user._get_company_ids()).sudo()
+            disallowed_ancestor_companies_sudo = user_companies.parent_ids - user_companies
+            all_companies_in_hierarchy_sudo = disallowed_ancestor_companies_sudo + user_companies
             session_info.update({
                 # current_company should be default_company
                 "user_companies": {
@@ -154,9 +152,10 @@ class Http(models.AbstractModel):
                             'id': comp.id,
                             'name': comp.name,
                             'sequence': comp.sequence,
-                            'child_ids': (comp.child_ids & user.company_ids).ids,
+                            'child_ids': (comp.child_ids & all_companies_in_hierarchy_sudo).ids,
                             'parent_id': comp.parent_id.id,
-                        } for comp in user.company_ids
+                            'currency_id': comp.currency_id.id,
+                        } for comp in user_companies
                     },
                     'disallowed_ancestor_companies': {
                         comp.id: {
@@ -169,7 +168,6 @@ class Http(models.AbstractModel):
                     },
                 },
                 "show_effect": True,
-                "display_switch_company_menu": user.has_group('base.group_multi_company') and len(user.company_ids) > 1,
             })
         return session_info
 
@@ -181,18 +179,21 @@ class Http(models.AbstractModel):
             'is_admin': user._is_admin() if session_uid else False,
             'is_system': user._is_system() if session_uid else False,
             'is_public': user._is_public(),
+            "is_internal_user": user._is_internal(),
             'is_website_user': user._is_public() if session_uid else False,
             'uid': session_uid,
+            "registry_hash": hmac(self.env(su=True), "webclient-cache", self.env.registry.registry_sequence),
             'is_frontend': True,
-            'profile_session': request.session.profile_session,
-            'profile_collectors': request.session.profile_collectors,
-            'profile_params': request.session.profile_params,
+            'profile_session': request.session.get('profile_session'),
+            'profile_collectors': request.session.get('profile_collectors'),
+            'profile_params': request.session.get('profile_params'),
             'show_effect': bool(request.env['ir.config_parameter'].sudo().get_param('base_setup.show_effect')),
-            'currencies': self.get_currencies(),
+            'currencies': self.env['res.currency'].get_all_currencies(),
+            'quick_login': str2bool(request.env['ir.config_parameter'].sudo().get_param('web.quick_login', default=True), True),
             'bundle_params': {
                 'lang': request.session.context['lang'],
             },
-            'test_mode': bool(config['test_enable'] or config['test_file']),
+            'test_mode': config['test_enable'],
         }
         if request.session.debug:
             session_info['bundle_params']['debug'] = request.session.debug
@@ -204,11 +205,6 @@ class Http(models.AbstractModel):
             })
         return session_info
 
-    @ormcache()
+    @api.deprecated("Deprecated since 19.0, use get_all_currencies on 'res.currency'")
     def get_currencies(self):
-        Currency = self.env['res.currency']
-        currencies = Currency.search_fetch([], ['symbol', 'position', 'decimal_places'])
-        return {
-            c.id: {'symbol': c.symbol, 'position': c.position, 'digits': [69, c.decimal_places]}
-            for c in currencies
-        }
+        return self.env['res.currency'].get_all_currencies()

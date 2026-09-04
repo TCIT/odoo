@@ -1,44 +1,38 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* onboarding
-# 
-# Translators:
-# zakariya moradi, 2025
-# Tiffany Chang, 2025
-# 
+# * onboarding
+#
+# Aliraza Habibitanha <alireza.habibitanha@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-26 08:57+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tiffany Chang, 2025\n"
-"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-09 10:31+0000\n"
+"Last-Translator: Aliraza Habibitanha <alireza.habibitanha@gmail.com>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-19/"
+"onboarding/fa/>\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fa\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-
-#. module: onboarding
-#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
-msgid "#{alt}"
-msgstr "متن اصلی:"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__progress_ids
 msgid "All Onboarding Progress Records (across companies)."
-msgstr "همه رکوردهای پیشرفت مقدماتی (در سراسر شرکت‌ها)."
+msgstr "همه سوابق پیشرفت همسوسازی (در همه شرکت‌ها)."
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
 msgid "All done!"
-msgstr "همه چیز انجام شد!"
+msgstr "انجام شد!"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__progress_ids
 msgid "All related Onboarding Progress Step Records (across companies)"
-msgstr "تمام رکوردهای مرحله پیشرفت ورود به سیستم مرتبط (در میان شرکت‌ها)"
+msgstr "همه سوابق مربوط به پیشرفت مرحله همسوسازی (در همه شرکت‌ها)"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image_alt
@@ -49,16 +43,16 @@ msgstr "متن جایگزین برای تصویر مرحله"
 #. odoo-python
 #: code:addons/onboarding/models/onboarding_onboarding_step.py:0
 msgid ""
-"An \"Opening Action\" is required for the following steps to be linked to an"
-" onboarding panel: %(step_titles)s"
+"An \"Opening Action\" is required for the following steps to be linked to an "
+"onboarding panel: %(step_titles)s"
 msgstr ""
-"برای مراحل زیر به یک \"اقدام افتتاحیه\" برای ارتباط با پانل ورود نیاز است: "
-"%(step_titles)s"
+"برای اینکه مراحل ذیل به پنل همسوسازی لینک شوند، یک «عملیات افتتاحیه» لازم "
+"است: %(step_titles)s"
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
 msgid "Are you sure you want to hide these configuration steps?"
-msgstr "آیا مطمئن هستید که می‌خواهید این مراحل تنظیمات را پنهان کنید؟"
+msgstr "از پنهان کردن راهنمای مراحل پیکربندی مطمئن هستید؟"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__button_text
@@ -83,12 +77,12 @@ msgstr "بستن پنل"
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
 msgid "Close the onboarding panel"
-msgstr "بستن پنل راه‌اندازی"
+msgstr "بستن پنل همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__panel_close_action_name
 msgid "Closing action"
-msgstr "اقدام بستن"
+msgstr "عمل بستن"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__company_id
@@ -100,7 +94,7 @@ msgstr "شرکت"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__current_onboarding_state
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__current_step_state
 msgid "Completion State"
-msgstr "<p>وضعیت تکمیل</p>"
+msgstr "وضعیت تکمیل"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__create_uid
@@ -108,7 +102,7 @@ msgstr "<p>وضعیت تکمیل</p>"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__create_uid
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__create_uid
 msgid "Created by"
-msgstr "ایجاد شده توسط"
+msgstr "ایجادکننده"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__create_date
@@ -116,12 +110,12 @@ msgstr "ایجاد شده توسط"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__create_date
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__create_date
 msgid "Created on"
-msgstr "ایجادشده در"
+msgstr "زمان ایجاد"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__description
 msgid "Description"
-msgstr "توصیف"
+msgstr "توضیح"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__display_name
@@ -129,7 +123,7 @@ msgstr "توصیف"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__display_name
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__display_name
 msgid "Display Name"
-msgstr "نام نمایش داده شده"
+msgstr "نام نمایشی"
 
 #. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__done
@@ -142,17 +136,17 @@ msgstr "انجام شده"
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__done_icon
 msgid "Font Awesome Icon when completed"
-msgstr "آیکون Font Awesome وقتی تکمیل شد"
+msgstr "آیکون Font Awesome پس از تکمیل"
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
 msgid "Get them out of my sight!"
-msgstr "آن‌ها را از دید من دور کن!"
+msgstr "مراحل را برایم پنهان کن!"
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
 msgid "Hide Onboarding Tips"
-msgstr "پنهان کردن نکات راه‌اندازی"
+msgstr "پنهان‌سازی نکات همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__id
@@ -160,12 +154,12 @@ msgstr "پنهان کردن نکات راه‌اندازی"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__id
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__id
 msgid "ID"
-msgstr "شناسه"
+msgstr "شناسه (ID)"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__is_per_company
 msgid "Is per company"
-msgstr "آیا به ازای هر شرکت است"
+msgstr "بر حسب شرکت است"
 
 #. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__just_done
@@ -181,7 +175,7 @@ msgstr "انجام شد"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__write_uid
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__write_uid
 msgid "Last Updated by"
-msgstr "آخرین بروز رسانی توسط"
+msgstr "آخرین به‌روزرسانی کننده"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__write_date
@@ -189,7 +183,7 @@ msgstr "آخرین بروز رسانی توسط"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__write_date
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__write_date
 msgid "Last Updated on"
-msgstr "آخرین بروز رسانی در"
+msgstr "زمان آخرین به‌روزرسانی"
 
 #. module: onboarding
 #. odoo-python
@@ -201,17 +195,17 @@ msgstr "بیایید آن را انجام دهیم"
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__text_completed
 msgid "Message at completion"
-msgstr "پیام در هنگام تکمیل"
+msgstr "پیام به هنگام تکمیل"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__name
 msgid "Name of the onboarding"
-msgstr "نام آشنایی اولیه"
+msgstr "نام برنامه همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__panel_close_action_name
 msgid "Name of the onboarding model action to execute when closing the panel."
-msgstr "نام اقدام مدل شروع به کار که هنگام بستن پانل باید اجرا شود."
+msgstr "نام عمل مدل همسوسازی که هنگام بستن پنل اجرا می‌شود."
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__panel_step_open_action_name
@@ -219,14 +213,14 @@ msgid ""
 "Name of the onboarding step model action to execute when opening the step, "
 "e.g. action_open_onboarding_1_step_1"
 msgstr ""
-"نام عملیات مدل گام راه اندازی که در هنگام باز کردن گام اجرا می‌شود، به عنوان"
-" مثال: action_open_onboarding_1_step_1"
+"نام عمل مدل مرحله همسوسازی که هنگام باز کردن مرحله اجرا می‌شود، به عنوان مثال"
+"، action_open_onboarding_1_step_1"
 
 #. module: onboarding
 #. odoo-python
 #: code:addons/onboarding/models/onboarding_onboarding.py:0
 msgid "Nice work! Your configuration is done."
-msgstr "کار عالی! پیکربندی شما انجام شده است."
+msgstr "تبریک! پیکربندی انجام شد."
 
 #. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__not_done
@@ -239,74 +233,74 @@ msgstr "انجام نشده"
 #. module: onboarding
 #: model:ir.model,name:onboarding.model_onboarding_onboarding
 msgid "Onboarding"
-msgstr "معارفه سازمانی"
+msgstr "همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__current_progress_id
 msgid "Onboarding Progress"
-msgstr "<span>پیشرفت خوش‌آمدگویی</span>"
+msgstr "پیشرفت همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__progress_ids
 msgid "Onboarding Progress Records"
-msgstr "رکوردهای پیشرفت شروع به کار"
+msgstr "سوابق پیشرفت همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__progress_ids
 msgid "Onboarding Progress Step Records"
-msgstr "مراحل پیشرفت ثبت‌نام"
+msgstr "سوابق مرحله پیشرفت همسوسازی"
 
 #. module: onboarding
 #: model:ir.model,name:onboarding.model_onboarding_progress_step
 msgid "Onboarding Progress Step Tracker"
-msgstr "<span>ردیاب پیشرفت مراحل خوش‌آمدگویی</span>"
+msgstr "رهگیری کننده مرحله پیشرفت همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__current_progress_step_id
 msgid "Onboarding Progress Step for the current context (company)."
-msgstr "پیشرفت مرحله ورود برای زمینه فعلی (شرکت)."
+msgstr "مرحله پیشرفت همسوسازی برای زمینه (شرکت) فعلی."
 
 #. module: onboarding
 #: model:ir.model,name:onboarding.model_onboarding_progress
 msgid "Onboarding Progress Tracker"
-msgstr "مسیر پیشرفت پذیرش کاربران"
+msgstr "رهگیری کننده پیشرفت همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__current_progress_id
 msgid "Onboarding Progress for the current context (company)."
-msgstr "پیشرفت ورود به سیستم برای زمینه فعلی (شرکت)."
+msgstr "پیشرفت همسوسازی برای زمینه (شرکت) فعلی."
 
 #. module: onboarding
 #: model:ir.model,name:onboarding.model_onboarding_onboarding_step
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__step_id
 msgid "Onboarding Step"
-msgstr "مراحل معارفه سازمانی"
+msgstr "مرحله همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__step_state
 msgid "Onboarding Step Progress"
-msgstr "پیشرفت مرحله پذیرش"
+msgstr "پیشرفت مرحله همسوسازی"
 
 #. module: onboarding
 #: model:ir.actions.act_window,name:onboarding.action_view_onboarding_step
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_step_view_tree
 msgid "Onboarding Steps"
-msgstr "مراحل معرفی"
+msgstr "مراحل همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.constraint,message:onboarding.constraint_onboarding_onboarding_route_name_uniq
 msgid "Onboarding alias must be unique."
-msgstr "نام مستعار آغازین باید منحصر به فرد باشد."
+msgstr "نام مستعار همسوسازی باید منحصر به فرد باشد."
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__onboarding_state
 msgid "Onboarding progress"
-msgstr "پیشرفت آشنایی"
+msgstr "پیشرفت همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__step_ids
 msgid "Onboarding steps"
-msgstr "مراحل راه‌اندازی"
+msgstr "مراحل همسوسازی"
 
 #. module: onboarding
 #: model:ir.actions.act_window,name:onboarding.action_view_onboarding_onboarding
@@ -315,59 +309,59 @@ msgstr "مراحل راه‌اندازی"
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_step_view_form
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_tree
 msgid "Onboardings"
-msgstr "آنبوردینگ‌ها"
+msgstr "برنامه‌های همسوسازی"
 
 #. module: onboarding
 #: model:ir.ui.menu,name:onboarding.menu_onboarding_step
 msgid "Onboardings Steps"
-msgstr "مراحل آماده‌سازی"
+msgstr "مراحل همسوسازی"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__route_name
 msgid "One word name"
-msgstr "یک کلمه ای نام"
+msgstr "نام یک کلمه‌ای"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__panel_step_open_action_name
 msgid "Opening action"
-msgstr "اقدام باز کردن"
+msgstr "عمل باز کردن"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__progress_step_ids
 msgid "Progress Steps Trackers"
-msgstr "ردیاب های مراحل پیشرفت"
+msgstr "رهگیری کننده‌های مراحل پیشرفت"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__progress_ids
 msgid "Related Onboarding Progress Tracker"
-msgstr "ردیاب پیشرفت پذیرش مرتبط"
+msgstr "رهگیری کننده پیشرفت همسوسازی مربوطه"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__onboarding_id
 msgid "Related onboarding tracked"
-msgstr "مرتبط با دنبال‌گیری ورود اولیه"
+msgstr "همسوسازی مورد نظر رهگیری شد"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__sequence
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__sequence
 msgid "Sequence"
-msgstr "دنباله"
+msgstr "توالی"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__is_per_company
 msgid "Should be done per company?"
-msgstr "آیا باید برای هر شرکت انجام شود؟"
+msgstr "باید به ازای هر شرکت انجام شود؟"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__step_image_alt
 msgid "Show when impossible to load the image"
-msgstr "نمایش دهد زمانی که بارگیری تصویر غیرممکن است"
+msgstr "هرگاه امکان بارگذاری تصویر وجود ندارد نمایش داده می‌شود"
 
 #. module: onboarding
 #. odoo-python
 #: code:addons/onboarding/models/onboarding_onboarding_step.py:0
 msgid "Step Completed!"
-msgstr "گام کامل شد!"
+msgstr "مرحله انجام شد!"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image
@@ -377,7 +371,7 @@ msgstr "تصویر مرحله"
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image_filename
 msgid "Step Image Filename"
-msgstr "نام فایل تصویر گام"
+msgstr "نام فایل تصویر مرحله"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__current_progress_step_id
@@ -392,17 +386,17 @@ msgstr "مراحل"
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__button_text
 msgid "Text on the panel's button to start this step"
-msgstr "متن روی دکمه‌ی پنل برای شروع این مرحله"
+msgstr "متن دکمه در پنل برای شروع این مرحله"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__text_completed
 msgid "Text shown on onboarding when completed"
-msgstr "متنی که هنگام تکمیل معرفی نشان داده می‌شود"
+msgstr "متنی که به هنگام تکمیل در پنل همسوسازی نمایش داده خواهد شد"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__done_text
 msgid "Text to show when step is completed"
-msgstr "متنی برای نمایش زمانی که مرحله تکمیل شده است"
+msgstr "متنی که پس از تکمیل مرحله نمایش داده می‌شود"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__title
@@ -413,20 +407,20 @@ msgstr "عنوان"
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_form
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_tree
 msgid "Toggle visibility"
-msgstr "تغییر نمایش"
+msgstr "تغییر قابلیت مشاهده"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__is_onboarding_closed
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__is_onboarding_closed
 msgid "Was panel closed?"
-msgstr "آیا پانل بسته شد؟"
+msgstr "پنل بسته شده است؟"
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
 msgid "o_onboarding_confetti"
-msgstr "o_ورود_کنفتی"
+msgstr ""
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_panel
 msgid "onboarding.onboarding.step"
-msgstr "مرحله ورود به سیستم.ورود به سیستم را وارد کنید"
+msgstr ""

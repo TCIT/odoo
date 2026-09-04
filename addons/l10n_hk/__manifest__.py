@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Hong Kong - Accounting',
-    'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations/hong_kong.html',
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations/hong_kong.html',
     'icon': '/account/static/description/l10n.png',
     'countries': ['hk'],
     'version': '1.0',
@@ -19,5 +19,6 @@
     'demo': [
         'demo/demo_company.xml',
     ],
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

@@ -3,10 +3,10 @@
 from odoo import models, fields
 
 
-class L10nArAfipResponsibilityType(models.Model):
-
+class L10n_ArAfipResponsibilityType(models.Model):
     _name = 'l10n_ar.afip.responsibility.type'
-    _description = 'AFIP Responsibility Type'
+
+    _description = 'ARCA Responsibility Type'
     _order = 'sequence'
 
     name = fields.Char(required=True, index='trigram')
@@ -14,5 +14,5 @@ class L10nArAfipResponsibilityType(models.Model):
     code = fields.Char(required=True, index=True)
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [('name', 'unique(name)', 'Name must be unique!'),
-                        ('code', 'unique(code)', 'Code must be unique!')]
+    _name_uniq = models.Constraint('unique(name)', 'Name must be unique!')
+    _code_uniq = models.Constraint('unique(code)', 'Code must be unique!')

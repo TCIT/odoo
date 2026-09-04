@@ -6,7 +6,7 @@
                     <div class="notification mb-3"/>
 
                     <div t-attf-class="row mb-4 pt-3 #{'' if can_create_link_tracker else 'd-none'}">
-                        <h2 class="o_page_header">Create a Link tracker</h2>
+                        <h1 class="o_page_header h2-fs">Create a Link tracker</h1>
                         <div class="col-md-7">
                             <form id="o_website_links_link_tracker_form">
 
@@ -49,16 +49,16 @@
                                     <label class="col-md-3 col-form-label text-start">Tracked Link</label>
                                     <p class="o_website_links_edition col-md-9 d-flex flex-nowrap gap-2 align-items-center mb-0">
                                         <span class="o_website_links_short_url d-flex align-items-center text-nowrap text-truncate" id="short_url"><span id="short-url-host" class="text-truncate"/><span id="o_website_links_code"/></span>
-                                        <span class="o_website_links_edit_tools text-nowrap" style="display:none;">
-                                            <a role="button" class="o_website_links_ok_edit btn btn-sm btn-primary" href="#">ok</a> or
-                                            <a class="o_website_links_cancel_edit" href="#">cancel</a>
+                                        <span class="o_website_links_edit_tools text-nowrap d-none">
+                                            <a role="button" class="o_website_links_ok_edit btn btn-sm btn-primary o_translate_inline" href="#">ok</a> or
+                                            <a class="o_website_links_cancel_edit o_translate_inline" href="#">cancel</a>
                                         </span>
-                                        <a t-attf-class="#{'' if can_create_link_tracker_code else 'd-none'} o_website_links_edit_code" aria-label="Edit code" title="Edit code"><i class="fa fa-pencil gray"/></a>
-                                        <a class="copy-to-clipboard btn btn-success text-nowrap"><i class="fa fa-copy me-2"/>Copy</a>
+                                        <a t-attf-class="#{'' if can_create_link_tracker_code else 'd-none'} o_website_links_edit_code o_translate_inline" aria-label="Edit code" title="Edit code"><i class="fa fa-pencil gray"/></a>
+                                        <a class="copy-to-clipboard btn btn-success text-nowrap o_translate_inline"><i class="fa fa-copy me-2"/>Copy</a>
                                     </p>
                                 </div>
                                 <div class="offset-md-3 col-md-9 px-2">
-                                    <p class="o_website_links_code_error text-danger fw-bold" style="display:none;"/>
+                                    <p class="o_website_links_code_error text-danger fw-bold d-none"/>
                                     <button class="o_website_links_new_link_tracker btn btn-primary my-3">Create another Tracker</button>
                                 </div>
                             </div>
@@ -67,7 +67,7 @@
                         <div class="offset-md-1 col-md-4 d-none d-md-block">
                             <p class="text-muted text-justify">Share this page with a <strong>short link</strong> that includes <strong>analytics trackers</strong>.</p>
                             <p class="text-muted text-justify">Those trackers can be used in Google Analytics to track clicks and visitors, or in Odoo reports to track opportunities and related revenues.</p>
-                            <a target="_blank" href="https://www.odoo.com/documentation/18.0/applications/websites/website/reporting/link_tracker.html">Read More</a>
+                            <a target="_blank" href="https://www.odoo.com/documentation/latest/applications/websites/website/reporting/link_tracker.html">Read More</a>
                         </div>
                     </div>
 

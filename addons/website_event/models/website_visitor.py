@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-from odoo.osv import expression
+from odoo.exceptions import UserError
+from odoo.fields import Domain
 
 
 class WebsiteVisitor(models.Model):
-    _name = 'website.visitor'
-    _inherit = ['website.visitor']
+    _inherit = 'website.visitor'
 
     event_registration_ids = fields.One2many(
         'event.registration', 'visitor_id', string='Event Registrations',
@@ -62,8 +61,8 @@ class WebsiteVisitor(models.Model):
         """ Search visitors with terms on events within their event registrations. E.g. [('event_registered_ids',
         'in', [1, 2])] should return visitors having a registration on events 1, 2 as
         well as their children for notification purpose. """
-        if operator == "not in":
-            raise NotImplementedError("Unsupported 'Not In' operation on visitors registrations")
+        if operator in ('not in', 'not any'):
+            raise UserError(self.env._("Unsupported 'Not In' operation on visitors registrations"))
 
         all_registrations = self.env['event.registration'].sudo().search([
             ('event_id', operator, operand)
@@ -77,8 +76,7 @@ class WebsiteVisitor(models.Model):
 
     def _inactive_visitors_domain(self):
         """ Visitors registered to events are considered always active and should not be deleted. """
-        domain = super()._inactive_visitors_domain()
-        return expression.AND([domain, [('event_registration_ids', '=', False)]])
+        return super()._inactive_visitors_domain() & Domain('event_registration_ids', '=', False)
 
     def _merge_visitor(self, target):
         """ Override linking process to link registrations to the final visitor. """

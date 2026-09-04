@@ -1,7 +1,5 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add("crm_rainbowman", {
     url: "/odoo",
@@ -13,7 +11,7 @@ registry.category("web_tour.tours").add("crm_rainbowman", {
             run: "click",
         },
         {
-            trigger: ".o-kanban-button-new",
+            trigger: "body:has(.o_kanban_renderer) .o-kanban-button-new",
             content: "click create",
             run: "click",
         },
@@ -35,7 +33,7 @@ registry.category("web_tour.tours").add("crm_rainbowman", {
         {
             trigger: ".o_kanban_record:contains('Test Lead 1')",
             content: "move to won stage",
-            run: "drag_and_drop (.o_opportunity_kanban .o_kanban_group:eq(3))",
+            run: "drag_and_drop (.o_opportunity_kanban .o_kanban_group:has(.o_column_title:contains('Won')))",
         },
         {
             trigger: ".o_reward_rainbow",

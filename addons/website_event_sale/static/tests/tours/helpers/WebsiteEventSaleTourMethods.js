@@ -1,4 +1,3 @@
-/** @odoo-module **/
 import * as wsTourUtils from '@website_sale/js/tours/tour_utils';
 
 const closeModal = {
@@ -13,6 +12,7 @@ export function changePricelist(pricelistName) {
             content: "Go to page Shop",
             trigger: '.nav-link:contains("Shop")',
             run: "click",
+            expectUnloadPage: true,
         },
         {
             content: "Toggle Pricelist",
@@ -23,6 +23,7 @@ export function changePricelist(pricelistName) {
             content: `Activate Pricelist ${pricelistName}`,
             trigger: `.dropdown-item:contains(${pricelistName})`,
             run: 'click',
+            expectUnloadPage: true,
         },
         {
             content: 'Wait for pricelist to load',
@@ -36,11 +37,13 @@ function checkPriceEvent(eventName, price, close = true) {
             content: "Go to page Event",
             trigger: '.nav-link:contains("Event")',
             run: "click",
+            expectUnloadPage: true,
         },
         {
             content: "Open the Pycon event",
             trigger: `.o_wevent_events_list a:contains(${eventName})`,
             run: "click",
+            expectUnloadPage: true,
         },
         {
             content: "Open the ticket picking modal",

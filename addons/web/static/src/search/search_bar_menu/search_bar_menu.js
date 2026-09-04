@@ -1,5 +1,4 @@
-import { Component } from "@odoo/owl";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { Component, useState } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { PropertiesGroupByItem } from "@web/search/properties_group_by_item/properties_group_by_item";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -10,7 +9,6 @@ import { AccordionItem } from "@web/core/dropdown/accordion_item";
 import { CustomGroupByItem } from "@web/search/custom_group_by_item/custom_group_by_item";
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 import { FACET_ICONS, GROUPABLE_TYPES } from "@web/search/utils/misc";
-import { _t } from "@web/core/l10n/translation";
 
 const favoriteMenuRegistry = registry.category("favoriteMenu");
 
@@ -32,21 +30,13 @@ export class SearchBarMenu extends Component {
                 default: { optional: true },
             },
         },
-        dropdownState: {
-            type: Object,
-            optional: true,
-            shape: {
-                isOpen: Boolean,
-                open: Function,
-                close: Function,
-            },
-        },
+        dropdownState: { ...Dropdown.props.state },
     };
 
     setup() {
         this.facet_icons = FACET_ICONS;
         // Filter
-        this.dialogService = useService("dialog");
+        this.actionService = useService("action");
         // GroupBy
         const fields = [];
         for (const [fieldName, field] of Object.entries(this.env.searchModel.searchViewFields)) {
@@ -56,6 +46,7 @@ export class SearchBarMenu extends Component {
         }
         this.fields = sortBy(fields, "string");
         // Favorite
+        this.state = useState({ sharedFavoritesExpanded: false });
         useBus(this.env.searchModel, "update", this.render);
     }
 
@@ -131,38 +122,24 @@ export class SearchBarMenu extends Component {
         this.env.searchModel.createNewGroupBy(fieldName);
     }
 
-    // Comparison Panel
-    get showComparisonMenu() {
-        return (
-            this.env.searchModel.searchMenuTypes.has("comparison") &&
-            this.env.searchModel.getSearchItems((i) => i.type === "comparison").length > 0
-        );
-    }
-    get comparisonItems() {
-        return this.env.searchModel.getSearchItems(
-            (searchItem) => searchItem.type === "comparison"
-        );
-    }
-
-    /**
-     * @param {number} itemId
-     */
-    onComparisonSelected(itemId) {
-        this.env.searchModel.toggleSearchItem(itemId);
-    }
-
     // Favorite Panel
 
     get favorites() {
         return this.env.searchModel.getSearchItems(
-            (searchItem) => searchItem.type === "favorite" && searchItem.userId !== false
+            (searchItem) => searchItem.type === "favorite" && searchItem.userIds.length === 1
         );
     }
 
     get sharedFavorites() {
-        return this.env.searchModel.getSearchItems(
-            (searchItem) => searchItem.type === "favorite" && searchItem.userId === false
+        const sharedFavorites = this.env.searchModel.getSearchItems(
+            (searchItem) => searchItem.type === "favorite" && searchItem.userIds.length !== 1
         );
+        if (sharedFavorites.length <= 4 || this.state.sharedFavoritesExpanded) {
+            this.state.sharedFavoritesExpanded = true;
+        } else {
+            sharedFavorites.length = 3;
+        }
+        return sharedFavorites;
     }
 
     get otherItems() {
@@ -183,16 +160,15 @@ export class SearchBarMenu extends Component {
         this.env.searchModel.toggleSearchItem(itemId);
     }
 
-    openConfirmationDialog(itemId, userId) {
-        const dialogProps = {
-            title: _t("Warning"),
-            body: userId
-                ? _t("Are you sure that you want to remove this filter?")
-                : _t("This filter is global and will be removed for everyone."),
-            confirmLabel: _t("Delete Filter"),
-            confirm: () => this.env.searchModel.deleteFavorite(itemId),
-            cancel: () => {},
-        };
-        this.dialogService.add(ConfirmationDialog, dialogProps);
+    editFavorite(itemId) {
+        this.actionService.doAction({
+            type: "ir.actions.act_window",
+            res_model: "ir.filters",
+            views: [[false, "form"]],
+            context: {
+                form_view_ref: "base.ir_filters_view_edit_form",
+            },
+            res_id: this.env.searchModel.searchItems[itemId].serverSideId,
+        });
     }
 }

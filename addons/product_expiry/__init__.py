@@ -1,9 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from . import models
+from . import report
 from . import wizard
 
-from odoo import api, SUPERUSER_ID, Command
+from odoo import Command
+
 
 def _enable_tracking_numbers(env):
     """ This hook ensures the tracking numbers are enabled when the module is installed since the

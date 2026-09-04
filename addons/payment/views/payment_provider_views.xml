@@ -84,9 +84,9 @@
                                 </group>
                                 <group string="Availability" name="availability">
                                     <field name="maximum_amount"/>
-                                    <label for="available_currency_ids"/>
+                                    <label for="available_currency_ids" groups="base.group_system"/>
                                     <!-- Use `o_row` to allow placing a button next to the field in overrides. -->
-                                    <div name="available_currencies" class="o_row">
+                                    <div name="available_currencies" class="o_row" groups="base.group_system">
                                         <field name="available_currency_ids"
                                                widget="many2many_tags"
                                                placeholder="Select currencies. Leave empty not to restrict any."
@@ -156,6 +156,7 @@
                         </aside>
                         <main class="ms-2">
                             <field name="name" class="mb-0 fw-bold fs-4"/>
+                            <field name="company_id" groups="base.group_multi_company" class="fs-6 text-muted mb-1"/>
                             <div class="d-flex">
                                 <t t-if="installed">
                                     <field name="state"
@@ -178,7 +179,7 @@
                             </div>
                             <footer>
                                 <button t-if="!installed and !selection_mode and !to_buy" type="object" class="btn btn-sm btn-primary ms-auto" name="button_immediate_install">Install</button>
-                                <button t-if="installed and is_disabled and !selection_mode" type="edit" class="btn btn-sm btn-secondary ms-auto">Activate</button>
+                                <button t-if="installed and is_disabled and !selection_mode" type="open" class="btn btn-sm btn-secondary ms-auto">Activate</button>
                                 <button t-if="!installed and to_buy" href="https://odoo.com/pricing?utm_source=db&amp;utm_medium=module" target="_blank" class="btn btn-sm btn-primary ms-auto">Upgrade</button>
                             </footer>
                         </main>
@@ -204,7 +205,7 @@
                        ]"
                 />
                 <filter name="provider_installed" string="Installed" domain="[('module_state', '=', 'installed')]"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter string="Provider" name="code" context="{'group_by': 'code'}"/>
                     <filter string="State" name="state" context="{'group_by': 'state'}"/>
                     <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
@@ -216,11 +217,17 @@
     <record id="action_payment_provider" model="ir.actions.act_window">
         <field name="name">Payment Providers</field>
         <field name="res_model">payment.provider</field>
+        <field name="path">payment-providers</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a new payment provider
+                No providers available
             </p>
+            <p class="fw-bold">To add a provider to the current company:</p>
+            <ol class="text-start d-inline-block">
+                <li>Toggle the main company in the company switcher.</li>
+                <li>Install the provider you want to add.</li>
+            </ol>
         </field>
     </record>
 

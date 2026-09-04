@@ -19,8 +19,8 @@
                             <field name="parent_id"/>
                             <field name="website_id" options="{'no_create': True}" groups="website.group_multi_website"/>
                             <field name="sequence" groups="base.group_no_one"/>
-                            <field name="website_description"
-                                   placeholder="Description displayed on the eCommerce categories page."/>
+                            <field name="website_description"/>
+                            <field name="cover_image" widget="image" alt="Cover Image"/>
                         </group>
                     </div>
                 </sheet>
@@ -43,6 +43,7 @@
     <record id="product_public_category_action" model="ir.actions.act_window">
         <field name="name">eCommerce Categories</field>
         <field name="res_model">product.public.category</field>
+        <field name="path">ecommerce-categories</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" eval="False"/>
         <field name="help" type="html">

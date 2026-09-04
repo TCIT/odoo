@@ -1,42 +1,33 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_crm_iap_reveal
-# 
-# Translators:
-# Jussi Lehto <jussi@gulfeo.com>, 2024
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
-# Erno Iipponen <erno.iipponen@web-veistamo.fi>, 2024
-# Kimmo Lehtonen <leban@netzionale.com>, 2024
-# Jiri Grönroos <jiri.gronroos@iki.fi>, 2024
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
-# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2024
-# Martin Trigaux, 2024
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
-# 
+# * website_crm_iap_reveal
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-03 18:36+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"website_crm_iap_reveal/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid ""
-"1 credit is consumed per visitor matching the website traffic conditions and"
-" whose company can be identified.<br/>"
+"1 credit is consumed per visitor matching the website traffic conditions and "
+"whose company can be identified.<br/>"
 msgstr ""
-"1 krediitti kuluu jokaista kävijää kohden, joka vastaa sivuston "
-"liikennöintiolosuhteita ja jonka yritys voidaan tunnistaa.<br/>"
+"Yksi krediitti käytetään jokaista kävijää kohden, joka vastaa sivuston "
+"liikenneoloja ja jonka yritys voidaan tunnistaa.<br/>"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
@@ -61,18 +52,18 @@ msgstr "Arkistoitu"
 #. module: website_crm_iap_reveal
 #: model:ir.model,name:website_crm_iap_reveal.model_crm_reveal_rule
 msgid "CRM Lead Generation Rules"
-msgstr "CRM Liidien luomisen säännöt"
+msgstr "CRM-järjestelmän liidien luomisen säännöt"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model,name:website_crm_iap_reveal.model_crm_reveal_view
 msgid "CRM Reveal View"
-msgstr "CRM Paljastusnäkymä"
+msgstr "CRM-näkymän paljastus"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__lead_for
 msgid "Choose whether to track companies only or companies and their contacts"
 msgstr ""
-"Valitse, haluatko seurata vain yrityksiä vai yrityksiä ja niiden "
+"Valitse, haluatko seurata vain yrityksiä vai sekä yrityksiä että niiden "
 "yhteystietoja"
 
 #. module: website_crm_iap_reveal
@@ -93,7 +84,7 @@ msgstr "Yrityksen koko"
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__company_size_max
 msgid "Company Size Max"
-msgstr "Yrityksen koko enintään"
+msgstr "Yrityksen enimmäiskoko"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
@@ -116,12 +107,17 @@ msgid "Create a conversion rule"
 msgstr "Luo muunnossääntö"
 
 #. module: website_crm_iap_reveal
+#: model:ir.model,website_form_label:website_crm_iap_reveal.model_crm_lead
+msgid "Create an Opportunity"
+msgstr "Luo myyntimahdollisuus"
+
+#. module: website_crm_iap_reveal
 #: model_terms:ir.actions.act_window,help:website_crm_iap_reveal.crm_reveal_rule_action
 msgid ""
 "Create rules to generate B2B leads/opportunities from your website visitors."
 msgstr ""
-"Luo sääntöjä, joilla voit luoda B2B-liidejä tai myyntimahdollisuuksia "
-"verkkosivustosi kävijöistä."
+"Luo sääntöjä B2B-liidien tai myyntimahdollisuuksien luomiseen verkkosivusi "
+"kävijöistä."
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__create_uid
@@ -140,8 +136,10 @@ msgid "Data Tracking"
 msgstr "Tietojen seuranta"
 
 #. module: website_crm_iap_reveal
+#: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_lead__display_name
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__display_name
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__display_name
+#: model:ir.model.fields,field_description:website_crm_iap_reveal.field_ir_http__display_name
 msgid "Display Name"
 msgstr "Näyttönimi"
 
@@ -154,7 +152,7 @@ msgstr "Syötä kelvollinen Regex."
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__contact_filter_type
 msgid "Filter On"
-msgstr "Suodata"
+msgstr "Suodatus päällä"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__filter_on_size
@@ -169,12 +167,12 @@ msgstr "Suodata koon mukaan"
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "From"
-msgstr "Alkaa"
+msgstr "Alken"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__lead_ids
 msgid "Generated Lead / Opportunity"
-msgstr "Luotu liidi tai myyntimahdollisuus"
+msgstr "Luotu liidi / myyntimahdollisuus"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model,name:website_crm_iap_reveal.model_ir_http
@@ -189,13 +187,15 @@ msgstr "Korkea"
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_lead__reveal_iap_credits
 msgid "IAP Credits"
-msgstr "Sovelluksen sisältä ostettavat krediitit"
+msgstr "Internet-palveluntarjoajan krediitit"
 
 #. module: website_crm_iap_reveal
+#: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_lead__id
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__id
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__id
+#: model:ir.model.fields,field_description:website_crm_iap_reveal.field_ir_http__id
 msgid "ID"
-msgstr "ID"
+msgstr "Tunnus"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_lead__reveal_ip
@@ -221,6 +221,7 @@ msgid "Last Updated on"
 msgstr "Viimeksi päivitetty"
 
 #. module: website_crm_iap_reveal
+#: model:ir.model,name:website_crm_iap_reveal.model_crm_lead
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__lead_type__lead
 msgid "Lead"
 msgstr "Liidi"
@@ -250,18 +251,14 @@ msgstr "Liidin luontinäkymät"
 #. module: website_crm_iap_reveal
 #: model:ir.actions.server,name:website_crm_iap_reveal.ir_cron_crm_reveal_lead_ir_actions_server
 msgid "Lead Generation: Leads/Opportunities Generation"
-msgstr "Lead Generation: Liidien tai myyntimahdollisuuksien tuottaminen"
-
-#. module: website_crm_iap_reveal
-#: model:ir.model,name:website_crm_iap_reveal.model_crm_lead
-msgid "Lead/Opportunity"
-msgstr "Liidi/mahdollisuus"
+msgstr "Liidien luominen: Liidien tai myyntimahdollisuuksien tuottaminen"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__industry_tag_ids
 msgid "Leave empty to always match. Odoo will not create lead if no match"
 msgstr ""
-"Jätä tyhjäksi, jos haluat aina täsmätä. Odoo ei luo liidiä, jos se ei vastaa"
+"Jätä tyhjäksi, jos haluat aina sovittaa yhteen. Odoo ei luo liidiä, jos se "
+"ei vastaa"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__priority__0
@@ -274,18 +271,18 @@ msgid ""
 "Make sure you know if you have to be GDPR compliant for storing personal "
 "data."
 msgstr ""
-"Varmista, että tiedät, onko henkilötietojen tallentamisen oltava GDPR:n "
-"mukaista."
+"Varmista, että tiedät, onko henkilötietojen tallentamisen noudatettava "
+"GDPR:tä."
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.constraint,message:website_crm_iap_reveal.constraint_crm_reveal_rule_limit_extra_contacts
 msgid "Maximum 5 contacts are allowed!"
-msgstr "Enintään 5 kontaktia on sallittu!"
+msgstr "Enintään 5 yhteystietoa on sallittu!"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__priority__1
 msgid "Medium"
-msgstr "Media"
+msgstr "Keskisuuri"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_view__reveal_state__not_found
@@ -310,25 +307,24 @@ msgstr "Tuotettujen myyntimahdollisuuksien määrä"
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__country_ids
 msgid ""
-"Only visitors of following countries will be converted into "
-"leads/opportunities (using GeoIP)."
+"Only visitors of following countries will be converted into leads/"
+"opportunities (using GeoIP)."
 msgstr ""
-"Vain seuraavien maiden kävijät muunnetaan liideiksi tai "
+"Vain vierailijat seuraavista maista muunnetaan liideiksi/"
 "myyntimahdollisuuksiksi (GeoIP:n avulla)."
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__state_ids
 msgid ""
-"Only visitors of following states will be converted into "
-"leads/opportunities."
+"Only visitors of following states will be converted into leads/opportunities."
 msgstr ""
-"Vain seuraavien valtioiden kävijät muunnetaan liideiksi tai "
+"Vain vierailijat seuraavista osavaltioista muunnetaan liideiksi/"
 "myyntimahdollisuuksiksi."
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__lead_type__opportunity
 msgid "Opportunity"
-msgstr "Mahdollisuus"
+msgstr "Myyntimahdollisuus"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
@@ -344,7 +340,7 @@ msgstr "Myyntimahdollisuuksien luomisen edellytykset"
 #. odoo-python
 #: code:addons/website_crm_iap_reveal/models/crm_reveal_rule.py:0
 msgid "Opportunity created by Odoo Lead Generation"
-msgstr "Odoo Lead Generationin luoma myyntimahdollisuus"
+msgstr "Odoo liidien luomisen luoma myyntimahdollisuus"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__other_role_ids
@@ -354,7 +350,7 @@ msgstr "Muut roolit"
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__preferred_role_id
 msgid "Preferred Role"
-msgstr "Suositeltava rooli"
+msgstr "Mieluisin rooli"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__priority
@@ -368,14 +364,14 @@ msgid ""
 "to target the homepage. Example: /page* to track all the pages which begin "
 "with /page"
 msgstr ""
-"Regex verkkosivuston sivujen seuraamiseksi. Jätä tyhjäksi, jos haluat "
-"seurata koko verkkosivustoa, tai /, jos haluat kohdistaa sen etusivulle. "
-"Esimerkki: /sivu* seurata kaikkia sivuja, jotka alkavat kirjaimella /sivu"
+"Regex verkkosivujen seuraamiseksi. Jätä tyhjäksi, jos haluat seurata koko "
+"verkkosivustoa tai / kohdistaaksesi seurannan aloitussivulle. Esimerkki: /"
+"sivu* seurataksesi kaikkia sivuja, jotka alkavat /'sivu'"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__website_id
 msgid "Restrict Lead generation to this website."
-msgstr "Rajoita liidien tuottaminen tälle verkkosivustolle."
+msgstr "Rajoita liidien luominen tälle verkkosivulle."
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__contact_filter_type__role
@@ -405,7 +401,7 @@ msgstr "Myyjä"
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_view_search
 msgid "Search CRM Reveal Rule"
-msgstr "Haku CRM Paljasta sääntö"
+msgstr "Hae CRM-paljastussääntöä"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__seniority_id
@@ -416,7 +412,7 @@ msgstr "Senioriteetti"
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__sequence
 msgid "Sequence"
-msgstr "Järjestys"
+msgstr "Sekvenssi"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__reveal_state
@@ -445,19 +441,19 @@ msgid ""
 "criteria. Their details will show up in the history thread of generated "
 "leads/opportunities. One credit is consumed per tracked contact."
 msgstr ""
-"Tämä on niiden yhteystietojen määrä, joita seurataan, jos heidän roolinsa "
-"tai asemansa vastaa kriteerejäsi. Heidän tietonsa näkyvät luotujen "
-"liidien/tilaisuuksien historiasäikeessä. Jokaisesta seuratusta kontaktista "
-"kuluu yksi krediitti."
+"Tämä on niiden yhteystietojen määrä, joita seurataan, jos heidän roolinsa/"
+"asemansa vastaa kriteerejäsi. Heidän tietonsa näkyvät luotujen liidien/"
+"tilaisuuksien viestiketjuissa. Jokaiseen seurattuun yhteystietoon käytetään "
+"yksi krediitti."
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,help:website_crm_iap_reveal.field_crm_reveal_rule__suffix
 msgid ""
-"This will be appended in name of generated lead so you can identify "
-"lead/opportunity is generated with this rule"
+"This will be appended in name of generated lead so you can identify lead/"
+"opportunity is generated with this rule"
 msgstr ""
-"Tämä liitetään luotujen liidien nimeen, jotta voit tunnistaa, että liidi tai"
-" myyntimahdollisuus on luotu tällä säännöllä"
+"Tämä liitetään luotujen liidien nimeen, jotta voit tunnistaa, että liidi tai "
+"myyntimahdollisuus on luotu tällä säännöllä"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_view__reveal_state__to_process
@@ -472,7 +468,7 @@ msgstr "Tyyppi"
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__regex_url
 msgid "URL Expression"
-msgstr "URL-ilmaisu"
+msgstr "URL-lauseke"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
@@ -507,12 +503,12 @@ msgstr "Verkkosivu"
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "Website Traffic Conditions"
-msgstr "Verkkosivuston liikenneolosuhteet"
+msgstr "Verkkosivun liikenneolosuhteet"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "additional credit(s) are consumed if the company matches this rule."
-msgstr "lisäkrediitit käytetään, jos yritys noudattaa tätä sääntöä."
+msgstr "lisäkrediittejä käytetään, jos yritys noudattaa tätä sääntöä."
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
@@ -532,4 +528,4 @@ msgstr "työntekijät"
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "to"
-msgstr "->"
+msgstr "-"

@@ -1,18 +1,20 @@
-/** @odoo-module **/
-
-import { _t } from '@web/core/l10n/translation';
-import { patch } from '@web/core/utils/patch';
 import {
     ComboConfiguratorDialog
 } from '@sale/js/combo_configurator_dialog/combo_configurator_dialog';
+import { _t } from '@web/core/l10n/translation';
+import { patch } from '@web/core/utils/patch';
 
 patch(ComboConfiguratorDialog, {
     props: {
         ...ComboConfiguratorDialog.props,
         isFrontend: { type: Boolean, optional: true },
-        // The following fields are needed for tracking.
-        category_name: { type: String, optional: true },
-        currency_name: { type: String, optional: true },
+        options: {
+            ...ComboConfiguratorDialog.props.options,
+            shape: {
+                ...ComboConfiguratorDialog.props.options.shape,
+                isBuyNow: { type: Boolean, optional: true },
+            },
+        },
     },
 });
 

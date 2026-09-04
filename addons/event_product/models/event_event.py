@@ -1,7 +1,7 @@
 from odoo import fields, models
 
 
-class Event(models.Model):
+class EventEvent(models.Model):
     _inherit = 'event.event'
 
     currency_id = fields.Many2one(

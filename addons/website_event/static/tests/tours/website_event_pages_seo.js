@@ -1,10 +1,8 @@
-/** @odoo-modules */
-
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("website_event_pages_seo", {
     // The tour must start on an event's custom page (not register page)
-    // url: `/event/openwood-collection-online-reveal-8/page/introduction-openwood-collection-online-reveal`,
+    // url: `/event/openwood-collection-online-reveal-8/page/home-openwood-collection-online-reveal`,
     steps: () => [
         {
             trigger: ":iframe #o_wevent_event_submenu", // Ensure we landed on the event page
@@ -33,11 +31,11 @@ registry.category("web_tour.tours").add("website_event_pages_seo", {
             trigger: "body:not(:has(.modal))",
         },
         {
-            trigger: ":iframe head:has(title:contains(/^Hello, world!$/)):not(:visible)",
+            trigger: ":iframe head:has(title:text(Hello, world!)):not(:visible)",
         },
         {
             content: "Check that the page title is adapted, inside and outside the iframe",
-            trigger: "head:has(title:contains(/^Hello, world!$/)):not(:visible)",
+            trigger: "head:has(title:text(Hello, world!)):not(:visible)",
         },
     ],
 });

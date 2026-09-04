@@ -1,13 +1,15 @@
 # # -*- coding: utf-8 -*-
 # # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import datetime
 import json
 import sys
+from freezegun import freeze_time
 from unittest.mock import patch
 
 from odoo import Command
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.exceptions import AccessError, ValidationError
-from odoo.tests import Form, common, tagged
+from odoo.tests import Form, common, tagged, WhitespaceInsensitive
 from odoo.tools import mute_logger
 
 
@@ -526,7 +528,7 @@ if env.context.get('old_values', None):  # on write
         comodel_access = self.env.ref('test_base_automation.access_base_automation_linked_test')
         comodel_access.group_id = self.env['res.groups'].create({
             'name': "Access to base.automation.linked.test",
-            "users": [Command.link(self.user_admin.id)],
+            "user_ids": [Command.link(self.user_admin.id)],
         })
 
         # sanity check: user demo has no access to the comodel of 'linked_id'
@@ -819,19 +821,94 @@ if env.context.get('old_values', None):  # on write
 
     def test_120_on_change(self):
         Model = self.env.get(self.lead_model.model)
-        lead_name_field = self.env['ir.model.fields'].search([
-            ('model_id', '=', self.lead_model.id),
-            ('name', '=', 'name'),
-        ])
+        lead_name_field = self.env['ir.model.fields']._get(self.lead_model.model, "name")
         self.assertEqual(lead_name_field.name in Model._onchange_methods, False)
         create_automation(
             self,
             model_id=self.lead_model.id,
             trigger='on_change',
+            filter_domain="[('name', 'like', 'IMPORTANT')]",
             on_change_field_ids=[lead_name_field.id],
-            _actions={'state': 'code', 'code': ""},
+            _actions={
+                'state': 'code',
+                'code': """
+action = {
+    'value': {
+        'priority': '[IMPORTANT]' in record.name,
+    }
+}
+            """,
+            },
         )
         self.assertEqual(lead_name_field.name in Model._onchange_methods, True)
+
+        with Form(self.env[self.lead_model.model]) as f:
+            self.assertEqual(f.priority, False)
+            f.name = 'Lead Test'
+            self.assertEqual(f.priority, False)
+
+            # changed because contains "IMPORTANT", true because contains "[IMPORTANT]"
+            f.name = 'Lead Test [IMPORTANT]'
+            self.assertEqual(f.priority, True)
+
+            # not changed because does not contain "IMPORTANT"
+            f.name = 'Lead Test'
+            self.assertEqual(f.priority, True)
+
+            # changed because contains "IMPORTANT", false because does not contain "[IMPORTANT]"
+            f.name = 'Lead Test [NOT IMPORTANT]'
+            self.assertEqual(f.priority, False)
+
+            # changed because contains "IMPORTANT", true because contains "[IMPORTANT]"
+            f.name = 'Lead Test [IMPORTANT]'
+            self.assertEqual(f.priority, True)
+
+    def test_121_on_change_with_domain_field_not_in_view(self):
+        lead_name_field = self.env['ir.model.fields']._get(self.lead_model.model, "name")
+        create_automation(
+            self,
+            model_id=self.lead_model.id,
+            trigger='on_change',
+            filter_domain="[('active', '!=', False)]",
+            on_change_field_ids=[lead_name_field.id],
+            _actions={
+                'state': 'code',
+                'code': """
+action = {
+    'value': {
+        'priority': '[IMPORTANT]' in record.name,
+    }
+}
+            """,
+            },
+        )
+        my_view = self.env["ir.ui.view"].create({
+            "name": "My View",
+            "model": self.lead_model.model,
+            "type": "form",
+            "arch": """
+                <form>
+                    <field name='name'/>
+                    <field name='priority'/>
+                </form>
+            """,
+        })
+        record = self.env[self.lead_model.model].create({
+            "name": "Test Lead",
+            "active": False,
+            "priority": False,
+        })
+        self.assertEqual(record.priority, False)
+        with Form(record, view=my_view) as f:
+            f.name = "[IMPORTANT] Lead"
+        self.assertEqual(record.priority, False)
+
+        record.name = "Test Lead"
+        record.active = True
+        self.assertEqual(record.priority, False)
+        with Form(record, view=my_view) as f:
+            f.name = "[IMPORTANT] Lead"
+        self.assertEqual(record.priority, True)
 
     def test_130_on_unlink(self):
         automation = create_automation(
@@ -856,7 +933,11 @@ if env.context.get('old_values', None):  # on write
         lead.unlink()
         self.assertEqual(called_count, 1)
 
-    def test_004_check_method(self):
+    @property
+    def automation_cron(self):
+        return self.env.ref('base_automation.ir_cron_data_base_automation_check')
+
+    def test_004_check_method_trigger_field(self):
         model = self.env["ir.model"]._get("base.automation.lead.test")
         TIME_TRIGGERS = [
            'on_time',
@@ -870,9 +951,69 @@ if env.context.get('old_values', None):  # on write
             "trigger": "on_time",
             "model_id": model.id,
         })
+
+        # first run, check we have a field set
+        # this does not happen using the UI where the trigger is forced to be set
         self.assertFalse(automation.last_run)
-        self.env["base.automation"]._check(False)
+        with self.assertLogs('odoo.addons.base_automation', 'WARNING') as capture, self.enter_registry_test_mode():
+            self.automation_cron.method_direct_trigger()
+        self.assertRegex(capture.output[0], r"Missing date trigger")
+        automation.trg_date_id = model.field_id.filtered(lambda f: f.name == 'date_automation_last')
+
+        # normal run
+        with self.enter_registry_test_mode():
+            self.automation_cron.method_direct_trigger()
         self.assertTrue(automation.last_run)
+
+    @common.freeze_time('2020-01-01 03:00:00')
+    def test_004_check_method_process(self):
+        model = self.env["ir.model"]._get("base.automation.lead.test")
+        TIME_TRIGGERS = [
+           'on_time',
+           'on_time_created',
+           'on_time_updated',
+        ]
+        self.env["base.automation"].search([('trigger', 'in', TIME_TRIGGERS)]).active = False
+
+        automation = self.env["base.automation"].create({
+            "name": "Cron BaseAuto",
+            "trigger": "on_time",
+            "model_id": model.id,
+            "trg_date_id": model.field_id.filtered(lambda f: f.name == 'date_automation_last').id,
+            "trg_date_range": 2,
+            "trg_date_range_type": "minutes",
+            "trg_date_range_mode": "after",
+        })
+
+        with (
+            patch.object(automation.__class__, '_process', side_effect=automation._process) as mock,
+            self.enter_registry_test_mode(),
+        ):
+            with patch.object(self.env.cr, '_now', now := datetime.datetime.now()):
+                past_date = now - datetime.timedelta(1)
+                self.env["base.automation.lead.test"].create([{
+                    'name': f'lead {i}',
+                    # 2 without a date, 8 set in past, 5 set in future (10, 11, ... minutes after now)
+                    'date_automation_last': False if i < 2 else past_date if i < 10 else now + datetime.timedelta(minutes=i),
+                } for i in range(15)])
+            with common.freeze_time('2020-01-01 03:02:01'), patch.object(self.env.cr, '_now', datetime.datetime.now()):
+                # process records
+                self.automation_cron.method_direct_trigger()
+                self.assertEqual(mock.call_count, 10)
+                self.assertEqual(automation.last_run, self.env.cr.now())
+            with common.freeze_time('2020-01-01 03:13:59'), patch.object(self.env.cr, '_now', datetime.datetime.now()):
+                # 2 in the future (because of timing)
+                # 10 previously done records because we use the date_automation_last as trigger without delay
+                self.automation_cron.method_direct_trigger()
+                self.assertEqual(mock.call_count, 22)
+                self.assertEqual(automation.last_run, self.env.cr.now())
+                # test triggering using a calendar
+                automation.trg_date_calendar_id = self.env["resource.calendar"].search([], limit=1).ensure_one()
+                automation.trg_date_range_type = 'day'
+                self.env["base.automation.lead.test"].create({'name': 'calendar'})  # for the run
+            with common.freeze_time('2020-02-02 03:11:00'), patch.object(self.env.cr, '_now', datetime.datetime.now()):
+                self.automation_cron.method_direct_trigger()
+                self.assertEqual(mock.call_count, 38)
 
     def test_005_check_model_with_different_rec_name_char(self):
         model = self.env["ir.model"]._get("base.automation.model.with.recname.char")
@@ -926,6 +1067,53 @@ if env.context.get('old_values', None):  # on write
         self.assertEqual(len(action_ids), 1)
         self.assertEqual(len(copy_action_ids), len(action_ids))
         self.assertNotEqual(copy_action_ids, action_ids)
+
+    def test_add_followers_1(self):
+        create_automation(self,
+            model_id=self.env["ir.model"]._get("base.automation.lead.thread.test").id,
+            trigger="on_create",
+            _actions={
+                "state": "followers",
+                "followers_type": "generic",
+                "followers_partner_field_name": "user_id.partner_id"
+            }
+        )
+        user = self.env["res.users"].create({"login": "maggot_brain", "name": "Eddie Hazel"})
+        thread_test = self.env["base.automation.lead.thread.test"].create({
+            "name": "free your mind",
+            "user_id": user.id,
+        })
+        self.assertEqual(thread_test.message_follower_ids.partner_id, user.partner_id)
+
+    def test_add_followers_2(self):
+        user = self.env["res.users"].create({"login": "maggot_brain", "name": "Eddie Hazel"})
+        create_automation(self,
+            model_id=self.env["ir.model"]._get("base.automation.lead.thread.test").id,
+            trigger="on_create",
+            _actions={
+                "state": "followers",
+                "followers_type": "specific",
+                "partner_ids": [Command.link(user.partner_id.id)]
+            }
+        )
+        thread_test = self.env["base.automation.lead.thread.test"].create({
+            "name": "free your mind",
+        })
+        self.assertEqual(thread_test.message_follower_ids.partner_id, user.partner_id)
+
+    def test_cannot_have_actions_with_warnings(self):
+        with self.assertRaises(ValidationError) as e:
+            create_automation(
+                self,
+                model_id=self.env['ir.model']._get('ir.actions.server').id,
+                trigger='on_time',
+                _actions={
+                    'name': 'Send Webhook Notification',
+                    'state': 'webhook',
+                    'webhook_field_ids': [self.env['ir.model.fields']._get('ir.actions.server', 'code').id],
+                },
+            )
+        self.assertEqual(e.exception.args[0], "Following child actions have warnings: Send Webhook Notification")
 
 
 @common.tagged('post_install', '-at_install')
@@ -1072,18 +1260,20 @@ class TestCompute(common.TransactionCase):
         self.assertEqual(automation.on_change_field_ids.ids, [])
 
         # Change the trigger fields will not change the domain
-        automation_form.trigger_field_ids.set(
+        automation_form.trigger_field_ids.add(
             self.env.ref('test_base_automation.field_base_automation_lead_test__tag_ids')
         )
         automation = automation_form.save()
         self.assertEqual(automation.filter_pre_domain, False)
         self.assertEqual(automation.filter_domain, repr([('priority', '=', True), ('employee', '=', False)]))
-        self.assertEqual(automation.trigger_field_ids.ids, [
+        self.assertItemsEqual(automation.trigger_field_ids.ids, [
+            self.env.ref('test_base_automation.field_base_automation_lead_test__priority').id,
+            self.env.ref('test_base_automation.field_base_automation_lead_test__employee').id,
             self.env.ref('test_base_automation.field_base_automation_lead_test__tag_ids').id
         ])
         self.assertEqual(automation.on_change_field_ids.ids, [])
 
-        # Erase the domain will not change the trigger fields
+        # Erase the domain will remove corresponding fields from the trigger fields
         automation_form.filter_domain = False
         automation = automation_form.save()
         self.assertEqual(automation.filter_pre_domain, False)
@@ -1211,6 +1401,31 @@ class TestCompute(common.TransactionCase):
         )
         r.parent_id = company2
         self.assertEqual(r.display_name, 'Awiclo, Bob')
+
+    def test_computation_sequence(self):
+        """ This test ensure sequential computation is done and all fields are correctly set
+        when a filter_pre_domain trigger computation of one of the chain element
+        """
+        project = self.env['test_base_automation.project'].create({})
+        task = self.env['test_base_automation.task'].create({
+            'project_id': project.id,
+            'allocated_hours': 100,
+        })
+
+        # this action is executed every time a task is modified
+        create_automation(
+            self,
+            model_id=self.env.ref('test_base_automation.model_test_base_automation_task').id,
+            trigger='on_create_or_write',
+            filter_pre_domain="[('remaining_hours', '>', 0)]",
+            _actions={'state': 'code'},  # no-op action
+        )
+
+        task.trigger_hours = 5
+        self.assertRecordValues(task, [{
+            'effective_hours': 5,
+            'remaining_hours': 95,
+        }])
 
     def test_recursion(self):
         project = self.env['test_base_automation.project'].create({})
@@ -1395,6 +1610,191 @@ class TestCompute(common.TransactionCase):
         res_users_model = self.env["ir.model"]._get("res.users")
         self.assertEqual(f.update_related_model_id, res_users_model)
 
+    def test_01_form_object_write_o2m_field(self):
+        aks_partner = self.env["res.partner"].create({"name": "A Kind Shepherd"})
+        bs_partner = self.env["res.partner"].create({"name": "Black Sheep"})
+
+        # test the 'object_write' type shows a resource_ref field for o2many
+        f = Form(self.env['ir.actions.server'], view="base.view_server_action_form")
+        f.name = "Adopt The Black Sheep"
+        f.model_id = self.env["ir.model"]._get("res.partner")
+        f.state = "object_write"
+        f.evaluation_type = "value"
+        f.update_path = "child_ids"
+        self.assertEqual(f.update_m2m_operation, "add")
+        self.assertEqual(f.value_field_to_show, "resource_ref")
+        f.resource_ref = f"res.partner,{bs_partner.id}"
+        action = f.save()
+
+        # test the action runs correctly
+        action.with_context(
+            active_model="res.partner",
+            active_id=aks_partner.id,
+        ).run()
+        self.assertEqual(aks_partner.child_ids, bs_partner)
+        self.assertEqual(bs_partner.parent_id, aks_partner)
+
+        # also check with 'remove' operation
+        f.update_m2m_operation = "remove"
+        action = f.save()
+        action.with_context(
+            active_model="res.partner",
+            active_id=aks_partner.id,
+        ).run()
+        self.assertEqual(aks_partner.child_ids.ids, [])
+        self.assertEqual(bs_partner.parent_id.id, False)
+
+    def test_02_form_object_write_with_sequence(self):
+        test_partner = self.env["res.partner"].create({"name": "Test Partner"})
+        test_sequence = self.env["ir.sequence"].create({
+            "name": "Test Sequence",
+            "padding": 4,
+            "prefix": "PARTNER/",
+            "suffix": "/TEST",
+        })
+
+        f = Form(self.env['ir.actions.server'], view="base.view_server_action_form")
+        f.model_id = self.env["ir.model"]._get("res.partner")
+        f.state = "object_write"
+        f.evaluation_type = "sequence"
+        self.assertEqual(f.warning, False)
+        f.update_path = "active"
+        self.assertEqual(f.warning, "A sequence must only be used with character fields.")
+        f.update_path = "ref"
+        self.assertEqual(f.warning, False)
+        f.sequence_id = test_sequence
+
+        action = f.save()
+        self.assertEqual(test_partner.ref, False)
+        action.with_context(
+            active_model="res.partner",
+            active_id=test_partner.id,
+        ).run()
+        self.assertEqual(test_partner.ref, "PARTNER/0001/TEST")
+
+    def test_03_server_action_code_history_wizard(self):
+        self.env.user.tz = 'Europe/Brussels'  # UTC +2 for May 2025
+
+        def get_history(action):
+            return self.env["ir.actions.server.history"].search([("action_id", "=", action.id)])
+
+        def assert_history(action, expected):
+            history = get_history(action)
+            self.assertRecordValues(history, expected)
+
+        expected = []
+
+        with freeze_time("2025-05-01 08:00:00"):
+            self.env.cr._now = datetime.datetime.now()  # reset transaction's NOW
+            action = self.env["ir.actions.server"].create({
+                "name": "Test Action",
+                "model_id": self.env["ir.model"]._get("res.partner").id,
+                "state": "code",
+                "code": "pass",
+            })
+        expected.insert(0, {
+            "code": "pass",
+            "display_name": WhitespaceInsensitive(f"May 1, 2025, 10:00:00 AM - {self.env.ref('base.user_root').name}"),
+        })
+        assert_history(action, expected)
+
+        with freeze_time("2025-05-01 08:30:00"):
+            self.env.cr._now = datetime.datetime.now()  # reset transaction's NOW
+            action.with_user(self.env.ref('base.user_admin')).write({"code": "hello"})
+        expected.insert(0, {
+            "code": "hello",
+            "display_name": WhitespaceInsensitive(f"May 1, 2025, 10:30:00 AM - {self.env.ref('base.user_admin').name}"),
+        })
+        assert_history(action, expected)
+
+        with freeze_time("2025-05-05 11:30:00"):
+            self.env.cr._now = datetime.datetime.now()  # reset transaction's NOW
+            action.with_user(self.env.ref('base.user_admin')).write({"code": "coucou"})
+        expected.insert(0, {
+            "code": "coucou",
+            "display_name": WhitespaceInsensitive(f"May 5, 2025, 1:30:00 PM - {self.env.ref('base.user_admin').name}"),
+        })
+        assert_history(action, expected)
+
+        with freeze_time("2025-05-12 09:30:00"):
+            self.env.cr._now = datetime.datetime.now()  # reset transaction's NOW
+            with Form(self.env['server.action.history.wizard'].with_context(default_action_id=action.id)) as wizard_form:
+                self.assertRecordValues(wizard_form.revision, [
+                    {
+                        "code": "hello",
+                        "display_name": WhitespaceInsensitive(f"May 1, 2025, 10:30:00 AM - {self.env.ref('base.user_admin').name}"),
+                    }
+                ])
+                first_diff = str(wizard_form.code_diff)
+                wizard_form.revision = get_history(action)[-1]
+                second_diff = str(wizard_form.code_diff)
+                self.assertNotEqual(first_diff, second_diff)
+            wizard_form.record.restore_revision()
+
+        self.assertEqual(action.code, "pass")
+        expected.insert(0, {
+            "code": "pass",
+            "display_name": WhitespaceInsensitive(f"May 12, 2025, 11:30:00 AM - {self.env.ref('base.user_root').name}"),
+        })
+        assert_history(action, expected)
+
+    def test_server_action_code_history_wizard_with_no_timezone(self):
+        self.env.user.tz = False
+
+        def get_history(action):
+            return self.env["ir.actions.server.history"].search([("action_id", "=", action.id)])
+
+        def assert_history(action, expected):
+            history = get_history(action)
+            self.assertRecordValues(history, expected)
+
+        expected = []
+
+        with freeze_time("2025-05-01 10:00:00"):
+            self.env.cr._now = datetime.datetime.now()  # reset transaction's NOW
+            action = self.env["ir.actions.server"].create({
+                "name": "Test Action",
+                "model_id": self.env["ir.model"]._get("res.partner").id,
+                "state": "code",
+                "code": "pass",
+            })
+        expected.insert(0, {
+            "code": "pass",
+            "display_name": WhitespaceInsensitive(f"May 1, 2025, 10:00:00 AM - {self.env.ref('base.user_root').name}"),
+        })
+        assert_history(action, expected)
+
+        with freeze_time("2025-05-01 10:00:00"):
+            self.env.cr._now = datetime.datetime.now()  # reset transaction's NOW
+            action.with_user(self.env.ref('base.user_admin')).write({"code": "hello"})
+        expected.insert(0, {
+            "code": "hello",
+            "display_name": WhitespaceInsensitive(f"May 1, 2025, 10:00:00 AM - {self.env.ref('base.user_admin').name}"),
+        })
+        assert_history(action, expected)
+
+        with freeze_time("2025-05-12 10:00:00"):
+            self.env.cr._now = datetime.datetime.now()  # reset transaction's NOW
+            with Form(self.env['server.action.history.wizard'].with_context(default_action_id=action.id)) as wizard_form:
+                self.assertRecordValues(wizard_form.revision, [
+                    {
+                        "code": "pass",
+                        "display_name": WhitespaceInsensitive(f"May 1, 2025, 10:00:00 AM - {self.env.ref('base.user_root').name}"),
+                    }
+                ])
+                first_diff = str(wizard_form.code_diff)
+                wizard_form.revision = get_history(action)[-1]
+                second_diff = str(wizard_form.code_diff)
+                self.assertNotEqual(first_diff, second_diff)
+            wizard_form.record.restore_revision()
+
+        self.assertEqual(action.code, "pass")
+        expected.insert(0, {
+            "code": "pass",
+            "display_name": WhitespaceInsensitive(f"May 12, 2025, 10:00:00 AM - {self.env.ref('base.user_root').name}"),
+        })
+        assert_history(action, expected)
+
 
 @common.tagged("post_install", "-at_install")
 class TestHttp(common.HttpCase):
@@ -1456,13 +1856,18 @@ class TestHttp(common.HttpCase):
         })
         name_field_id = self.env.ref("test_base_automation.field_base_automation_linked_test__name")
         automation_sender = create_automation(self, trigger="on_write", model_id=model.id, trigger_field_ids=[(6, 0, [name_field_id.id])], _actions={
+            "name": "Send Webhook Notification",
             "state": "webhook",
             "webhook_url": automation_receiver.url,
         })
 
+        # Changing the name will make an http request, post-commitedly
         obj.name = "new_name"
         self.cr.flush()
+        with self.allow_requests(all_requests=True):
+            self.cr.postcommit.run()  # webhooks run in postcommit
         self.cr.clear()
+        self._wait_remaining_requests()  # just in case the request timeouts
         self.assertEqual(json.loads(obj.another_field), {
             '_action': f'Send Webhook Notification(#{automation_sender.action_server_ids[0].id})',
             "_id": obj.id,

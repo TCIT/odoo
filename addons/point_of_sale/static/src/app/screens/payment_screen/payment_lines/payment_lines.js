@@ -1,13 +1,15 @@
 import { _t } from "@web/core/l10n/translation";
-import { NumberPopup } from "@point_of_sale/app/utils/input_popups/number_popup";
+import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
 import { useService } from "@web/core/utils/hooks";
-import { Component, useState } from "@odoo/owl";
-import { usePos } from "@point_of_sale/app/store/pos_hook";
+import { Component } from "@odoo/owl";
+import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { parseFloat } from "@web/views/fields/parsers";
-import { enhancedButtons } from "@point_of_sale/app/generic_components/numpad/numpad";
+import { enhancedButtons } from "@point_of_sale/app/components/numpad/numpad";
+import { PriceFormatter } from "@point_of_sale/app/components/price_formatter/price_formatter";
 
 export class PaymentScreenPaymentLines extends Component {
     static template = "point_of_sale.PaymentScreenPaymentLines";
+    static components = { PriceFormatter };
     static props = {
         paymentLines: { type: Array, optional: true },
         deleteLine: Function,
@@ -17,16 +19,17 @@ export class PaymentScreenPaymentLines extends Component {
         sendPaymentRequest: Function,
         sendPaymentReverse: Function,
         updateSelectedPaymentline: Function,
+        isRefundOrder: Boolean,
     };
 
     setup() {
-        this.ui = useState(useService("ui"));
+        this.ui = useService("ui");
         this.pos = usePos();
         this.dialog = useService("dialog");
     }
 
     selectedLineClass(line) {
-        return { "payment-terminal": line.get_payment_status() };
+        return { "payment-terminal": line.getPaymentStatus() };
     }
     unselectedLineClass(line) {
         return {};
@@ -37,7 +40,7 @@ export class PaymentScreenPaymentLines extends Component {
             this.dialog.add(NumberPopup, {
                 title: _t("New amount"),
                 buttons: enhancedButtons(),
-                startingValue: this.env.utils.formatCurrency(paymentline.get_amount(), false),
+                startingValue: this.env.utils.formatCurrency(paymentline.getAmount(), false),
                 getPayload: (num) => {
                     this.props.updateSelectedPaymentline(parseFloat(num));
                 },

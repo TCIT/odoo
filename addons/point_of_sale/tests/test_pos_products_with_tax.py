@@ -171,7 +171,7 @@ class TestPoSProductsWithTax(TestPoSCommon):
             for t1, t2 in zip(sorted(manually_calculated_taxes), sorted(tax_lines.mapped('balance'))):
                 self.assertAlmostEqual(t1, t2, msg='Taxes should be correctly combined.')
 
-            base_amounts = (97.27, 445.46)  # computation does not include invoiced order.
+            base_amounts = (-97.27, -445.46)  # computation does not include invoiced order.
             self.assertAlmostEqual(sum(base_amounts), sum(tax_lines.mapped('tax_base_amount')))
 
         self._run_test({
@@ -279,7 +279,7 @@ class TestPoSProductsWithTax(TestPoSCommon):
             self.assertAlmostEqual(refund_order.amount_paid, -104.01, msg='Amount paid for return order should be negative.')
 
         def _after_closing_cb():
-            manually_calculated_taxes = (4.01, 6.37)  # should be positive since it is return order
+            manually_calculated_taxes = (4.01, 6.36)  # should be positive since it is return order
             tax_lines = self.pos_session.move_id.line_ids.filtered(lambda line: line.account_id == self.tax_received_account)
             self.assertAlmostEqual(sum(manually_calculated_taxes), sum(tax_lines.mapped('balance')))
             for t1, t2 in zip(sorted(manually_calculated_taxes), sorted(tax_lines.mapped('balance'))):
@@ -308,9 +308,9 @@ class TestPoSProductsWithTax(TestPoSCommon):
                 'session_journal_entry': {
                     'line_ids': [
                         {'account_id': self.tax_received_account.id, 'partner_id': False, 'debit': 4.01, 'credit': 0, 'reconciled': False},
-                        {'account_id': self.tax_received_account.id, 'partner_id': False, 'debit': 6.37, 'credit': 0, 'reconciled': False},
+                        {'account_id': self.tax_received_account.id, 'partner_id': False, 'debit': 6.36, 'credit': 0, 'reconciled': False},
                         {'account_id': self.sales_account.id, 'partner_id': False, 'debit': 30, 'credit': 0, 'reconciled': False},
-                        {'account_id': self.sales_account.id, 'partner_id': False, 'debit': 36.36, 'credit': 0, 'reconciled': False},
+                        {'account_id': self.sales_account.id, 'partner_id': False, 'debit': 36.37, 'credit': 0, 'reconciled': False},
                         {'account_id': self.sales_account.id, 'partner_id': False, 'debit': 27.27, 'credit': 0, 'reconciled': False},
                         {'account_id': self.pos_receivable_account.id, 'partner_id': False, 'debit': 0, 'credit': 104.01, 'reconciled': True},
                     ],
@@ -551,7 +551,6 @@ class TestPoSProductsWithTax(TestPoSCommon):
         tax_pos = self.product1.taxes_id
         self.assertFalse(tax_pos.is_used)
         self.test_orders_no_invoiced()
-        tax_pos.invalidate_model(fnames=['is_used'])
         self.assertTrue(tax_pos.is_used)
 
     def test_pos_loaded_product_taxes_on_branch(self):
@@ -668,23 +667,83 @@ class TestPoSProductsWithTax(TestPoSCommon):
         # - Product no tax              => no tax should be set
         pos_data = pos_session.load_data([])
         self.assertEqual(
-            next(iter(filter(lambda p: p['id'] == product_all_taxes.id, pos_data['product.product']['data'])))['taxes_id'],
+            next(iter(filter(lambda p: p['id'] == product_all_taxes.product_tmpl_id.id, pos_data['product.template'])))['taxes_id'],
             tax_xx.ids
         )
         self.assertEqual(
-            next(iter(filter(lambda p: p['id'] == product_no_xx_tax.id, pos_data['product.product']['data'])))['taxes_id'],
+            next(iter(filter(lambda p: p['id'] == product_no_xx_tax.product_tmpl_id.id, pos_data['product.template'])))['taxes_id'],
             tax_x.ids
         )
-        tax_data_no_branch = next(iter(filter(lambda p: p['id'] == product_no_branch_tax.id, pos_data['product.product']['data'])))['taxes_id']
+        tax_data_no_branch = next(iter(filter(lambda p: p['id'] == product_no_branch_tax.product_tmpl_id.id, pos_data['product.template'])))['taxes_id']
         tax_data_no_branch.sort()
         self.assertEqual(
             tax_data_no_branch,
             (tax_a + tax_b).ids
         )
         self.assertEqual(
-            next(iter(filter(lambda p: p['id'] == product_no_tax.id, pos_data['product.product']['data'])))['taxes_id'],
+            next(iter(filter(lambda p: p['id'] == product_no_tax.product_tmpl_id.id, pos_data['product.template'])))['taxes_id'],
             []
         )
+
+        pos_user = self.env['res.users'].create({
+            'name': 'Joe Odoo',
+            'login': 'pos_user',
+            'password': 'pos_user',
+            'group_ids': [
+                (4, self.env.ref('base.group_user').id),
+                (4, self.env.ref('point_of_sale.group_pos_user').id),
+                (4, self.env.ref('stock.group_stock_user').id),
+            ],
+            'tz': 'America/New_York',
+            'company_id': branch_xx.id,
+            'company_ids': [Command.set([company.id, branch_x.id, branch_xx.id])],
+        })
+
+        def get_taxes_name_popup(product):
+            product = product.product_tmpl_id
+            # In order to simulate the state of the cache when we run this
+            # function over RPC, we need to fetch the below data first,
+            # invalidate our cache, and then enter `get_product_info_pos`
+            # with the arguments already loaded. This is necessary to test
+            # an access rights issue when trying to load product info.
+            branch_xx_id = branch_xx.id
+            xx_config_id = xx_config.id
+            product_all_taxes_lst_price = product_all_taxes.lst_price
+            self.env.invalidate_all()
+            return [tax['name'] for tax in product.with_user(pos_user).with_context(allowed_company_ids=[branch_xx_id]).get_product_info_pos(product_all_taxes_lst_price, 1, xx_config_id)['all_prices']['tax_details']]
+
+        self.assertEqual(get_taxes_name_popup(product_all_taxes), ["Tax XX"])
+        self.assertEqual(get_taxes_name_popup(product_no_xx_tax), ["Tax X"])
+        self.assertEqual(get_taxes_name_popup(product_no_branch_tax), ["Tax A", "Tax B"])
+        self.assertEqual(get_taxes_name_popup(product_no_tax), [])
+
+    def test_get_product_info_pos_with_fiscal_position(self):
+        tax_15 = self.env['account.tax'].create({
+            'name': 'tax_15',
+            'type_tax_use': 'sale',
+            'amount_type': 'percent',
+            'amount': 15.0,
+        })
+        tax_30 = self.env['account.tax'].create({
+            'name': 'tax_30',
+            'type_tax_use': 'sale',
+            'amount_type': 'percent',
+            'amount': 30.0,
+            'original_tax_ids': [Command.set(tax_15.ids)],
+        })
+        fp = self.env['account.fiscal.position'].create({
+            'name': 'Maps 15 to 30',
+            'tax_ids': [Command.set(tax_30.ids)],
+        })
+        product = self.create_product('Product FP', self.categ_basic, 100.0, tax_ids=tax_15.ids)
+        template = product.product_tmpl_id
+
+        def get_display_info(fp_id=False):
+            info = template.with_context(fiscal_position_id=fp_id).get_product_info_pos(100.0, 1, self.config.id)['all_prices']
+            return (info['price_with_tax'], [t['name'] for t in info['tax_details']])
+
+        self.assertEqual(get_display_info(), (115.0, ['tax_15']))
+        self.assertEqual(get_display_info(fp.id), (130.0, ['tax_30']))
 
     def test_combo_product_variant_error(self):
         """This tests make sure that product containing variants cannot change type to combo"""
@@ -702,3 +761,25 @@ class TestPoSProductsWithTax(TestPoSCommon):
         with self.assertRaises(UserError):
             with Form(self.variant_product.product_tmpl_id) as product:
                 product.type = "combo"
+
+    def test_tax_change_blocked_when_open_pos_session(self):
+        """Changing a POS sale tax must be blocked when a POS session is open"""
+        tax = self.taxes['tax7']
+
+        self.open_new_session()
+        self.assertEqual(self.pos_session.state, 'opened')
+
+        self.env['pos.order'].sync_from_ui([self.create_ui_order_data([
+            (self.product1, 1),
+        ])])
+
+        self.assertTrue(self.pos_session.order_ids)
+        self.assertTrue(self.env['pos.order.line'].search([
+            ('order_id.session_id', '=', self.pos_session.id),
+            ('tax_ids', 'in', tax.ids),
+        ], limit=1))
+
+        with self.assertRaises(UserError):
+            tax.write({
+                'price_include_override': 'tax_included',
+            })

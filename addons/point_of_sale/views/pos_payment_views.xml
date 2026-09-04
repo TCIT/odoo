@@ -9,7 +9,8 @@
                     <group>
                         <field name="session_id" readonly="0"/>
                         <field name="pos_order_id"/>
-                        <field name="amount" readonly="0"/>
+                        <field name="amount" readonly="0" widget="monetary"/>
+                        <field name="currency_id"/>
                         <field name="payment_method_id"/>
                         <field name="payment_method_payment_mode" invisible="not payment_method_payment_mode"/>
                         <field name="card_type" invisible="not card_type or not card_no"/>
@@ -49,7 +50,7 @@
                 <field name="name"/>
                 <field name="amount"/>
                 <field name="pos_order_id" />
-                <group expand="0" string="Group By">
+                <group>
                     <filter name="group_by_payment_method" string="Payment Method" domain="[]"  context="{'group_by':'payment_method_id'}"/>
                     <filter name="group_by_session" string="Session" domain="[]"  context="{'group_by':'session_id'}"/>
                 </group>

@@ -1,16 +1,44 @@
-from odoo import models
+from odoo import _, api, models
+from odoo.exceptions import RedirectWarning
 
 
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
-    def l10n_tr_nilvera_get_documents(self):
-        self.env['account.move']._l10n_tr_nilvera_get_documents()
+    @api.depends('is_nilvera_journal', 'l10n_tr_nilvera_api_key', 'type')
+    def _compute_show_fetch_in_einvoices_button(self):
+        # EXTENDS 'account'
+        super()._compute_show_fetch_in_einvoices_button()
+        self.filtered(
+            lambda j: j.is_nilvera_journal and
+                      j.type == 'purchase'
+        ).show_fetch_in_einvoices_button = True
 
-    def l10n_tr_nilvera_get_message_status(self):
-        """ Gets the status from Nilvera for all processing invoices in this journal. """
-        invoices_to_update = self.env['account.move'].search([
-            ('journal_id', '=', self.id),
-            ('l10n_tr_nilvera_send_status', 'in', ['waiting', 'sent']),
-        ])
-        invoices_to_update._l10n_tr_nilvera_get_submitted_document_status()
+    @api.depends('l10n_tr_nilvera_api_key', 'type')
+    def _compute_show_refresh_out_einvoices_status_button(self):
+        # EXTENDS 'account'
+        super()._compute_show_refresh_out_einvoices_status_button()
+        self.filtered(
+            lambda j: j.type == 'sale'
+        ).show_refresh_out_einvoices_status_button = True
+
+    def button_fetch_in_einvoices(self):
+        # EXTENDS 'account'
+        """ Fetches bills from Nilvera."""
+        self._check_api_key()
+        super().button_fetch_in_einvoices()
+        self.env['account.move']._cron_nilvera_get_new_einvoice_purchase_documents()
+
+    def button_refresh_out_einvoices_status(self):
+        # EXTENDS 'account'
+        self._check_api_key()
+        super().button_refresh_out_einvoices_status()
+        self.env['account.move']._cron_nilvera_get_invoice_status()
+
+    def _check_api_key(self):
+        if self.sudo().filtered(lambda j: not j.l10n_tr_nilvera_api_key):
+            raise RedirectWarning(
+                _("Please configure your Nilvera API key"),
+                self.env.ref('account.action_account_config').id,
+                _("Go to the Accounting Settings")
+            )

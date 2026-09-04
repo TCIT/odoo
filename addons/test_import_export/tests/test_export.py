@@ -2,8 +2,8 @@ import json
 from datetime import date
 from unittest.mock import patch
 
-from odoo import http
-from odoo.tests import common, tagged
+from odoo import Command, http
+from odoo.tests import common, tagged, warmup
 from odoo.tools.misc import get_lang
 from odoo.addons.web.controllers.export import ExportXlsxWriter
 
@@ -601,5 +601,166 @@ class TestGroupedExport(XlsxCreatorCase):
                 ['1 (1)', '86420.86'],
                 ['    86420.864 (1)', '86420.86'],
                 ['1', '86420.86'],
+            ],
+        )
+
+    def test_order(self):
+        self.make([
+            {'date_max': '2025-04-01', 'int_sum': 1},
+            {'date_max': '2025-12-12', 'int_sum': 1},
+            {'date_max': '2025-12-12', 'int_sum': 2},
+            {'date_max': '2025-04-01', 'int_sum': 2},
+        ])
+        self.patch(self.registry[self.model_name], '_order', 'date_max DESC')
+        export = self.export(fields=['date_max'], params={'groupby': ['int_sum'], 'domain': []})
+        self.assertExportEqual(
+            export,
+            [
+                ['Date Max'],
+                ['1 (2)'],
+                ['2025-12-12'],
+                ['2025-04-01'],
+                ['2 (2)'],
+                ['2025-12-12'],
+                ['2025-04-01'],
+            ],
+        )
+
+    def test_order_many2many(self):
+        self.patch(self.registry[self.model_name], '_order', 'date_max DESC')
+
+        partner1, partner2, partner3, partner4 = self.env["res.partner"].create([
+            {'name': 'foo'},
+            {'name': 'bar'},
+            {'name': 'baz'},
+            {'name': 'xyz'},
+        ])
+        self.make([
+            {'many2many': [Command.link(partner1.id), Command.link(partner2.id)], 'date_max': '2025-04-01'},
+            {'many2many': [Command.link(partner2.id), Command.link(partner3.id)], 'date_max': '2025-12-12'},
+            {'many2many': [Command.link(partner3.id), Command.link(partner4.id)], 'date_max': '2025-12-12'},
+            {'many2many': [Command.link(partner4.id), Command.link(partner1.id)], 'date_max': '2025-04-01'},
+        ])
+        export = self.export(fields=['date_max'], params={'groupby': ['many2many']})
+        self.assertExportEqual(
+            export,
+            [
+                ['Date Max'],
+                ['foo (2)'],
+                ['2025-04-01'],
+                ['2025-04-01'],
+                ['bar (2)'],
+                ['2025-12-12'],
+                ['2025-04-01'],
+                ['baz (2)'],
+                ['2025-12-12'],
+                ['2025-12-12'],
+                ['xyz (2)'],
+                ['2025-12-12'],
+                ['2025-04-01'],
+            ],
+        )
+
+    @warmup
+    def test_performance_export_data(self):
+        """ Tests the number of calls to `export_data` and the number of sql queries during a grouped export"""
+        self.make([
+            {'int_sum': 1, 'int_max': 1},
+            {'int_sum': 1, 'int_max': 2},
+            {'int_sum': 1, 'int_max': 3},
+            {'int_sum': 2, 'int_max': 4},
+            {'int_sum': 2, 'int_max': 5},
+            {'int_sum': 3, 'int_max': 6},
+            {'int_sum': 4, 'int_max': 7},
+            {'int_sum': 5, 'int_max': 8},
+        ])
+        with self.assertQueryCount(5), patch.object(
+            self.env.registry[self.model_name],
+            'export_data',
+            autospec=True,
+            side_effect=self.env.registry[self.model_name].export_data,
+        ) as mock:
+            export = self.export(fields=['int_sum', 'int_max'], params={'groupby': ['int_sum'], 'domain': []})
+
+        self.assertEqual(mock.call_count, 1, "`export_data` should be called only one time")
+
+        self.assertExportEqual(
+            export,
+            [
+                ['Int Sum', 'Int Max'],
+                ['1 (3)', '3'],
+                ['1', '1'],
+                ['1', '2'],
+                ['1', '3'],
+                ['2 (2)', '5'],
+                ['2', '4'],
+                ['2', '5'],
+                ['3 (1)', '6'],
+                ['3', '6'],
+                ['4 (1)', '7'],
+                ['4', '7'],
+                ['5 (1)', '8'],
+                ['5', '8'],
+            ],
+        )
+
+    def test_groupby_properties_type_field(self):
+        """Test that exporting works for record grouped by a property field."""
+
+        property_def = [{'name': 'date', 'type': 'date', 'string': 'Date', 'default': '2025-11-11'}]
+        record = self.env['export.aggregator'].create({'definition_properties': property_def})
+        values = [
+            {'int_sum': 10, 'properties': {'date': '2025-11-09'}, 'parent_id': record.id, 'float_min': 86.8},
+            {'int_sum': 10, 'properties': {'date': '2025-11-12'}, 'parent_id': record.id, 'float_min': 82.8},
+            {'int_sum': 10, 'properties': {'date': '2025-09-09'}, 'parent_id': record.id, 'float_min': 20.8},
+        ]
+        self.make(values)
+        export = self.export(
+            fields=['int_sum', 'properties'],
+            params={
+                'groupby': ['properties.date:month'],
+                'domain': [('int_sum', '=', 10)],
+            },
+        )
+
+        self.assertExportEqual(export, [
+            ['Int Sum', 'Properties'],
+            ['September 2025 (1)', ''],
+            ['10', "{'date': '2025-09-09'}"],
+            ['November 2025 (2)', ''],
+            ['10', "{'date': '2025-11-09'}"],
+            ['10', "{'date': '2025-11-12'}"],
+        ])
+
+    def test_groupby_avg_empty_group(self):
+        """
+        Test that exporting a grouped view does not crash
+        when encountering an empty group.
+        """
+        self.make({'date_max': '2026-01-01', 'float_avg': 100.0})
+
+        # Sepcify min_groups which sets the number of groups in the view
+        export = self.export(
+            fields=['float_avg'],
+            params={
+                'groupby': ['date_max:month'],
+                'context': {
+                    'fill_temporal': {
+                        'min_groups': 4,
+                        'fill_from': '2026-01-01',
+                    }
+                }
+            }
+        )
+
+        self.assertExportEqual(
+            export,
+            [
+                ['Float Avg'],
+                ['January 2026 (1)'],
+                ['100.00'],
+                ['February 2026 (0)'],
+                ['March 2026 (0)'],
+                ['April 2026 (0)'],
             ],
         )

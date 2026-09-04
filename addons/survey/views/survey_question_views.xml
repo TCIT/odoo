@@ -272,11 +272,11 @@
                                         <field name="is_time_limited" nolabel="1" class="oe_inline"
                                             widget="boolean_update_flag"
                                             options="{'flagFieldName': 'is_time_customized'}"
-                                            context="{'referenceValue': parent.session_speed_rating}"/>
+                                            context="{'referenceValue': survey_session_speed_rating}"/>
                                         <field name="time_limit" nolabel="1" class="oe_inline"
                                             widget="integer_update_flag"
                                             options="{'flagFieldName': 'is_time_customized'}"
-                                            context="{'referenceValue': parent.session_speed_rating_time_limit}"
+                                            context="{'referenceValue': survey_session_speed_rating_time_limit}"
                                             invisible="not is_time_limited" />
                                     </div>
                                 </group>
@@ -307,7 +307,7 @@
                 <field name="title"/>
                 <field name="survey_id" string="Survey"/>
                 <field name="question_type" string="Type"/>
-                <group expand="1" string="Group By">
+                <group>
                     <filter name="group_by_type" string="Type" domain="[]" context="{'group_by':'question_type'}"/>
                     <filter name="group_by_survey" string="Survey" domain="[]" context="{'group_by':'survey_id'}"/>
                 </group>
@@ -377,7 +377,7 @@
         <field name="arch" type="xml">
             <search string="Search Label">
                 <field name="question_id"/>
-                <group expand="1" string="Group By">
+                <group>
                     <filter name="group_by_question" string="Question" domain="[]" context="{'group_by':'question_id'}"/>
                 </group>
             </search>

@@ -1,10 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Mexico - Accounting',
-    'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations/mexico.html',
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations/mexico.html',
     'icon': '/account/static/description/l10n.png',
     'countries': ['mx'],
-    'version': '2.2',
+    'version': '2.4',
     'author': 'Vauxoo',
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
@@ -38,6 +38,7 @@ With this module you will have:
         'views/res_bank_view.xml',
         'views/account_views.xml',
         'views/account_tax_view.xml',
+        'views/res_config_settings_views.xml',
         "data/l10n_mx_uom.xml",
     ],
     'demo': [

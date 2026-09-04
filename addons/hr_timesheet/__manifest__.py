@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 
@@ -37,6 +36,7 @@ up a management by affair.
         'report/report_timesheet_templates.xml',
         'views/hr_department_views.xml',
         'views/hr_employee_views.xml',
+        'views/hr_employee_public_views.xml',
         'data/hr_timesheet_data.xml',
         'views/project_task_sharing_views.xml',
         'views/project_update_views.xml',
@@ -47,22 +47,24 @@ up a management by affair.
         'data/hr_timesheet_demo.xml',
     ],
     'installable': True,
+    'pre_init_hook': '_pre_init_hook',
     'post_init_hook': 'create_internal_project',
     'uninstall_hook': '_uninstall_hook',
     'assets': {
         'web.assets_backend': [
             'hr_timesheet/static/src/**/*',
-            ('remove', 'hr_timesheet/static/src/views/**'),
+            ('remove', 'hr_timesheet/static/src/views/project_task_analysis_graph/**/*'),
+            ('remove', 'hr_timesheet/static/src/views/project_task_graph/**/*'),
+            ('remove', 'hr_timesheet/static/src/views/timesheet_graph/**/*'),
         ],
         'web.assets_backend_lazy': [
-            'hr_timesheet/static/src/views/**',
+            'hr_timesheet/static/src/views/project_task_analysis_graph/**/*',
+            'hr_timesheet/static/src/views/project_task_graph/**/*',
+            'hr_timesheet/static/src/views/timesheet_graph/**/*',
         ],
         'web.assets_unit_tests': [
-            "hr_timesheet/static/tests/hr_timesheet_models.js",
-        ],
-        'web.qunit_suite_tests': [
-            'hr_timesheet/static/tests/**/*',
-            ('remove', "hr_timesheet/static/tests/hr_timesheet_models.js"),
+            'hr_timesheet/static/tests/hr_timesheet_models.js',
+            'hr_timesheet/static/tests/**/*.test.js',
         ],
         'project.webclient': [
             'hr_timesheet/static/src/services/**/*',
@@ -70,5 +72,6 @@ up a management by affair.
             'hr_timesheet/static/src/scss/timesheets_task_form.scss'
         ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

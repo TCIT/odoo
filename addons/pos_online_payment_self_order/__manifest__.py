@@ -15,12 +15,22 @@
     'auto_install': True,
     'assets': {
         'pos_self_order.assets': [
-            'pos_online_payment_self_order/static/src/**/*',
-            'web/static/lib/zxing-library/zxing-library.js',
+            'pos_online_payment_self_order/static/src/app/**/*',
+            'point_of_sale/static/lib/qrcode.js',
+        ],
+        'point_of_sale._assets_pos': [
+            'pos_online_payment_self_order/static/src/overrides/**/*',
         ],
         'web.assets_tests': [
             'pos_online_payment_self_order/static/tests/tours/pos_online_payment_multi_table_order.js',
         ],
+        'pos_self_order.assets_tests': [
+            'pos_online_payment_self_order/static/tests/tours/pos_self_order_mobile_online_payment_tour.js',
+        ],
+        'web.assets_unit_tests': [
+            'pos_online_payment_self_order/static/tests/unit/**/*',
+        ],
     },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

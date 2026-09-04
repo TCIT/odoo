@@ -10,9 +10,13 @@
         </t>
         <t t-if="o.dest_address_id">
             <t t-set="information_block">
-                <strong>Shipping address:</strong>
+                <strong class="d-block mt-3">Shipping address</strong>
                 <div t-field="o.dest_address_id"
                     t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}' name="purchase_shipping_address"/>
+                <div>
+                    <strong>Requested Ship Date:</strong>
+                    <span t-field="o.date_planned" t-options="{'date_only': 'true'}"/>
+                </div>
             </t>
         </t>
         <div class="page">
@@ -30,20 +34,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="o.order_line" t-as="order_line">
-                        <tr t-att-class="'fw-bold o_line_section' if order_line.display_type == 'line_section' else 'fst-italic o_line_note' if order_line.display_type == 'line_note' else ''">
+                    <t t-foreach="o.order_line.filtered(lambda l: l.display_type or l.product_qty != 0)" t-as="order_line">
+                        <tr t-att-class="'fw-bolder o_line_section' if order_line.display_type == 'line_section' else 'fw-bold o_line_subsection' if order_line.display_type == 'line_subsection' else 'fst-italic o_line_note' if order_line.display_type == 'line_note' else ''">
                             <t t-if="not order_line.display_type">
                                 <td id="product">
                                     <span t-field="order_line.name"/>
                                 </td>
                                 <td class="text-center">
-                                    <span t-field="order_line.date_planned"/>
+                                    <span t-field="order_line.date_planned" t-options="{'date_only': 'true'}"/>
                                 </td>
                                 <td class="text-end">
                                     <span t-field="order_line.product_qty"/>
-                                    <span t-field="order_line.product_uom" groups="uom.group_uom"/>
-                                    <span t-if="order_line.product_packaging_id">
-                                        (<span t-field="order_line.product_packaging_qty" t-options='{"widget": "integer"}'/> <span t-field="order_line.product_packaging_id"/>)
+                                    <span t-field="order_line.product_uom_id" groups="uom.group_uom"/>
+                                    <span t-if="order_line.product_uom_id != order_line.product_id.uom_id" class="text-muted small">
+                                    <br/>
+                                        <span t-field="order_line.product_uom_qty" t-options="{'widget': 'float', 'decimal_precision': 'Product Unit'}"/> <span t-field="order_line.product_id.uom_id"/>
                                     </span>
                                 </td>
                             </t>
@@ -57,13 +62,13 @@
                 </tbody>
             </table>
 
-            <p t-field="o.notes" class="mt-4"/>
+            <p t-field="o.note" class="mt-4"/>
 
             <div class="oe_structure"/>
 
             <t t-set="base_address" t-value="o.env['ir.config_parameter'].sudo().get_param('web.base.url')"/>
             <t t-set="portal_url" t-value="base_address + '/my/purchase/' + str(o.id) + '#portal_connect_software_modal'"/>
-            <div t-if="any(u._is_portal() for u in o.partner_id.user_ids)" class="text-center">
+            <div t-if="any(u._is_portal() for u in o.partner_id.user_ids) and o._get_edi_builders()" class="text-center">
                 <a t-att-href="portal_url">Connect your software</a> with <t t-out="o.company_id.name"/> to create quotes automatically.
             </div>
         </div>

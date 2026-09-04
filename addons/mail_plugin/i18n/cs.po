@@ -1,24 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* mail_plugin
-# 
-# Translators:
-# Wil Odoo, 2024
-# Tereza Mokrá, 2024
-# 
+# * mail_plugin
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tereza Mokrá, 2024\n"
-"Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 17:53+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Czech <https://translate.odoo.com/projects/odoo-19/"
+"mail_plugin/cs/>\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: cs\n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -143,7 +142,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Company updated"
-msgstr ""
+msgstr "Společnost aktualizovaná"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -162,37 +161,42 @@ msgstr "Kontaktní údaje"
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Contact created"
-msgstr ""
+msgstr "Kontakt vytvořen"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Contacts Found (%(count)s)"
-msgstr ""
+msgstr "Nalezeno kontakty (%(count)s)"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Could not autocomplete the company. Internal error. Try again later..."
 msgstr ""
+"Aktualizování společnosti se nezdařilo. Interní chyba. Zkuste to znovu "
+"později..."
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Could not connect to database. Try to log out and in."
 msgstr ""
+"Připojení do databáze se nezdařilo. Zkuste se odhlásit a přihlásit znovu."
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Could not connect to your database. Please try again."
-msgstr ""
+msgstr "Připojení do databáze se nezdařilo. Zkuste to znovu."
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Could not display image %(attachmentName)s, size is over limit."
 msgstr ""
+"Nelze zobrazit obrázek %(attachmentName)s, protože jeho velikost přesahuje "
+"limit."
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -205,6 +209,11 @@ msgstr "Vytvořit"
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Create a Company"
 msgstr "Vytvořit společnost"
+
+#. module: mail_plugin
+#: model:ir.model,website_form_label:mail_plugin.model_res_partner
+msgid "Create a Customer"
+msgstr "Vytvořit zákazníka"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -226,19 +235,19 @@ msgstr "Vytvořeno dne"
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Debug"
-msgstr ""
+msgstr "Ladění"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Debug Zone"
-msgstr ""
+msgstr "Zona ladění"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Debug zone for development purpose."
-msgstr ""
+msgstr "Zona ladění pro účely vývoje."
 
 #. module: mail_plugin
 #: model_terms:ir.ui.view,arch_db:mail_plugin.app_auth
@@ -252,6 +261,8 @@ msgid "Description"
 msgstr "Popis"
 
 #. module: mail_plugin
+#: model:ir.model.fields,field_description:mail_plugin.field_ir_http__display_name
+#: model:ir.model.fields,field_description:mail_plugin.field_res_partner__display_name
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__display_name
 msgid "Display Name"
 msgstr "Zobrazovací název"
@@ -343,6 +354,8 @@ msgid "IAP response stored as a JSON string"
 msgstr ""
 
 #. module: mail_plugin
+#: model:ir.model.fields,field_description:mail_plugin.field_ir_http__id
+#: model:ir.model.fields,field_description:mail_plugin.field_res_partner__id
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__id
 msgid "ID"
 msgstr "ID"

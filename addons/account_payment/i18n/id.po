@@ -1,24 +1,30 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_payment
-# 
+# * account_payment
+#
 # Translators:
-# Wil Odoo, 2024
-# Abe Manyo, 2024
-# 
+# Martin Trigaux, 2022
+# Ryanto The <ry.the77@gmail.com>, 2022
+# Muftiara Syuhada <muftiara.syuhada@gmail.com>, 2023
+# Abe Manyo, 2023
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
+# "Abe Manyo (abem)" <abem@odoo.com>, 2025, 2026.
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-25 07:48+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Abe Manyo, 2024\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-05-29 17:36+0000\n"
+"PO-Revision-Date: 2026-08-08 07:16+0000\n"
+"Last-Translator: \"Nurul Aini Akrima Sabila (nuaas)\" <nuaas@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/"
+"account_payment/id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_payment
 #. odoo-python
@@ -32,7 +38,7 @@ msgstr ""
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "%s day(s) overdue"
 msgstr "%s hari terlambat"
 
@@ -111,25 +117,28 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
-"                        few minutes, please check your payment provider configuration."
+"                        Wait a moment for it to be processed. If the refund "
+"is still pending in a\n"
+"                        few minutes, please check your payment provider "
+"configuration."
 msgstr ""
 "<strong>Warning!</strong> Ada refund yang pending untuk pembayaran ini.\n"
-"                        Tunggu sebentar sampai refund diproses. Bila refund masih pending setelah\n"
-"                        beberapa menit, silakan periksa kembali konfigurasi penyedia pembayaran Anda."
+"                        Tunggu sebentar sampai refund diproses. Bila refund "
+"masih pending setelah\n"
+"                        beberapa menit, silakan periksa kembali konfigurasi "
+"penyedia pembayaran Anda."
 
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/wizards/payment_link_wizard.py:0
 msgid "A discount will be applied if the customer pays before %s included."
-msgstr ""
-"Diskon akan diterapkan bila pelanggan membayar sebelum dan termasuk %s. "
+msgstr "Diskon akan diterapkan bila pelanggan membayar sebelum dan termasuk %s."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay"
-" twice."
+"A payment has already been made on this invoice, please make sure to not pay "
+"twice."
 msgstr ""
 "Pembayaran sudah dilakukan pada faktur ini, pastikan pembayaran tidak "
 "dilakukan dua kali."
@@ -145,11 +154,6 @@ msgstr "Sudah ada transaksi pembayaran dengan referensi %s."
 #: code:addons/account_payment/models/account_payment.py:0
 msgid "A token is required to create a new payment transaction."
 msgstr "Token dibutuhkan untuk membuat transaksi pembayaran baru."
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,button_text:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Activate Stripe"
-msgstr "Aktifkan Stripe"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
@@ -189,6 +193,11 @@ msgid "Authorized Transactions"
 msgstr "Transaksi Diotorisasi"
 
 #. module: account_payment
+#: model:ir.model,name:account_payment.model_account_bank_statement_line
+msgid "Bank Statement Line"
+msgstr ""
+
+#. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.account_invoice_view_form_inherit_payment
 msgid "Capture Transaction"
 msgstr "Cetak Transaksi"
@@ -199,11 +208,6 @@ msgstr "Cetak Transaksi"
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
 msgid "Close"
 msgstr "Tutup"
-
-#. module: account_payment
-#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__payment_method_code
-msgid "Code"
-msgstr "Kode"
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_res_config_settings
@@ -231,7 +235,18 @@ msgid "Discount Date"
 msgstr "Tanggal Diskon"
 
 #. module: account_payment
+#: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_journal__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_move__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__display_name
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_provider__display_name
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__display_name
+#: model:ir.model.fields,field_description:account_payment.field_payment_transaction__display_name
+#: model:ir.model.fields,field_description:account_payment.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "Nama Tampilan"
 
@@ -260,11 +275,6 @@ msgid "Early Payment Discount of"
 msgstr "Diskon Pembayaran Awal sebesar"
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,description:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Enable credit & debit card payments supported by Stripe."
-msgstr "Aktifkan pembayaran kartu kredit & debit yang didukung oleh Stripe."
-
-#. module: account_payment
 #: model:ir.model.fields.selection,name:account_payment.selection__payment_refund_wizard__support_refund__full_only
 msgid "Full Only"
 msgstr "Hanya Penuh"
@@ -290,7 +300,18 @@ msgid "Has a pending refund"
 msgstr "Memiliki refund yang pending"
 
 #. module: account_payment
+#: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__id
+#: model:ir.model.fields,field_description:account_payment.field_account_journal__id
+#: model:ir.model.fields,field_description:account_payment.field_account_move__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_method_line__id
+#: model:ir.model.fields,field_description:account_payment.field_account_payment_register__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_provider__id
 #: model:ir.model.fields,field_description:account_payment.field_payment_refund_wizard__id
+#: model:ir.model.fields,field_description:account_payment.field_payment_transaction__id
+#: model:ir.model.fields,field_description:account_payment.field_res_config_settings__id
 msgid "ID"
 msgstr "ID"
 
@@ -310,7 +331,8 @@ msgid ""
 "In test mode, a fake payment is processed through a test payment interface.\n"
 "This mode is advised when setting up the provider."
 msgstr ""
-"Pada mode testing, pembayaran palsu akan diproses melalui antarmuka pembayaran testing.\n"
+"Pada mode testing, pembayaran palsu akan diproses melalui antarmuka "
+"pembayaran testing.\n"
 "Mode ini disarankan saat sedang set up provider."
 
 #. module: account_payment
@@ -394,19 +416,10 @@ msgstr ""
 "mengotorisasi transaksi (alih-alih untuk mengambil jumlah)."
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,step_image_alt:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Onboarding Online Payments"
-msgstr "Onboarding Pembayaran Online"
-
-#. module: account_payment
-#: model:ir.model,name:account_payment.model_onboarding_onboarding_step
-msgid "Onboarding Step"
-msgstr "Langkah Onboarding"
-
-#. module: account_payment
-#: model:onboarding.onboarding.step,title:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Online Payments"
-msgstr "Pembayaran Online"
+#. odoo-python
+#: code:addons/account_payment/wizards/payment_link_wizard.py:0
+msgid "Online payment option is not enabled in Configuration."
+msgstr "Opsi pembayaran online tidak diaktifkan di Konfigurasi."
 
 #. module: account_payment
 #. odoo-python
@@ -484,7 +497,7 @@ msgstr "Jurnal Pembayaran"
 #: model:ir.model,name:account_payment.model_account_payment_method_line
 #: model:ir.ui.menu,name:account_payment.payment_method_menu
 msgid "Payment Methods"
-msgstr "Metode-Metode Pembayaran"
+msgstr "Metode Pembayaran"
 
 #. module: account_payment
 #: model:ir.model,name:account_payment.model_payment_provider
@@ -598,11 +611,6 @@ msgid "State"
 msgstr "Status"
 
 #. module: account_payment
-#: model:onboarding.onboarding.step,done_text:account_payment.onboarding_onboarding_step_payment_provider
-msgid "Step Completed!"
-msgstr "Langkah Selesai!"
-
-#. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_payment__suitable_payment_token_ids
 #: model:ir.model.fields,field_description:account_payment.field_account_payment_register__suitable_payment_token_ids
 msgid "Suitable Payment Token"
@@ -619,8 +627,7 @@ msgstr "Token akses tidak valid."
 #: code:addons/account_payment/wizards/payment_refund_wizard.py:0
 msgid ""
 "The amount to be refunded must be positive and cannot be superior to %s."
-msgstr ""
-"Jumlah yang akan di-refund harus positif dan tidak boleh lebih dari %s."
+msgstr "Jumlah yang akan di-refund harus positif dan tidak boleh lebih dari %s."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__journal_id
@@ -630,12 +637,8 @@ msgstr "Jurnal di mana transaksi sukses ditulis."
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/models/payment_transaction.py:0
-msgid ""
-"The payment related to the transaction with reference %(ref)s has been "
-"posted: %(link)s"
-msgstr ""
-"Pembayaran terkait transaksi dengan referensi %(ref)s telah diposting: "
-"%(link)s"
+msgid "The payment related to transaction %(ref)s has been posted: %(link)s"
+msgstr "Pembayaran terkait transaksi %(ref)s telah dipost: %(link)s"
 
 #. module: account_payment
 #. odoo-python
@@ -649,6 +652,18 @@ msgid "The source payment of related refund payments"
 msgstr "Sumber pembayaran yang terkait pembayaran refund"
 
 #. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There are pending transactions for this invoice."
+msgstr "Terdapat transaksi pending untuk faktur ini."
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "There is no amount to be paid."
+msgstr "Tidak ada yang perlu dibayar."
+
+#. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
 msgid "There was an error processing your payment: invalid invoice."
 msgstr "Terjadi kesalahan ketika memproses tagihan Anda: faktur tidak valid."
@@ -659,8 +674,8 @@ msgid ""
 "There was an error processing your payment: issue with credit card ID "
 "validation."
 msgstr ""
-"Terjadi kesalahan ketika memproses tagihan Anda: ada masalah pada pengesahan"
-" ID kartu kredit."
+"Terjadi kesalahan ketika memproses tagihan Anda: ada masalah pada pengesahan "
+"ID kartu kredit."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
@@ -671,13 +686,31 @@ msgstr "Terjadi kesalahan ketika memproses tagihan Anda: transaksi gagal."
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
 msgid "There was en error processing your payment: invalid credit card ID."
 msgstr ""
-"Terjadi kesalahan ketika memproses tagihan Anda: ID kartu kredit tidak "
-"valid."
+"Terjadi kesalahan ketika memproses tagihan Anda: ID kartu kredit tidak valid."
 
 #. module: account_payment
-#: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment_paid
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice cannot be paid online."
+msgstr "Faktur ini tidak dapat dibayar online."
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
 msgid "This invoice has already been paid."
 msgstr "Faktur ini sudah dibayar."
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This invoice isn't posted."
+msgstr "Faktur ini belum dipost."
+
+#. module: account_payment
+#. odoo-python
+#: code:addons/account_payment/models/account_move.py:0
+msgid "This is not an outgoing invoice."
+msgstr "Ini bukan faktur keluar."
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__transaction_count
@@ -711,10 +744,12 @@ msgstr "Batalkan Transaksi"
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the "
+"enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
-"Anda tidak dapat menghapus metode pembayaran yang terkait provider dalam status enabled atau testing.\n"
+"Anda tidak dapat menghapus metode pembayaran yang terkait provider dalam "
+"status enabled atau testing.\n"
 "Provider yang terhubung: %s"
 
 #. module: account_payment
@@ -724,8 +759,8 @@ msgid ""
 "You cannot uninstall this module as payments using this payment method "
 "already exist."
 msgstr ""
-"Anda tidak dapat menguninstal modul ini karena pembayaran menggunakan metode"
-" pembayaran ini sudah tersedia."
+"Anda tidak dapat menguninstal modul ini karena pembayaran menggunakan metode "
+"pembayaran ini sudah tersedia."
 
 #. module: account_payment
 #. odoo-python
@@ -734,18 +769,19 @@ msgid ""
 "You must first deactivate a payment provider before deleting its journal.\n"
 "Linked providers: %s"
 msgstr ""
-"Anda harus pertama-tama menonaktifkan penyedia pembayaran sebelum menghapusnya dari jurnal.\n"
+"Anda harus pertama-tama menonaktifkan penyedia pembayaran sebelum "
+"menghapusnya dari jurnal.\n"
 "Provider yang terhubung: %s"
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "due in %s day(s)"
 msgstr "jatuh tempo dalam %s hari"
 
 #. module: account_payment
 #. odoo-javascript
-#: code:addons/account_payment/static/src/js/portal_my_invoices_payment.js:0
+#: code:addons/account_payment/static/src/interactions/portal_my_invoices_payment_list.js:0
 msgid "due today"
 msgstr "jatuh tempo hari ini"
 
@@ -758,3 +794,41 @@ msgstr "telah diterapkan."
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid "overdue"
 msgstr "terlambat"
+
+#~ msgid "Code"
+#~ msgstr "Kode"
+
+#~ msgid ""
+#~ "<strong>No suitable payment option could be found.</strong><br/>\n"
+#~ "                                If you believe that it is an error, "
+#~ "please contact the website administrator."
+#~ msgstr ""
+#~ "<strong>Tidak ada pilihan pembayaran yang sesuai yang dapat ditemukan.</"
+#~ "strong><br/>\n"
+#~ "                                Jika Anda merasa ini merupakan error, "
+#~ "silakan hubungi administrator website."
+
+#~ msgid "Pay with"
+#~ msgstr "Bayar dengan"
+
+#~ msgid "Register Payment"
+#~ msgstr "Buat Pembayaran"
+
+#~ msgid ""
+#~ "The payment related to the transaction with reference %(ref)s has been "
+#~ "posted: %(link)s"
+#~ msgstr ""
+#~ "Pembayaran terkait transaksi dengan referensi %(ref)s telah diposting: %"
+#~ "(link)s"
+
+#~ msgid "Type of Refund Supported"
+#~ msgstr "Tipe Refund yang Didukung"
+
+#~ msgid ""
+#~ "You can't delete a payment method that is linked to a provider in the "
+#~ "enabled or test state.\n"
+#~ "Linked provider(s): %s"
+#~ msgstr ""
+#~ "Anda tidak dapat menghapus metode pembayaran yang terkait provider dalam "
+#~ "status enabled atau testing.\n"
+#~ "Provider yang terhubung: %s"

@@ -1,20 +1,15 @@
-# -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from collections import defaultdict
 from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
-from odoo.osv.expression import AND
-from odoo.tools import format_date
+from odoo import api, fields, models
 
 
 class HrLeaveType(models.Model):
     _inherit = 'hr.leave.type'
 
-    work_entry_type_id = fields.Many2one('hr.work.entry.type', string='Work Entry Type')
+    work_entry_type_id = fields.Many2one('hr.work.entry.type', string='Work Entry Type', index='btree_not_null')
 
 
 class HrLeave(models.Model):
@@ -44,12 +39,16 @@ class HrLeave(models.Model):
         # 1. Create a work entry for each leave
         work_entries_vals_list = []
         for leave in self:
-            contracts = leave.employee_id.sudo()._get_contracts(leave.date_from, leave.date_to, states=['open', 'close'])
+            contracts = leave.employee_id.sudo()._get_versions_with_contract_overlap_with_period(leave.date_from.date(), leave.date_to.date())
             for contract in contracts:
                 # Generate only if it has aleady been generated
                 if leave.date_to >= contract.date_generated_from and leave.date_from <= contract.date_generated_to:
-                    work_entries_vals_list += contracts._get_work_entries_values(leave.date_from, leave.date_to)
+                    work_entries_vals_list += contracts._get_work_entries_values(
+                        datetime.combine(leave.date_from, time.min),
+                        datetime.combine(leave.date_to, time.max),
+                    )
 
+        work_entries_vals_list = self.env['hr.version']._generate_work_entries_postprocess(work_entries_vals_list)
         new_leave_work_entries = self.env['hr.work.entry'].create(work_entries_vals_list)
 
         if new_leave_work_entries:
@@ -57,8 +56,8 @@ class HrLeave(models.Model):
             start = min(self.mapped('date_from'), default=False)
             stop = max(self.mapped('date_to'), default=False)
             work_entry_groups = self.env['hr.work.entry']._read_group([
-                ('date_start', '<', stop),
-                ('date_stop', '>', start),
+                ('date', '<=', stop),
+                ('date', '>=', start),
                 ('employee_id', 'in', self.employee_id.ids),
             ], ['employee_id'], ['id:recordset'])
             work_entries_by_employee = {
@@ -84,8 +83,8 @@ class HrLeave(models.Model):
 
                 overlappping |= self.env['hr.work.entry']._from_intervals(outside_intervals)
                 included |= previous_employee_work_entries - overlappping
-            overlappping.write({'leave_id': False})
-            included.write({'active': False})
+            overlappping.filtered(lambda entry: entry.state != 'validated').write({'leave_id': False})
+            included.filtered(lambda entry: entry.state != 'validated').write({'active': False})
 
     def write(self, vals):
         if not self:
@@ -121,18 +120,12 @@ class HrLeave(models.Model):
         with self.env['hr.work.entry']._error_checking(start=start, stop=stop, employee_ids=employee_ids):
             return super().create(vals_list)
 
-    def action_reset_confirm(self):
-        start = min(self.mapped('date_from'), default=False)
-        stop = max(self.mapped('date_to'), default=False)
-        with self.env['hr.work.entry']._error_checking(start=start, stop=stop, employee_ids=self.employee_id.ids):
-            return super().action_reset_confirm()
-
     def _get_leaves_on_public_holiday(self):
         return super()._get_leaves_on_public_holiday().filtered(
             lambda l: l.holiday_status_id.work_entry_type_id.code not in ['LEAVE110', 'LEAVE210', 'LEAVE280'])
 
     def _validate_leave_request(self):
-        super(HrLeave, self)._validate_leave_request()
+        super()._validate_leave_request()
         self.sudo()._cancel_work_entry_conflict()  # delete preexisting conflicting work_entries
         return True
 
@@ -141,11 +134,16 @@ class HrLeave(models.Model):
         Override to archive linked work entries and recreate attendance work entries
         where the refused leave was.
         """
-        res = super(HrLeave, self).action_refuse()
+        res = super().action_refuse()
         self._regen_work_entries()
         return res
 
-    def _action_user_cancel(self, reason):
+    def _move_validate_leave_to_confirm(self):
+        res = super()._move_validate_leave_to_confirm()
+        self._regen_work_entries()
+        return res
+
+    def _action_user_cancel(self, reason=None):
         res = super()._action_user_cancel(reason)
         self.sudo()._regen_work_entries()
         return res
@@ -160,7 +158,10 @@ class HrLeave(models.Model):
         # Re-create attendance work entries
         vals_list = []
         for work_entry in work_entries:
-            vals_list += work_entry.contract_id._get_work_entries_values(work_entry.date_start, work_entry.date_stop)
+            vals_list += work_entry.version_id._get_work_entries_values(
+                datetime.combine(work_entry.date, time.min),
+                datetime.combine(work_entry.date, time.max))
+        vals_list = self.env['hr.version']._generate_work_entries_postprocess(vals_list)
         self.env['hr.work.entry'].create(vals_list)
 
     def _compute_can_cancel(self):

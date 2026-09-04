@@ -1,18 +1,20 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import werkzeug
-import itertools
 import pytz
 import babel.dates
 from collections import defaultdict
 
 from odoo import http, fields, tools, models
 from odoo.addons.website.controllers.main import QueryURL
+from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools import html2plaintext
 from odoo.tools.misc import get_lang
 from odoo.tools import sql
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
 
 
 class WebsiteBlog(http.Controller):
@@ -36,7 +38,7 @@ class WebsiteBlog(http.Controller):
             dom, groupby=['post_date:month'])
 
         locale = get_lang(request.env).code
-        tzinfo = pytz.timezone(request.context.get('tz', 'utc') or 'utc')
+        tzinfo = request.env.tz
         fmt = tools.DEFAULT_SERVER_DATETIME_FORMAT
 
         res = defaultdict(list)
@@ -74,10 +76,10 @@ class WebsiteBlog(http.Controller):
         domain = request.website.website_domain()
 
         if blog:
-            domain += [('blog_id', '=', blog.id)]
+            domain &= Domain('blog_id', '=', blog.id)
 
         if date_begin and date_end:
-            domain += [("post_date", ">=", date_begin), ("post_date", "<=", date_end)]
+            domain &= Domain("post_date", ">=", date_begin) & Domain("post_date", "<=", date_end)
         active_tag_ids = tags and [request.env['ir.http']._unslug(tag)[1] for tag in tags.split(',')] or []
         active_tags = BlogTag
         if active_tag_ids:
@@ -88,19 +90,19 @@ class WebsiteBlog(http.Controller):
                 new_url = path.replace("/tag/%s" % tags, fixed_tag_slug and "/tag/%s" % fixed_tag_slug or "", 1)
                 if new_url != path:  # check that really replaced and avoid loop
                     return request.redirect(new_url, 301)
-            domain += [('tag_ids', 'in', active_tags.ids)]
+            domain &= Domain('tag_ids', 'in', active_tags.ids)
 
         if request.env.user.has_group('website.group_website_designer'):
-            count_domain = domain + [("website_published", "=", True), ("post_date", "<=", fields.Datetime.now())]
+            count_domain = domain & Domain("website_published", "=", True) & Domain("post_date", "<=", fields.Datetime.now())
             published_count = BlogPost.search_count(count_domain)
             unpublished_count = BlogPost.search_count(domain) - published_count
 
             if state == "published":
-                domain += [("website_published", "=", True), ("post_date", "<=", fields.Datetime.now())]
+                domain &= Domain("website_published", "=", True) & Domain("post_date", "<=", fields.Datetime.now())
             elif state == "unpublished":
-                domain += ['|', ("website_published", "=", False), ("post_date", ">", fields.Datetime.now())]
+                domain &= Domain("website_published", "=", False) | ("post_date", ">", fields.Datetime.now())
         else:
-            domain += [("post_date", "<=", fields.Datetime.now())]
+            domain &= Domain("post_date", "<=", fields.Datetime.now())
 
         offset = (page - 1) * self._blog_post_per_page
 
@@ -139,7 +141,7 @@ class WebsiteBlog(http.Controller):
             all_tags = tools.lazy(lambda: blogs.all_tags(join=True) if not blog else blogs.all_tags().get(blog.id, request.env['blog.tag']))
         tag_category = tools.lazy(lambda: sorted(all_tags.mapped('category_id'), key=lambda category: category.name.upper()))
         other_tags = tools.lazy(lambda: sorted(all_tags.filtered(lambda x: not x.category_id), key=lambda tag: tag.name.upper()))
-        nav_list = tools.lazy(self.nav_list)
+        nav_list = tools.lazy(lambda: self.nav_list(blog))
         # and avoid accessing related blogs one by one
         posts.blog_id
 
@@ -172,10 +174,10 @@ class WebsiteBlog(http.Controller):
         '''/blog/<model("blog.blog"):blog>/page/<int:page>''',
         '''/blog/<model("blog.blog"):blog>/tag/<string:tag>''',
         '''/blog/<model("blog.blog"):blog>/tag/<string:tag>/page/<int:page>''',
-    ], type='http', auth="public", website=True, sitemap=True)
+    ], type='http', auth="public", website=True, sitemap=True, list_as_website_content=_lt("Blogs"))
     def blog(self, blog=None, tag=None, page=1, search=None, **opt):
         Blog = request.env['blog.blog']
-        blogs = tools.lazy(lambda: Blog.search(request.website.website_domain(), order="create_date asc, id asc"))
+        blogs = tools.lazy(lambda: Blog.search(request.website.website_domain(), order="sequence"))
 
         if not blog and len(blogs) == 1:
             url = QueryURL('/blog/%s' % request.env['ir.http']._slug(blogs[0]), search=search, **opt)()
@@ -240,7 +242,7 @@ class WebsiteBlog(http.Controller):
         date_begin, date_end = post.get('date_begin'), post.get('date_end')
 
         domain = request.website.website_domain()
-        blogs = blog.search(domain, order="create_date, id asc")
+        blogs = blog.search(domain, order="sequence")
 
         tag = None
         if tag_id:

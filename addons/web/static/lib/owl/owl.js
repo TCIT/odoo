@@ -87,10 +87,16 @@
     class OwlError extends Error {
     }
 
-    const { setAttribute: elemSetAttribute, removeAttribute } = Element.prototype;
-    const tokenList = DOMTokenList.prototype;
-    const tokenListAdd = tokenList.add;
-    const tokenListRemove = tokenList.remove;
+    let elemSetAttribute;
+    let removeAttribute;
+    let tokenListAdd;
+    let tokenListRemove;
+    if (typeof Element !== "undefined") {
+        ({ setAttribute: elemSetAttribute, removeAttribute } = Element.prototype);
+        const tokenList = DOMTokenList.prototype;
+        tokenListAdd = tokenList.add;
+        tokenListRemove = tokenList.remove;
+    }
     const isArray = Array.isArray;
     const { split, trim } = String.prototype;
     const wordRegexp = /\s+/;
@@ -279,13 +285,39 @@
         const rootNode = el.getRootNode();
         return rootNode instanceof ShadowRoot && el.ownerDocument.contains(rootNode.host);
     }
+    /**
+     * Determine whether the given element is contained in a specific root documnet:
+     * either directly or with a shadow root in between or in an iframe.
+     */
+    function isAttachedToDocument(element, documentElement) {
+        let current = element;
+        const shadowRoot = documentElement.defaultView.ShadowRoot;
+        while (current) {
+            if (current === documentElement) {
+                return true;
+            }
+            if (current.parentNode) {
+                current = current.parentNode;
+            }
+            else if (current instanceof shadowRoot && current.host) {
+                current = current.host;
+            }
+            else {
+                return false;
+            }
+        }
+        return false;
+    }
     function validateTarget(target) {
         // Get the document and HTMLElement corresponding to the target to allow mounting in iframes
         const document = target && target.ownerDocument;
         if (document) {
+            if (!document.defaultView) {
+                throw new OwlError("Cannot mount a component: the target document is not attached to a window (defaultView is missing)");
+            }
             const HTMLElement = document.defaultView.HTMLElement;
             if (target instanceof HTMLElement || target instanceof ShadowRoot) {
-                if (!document.body.contains(target instanceof HTMLElement ? target : target.host)) {
+                if (!isAttachedToDocument(target, document)) {
                     throw new OwlError("Cannot mount a component on a detached dom node");
                 }
                 return;
@@ -322,12 +354,40 @@
      */
     class Markup extends String {
     }
-    /*
-     * Marks a value as safe, that is, a value that can be injected as HTML directly.
-     * It should be used to wrap the value passed to a t-out directive to allow a raw rendering.
-     */
-    function markup(value) {
-        return new Markup(value);
+    function htmlEscape(str) {
+        if (str instanceof Markup) {
+            return str;
+        }
+        if (str === undefined) {
+            return markup("");
+        }
+        if (typeof str === "number") {
+            return markup(String(str));
+        }
+        [
+            ["&", "&amp;"],
+            ["<", "&lt;"],
+            [">", "&gt;"],
+            ["'", "&#x27;"],
+            ['"', "&quot;"],
+            ["`", "&#x60;"],
+        ].forEach((pairs) => {
+            str = String(str).replace(new RegExp(pairs[0], "g"), pairs[1]);
+        });
+        return markup(str);
+    }
+    function markup(valueOrStrings, ...placeholders) {
+        if (!Array.isArray(valueOrStrings)) {
+            return new Markup(valueOrStrings);
+        }
+        const strings = valueOrStrings;
+        let acc = "";
+        let i = 0;
+        for (; i < placeholders.length; ++i) {
+            acc += strings[i] + htmlEscape(placeholders[i]);
+        }
+        acc += strings[i];
+        return new Markup(acc);
     }
 
     function createEventHandler(rawEvent) {
@@ -415,10 +475,15 @@
     }
 
     const getDescriptor$3 = (o, p) => Object.getOwnPropertyDescriptor(o, p);
-    const nodeProto$4 = Node.prototype;
-    const nodeInsertBefore$3 = nodeProto$4.insertBefore;
-    const nodeSetTextContent$1 = getDescriptor$3(nodeProto$4, "textContent").set;
-    const nodeRemoveChild$3 = nodeProto$4.removeChild;
+    let nodeInsertBefore$3;
+    let nodeSetTextContent$1;
+    let nodeRemoveChild$3;
+    if (typeof Node !== "undefined") {
+        const nodeProto = Node.prototype;
+        nodeInsertBefore$3 = nodeProto.insertBefore;
+        nodeSetTextContent$1 = getDescriptor$3(nodeProto, "textContent").set;
+        nodeRemoveChild$3 = nodeProto.removeChild;
+    }
     // -----------------------------------------------------------------------------
     // Multi NODE
     // -----------------------------------------------------------------------------
@@ -554,11 +619,15 @@
     }
 
     const getDescriptor$2 = (o, p) => Object.getOwnPropertyDescriptor(o, p);
-    const nodeProto$3 = Node.prototype;
-    const characterDataProto$1 = CharacterData.prototype;
-    const nodeInsertBefore$2 = nodeProto$3.insertBefore;
-    const characterDataSetData$1 = getDescriptor$2(characterDataProto$1, "data").set;
-    const nodeRemoveChild$2 = nodeProto$3.removeChild;
+    let nodeInsertBefore$2;
+    let characterDataSetData$1;
+    let nodeRemoveChild$2;
+    if (typeof Node !== "undefined") {
+        const nodeProto = Node.prototype;
+        nodeInsertBefore$2 = nodeProto.insertBefore;
+        nodeRemoveChild$2 = nodeProto.removeChild;
+        characterDataSetData$1 = getDescriptor$2(CharacterData.prototype, "data").set;
+    }
     class VSimpleNode {
         constructor(text) {
             this.text = text;
@@ -624,13 +693,19 @@
     }
 
     const getDescriptor$1 = (o, p) => Object.getOwnPropertyDescriptor(o, p);
-    const nodeProto$2 = Node.prototype;
-    const elementProto = Element.prototype;
-    const characterDataProto = CharacterData.prototype;
-    const characterDataSetData = getDescriptor$1(characterDataProto, "data").set;
-    const nodeGetFirstChild = getDescriptor$1(nodeProto$2, "firstChild").get;
-    const nodeGetNextSibling = getDescriptor$1(nodeProto$2, "nextSibling").get;
-    const NO_OP = () => { };
+    let nodeProto;
+    let elementProto;
+    let characterDataSetData;
+    let nodeGetFirstChild;
+    let nodeGetNextSibling;
+    if (typeof Node !== "undefined") {
+        nodeProto = Node.prototype;
+        elementProto = Element.prototype;
+        characterDataSetData = getDescriptor$1(CharacterData.prototype, "data").set;
+        nodeGetFirstChild = getDescriptor$1(nodeProto, "firstChild").get;
+        nodeGetNextSibling = getDescriptor$1(nodeProto, "nextSibling").get;
+    }
+    const NO_OP$1 = () => { };
     function makePropSetter(name) {
         return function setProp(value) {
             // support 0, fallback to empty string for other falsy values
@@ -960,7 +1035,7 @@
                         idx: info.idx,
                         refIdx: info.refIdx,
                         setData: makeRefSetter(index, ctx.refList),
-                        updateData: NO_OP,
+                        updateData: NO_OP$1,
                     });
             }
         }
@@ -1018,8 +1093,8 @@
         const isDynamic = refN > 0;
         // these values are defined here to make them faster to lookup in the class
         // block scope
-        const nodeCloneNode = nodeProto$2.cloneNode;
-        const nodeInsertBefore = nodeProto$2.insertBefore;
+        const nodeCloneNode = nodeProto.cloneNode;
+        const nodeInsertBefore = nodeProto.insertBefore;
         const elementRemove = elementProto.remove;
         class Block {
             constructor(data) {
@@ -1148,11 +1223,17 @@
     }
 
     const getDescriptor = (o, p) => Object.getOwnPropertyDescriptor(o, p);
-    const nodeProto$1 = Node.prototype;
-    const nodeInsertBefore$1 = nodeProto$1.insertBefore;
-    const nodeAppendChild = nodeProto$1.appendChild;
-    const nodeRemoveChild$1 = nodeProto$1.removeChild;
-    const nodeSetTextContent = getDescriptor(nodeProto$1, "textContent").set;
+    let nodeInsertBefore$1;
+    let nodeAppendChild;
+    let nodeRemoveChild$1;
+    let nodeSetTextContent;
+    if (typeof Node !== "undefined") {
+        const nodeProto = Node.prototype;
+        nodeInsertBefore$1 = nodeProto.insertBefore;
+        nodeAppendChild = nodeProto.appendChild;
+        nodeRemoveChild$1 = nodeProto.removeChild;
+        nodeSetTextContent = getDescriptor(nodeProto, "textContent").set;
+    }
     // -----------------------------------------------------------------------------
     // List Node
     // -----------------------------------------------------------------------------
@@ -1364,9 +1445,13 @@
         return mapping;
     }
 
-    const nodeProto = Node.prototype;
-    const nodeInsertBefore = nodeProto.insertBefore;
-    const nodeRemoveChild = nodeProto.removeChild;
+    let nodeInsertBefore;
+    let nodeRemoveChild;
+    if (typeof Node !== "undefined") {
+        const nodeProto = Node.prototype;
+        nodeInsertBefore = nodeProto.insertBefore;
+        nodeRemoveChild = nodeProto.removeChild;
+    }
     class VHtml {
         constructor(html) {
             this.content = [];
@@ -1586,6 +1671,7 @@
             let current = fiber;
             do {
                 current.node.fiber = current;
+                fibersInError.set(current, error);
                 current = current.parent;
             } while (current);
             fibersInError.set(fiber.root, error);
@@ -1673,6 +1759,15 @@
             }
             else {
                 result++;
+                if (node.bdom) {
+                    // a mounted node whose pending fiber is cancelled before it could
+                    // render may have renders coalesced into that fiber (requested by
+                    // reactive changes, whose subscriptions were cleared when they were
+                    // notified), so dropping the fiber would silently lose them: force
+                    // the cancelling render to re-render the node even if its props are
+                    // unchanged.
+                    node.forceNextRender = true;
+                }
             }
             result += cancelFibers(fiber.children);
         }
@@ -2332,12 +2427,18 @@
         const node = getCurrent();
         let render = batchedRenderFunctions.get(node);
         if (!render) {
-            render = batched(node.render.bind(node, false));
+            const wrapper = { fn: batched(node.render.bind(node, false)) };
+            render = (...args) => wrapper.fn(...args);
             batchedRenderFunctions.set(node, render);
             // manual implementation of onWillDestroy to break cyclic dependency
-            node.willDestroy.push(clearReactivesForCallback.bind(null, render));
+            node.willDestroy.push(cleanupRenderAndReactives.bind(null, wrapper, render));
         }
         return reactive(state, render);
+    }
+    const NO_OP = () => { };
+    function cleanupRenderAndReactives(wrapper, render) {
+        wrapper.fn = NO_OP;
+        clearReactivesForCallback(render);
     }
     class ComponentNode {
         constructor(C, props, app, parent, parentKey) {
@@ -3643,7 +3744,10 @@
     const whitespaceRE = /\s+/g;
     // using a non-html document so that <inner/outer>HTML serializes as XML instead
     // of HTML (as we will parse it as xml later)
-    const xmlDoc = document.implementation.createDocument(null, null, null);
+    let xmlDoc;
+    if (typeof document !== "undefined") {
+        xmlDoc = document.implementation.createDocument(null, null, null);
+    }
     const MODS = new Set(["stop", "capture", "prevent", "self", "synthetic"]);
     let nextDataIds = {};
     function generateId(prefix = "") {
@@ -3799,7 +3903,16 @@
             return key;
         }
     }
-    const TRANSLATABLE_ATTRS = ["label", "title", "placeholder", "alt"];
+    const TRANSLATABLE_ATTRS = [
+        "alt",
+        "aria-label",
+        "aria-placeholder",
+        "aria-roledescription",
+        "aria-valuetext",
+        "label",
+        "placeholder",
+        "title",
+    ];
     const translationRE = /^(\s*)([\s\S]+?)(\s*)$/;
     class CodeGenerator {
         constructor(ast, options) {
@@ -4479,7 +4592,7 @@
             const isNewBlock = !block || forceNewBlock;
             let codeIdx = this.target.code.length;
             if (isNewBlock) {
-                const n = ast.content.filter((c) => c.type !== 6 /* TSet */).length;
+                const n = ast.content.filter((c) => !c.hasNoRepresentation).length;
                 let result = null;
                 if (n <= 1) {
                     for (let child of ast.content) {
@@ -4493,15 +4606,15 @@
             let index = 0;
             for (let i = 0, l = ast.content.length; i < l; i++) {
                 const child = ast.content[i];
-                const isTSet = child.type === 6 /* TSet */;
+                const forceNewBlock = !child.hasNoRepresentation;
                 const subCtx = createContext(ctx, {
                     block,
                     index,
-                    forceNewBlock: !isTSet,
+                    forceNewBlock,
                     isLast: ctx.isLast && i === l - 1,
                 });
                 this.compileAST(child, subCtx);
-                if (!isTSet) {
+                if (forceNewBlock) {
                     index++;
                 }
             }
@@ -4804,16 +4917,15 @@
                 isMultiple = isMultiple || this.slotNames.has(ast.name);
                 this.slotNames.add(ast.name);
             }
-            const dynProps = ast.attrs ? ast.attrs["t-props"] : null;
-            if (ast.attrs) {
-                delete ast.attrs["t-props"];
-            }
+            const attrs = { ...ast.attrs };
+            const dynProps = attrs["t-props"];
+            delete attrs["t-props"];
             let key = this.target.loopLevel ? `key${this.target.loopLevel}` : "key";
             if (isMultiple) {
                 key = this.generateComponentKey(key);
             }
             const props = ast.attrs
-                ? this.formatPropObject(ast.attrs, ast.attrsTranslationCtx, ctx.translationCtx)
+                ? this.formatPropObject(attrs, ast.attrsTranslationCtx, ctx.translationCtx)
                 : [];
             const scope = this.getPropString(props, dynProps);
             if (ast.defaultContent) {
@@ -4918,11 +5030,11 @@
             parseTPortal(node, ctx) ||
             parseTCall(node, ctx) ||
             parseTCallBlock(node) ||
-            parseTEscNode(node, ctx) ||
-            parseTOutNode(node, ctx) ||
-            parseTKey(node, ctx) ||
             parseTTranslation(node, ctx) ||
             parseTTranslationContext(node, ctx) ||
+            parseTKey(node, ctx) ||
+            parseTEscNode(node, ctx) ||
+            parseTOutNode(node, ctx) ||
             parseTSlot(node, ctx) ||
             parseComponent(node, ctx) ||
             parseDOMNode(node, ctx) ||
@@ -4990,19 +5102,29 @@
     function parseTDebugLog(node, ctx) {
         if (node.hasAttribute("t-debug")) {
             node.removeAttribute("t-debug");
-            return {
+            const content = parseNode(node, ctx);
+            const ast = {
                 type: 12 /* TDebug */,
-                content: parseNode(node, ctx),
+                content,
             };
+            if (content === null || content === void 0 ? void 0 : content.hasNoRepresentation) {
+                ast.hasNoRepresentation = true;
+            }
+            return ast;
         }
         if (node.hasAttribute("t-log")) {
             const expr = node.getAttribute("t-log");
             node.removeAttribute("t-log");
-            return {
+            const content = parseNode(node, ctx);
+            const ast = {
                 type: 13 /* TLog */,
                 expr,
-                content: parseNode(node, ctx),
+                content,
             };
+            if (content === null || content === void 0 ? void 0 : content.hasNoRepresentation) {
+                ast.hasNoRepresentation = true;
+            }
+            return ast;
         }
         return null;
     }
@@ -5232,11 +5354,19 @@
         }
         const key = node.getAttribute("t-key");
         node.removeAttribute("t-key");
-        const body = parseNode(node, ctx);
-        if (!body) {
+        const content = parseNode(node, ctx);
+        if (!content) {
             return null;
         }
-        return { type: 10 /* TKey */, expr: key, content: body };
+        const ast = {
+            type: 10 /* TKey */,
+            expr: key,
+            content,
+        };
+        if (content.hasNoRepresentation) {
+            ast.hasNoRepresentation = true;
+        }
+        return ast;
     }
     // -----------------------------------------------------------------------------
     // t-call
@@ -5345,7 +5475,7 @@
         if (node.textContent !== node.innerHTML) {
             body = parseChildren(node, ctx);
         }
-        return { type: 6 /* TSet */, name, value, defaultValue, body };
+        return { type: 6 /* TSet */, name, value, defaultValue, body, hasNoRepresentation: true };
     }
     // -----------------------------------------------------------------------------
     // Components
@@ -5524,30 +5654,51 @@
     // -----------------------------------------------------------------------------
     // Translation
     // -----------------------------------------------------------------------------
+    function wrapInTTranslationAST(r) {
+        const ast = { type: 16 /* TTranslation */, content: r };
+        if (r === null || r === void 0 ? void 0 : r.hasNoRepresentation) {
+            ast.hasNoRepresentation = true;
+        }
+        return ast;
+    }
     function parseTTranslation(node, ctx) {
         if (node.getAttribute("t-translation") !== "off") {
             return null;
         }
         node.removeAttribute("t-translation");
-        return {
-            type: 16 /* TTranslation */,
-            content: parseNode(node, ctx),
-        };
+        const result = parseNode(node, ctx);
+        if ((result === null || result === void 0 ? void 0 : result.type) === 3 /* Multi */) {
+            const children = result.content.map(wrapInTTranslationAST);
+            return makeASTMulti(children);
+        }
+        return wrapInTTranslationAST(result);
     }
     // -----------------------------------------------------------------------------
     // Translation Context
     // -----------------------------------------------------------------------------
+    function wrapInTTranslationContextAST(r, translationCtx) {
+        const ast = {
+            type: 17 /* TTranslationContext */,
+            content: r,
+            translationCtx,
+        };
+        if (r === null || r === void 0 ? void 0 : r.hasNoRepresentation) {
+            ast.hasNoRepresentation = true;
+        }
+        return ast;
+    }
     function parseTTranslationContext(node, ctx) {
         const translationCtx = node.getAttribute("t-translation-context");
         if (!translationCtx) {
             return null;
         }
         node.removeAttribute("t-translation-context");
-        return {
-            type: 17 /* TTranslationContext */,
-            content: parseNode(node, ctx),
-            translationCtx,
-        };
+        const result = parseNode(node, ctx);
+        if ((result === null || result === void 0 ? void 0 : result.type) === 3 /* Multi */) {
+            const children = result.content.map((c) => wrapInTTranslationContextAST(c, translationCtx));
+            return makeASTMulti(children);
+        }
+        return wrapInTTranslationContextAST(result, translationCtx);
     }
     // -----------------------------------------------------------------------------
     // Portal
@@ -5592,6 +5743,13 @@
         }
         return children;
     }
+    function makeASTMulti(children) {
+        const ast = { type: 3 /* Multi */, content: children };
+        if (children.every((c) => c.hasNoRepresentation)) {
+            ast.hasNoRepresentation = true;
+        }
+        return ast;
+    }
     /**
      * Parse all the child nodes of a given node and return an ast if possible.
      * In the case there are multiple children, they are wrapped in a astmulti.
@@ -5604,7 +5762,7 @@
             case 1:
                 return children[0];
             default:
-                return { type: 3 /* Multi */, content: children };
+                return makeASTMulti(children);
         }
     }
     /**
@@ -5708,11 +5866,15 @@
     }
 
     // do not modify manually. This file is generated by the release script.
-    const version = "2.6.0";
+    const version = "2.8.4";
 
     // -----------------------------------------------------------------------------
     //  Scheduler
     // -----------------------------------------------------------------------------
+    let requestAnimationFrame;
+    if (typeof window !== "undefined") {
+        requestAnimationFrame = window.requestAnimationFrame.bind(window);
+    }
     class Scheduler {
         constructor() {
             this.tasks = new Set();
@@ -5800,18 +5962,13 @@
     }
     // capture the value of requestAnimationFrame as soon as possible, to avoid
     // interactions with other code, such as test frameworks that override them
-    Scheduler.requestAnimationFrame = window.requestAnimationFrame.bind(window);
+    Scheduler.requestAnimationFrame = requestAnimationFrame;
 
     let hasBeenLogged = false;
-    const DEV_MSG = () => {
-        const hash = window.owl ? window.owl.__info__.hash : "master";
-        return `Owl is running in 'dev' mode.
-
-This is not suitable for production use.
-See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration for more information.`;
-    };
     const apps = new Set();
-    window.__OWL_DEVTOOLS__ || (window.__OWL_DEVTOOLS__ = { apps, Fiber, RootFiber, toRaw, reactive });
+    if (typeof window !== "undefined") {
+        window.__OWL_DEVTOOLS__ || (window.__OWL_DEVTOOLS__ = { apps, Fiber, RootFiber, toRaw, reactive });
+    }
     class App extends TemplateSet {
         constructor(Root, config = {}) {
             super(config);
@@ -5826,7 +5983,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
             }
             this.warnIfNoStaticProps = config.warnIfNoStaticProps || false;
             if (this.dev && !config.test && !hasBeenLogged) {
-                console.info(DEV_MSG());
+                console.info(`Owl is running in 'dev' mode.`);
                 hasBeenLogged = true;
             }
             const env = config.env || {};
@@ -6190,6 +6347,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     exports.__info__ = __info__;
     exports.batched = batched;
     exports.blockDom = blockDom;
+    exports.htmlEscape = htmlEscape;
     exports.loadFile = loadFile;
     exports.markRaw = markRaw;
     exports.markup = markup;
@@ -6223,8 +6381,8 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2025-01-15T10:40:24.184Z';
-    __info__.hash = 'a9be149';
+    __info__.date = '2026-07-10T09:10:50.283Z';
+    __info__.hash = '5093c0b';
     __info__.url = 'https://github.com/odoo/owl';
 
 

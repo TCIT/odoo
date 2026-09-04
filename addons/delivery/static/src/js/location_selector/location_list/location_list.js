@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { Location } from '@delivery/js/location_selector/location/location';
 import { Component, onMounted, useEffect } from '@odoo/owl';
 
@@ -40,7 +38,7 @@ export class LocationList extends Component {
 
     setup() {
         onMounted(() => {
-            document.getElementById(`location-${this.props.selectedLocationId}`).focus();
+            document.getElementById(`location-${this.props.selectedLocationId}`)?.focus();
         });
 
         // Focus on the location on the list when clicking on the map marker.

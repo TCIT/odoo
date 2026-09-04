@@ -1,51 +1,57 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_event_exhibitor
-# 
-# Translators:
-# emre oktem, 2024
-# Tiffany Chang, 2024
-# Ramiz Deniz Öner <deniz@denizoner.com>, 2024
-# Metin Akın <aknmetin@gmail.com>, 2024
-# Tugay Hatıl <tugayh@projetgrup.com>, 2024
-# Nadir Gazioglu <nadirgazioglu@gmail.com>, 2024
-# Ahmet Altinisik <aaltinisik@altinkaya.com.tr>, 2024
-# Ediz Duman <neps1192@gmail.com>, 2024
-# Melih Melik Sonmez, 2024
-# Levent Karakaş <levent@mektup.at>, 2024
-# Gökhan Erdoğdu <gokhan.erdogdu@mechsoft.com.tr>, 2024
-# Martin Trigaux, 2024
-# Umur Akın <umura@projetgrup.com>, 2024
-# Buket Şeker <buket_skr@hotmail.com>, 2024
-# Murat Durmuş <muratd@projetgrup.com>, 2024
-# Murat Kaplan <muratk@projetgrup.com>, 2024
-# Ozlem Cikrikci <ozlemc@eskayazilim.com.tr>, 2024
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024
-# abc Def <hdogan1974@gmail.com>, 2024
-# Halil, 2024
-# 
+# * website_event_exhibitor
+#
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
+# Weblate Translation Memory <noreply-mt-weblate-translation-memory@weblate.org>, 2025, 2026.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025, 2026.
+# "Malaz Siddig Elsayed Abuidris (msea)" <msea@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:05+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Halil, 2024\n"
-"Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
+"POT-Creation-Date: 2026-01-25 18:37+0000\n"
+"PO-Revision-Date: 2026-08-02 19:52+0000\n"
+"Last-Translator: Odoo Turkish Import <dyki+tr@odoo.com>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
+"website_event_exhibitor/tr/>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: tr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_event_exhibitor
 #. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/components/exhibitor_connect_closed_dialog/exhibitor_connect_closed_dialog.xml:0
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 msgid ""
 ")\n"
 "                    to meet them!"
 msgstr ""
+")\n"
+"                    onlarla tanışmak için!"
+
+#. module: website_event_exhibitor
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
+msgid ""
+"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
+msgstr ""
+"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Daha fazlasını "
+"keşfedin</a>"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_card
@@ -69,44 +75,12 @@ msgstr "<small class=\"badge text-bg-danger\">Yayımlanmamış</small>"
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
 msgid "<span class=\"fa fa-plus me-1\"/> Add Exhibitors"
-msgstr ""
+msgstr "<span class=\"fa fa-plus me-1\"/> Katılımcı Ekle"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_aside
 msgid "<span class=\"h5 m-3\">Other exhibitors</span>"
 msgstr "<span class=\"h5 m-3\">Diğer katılımcılar</span>"
-
-#. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
-msgid ""
-"<span>Oops! This room is currently closed</span><br/>\n"
-"                    Come back between"
-msgstr ""
-"<span>Oops! Bu oda şu anda kapalı</span><br/>\n"
-"                    Arasına geri dön"
-
-#. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
-msgid ""
-"<span>Oops! This room is full</span><br/>Come back later to have a chat with"
-" us!"
-msgstr ""
-"<span>Oops! Bu oda dolu!</span><br/>Bizimle sohbet etmek için daha sonra "
-"tekrar gelin!"
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
-msgid ""
-"A non-profit international educational and scientific\n"
-"                    organisation, hosting three departments (aeronautics and\n"
-"                    aerospace, environmental and applied fluid dynamics, and\n"
-"                    turbomachinery and propulsion)."
-msgstr ""
-"Kar amacı gütmeyen uluslararası bir eğitim ve bilim\n"
-"                    organizasyon, üç bölüme ev sahipliği yapıyor (havacılık ve\n"
-"                    havacılık, çevre ve uygulamalı akışkanlar dinamiği, ve\n"
-"                    turbo makine ve tahrik)."
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
@@ -149,9 +123,14 @@ msgid "All Countries"
 msgstr "Tüm Ülkeler"
 
 #. module: website_event_exhibitor
+#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
+msgid "All Events"
+msgstr "Tüm Olaylar"
+
+#. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_exhibitor_main
 msgid "All Exhibitors"
-msgstr ""
+msgstr "Tüm Katılımcılar"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_topbar_sponsorship
@@ -166,13 +145,19 @@ msgstr "Arşivlendi"
 
 #. module: website_event_exhibitor
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
 msgid "As a team, we are happy to contribute to this event."
 msgstr "Ekip olarak bu etkinliğe katkıda bulunmaktan mutluluk duyuyoruz."
 
@@ -194,7 +179,7 @@ msgstr "Şuradan"
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_exhibitor_main
 msgid "Back to all Exhibitors"
-msgstr ""
+msgstr "Tüm Katılımcılara Geri Dön"
 
 #. module: website_event_exhibitor
 #: model:event.sponsor.type,name:website_event_exhibitor.event_sponsor_type1
@@ -210,17 +195,12 @@ msgstr "Ülkeye Göre"
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_topbar_sponsorship
 msgid "By Level"
-msgstr ""
+msgstr "Seviyeye Göre"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__can_publish
 msgid "Can Publish"
 msgstr "Yayınlanabilir"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__chat_room_id
-msgid "Chat Room"
-msgstr "Sohbet Odası"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_topbar
@@ -235,15 +215,21 @@ msgstr "Arasına geri dön"
 
 #. module: website_event_exhibitor
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
 msgid "Come see us live, we hope to meet you!"
-msgstr ""
+msgstr "Bizi canlı görün, sizinle tanışmayı umuyoruz!"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_card
@@ -251,7 +237,8 @@ msgid "Connect"
 msgstr "Bağlan"
 
 #. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.snippet_options
+#. odoo-javascript
+#: code:addons/website_event_exhibitor/static/src/website_builder/event_page_option.xml:0
 msgid "Countries"
 msgstr "Ülke"
 
@@ -289,62 +276,23 @@ msgid "Created on"
 msgstr "Oluşturuldu"
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Customer Relationship Management"
-msgstr "Müşteri İlişkileri Yönetimi (CRM)"
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid ""
-"Deco Addict designs, develops, integrates and supports HR and Supply\n"
-"                Chain processes in order to make our customers more productive,\n"
-"                responsive and profitable."
-msgstr ""
-"Deco Addict, İK ve Tedariki tasarlar, geliştirir, entegre eder ve destekler\n"
-"                Müşterilerimizi daha üretken hale getirmek için zincirleme süreçler,\n"
-"                duyarlı ve karlı."
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid ""
-"Deco Addict integrates ERP for Global Companies and supports PME\n"
-"                with Open Sources software to manage their businesses. Our\n"
-"                consultants are experts in the following areas:"
-msgstr ""
-"Deco Addict, Küresel Şirketler için ERP'yi entegre ediyor ve PME'yi destekliyor\n"
-"                işlerini yönetmek için Açık Kaynak yazılımı ile. Bizim\n"
-"                danışmanlar aşağıdaki alanlarda uzmandır:"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__website_description
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 msgid "Description"
 msgstr "Açıklama"
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
 msgid "Discover more"
 msgstr "Daha fazlasını keşfet"
 
 #. module: website_event_exhibitor
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__display_name
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__display_name
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__display_name
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_type__display_name
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_website__display_name
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_website_event_menu__display_name
 msgid "Display Name"
 msgstr "İsim Göster"
 
@@ -358,8 +306,8 @@ msgstr ""
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
-msgid "Display in footer"
-msgstr "Altbilgide görüntüle"
+msgid "Display on website footer"
+msgstr "Web sitesi altbilgisinde görüntüle"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_email
@@ -381,11 +329,6 @@ msgstr "Bitiş saati"
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 msgid "Event"
 msgstr "Etkinlik"
-
-#. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.snippet_options
-msgid "Event Page"
-msgstr "Etkinlik Sayfası"
 
 #. module: website_event_exhibitor
 #: model:ir.model,name:website_event_exhibitor.model_event_sponsor
@@ -421,8 +364,6 @@ msgid "Exhibitor"
 msgstr "Sergileyici"
 
 #. module: website_event_exhibitor
-#. odoo-python
-#: code:addons/website_event_exhibitor/models/event_event.py:0
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_search
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_topbar
 msgid "Exhibitors"
@@ -438,6 +379,12 @@ msgstr "Sergileyiciler Menüsü Öğesi"
 #: model:ir.model.fields.selection,name:website_event_exhibitor.selection__website_event_menu__menu_type__exhibitor
 msgid "Exhibitors Menus"
 msgstr "Sergileyiciler Menüleri"
+
+#. module: website_event_exhibitor
+#. odoo-python
+#: code:addons/website_event_exhibitor/models/event_event.py:0
+msgid "Exhibitors list"
+msgstr "Katılımcı listesi"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_topbar
@@ -471,19 +418,20 @@ msgid "Gold"
 msgstr "Altın"
 
 #. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_search
-msgid "Group By"
-msgstr "Grupla"
-
-#. module: website_event_exhibitor
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
+#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
 msgid "Happy to be Sponsor"
 msgstr "Sponsor olmaktan mutluluk duyuyoruz"
 
@@ -493,8 +441,12 @@ msgid "Has Message"
 msgstr "Mesaj Var"
 
 #. module: website_event_exhibitor
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__id
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__id
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__id
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_type__id
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_website__id
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_website_event_menu__id
 msgid "ID"
 msgstr "ID"
 
@@ -540,14 +492,8 @@ msgid ""
 "Indicates the timezone in which the event dates/times will be displayed on "
 "the website."
 msgstr ""
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Inventory and Warehouse management"
-msgstr "Stok ve Depo yönetimi"
+"Etkinlik tarih ve saatlerinin web sitesinde hangi saat diliminde "
+"görüntüleneceğini belirtir."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_is_follower
@@ -558,51 +504,6 @@ msgstr "Takipçi mi"
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__is_published
 msgid "Is Published"
 msgstr "Yayınlandı"
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
-msgid ""
-"It provides post-graduate education in fluid dynamics\n"
-"                    (research master in fluid dynamics, former \"Diploma\n"
-"                    Course\", doctoral program, stagiaire program and lecture\n"
-"                    series) and encourages \"training in research through\n"
-"                    research\"."
-msgstr ""
-"Akışkanlar dinamiği alanında lisansüstü eğitim vermektedir.\n"
-"                    (akışkanlar dinamiği araştırma ustası, eski \"Diploma\"\n"
-"                    Ders\", doktora programı, stagiaire programı ve öğretim programı\n"
-"                    serisi) ve \"araştırma yoluyla eğitim\n"
-"                    araştırma\"."
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
-msgid ""
-"It undertakes and promotes research in the field of fluid\n"
-"                    dynamics. It possesses about fifty different wind tunnels,\n"
-"                    turbomachinery and other specialized test facilities, some\n"
-"                    of which are unique or the largest in the world. Extensive\n"
-"                    research on experimental, computational and theoretical\n"
-"                    aspects of gas and liquid flows is carried out under the\n"
-"                    direction of the faculty and research engineers, sponsored\n"
-"                    mainly by governmental and international agencies as well\n"
-"                    as industries."
-msgstr ""
-"Sıvı alanında araştırma yapmayı taahhüt eder ve teşvik eder\n"
-"                    Dynamics. Yaklaşık elli farklı rüzgar tüneline sahiptir,\n"
-"                    turbo makineler ve diğer özel test tesisleri, bazıları\n"
-"                    bunlardan benzersiz veya dünyanın en büyüğü. Yaygın\n"
-"                    deneysel, hesaplamalı ve teorik araştırmalar\n"
-"                    gaz ve sıvı akışlarının yönleri\n"
-"                    fakülte ve araştırma mühendislerinin yönetimi, sponsorlu\n"
-"                    esas olarak hükümet ve uluslararası kuruluşlar tarafından\n"
-"                    endüstriler olarak."
-
-#. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
-msgid "Jitsi Name"
-msgstr "Jitsi Adı"
 
 #. module: website_event_exhibitor
 #. odoo-javascript
@@ -617,11 +518,6 @@ msgid "Join us there to meet"
 msgstr "Tanışmak için orada bize katılın"
 
 #. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_lang_id
-msgid "Language"
-msgstr "Dil"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__write_uid
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__write_uid
 msgid "Last Updated by"
@@ -632,11 +528,6 @@ msgstr "Son Güncelleyen"
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__write_date
 msgid "Last Updated on"
 msgstr "Son Güncelleme"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_last_activity
-msgid "Last activity"
-msgstr "Son aktivite"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_search
@@ -659,24 +550,6 @@ msgid "Logo"
 msgstr "Logo"
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Materials Management"
-msgstr "Malzeme Yönetimi"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_max_capacity
-msgid "Max capacity"
-msgstr "Azami kapasite"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__room_max_participant_reached
-msgid "Maximum number of participant reached in the room at the same time"
-msgstr "Aynı anda odada ulaşılan maksimum katılımcı sayısı"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_website_event_menu__menu_type
 msgid "Menu Type"
 msgstr "Menü Türü"
@@ -690,12 +563,6 @@ msgstr "Mesaj Teslim hatası"
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_ids
 msgid "Messages"
 msgstr "Mesajlar"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_mobile
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
-msgid "Mobile"
-msgstr "Mobil"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_card
@@ -763,7 +630,6 @@ msgid "Number of messages with delivery error"
 msgstr "Teslimat hatası olan mesaj adedi"
 
 #. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_search
 msgid "Online"
 msgstr "Çevrimiçi"
@@ -784,46 +650,10 @@ msgid "Opening hour"
 msgstr "Açılış saati"
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid ""
-"Our experts invent, imagine and develop solutions which meet\n"
-"                your business requirements. They build a new technical\n"
-"                environment for your company, but they always take the already\n"
-"                installed IT software into account. That is why Idealis\n"
-"                Consulting delivers excellence in HR and SC Management."
-msgstr ""
-"Uzmanlarımız buluşan çözümler icat eder, hayal eder ve geliştirir\n"
-"                iş gereksinimleriniz. Yeni bir teknik inşa ediyorlar\n"
-"                Şirketiniz için ortam, ancak her zaman zaten\n"
-"                BT yazılımını hesaba kattı. Bu yüzden Idealis\n"
-"                Danışmanlık, İK ve SC Yönetiminde mükemmellik sağlar."
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_participant_count
-msgid "Participant count"
-msgstr "Katılımcı sayısı"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_id
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 msgid "Partner"
 msgstr "İş Ortağı"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_max_participant_reached
-msgid "Peak participants"
-msgstr "Zirve katılımcıları"
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Personnel Administration"
-msgstr "Personel Yönetimi"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_phone
@@ -852,14 +682,6 @@ msgid "Ratings"
 msgstr "Değerlendirmeler"
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Reporting"
-msgstr "Raporlama"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__activity_user_id
 msgid "Responsible User"
 msgstr "Sorumlu Kullanıcı"
@@ -870,38 +692,25 @@ msgid "Ribbon Style"
 msgstr "Şerit Stili"
 
 #. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_is_full
-msgid "Room Is Full"
-msgstr "Oda Dolu"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_name
-msgid "Room Name"
-msgstr "Oda Adı"
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_has_sms_error
 msgid "SMS Delivery error"
 msgstr "SMS İleti hatası"
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Sales and Distribution"
-msgstr "Satış ve Dağıtım"
-
-#. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_topbar
 msgid "Search an exhibitor ..."
-msgstr ""
+msgstr "Katılımcı arayın ..."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__sequence
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor_type__sequence
 msgid "Sequence"
 msgstr "Sıralama"
+
+#. module: website_event_exhibitor
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__show_on_ticket
+msgid "Show on ticket"
+msgstr "Bilet üzerinde göster"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__exhibitor_menu
@@ -919,12 +728,6 @@ msgstr "Gümüş"
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__subtitle
 msgid "Slogan"
 msgstr "Slogan"
-
-#. module: website_event_exhibitor
-#. odoo-python
-#: code:addons/website_event_exhibitor/models/event_sponsor.py:0
-msgid "Sponsor"
-msgstr "Sponsor"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__sponsor_count
@@ -946,11 +749,6 @@ msgstr "Sponsor Seviyesi"
 #: model:ir.ui.menu,name:website_event_exhibitor.menu_event_sponsor_type
 msgid "Sponsor Levels"
 msgstr "Sponsor Seviyeleri"
-
-#. module: website_event_exhibitor
-#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__mobile
-msgid "Sponsor Mobile"
-msgstr "Sponsor Mobil"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__name
@@ -979,9 +777,10 @@ msgid "Sponsor image"
 msgstr "Sponsor resmi"
 
 #. module: website_event_exhibitor
+#. odoo-javascript
+#: code:addons/website_event_exhibitor/static/src/website_builder/event_page_option.xml:0
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__sponsor_ids
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_event_view_form
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.snippet_options
 msgid "Sponsors"
 msgstr "Sponsorlar"
 
@@ -990,14 +789,16 @@ msgstr "Sponsorlar"
 #: model_terms:ir.actions.act_window,help:website_event_exhibitor.event_sponsor_action_from_event
 msgid ""
 "Sponsors are advertised on your event pages.<br>\n"
-"    Exhibitors have a dedicated page a with chat room for people to connect with them."
+"    Exhibitors have a dedicated page a with chat room for people to connect "
+"with them."
 msgstr ""
 "Sponsorların reklamları etkinlik sayfalarınızda yapılır.<br>Katılımcıların, "
 "insanların onlarla bağlantı kurması için sohbet odası içeren özel bir "
 "sayfası vardır."
 
 #. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.snippet_options
+#. odoo-javascript
+#: code:addons/website_event_exhibitor/static/src/website_builder/event_page_option.xml:0
 msgid "Sponsorship"
 msgstr "Sponsorluk"
 
@@ -1020,17 +821,14 @@ msgstr ""
 "Planlanmış\\: Gelecek Aktiviteler."
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Talent Management"
-msgstr "Yetenek Yönetimi"
+#: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__website_absolute_url
+msgid "The full absolute URL to access the document through the website."
+msgstr "Belgeye web sitesi üzerinden erişmek için tam mutlak URL."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__website_url
-msgid "The full URL to access the document through the website."
-msgstr "Web sitesi aracılığıyla belgeye erişmek için tam URL."
+msgid "The full relative URL to access the document through the website."
+msgstr "Belgeye web sitesi üzerinden erişmek için tam göreli URL."
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
@@ -1043,7 +841,8 @@ msgid "Timezone"
 msgstr "Saat Dilimi"
 
 #. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.snippet_options
+#. odoo-javascript
+#: code:addons/website_event_exhibitor/static/src/website_builder/event_page_option.xml:0
 msgid "Top Bar Filter"
 msgstr "Üst Çubuk Filtresi"
 
@@ -1065,18 +864,24 @@ msgstr "Mevcut web sitesinde görülebilir"
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
 msgid "We could not find any exhibitor at this moment."
-msgstr ""
+msgstr "Şu anda herhangi bir katılımcı bulamadık."
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
 msgid "We could not find any exhibitor matching your search for:"
-msgstr ""
+msgstr "Aramanızla eşleşen bir katılımcı bulamadık:"
 
 #. module: website_event_exhibitor
+#: model:ir.model,name:website_event_exhibitor.model_website
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_tree
 msgid "Website"
 msgstr "Websitesi"
+
+#. module: website_event_exhibitor
+#: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__website_absolute_url
+msgid "Website Absolute URL"
+msgstr "Web Sitesi Mutlak URL"
 
 #. module: website_event_exhibitor
 #: model:ir.model,name:website_event_exhibitor.model_website_event_menu

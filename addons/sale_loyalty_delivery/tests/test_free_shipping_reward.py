@@ -78,7 +78,6 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_B.id,
                 'name': 'Product B',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
             })
         ]})
@@ -104,7 +103,6 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_B.id,
                 'name': 'Product 1B',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
                 'price_unit': 81.74,
             })
@@ -118,7 +116,6 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
             (0, False, {
                 'product_id': self.product_A.id,
                 'name': 'Product 1',
-                'product_uom': self.uom_unit.id,
                 'product_uom_qty': 1.0,
                 'price_unit': 0.30,
             })
@@ -276,7 +273,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
         })
         self._auto_rewards(order, programs)
         # 872.73 - (20% of 1 iPad) = 872.73 - 58.18 = 814.55
-        self.assertAlmostEqual(order.amount_untaxed, 1105.46, 2, "One large cabinet should be discounted by 20%")
+        self.assertAlmostEqual(order.amount_untaxed, 1105.45, 2, "One large cabinet should be discounted by 20%")
 
     def test_free_shipping_reward_last_line(self):
         """

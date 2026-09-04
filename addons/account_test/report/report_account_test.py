@@ -9,7 +9,7 @@ from odoo.tools.safe_eval import safe_eval
 #
 
 
-class ReportAssertAccount(models.AbstractModel):
+class ReportAccount_TestReport_Accounttest(models.AbstractModel):
     _name = 'report.account_test.report_accounttest'
     _description = 'Account Test Report'
 
@@ -35,7 +35,7 @@ class ReportAssertAccount(models.AbstractModel):
                 cols = list(item)
             return [(col, item.get(col)) for col in cols if col in item]
 
-        localdict = {
+        context = {
             'cr': self.env.cr,
             'uid': self.env.uid,
             'reconciled_inv': reconciled_inv,  # specific function used in different tests
@@ -43,9 +43,9 @@ class ReportAssertAccount(models.AbstractModel):
             'column_order': None,  # used to choose the display order of columns (in case you are returning a list of dict)
             '_': lambda *a, **kw: self.env._(*a, **kw),  # pylint: disable=E8502,
         }
-        safe_eval(code_exec, localdict, mode="exec", nocopy=True)
-        result = localdict['result']
-        column_order = localdict.get('column_order', None)
+        safe_eval(code_exec, context, mode="exec")
+        result = context['result']
+        column_order = context.get('column_order')
 
         if not isinstance(result, (tuple, list, set)):
             result = [result]

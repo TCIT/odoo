@@ -1,32 +1,38 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_fleet
-# 
-# Translators:
-# Wil Odoo, 2024
-# 
+# * account_fleet
+#
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
-"Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-02 20:22+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
+"account_fleet/ja/>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: ja\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_fleet
 #: model_terms:ir.ui.view,arch_db:account_fleet.fleet_vehicle_log_services_view_form
 msgid ""
-"<span class=\"o_stat_text text-success\" invisible=\"account_move_state != 'posted'\" title=\"Service's Bill\">Service's Bill</span>\n"
-"                            <span class=\"o_stat_text text-warning\" invisible=\"account_move_state == 'posted'\" title=\"Service's Bill\">Service's Bill</span>"
+"<span class=\"o_stat_text text-success\" invisible=\"account_move_state != "
+"'posted'\" title=\"Service's Bill\">Service's Bill</span>\n"
+"                            <span class=\"o_stat_text text-warning\" "
+"invisible=\"account_move_state == 'posted'\" title=\"Service's "
+"Bill\">Service's Bill</span>"
 msgstr ""
-"<span class=\"o_stat_text text-success\" invisible=\"account_move_state != 'posted'\" title=\"Service's Bill\">サービスの請求</span>\n"
-"                            <span class=\"o_stat_text text-warning\" invisible=\"account_move_state == 'posted'\" title=\"Service's Bill\">サービスの請求</span>"
+"<span class=\"o_stat_text text-success\" invisible=\"account_move_state != "
+"'posted'\" title=\"Service's Bill\">サービスの請求</span>\n"
+"                            <span class=\"o_stat_text text-warning\" "
+"invisible=\"account_move_state == 'posted'\" title=\"Service's Bill\">"
+"サービスの請求</span>"
 
 #. module: account_fleet
 #: model:ir.model.fields,field_description:account_fleet.field_fleet_vehicle__account_move_ids
@@ -70,6 +76,24 @@ msgid "Creation Date"
 msgstr "作成日"
 
 #. module: account_fleet
+#: model:ir.model.fields,field_description:account_fleet.field_account_automatic_entry_wizard__display_name
+#: model:ir.model.fields,field_description:account_fleet.field_account_move__display_name
+#: model:ir.model.fields,field_description:account_fleet.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:account_fleet.field_fleet_vehicle__display_name
+#: model:ir.model.fields,field_description:account_fleet.field_fleet_vehicle_log_services__display_name
+msgid "Display Name"
+msgstr "表示名"
+
+#. module: account_fleet
+#: model:ir.model.fields,field_description:account_fleet.field_account_automatic_entry_wizard__id
+#: model:ir.model.fields,field_description:account_fleet.field_account_move__id
+#: model:ir.model.fields,field_description:account_fleet.field_account_move_line__id
+#: model:ir.model.fields,field_description:account_fleet.field_fleet_vehicle__id
+#: model:ir.model.fields,field_description:account_fleet.field_fleet_vehicle_log_services__id
+msgid "ID"
+msgstr "ID"
+
+#. module: account_fleet
 #: model:ir.model,name:account_fleet.model_account_move
 msgid "Journal Entry"
 msgstr "仕訳"
@@ -77,7 +101,7 @@ msgstr "仕訳"
 #. module: account_fleet
 #: model:ir.model,name:account_fleet.model_account_move_line
 msgid "Journal Item"
-msgstr "仕訳項目"
+msgstr "仕訳明細"
 
 #. module: account_fleet
 #: model:ir.model.fields,field_description:account_fleet.field_account_move_line__need_vehicle
@@ -116,9 +140,11 @@ msgstr "仕入先請求書"
 #. odoo-python
 #: code:addons/account_fleet/models/fleet_vehicle_log_services.py:0
 msgid ""
-"You cannot delete log services records because one or more of them were bill"
-" created."
-msgstr "ログサービスのレコードは、1つまたは複数の仕入先請求書が作成されているため、削除できません。"
+"You cannot delete log services records because one or more of them were bill "
+"created."
+msgstr ""
+"ログサービスのレコードは、1つまたは複数の仕入先請求書が作成されているため、削"
+"除できません。"
 
 #. module: account_fleet
 #. odoo-python
@@ -126,7 +152,9 @@ msgstr "ログサービスのレコードは、1つまたは複数の仕入先�
 msgid ""
 "You cannot modify amount of services linked to an account move line. Do it "
 "on the related accounting entry instead."
-msgstr "会計仕訳明細にリンクされているサービスの金額は変更できません。関連する会計仕訳で行って下さい。"
+msgstr ""
+"会計仕訳明細にリンクされているサービスの金額は変更できません。関連する会計仕"
+"訳で行って下さい。"
 
 #. module: account_fleet
 #: model_terms:ir.ui.view,arch_db:account_fleet.fleet_vehicle_view_form

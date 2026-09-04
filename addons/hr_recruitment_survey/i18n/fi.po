@@ -1,53 +1,63 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_recruitment_survey
-# 
+# * hr_recruitment_survey
+#
 # Translators:
-# Tiffany Chang, 2024
-# Miika Nissi <miika.nissi@tawasta.fi>, 2024
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Iipponen <erno@web-veistamo.fi>, 2024
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Martin Trigaux, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
-# 
+# Kari Lindgren <kari.lindgren@emsystems.fi>, 2022
+# Miku Laitinen <miku.laitinen@gmail.com>, 2022
+# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2022
+# Mikko Salmela <salmemik@gmail.com>, 2022
+# Miika Nissi <miika.nissi@tawasta.fi>, 2022
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2022
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2022
+# Iipponen <erno@web-veistamo.fi>, 2022
+# Martin Trigaux, 2022
+# "Tiffany Chang (tic)" <tic@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:40+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-01-25 18:36+0000\n"
+"PO-Revision-Date: 2026-08-03 11:23+0000\n"
+"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
+"hr_recruitment_survey/fi/>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: fi\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_recruitment_survey
 #: model:mail.template,body_html:hr_recruitment_survey.mail_template_applicant_interview_invite
 msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Dear <t t-out=\"object.partner_id.name or 'applicant'\">[applicant name]</t><br/><br/>\n"
+"        Dear <t t-out=\"object.partner_id.name or 'applicant'\">[applicant "
+"name]</t><br/><br/>\n"
 "        <t>\n"
-"            You've progressed through the recruitment process and we would like you to answer some questions.\n"
+"            You've progressed through the recruitment process and we would "
+"like you to answer some questions.\n"
 "        </t>\n"
 "        </p><div style=\"margin: 16px 0px 16px 0px;\">\n"
-"            <a t-att-href=\"(object.get_start_url())\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
+"            <a t-att-href=\"(object.get_start_url())\" t-attf-"
+"style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size:13px;\">\n"
 "                <t>\n"
 "                    Start the written interview\n"
 "                </t>\n"
 "            </a>\n"
 "        </div>\n"
 "        <t t-if=\"object.deadline\">\n"
-"            Please answer the interview for <t t-out=\"format_date(object.deadline)\">[deadline date]</t>.<br/><br/>\n"
+"            Please answer the interview for <t t-"
+"out=\"format_date(object.deadline)\">[deadline date]</t>.<br/><br/>\n"
 "        </t>\n"
 "        <t>\n"
-"            We wish you good luck! Thank you in advance for your participation.\n"
+"            We wish you good luck! Thank you in advance for your "
+"participation.\n"
 "        </t>\n"
 "    \n"
 "</div>\n"
@@ -55,22 +65,29 @@ msgid ""
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Hyvä <t t-out=\"object.partner_id.name or 'applicant'\">[hakijan nimi]</t><br/><br/>\n"
-"       <t>\n"
-"            Olet edennyt rekrytointiprosessin läpi, ja haluaisimme sinun vastaavan joihinkin kysymyksiin.\n"
-"       </t>\n"
+"        Hyvä <t t-out=\"object.partner_id.name or 'applicant'\">"
+"[osallistujan nimi]</t><br/><br/>\n"
+"        <t>\n"
+"            Olet edennyt rekrytointiprosessin läpi ja haluaisimme,että "
+"vastaat joihinkin kysymyksiin.\n"
+"        </t>\n"
 "        </p><div style=\"margin: 16px 0px 16px 0px;\">\n"
-"            <a t-att-href=\"(object.get_start_url())\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
+"            <a t-att-href=\"(object.get_start_url())\" t-attf-"
+"style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {"
+"{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size:13px;\">\n"
 "                <t>\n"
 "                    Aloita kirjallinen haastattelu\n"
 "                </t>\n"
 "            </a>\n"
 "        </div>\n"
 "        <t t-if=\"object.deadline\">\n"
-"            Vastaa haastatteluun <t t-out=\"format_date(object.deadline)\">[määräpäivä]</t>.<br/><br/>\n"
+"            Vastaa haastatteluun <t t-out=\"format_date(object.deadline)\">"
+"[eräpäivä]</t> mennessä.<br/><br/>\n"
 "        </t>\n"
 "        <t>\n"
-"            Toivotamme sinulle onnea! Kiitos etukäteen osallistumisestanne.\n"
+"            Toivotamme sinulle onnea! Kiitos etukäteen osallistumisestasi.\n"
 "        </t>\n"
 "    \n"
 "</div>\n"
@@ -118,11 +135,16 @@ msgid "Applicant: Interview"
 msgstr "Hakija: Haastattelu"
 
 #. module: hr_recruitment_survey
+#: model:ir.model,website_form_label:hr_recruitment_survey.model_hr_applicant
+msgid "Apply for a Job"
+msgstr "Hae työpaikkaa"
+
+#. module: hr_recruitment_survey
 #: model:ir.model.fields,help:hr_recruitment_survey.field_hr_applicant__survey_id
 #: model:ir.model.fields,help:hr_recruitment_survey.field_hr_job__survey_id
 msgid ""
-"Choose an interview form for this job position and you will be able to "
-"print/answer this interview from all applicants who apply for this job"
+"Choose an interview form for this job position and you will be able to print/"
+"answer this interview from all applicants who apply for this job"
 msgstr ""
 "Valitse tähän työtehtävään liittyvä haastattelulomake. Voit tulostaa ja "
 "täyttää sen kaikkien tehtävään pyrkivien hakijoiden osalta"
@@ -133,6 +155,15 @@ msgid "Display Interview Form"
 msgstr "Näytä haastattelulomake"
 
 #. module: hr_recruitment_survey
+#: model:ir.model.fields,field_description:hr_recruitment_survey.field_hr_applicant__display_name
+#: model:ir.model.fields,field_description:hr_recruitment_survey.field_hr_job__display_name
+#: model:ir.model.fields,field_description:hr_recruitment_survey.field_survey_invite__display_name
+#: model:ir.model.fields,field_description:hr_recruitment_survey.field_survey_survey__display_name
+#: model:ir.model.fields,field_description:hr_recruitment_survey.field_survey_user_input__display_name
+msgid "Display Name"
+msgstr "Näyttönimi"
+
+#. module: hr_recruitment_survey
 #: model:survey.question,title:hr_recruitment_survey.survey_recruitment_form_p1_q4
 msgid "Education"
 msgstr "Koulutus"
@@ -140,17 +171,17 @@ msgstr "Koulutus"
 #. module: hr_recruitment_survey
 #: model:survey.question,title:hr_recruitment_survey.survey_recruitment_form_p1_q2
 msgid "From which university did or will you graduate?"
-msgstr "Mistä yliopistosta valmistuit tai aiot valmistua?"
+msgstr "Mistä yliopistosta valmistuit tai valmistut?"
 
 #. module: hr_recruitment_survey
 #: model:survey.question.answer,value:hr_recruitment_survey.survey_recruitment_form_p1_q8_row2
 msgid "Getting on with colleagues"
-msgstr "Kollegoiden kanssa toimeentuleminen"
+msgstr "Kollegoiden kanssa toiminta"
 
 #. module: hr_recruitment_survey
 #: model:survey.question.answer,value:hr_recruitment_survey.survey_recruitment_form_p1_q8_row8
 msgid "Getting perks such as free parking, gym passes"
-msgstr "Saada etuisuuksia, kuten ilmainen pysäköinti, kuntosalijäsenyys"
+msgstr "Etuuksien saaminen, kuten ilmainen pysäköinti, kuntosalijäsenyys"
 
 #. module: hr_recruitment_survey
 #: model:survey.question.answer,value:hr_recruitment_survey.survey_recruitment_form_p1_q8_row1
@@ -165,12 +196,21 @@ msgstr "Mukava toimistoympäristö"
 #. module: hr_recruitment_survey
 #: model:survey.question.answer,value:hr_recruitment_survey.survey_recruitment_form_p1_q8_row7
 msgid "Having freebies such as tea, coffee and stationery"
-msgstr "Ilmaistuotteita, kuten teetä, kahvia ja paperitarvikkeita"
+msgstr "Ilmaistuotteet, kuten tee, kahvi ja paperitarvikkeet"
+
+#. module: hr_recruitment_survey
+#: model:ir.model.fields,field_description:hr_recruitment_survey.field_hr_applicant__id
+#: model:ir.model.fields,field_description:hr_recruitment_survey.field_hr_job__id
+#: model:ir.model.fields,field_description:hr_recruitment_survey.field_survey_invite__id
+#: model:ir.model.fields,field_description:hr_recruitment_survey.field_survey_survey__id
+#: model:ir.model.fields,field_description:hr_recruitment_survey.field_survey_user_input__id
+msgid "ID"
+msgstr "Tunnus"
 
 #. module: hr_recruitment_survey
 #: model:survey.question.answer,value:hr_recruitment_survey.survey_recruitment_form_p1_q8_col2
 msgid "Important"
-msgstr "Tarkeä"
+msgstr "Tärkeä"
 
 #. module: hr_recruitment_survey
 #: model:ir.model.fields,field_description:hr_recruitment_survey.field_hr_job__survey_id
@@ -187,7 +227,7 @@ msgstr "Haastattelulomake: %s"
 #. module: hr_recruitment_survey
 #: model_terms:ir.ui.view,arch_db:hr_recruitment_survey.res_config_settings_view_form
 msgid "Interview Survey"
-msgstr "Haastattelututkimus"
+msgstr "Haastattelukysely"
 
 #. module: hr_recruitment_survey
 #: model:ir.actions.act_window,name:hr_recruitment_survey.survey_survey_action_recruitment
@@ -200,12 +240,12 @@ msgstr "Haastattelut"
 #: model:ir.model,name:hr_recruitment_survey.model_hr_job
 #: model:ir.model.fields,field_description:hr_recruitment_survey.field_survey_survey__hr_job_ids
 msgid "Job Position"
-msgstr "Tehtävänimike"
+msgstr "Työtehtävä"
 
 #. module: hr_recruitment_survey
 #: model:survey.question,title:hr_recruitment_survey.survey_recruitment_form_p1_q6
 msgid "Knowledge"
-msgstr "Tietämys"
+msgstr "Tietokirjasto"
 
 #. module: hr_recruitment_survey
 #: model:survey.question.answer,value:hr_recruitment_survey.survey_recruitment_form_p1_q8_row6
@@ -238,16 +278,18 @@ msgid ""
 "Please answer those questions to help recruitment officers to preprocess "
 "your application."
 msgstr ""
-"Vastaa näihin kysymyksiin, jotta rekrytoinnista vastaavat virkamiehet voivat"
-" käsitellä hakemuksesi valmiiksi."
+"Vastaa näihin kysymyksiin, jotta rekrytoinnista vastaavat voivat käsitellä "
+"hakemuksesi etukäteen."
 
 #. module: hr_recruitment_survey
 #: model_terms:survey.question,description:hr_recruitment_survey.survey_recruitment_form_p1
 msgid ""
-"Please fill information about you: who you are, what are your education, experience, and activities.\n"
+"Please fill information about you: who you are, what are your education, "
+"experience, and activities.\n"
 "    It will help us managing your application."
 msgstr ""
-"Täytä tiedot itsestäsi: kuka olet, mikä on koulutuksesi, kokemuksesi ja toimintasi.\n"
+"Täytä tiedot itsestäsi: kuka olet, mikä on koulutuksesi, kokemuksesi ja muut "
+"huomion arvoiset asiat.\n"
 "    Se auttaa meitä hakemuksesi hallinnoinnissa."
 
 #. module: hr_recruitment_survey
@@ -262,16 +304,14 @@ msgstr "Ilmoita hakijan nimi."
 msgid ""
 "Please summarize your education history: schools, location, diplomas, ..."
 msgstr ""
-"Kerro lyhyesti koulutushistoriastasi: koulut, sijainti, tutkintotodistukset,"
-" ..."
+"Kerro lyhyesti koulutustaustastasi: koulut, sijainti, tutkintotodistukset, "
+"..."
 
 #. module: hr_recruitment_survey
 #: model_terms:survey.question,description:hr_recruitment_survey.survey_recruitment_form_p1_q7
 msgid ""
 "Please tell us a bit more about yourself: what are your main activities, ..."
-msgstr ""
-"Kerro meille hieman lisää itsestäsi: mitkä ovat pääasialliset toimintasi, "
-"..."
+msgstr "Kerro meille hieman lisää itsestäsi: mitkä ovat pääosaamisalueesi, ..."
 
 #. module: hr_recruitment_survey
 #: model:ir.model.fields.selection,name:hr_recruitment_survey.selection__survey_survey__survey_type__recruitment
@@ -281,7 +321,7 @@ msgstr "Rekrytointi"
 #. module: hr_recruitment_survey
 #: model:survey.survey,title:hr_recruitment_survey.survey_recruitment_form
 msgid "Recruitment Form"
-msgstr "Työhakemuksen lomake"
+msgstr "Rekrytointilomake"
 
 #. module: hr_recruitment_survey
 #: model:ir.model.fields,field_description:hr_recruitment_survey.field_hr_applicant__response_ids
@@ -320,7 +360,7 @@ msgstr "Ohjattu kyselykutsu"
 #. module: hr_recruitment_survey
 #: model:ir.model.fields,field_description:hr_recruitment_survey.field_survey_survey__survey_type
 msgid "Survey Type"
-msgstr "Tutkimuksen tyyppi"
+msgstr "Kyselyn tyyppi"
 
 #. module: hr_recruitment_survey
 #: model:ir.model,name:hr_recruitment_survey.model_survey_user_input
@@ -352,12 +392,12 @@ msgstr "Erittäin tärkeä"
 #. module: hr_recruitment_survey
 #: model:survey.question,title:hr_recruitment_survey.survey_recruitment_form_p1_q3
 msgid "Were you referred by an employee?"
-msgstr "Oliko työntekijä suosittanut sinua?"
+msgstr "Onko työntekijä suosittellut sinua?"
 
 #. module: hr_recruitment_survey
 #: model_terms:survey.question,description:hr_recruitment_survey.survey_recruitment_form_p1_q6
 msgid "What are your main knowledge regarding the job you are applying to?"
-msgstr "Mitkä ovat tärkeimmät tietosi hakemastasi työstä?"
+msgstr "Mitä tietoja ja taitoja sinulla jo on hakemaasi työhön liittyen?"
 
 #. module: hr_recruitment_survey
 #: model:survey.question,title:hr_recruitment_survey.survey_recruitment_form_p1_q8
@@ -380,5 +420,6 @@ msgid ""
 "You can create surveys used for recruitments. Design easily your interview,\n"
 "                send invitations and analyze answers."
 msgstr ""
-"Voit luoda kyselyitä, joita käytetään rekrytoinneissa. Suunnittele helposti haastattelusi,\n"
-"                lähetä kutsut ja analysoi vastaukset."
+"Voit luoda kyselyitä, joita käytetään rekrytoinnissa. Suunnittele helposti "
+"haastattelusi,\n"
+"                lähetä kutsut ja analysoi vastauksia."

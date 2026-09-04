@@ -1,5 +1,5 @@
 import { SpreadsheetModels, defineSpreadsheetModels } from "@spreadsheet/../tests/helpers/data";
-import { fields, models } from "@web/../tests/web_test_helpers";
+import { fields, models, onRpc } from "@web/../tests/web_test_helpers";
 import { RPCError } from "@web/core/network/rpc";
 
 export function getDashboardServerData() {
@@ -20,18 +20,13 @@ export class SpreadsheetDashboard extends models.Model {
     json_data = fields.Char({});
     is_published = fields.Boolean({ string: "Is published" });
     dashboard_group_id = fields.Many2one({ relation: "spreadsheet.dashboard.group" });
+    favorite_user_ids = fields.Many2many({ relation: "res.users", string: "Favorite Users" });
+    is_favorite = fields.Boolean({ compute: "_compute_is_favorite", string: "Is Favorite" });
 
-    get_readonly_dashboard(id) {
-        const dashboard = this.env["spreadsheet.dashboard"].search_read([["id", "=", id]])[0];
-        if (!dashboard) {
-            const error = new RPCError();
-            error.data = {};
-            throw error;
+    _compute_is_favorite() {
+        for (const record of this) {
+            record.is_favorite = record.favorite_user_ids.includes(this.env.uid);
         }
-        return {
-            snapshot: JSON.parse(dashboard.spreadsheet_data),
-            revisions: [],
-        };
     }
 
     _records = [
@@ -73,6 +68,21 @@ export class SpreadsheetDashboardGroup extends models.Model {
         { id: 2, name: "Container 2", published_dashboard_ids: [3] },
     ];
 }
+
+function mockDashboardDataController(_request, { res_id }) {
+    const [record] = this.env["spreadsheet.dashboard"].search_read([["id", "=", parseInt(res_id)]]);
+    if (!record) {
+        const error = new RPCError(`Dashboard ${res_id} does not exist`);
+        error.data = {};
+        throw error;
+    }
+    return {
+        snapshot: JSON.parse(record.spreadsheet_data),
+        revisions: [],
+    };
+}
+
+onRpc("/spreadsheet/dashboard/data/<int:res_id>", mockDashboardDataController);
 
 export function defineSpreadsheetDashboardModels() {
     const SpreadsheetDashboardModels = [SpreadsheetDashboard, SpreadsheetDashboardGroup];

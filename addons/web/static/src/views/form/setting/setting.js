@@ -1,7 +1,7 @@
-import { session } from "@web/session";
 import { Component } from "@odoo/owl";
 import { FormLabel } from "../form_label";
 import { DocumentationLink } from "@web/views/widgets/documentation_link/documentation_link";
+import { user } from "@web/core/user";
 
 export class Setting extends Component {
     static template = "web.Setting";
@@ -11,6 +11,7 @@ export class Setting extends Component {
     };
     static props = {
         id: { type: String, optional: 1 },
+        info: { type: String, optional: 1 },
         title: { type: String, optional: 1 },
         fieldId: { type: String, optional: 1 },
         help: { type: String, optional: 1 },
@@ -47,9 +48,7 @@ export class Setting extends Component {
     }
 
     get displayCompanyDependentIcon() {
-        return (
-            this.labelString && this.props.companyDependent && session.display_switch_company_menu
-        );
+        return this.labelString && this.props.companyDependent && user.allowedCompanies.length > 1;
     }
 
     get labelString() {

@@ -7,11 +7,14 @@ from werkzeug.urls import url_encode
 from odoo import http, tools, _
 from odoo.addons.auth_signup.models.res_users import SignupError
 from odoo.addons.web.controllers.home import ensure_db, Home, SIGN_UP_REQUEST_PARAMS, LOGIN_SUCCESSFUL_PARAMS
+from odoo.addons.web.models.res_users import SKIP_CAPTCHA_LOGIN
 from odoo.addons.base_setup.controllers.main import BaseSetup
 from odoo.exceptions import UserError
+from odoo.tools.translate import LazyTranslate
 from odoo.http import request
 from markupsafe import Markup
 
+_lt = LazyTranslate(__name__)
 _logger = logging.getLogger(__name__)
 
 LOGIN_SUCCESSFUL_PARAMS.add('account_created')
@@ -33,7 +36,7 @@ class AuthSignupHome(Home):
                 return request.redirect_query('/web/login_successful', query={'account_created': True})
         return response
 
-    @http.route('/web/signup', type='http', auth='public', website=True, sitemap=False)
+    @http.route('/web/signup', type='http', auth='public', website=True, sitemap=False, captcha='signup', list_as_website_content=_lt("Sign Up"))
     def web_auth_signup(self, *args, **kw):
         qcontext = self.get_auth_signup_qcontext()
 
@@ -42,9 +45,6 @@ class AuthSignupHome(Home):
 
         if 'error' not in qcontext and request.httprequest.method == 'POST':
             try:
-                if not request.env['ir.http']._verify_request_recaptcha_token('signup'):
-                    raise UserError(_("Suspicious activity detected by Google reCaptcha."))
-
                 self.do_signup(qcontext)
 
                 # Set user to public if they were not signed in by do_signup
@@ -61,11 +61,14 @@ class AuthSignupHome(Home):
                 template = request.env.ref('auth_signup.mail_template_user_signup_account_created', raise_if_not_found=False)
                 if user_sudo and template:
                     template.sudo().send_mail(user_sudo.id, force_send=True)
+                request.update_context(skip_captcha_login=SKIP_CAPTCHA_LOGIN)
                 return self.web_login(*args, **kw)
             except UserError as e:
                 qcontext['error'] = e.args[0]
             except (SignupError, AssertionError) as e:
-                if request.env["res.users"].sudo().search_count([("login", "=", qcontext.get("login"))], limit=1):
+                User = request.env['res.users']
+                if User.sudo().with_context(active_test=False).\
+                        search_count(User._get_login_domain(qcontext.get('login')), limit=1):
                     qcontext["error"] = _("Another user is already registered using this email address.")
                 else:
                     _logger.warning("%s", e)
@@ -81,7 +84,7 @@ class AuthSignupHome(Home):
         response.headers['Content-Security-Policy'] = "frame-ancestors 'self'"
         return response
 
-    @http.route('/web/reset_password', type='http', auth='public', website=True, sitemap=False)
+    @http.route('/web/reset_password', type='http', auth='public', website=True, sitemap=False, captcha='password_reset', list_as_website_content=_lt("Reset Password"))
     def web_auth_reset_password(self, *args, **kw):
         qcontext = self.get_auth_signup_qcontext()
 
@@ -90,11 +93,10 @@ class AuthSignupHome(Home):
 
         if 'error' not in qcontext and request.httprequest.method == 'POST':
             try:
-                if not request.env['ir.http']._verify_request_recaptcha_token('password_reset'):
-                    raise UserError(_("Suspicious activity detected by Google reCaptcha."))
                 if qcontext.get('token'):
-                    self.do_signup(qcontext)
-                    return self.web_login(*args, **kw)
+                    self.do_signup(qcontext, do_login=False)
+                    request.update_context(skip_captcha_login=SKIP_CAPTCHA_LOGIN)
+                    qcontext['message'] = _("Your password has been reset successfully.")
                 else:
                     login = qcontext.get('login')
                     assert login, _("No login provided.")
@@ -102,7 +104,7 @@ class AuthSignupHome(Home):
                         "Password reset attempt for <%s> by user <%s> from %s",
                         login, request.env.user.login, request.httprequest.remote_addr)
                     request.env['res.users'].sudo().reset_password(login)
-                    qcontext['message'] = _("Password reset instructions sent to your email")
+                    qcontext['message'] = _("Password reset instructions sent to your email address.")
             except UserError as e:
                 qcontext['error'] = e.args[0]
             except SignupError:
@@ -155,22 +157,31 @@ class AuthSignupHome(Home):
         if values.get('password') != qcontext.get('confirm_password'):
             raise UserError(_("Passwords do not match; please retype them."))
         supported_lang_codes = [code for code, _ in request.env['res.lang'].get_installed()]
-        lang = request.context.get('lang', '')
+        lang = request.env.context.get('lang', '')
         if lang in supported_lang_codes:
             values['lang'] = lang
         return values
 
-    def do_signup(self, qcontext):
+    def do_signup(self, qcontext, do_login=True):
         """ Shared helper that creates a res.partner out of a token """
         values = self._prepare_signup_values(qcontext)
-        self._signup_with_values(qcontext.get('token'), values)
+        self._signup_with_values(qcontext.get('token'), values, do_login)
         request.env.cr.commit()
 
-    def _signup_with_values(self, token, values):
+    def _signup_with_values(self, token, values, do_login):
         login, password = request.env['res.users'].sudo().signup(values, token)
-        request.env.cr.commit()     # as authenticate will use its own cursor we need to commit the current transaction
         credential = {'login': login, 'password': password, 'type': 'password'}
-        request.session.authenticate(request.db, credential)
+        if do_login:
+            request.session.authenticate(request.env, credential)
+
+    @http.route(["/.well-known/change-password"], type="http", auth="public", methods=["GET"])
+    def well_known_change_password(self):
+        """Redirect to the password reset form.
+
+        Implements the Change Password URL specification:
+        https://wicg.github.io/change-password-url/
+        """
+        return request.redirect("/web/reset_password")
 
 class AuthBaseSetup(BaseSetup):
     @http.route()

@@ -17,5 +17,11 @@ This is the base module for managing Units of measure.
         'views/uom_uom_views.xml',
     ],
     'installable': True,
+    'assets': {
+        'web.assets_backend': [
+            'uom/static/src/components/**/*',
+        ],
+    },
+    'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

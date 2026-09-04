@@ -1,8 +1,5 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { helpers, registries, EvaluationError } from "@odoo/o-spreadsheet";
-import { sprintf } from "@web/core/utils/strings";
 
 const { arg, toString, toNumber } = helpers;
 const { functionRegistry } = registries;
@@ -13,7 +10,7 @@ const { functionRegistry } = registries;
 
 function assertListsExists(listId, getters) {
     if (!getters.isExistingList(listId)) {
-        throw new EvaluationError(sprintf(_t('There is no list with id "%s"'), listId));
+        throw new EvaluationError(_t('There is no list with id "%s"', listId));
     }
 }
 
@@ -29,6 +26,9 @@ const ODOO_LIST = {
         const id = toString(listId);
         const position = toNumber(index, this.locale) - 1;
         const _fieldName = toString(fieldName);
+        if (!_fieldName) {
+            return new EvaluationError(_t("The field name should not be empty."));
+        }
         assertListsExists(id, this.getters);
         return this.getters.getListCellValueAndFormat(id, position, _fieldName);
     },
@@ -39,14 +39,20 @@ const ODOO_LIST_HEADER = {
     description: _t("Get the header of a list."),
     args: [
         arg("list_id (string)", _t("ID of the list.")),
-        arg("field_name (string)", _t("Name of the field.")),
+        arg("field_name (string)", _t("Technical field name.")),
+        arg("field_display_name (string, optional)", _t("Name of the field.")),
     ],
     category: "Odoo",
-    compute: function (listId, fieldName) {
+    compute: function (listId, fieldName, fieldDisplayName) {
         const id = toString(listId);
-        const field = toString(fieldName);
+        const _fieldName = toString(fieldName);
+        if (!_fieldName) {
+            return new EvaluationError(_t("The field name should not be empty."));
+        }
         assertListsExists(id, this.getters);
-        return this.getters.getListHeaderValue(id, field);
+        const displayName = toString(fieldDisplayName);
+        const translatedDisplayName = this.getters.getListHeaderValue(id, _fieldName);
+        return displayName || translatedDisplayName;
     },
     returns: ["NUMBER", "STRING"],
 };
