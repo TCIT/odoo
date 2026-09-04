@@ -1,0 +1,12 @@
+.git
+.github
+.tx
+doc/
+setup/win32/
+**/__pycache__/
+**/*.py[co]
+node_modules/
+*.egg-info/
+docker-compose.yml
+app.json
+heroku.yml

@@ -1,0 +1,59 @@
+{
+  "name": "odoo",
+  "description": "Odoo 19.0 (LTS) running on a Heroku container-stack dyno.",
+  "repository": "https://github.com/TCIT/odoo",
+  "keywords": ["odoo", "erp", "python", "postgresql"],
+  "stack": "container",
+  "addons": [
+    {
+      "plan": "heroku-postgresql:essential-0"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "standard-2x"
+    }
+  },
+  "env": {
+    "ODOO_ADMIN_PASSWD": {
+      "description": "Master password protecting the database manager. Never leave this on Odoo's 'admin' default.",
+      "generator": "secret"
+    },
+    "ODOO_INIT_MODULES": {
+      "description": "Modules installed on the very first release, comma separated. 'base' is the bare server; add the apps you need, for example base,l10n_cl,sale_management.",
+      "value": "base",
+      "required": false
+    },
+    "ODOO_UPDATE_MODULES": {
+      "description": "Modules updated on every subsequent release. Leave empty to skip the update; set to 'all' once, after upgrading the Odoo series.",
+      "value": "",
+      "required": false
+    },
+    "ODOO_LIST_DB": {
+      "description": "Expose the database manager. Keep it False in production.",
+      "value": "False",
+      "required": false
+    },
+    "ODOO_DB_MAXCONN": {
+      "description": "Postgres connections Odoo may open. Must stay below the add-on's connection limit (20 on essential tiers).",
+      "value": "5",
+      "required": false
+    },
+    "ODOO_WORKERS": {
+      "description": "Must stay 0. In multiprocess mode Odoo serves websockets from a second port, which a dyno cannot expose.",
+      "value": "0",
+      "required": false
+    }
+  },
+  "environments": {
+    "test": {
+      "formation": {
+        "web": {
+          "quantity": 1,
+          "size": "standard-2x"
+        }
+      }
+    }
+  }
+}
