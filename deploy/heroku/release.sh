@@ -36,4 +36,13 @@ fi
 
 python3 "${HEROKU_DIR}/bootstrap.py" sync-parameters
 
+# ir_attachment.location can only be set once ir_config_parameter exists, so
+# whatever the installation wrote landed on the filestore, which this dyno
+# will not have after its next restart. Move it into the database.
+if python3 "${HEROKU_DIR}/bootstrap.py" pending-storage-migration; then
+    echo "odoo: moving attachments off the filestore"
+    printf '%s\n' 'env["ir.attachment"].force_storage()' 'env.cr.commit()' \
+        | ./odoo-bin shell --config "${CONFIG_FILE}" --no-http
+fi
+
 echo "odoo: release phase finished"

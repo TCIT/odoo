@@ -50,11 +50,21 @@ def env_bool(name, default):
     return value.strip().lower() in ("1", "true", "yes", "on")
 
 
+def holds_a_module(directory):
+    """An addons directory is only useful to Odoo once it contains a module."""
+    try:
+        entries = os.listdir(directory)
+    except OSError:
+        return False
+    return any(os.path.isdir(os.path.join(directory, name)) for name in entries)
+
+
 def addons_path():
     """Core addons, plus an optional directory for the project's own modules.
 
-    ``custom-addons`` is only added when it exists: Odoo refuses to start on
-    an addons_path entry that points nowhere.
+    ``custom-addons`` is only added once it actually holds a module: Odoo
+    warns about an addons_path entry that points nowhere or is empty, which
+    is noise on a checkout where nobody has added a module yet.
     """
     paths = [os.path.join(APP_ROOT, "addons"), os.path.join(APP_ROOT, "odoo", "addons")]
     for extra in os.environ.get("ODOO_EXTRA_ADDONS_PATH", "custom-addons").split(","):
@@ -63,7 +73,7 @@ def addons_path():
             continue
         if not os.path.isabs(extra):
             extra = os.path.join(APP_ROOT, extra)
-        if os.path.isdir(extra):
+        if holds_a_module(extra):
             paths.insert(0, extra)
     return ",".join(paths)
 

@@ -69,7 +69,7 @@ Everything is driven by environment variables and turned into an
 | `ODOO_WITHOUT_DEMO` | `True` | Set `False` to install demo data |
 | `ODOO_BASE_URL` | derived | `web.base.url`; falls back to `HEROKU_APP_NAME` |
 | `ODOO_ATTACHMENT_LOCATION` | `db` | Where attachments live, see below |
-| `ODOO_EXTRA_ADDONS_PATH` | `custom-addons` | Comma-separated, relative to `/app`; entries that do not exist are skipped |
+| `ODOO_EXTRA_ADDONS_PATH` | `custom-addons` | Comma-separated, relative to `/app`; an entry is only added once it holds a module |
 | `ODOO_DATA_DIR` | `/tmp/odoo-data` | Sessions and filestore |
 | `ODOO_LOG_LEVEL` | `info` | Odoo log level |
 | `ODOO_LIMIT_TIME_REAL` | `120` | Per-request wall-clock limit |
@@ -89,6 +89,13 @@ non-zero exit rolls the release back.
 
 Afterwards it writes two system parameters straight to Postgres:
 `ir_attachment.location = db` and a frozen `web.base.url`.
+
+That parameter cannot be set any earlier -- `ir_config_parameter` does not
+exist until `base` is installed -- so the first installation always writes a
+few hundred attachments to the filestore first. The release phase therefore
+finishes by calling `ir.attachment.force_storage()` to move them into
+Postgres, and only when something is actually left on disk. Skipping this
+would cost you every module icon and image on the first dyno restart.
 
 ### Installing more apps later
 
@@ -129,8 +136,10 @@ docker compose up --build
 
 Same image, same entrypoint, same `DATABASE_URL` contract, with demo data
 on and TLS off. Odoo is on <http://localhost:8069>, and `./custom-addons` is
-mounted into the container so your own modules are picked up. Restart the
-`odoo` service after adding a module directory, then install it with:
+mounted into the container so your own modules are picked up (the
+directory is left out of `addons_path` until it actually holds a module, so
+an empty one is not an error). Restart the `odoo` service after adding a
+module directory, then install it with:
 
 ```bash
 docker compose exec odoo ./odoo-bin --config /tmp/odoo.conf \

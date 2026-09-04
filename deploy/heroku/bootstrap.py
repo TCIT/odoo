@@ -14,6 +14,12 @@ does not do for us on a platform with an ephemeral filesystem:
     loses its filesystem on every restart, so anything written to the
     filestore would silently disappear.
 
+``pending-storage-migration``
+    Report whether attachments are still sitting on the filestore. Module
+    installation happens before ``ir_attachment.location`` can be set --
+    the parameter table does not exist until ``base`` is installed -- so
+    the first release always leaves some behind.
+
 Both talk to Postgres directly instead of booting a registry: the release
 dyno is small and short-lived, and this keeps it that way.
 """
@@ -30,6 +36,13 @@ INITIALIZED_QUERY = """
       FROM information_schema.tables
      WHERE table_schema = 'public'
        AND table_name = 'ir_module_module'
+"""
+
+PENDING_MIGRATION_QUERY = """
+    SELECT 1
+      FROM ir_attachment
+     WHERE store_fname IS NOT NULL
+     LIMIT 1
 """
 
 UPSERT_PARAMETER = """
@@ -71,11 +84,15 @@ def base_url():
     return None
 
 
+def attachment_location():
+    return os.environ.get("ODOO_ATTACHMENT_LOCATION", "db")
+
+
 def wanted_parameters():
     params = {
         # The filestore lives on the dyno's ephemeral disk and is wiped on
         # every restart, so attachments have to go to Postgres instead.
-        "ir_attachment.location": os.environ.get("ODOO_ATTACHMENT_LOCATION", "db"),
+        "ir_attachment.location": attachment_location(),
     }
     url = base_url()
     if url:
@@ -92,6 +109,15 @@ def cmd_is_initialized():
         return 0 if cursor.fetchone() else 1
 
 
+def cmd_pending_storage_migration():
+    """Exit 0 when attachments still have to be moved into the database."""
+    if attachment_location() != "db":
+        return 1
+    with connect() as conn, conn.cursor() as cursor:
+        cursor.execute(PENDING_MIGRATION_QUERY)
+        return 0 if cursor.fetchone() else 1
+
+
 def cmd_sync_parameters():
     params = wanted_parameters()
     with connect() as conn, conn.cursor() as cursor:
@@ -104,6 +130,7 @@ def cmd_sync_parameters():
 
 COMMANDS = {
     "is-initialized": cmd_is_initialized,
+    "pending-storage-migration": cmd_pending_storage_migration,
     "sync-parameters": cmd_sync_parameters,
 }
 
